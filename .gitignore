@@ -1,0 +1,12 @@
+# Python / entorno
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Datos crudos demasiado grandes para GitHub (>100 MB) — descargar aparte (ver README)
+Data raw/personas_censo2024.csv
+Data raw/_external/deis/
+*.zip

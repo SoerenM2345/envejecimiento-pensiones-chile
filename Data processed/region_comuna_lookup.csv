@@ -1,0 +1,347 @@
+comuna_id,comuna_nombre,provincia_id,provincia_nombre,region_id,region_nombre,region_nombre_corto
+1101,Iquique,11,Iquique,1,Tarapacá,Tarapacá
+1107,Alto Hospicio,11,Iquique,1,Tarapacá,Tarapacá
+1401,Pozo Almonte,14,Tamarugal,1,Tarapacá,Tarapacá
+1402,Camiña,14,Tamarugal,1,Tarapacá,Tarapacá
+1403,Colchane,14,Tamarugal,1,Tarapacá,Tarapacá
+1404,Huara,14,Tamarugal,1,Tarapacá,Tarapacá
+1405,Pica,14,Tamarugal,1,Tarapacá,Tarapacá
+2101,Antofagasta,21,Antofagasta,2,Antofagasta,Antofagasta
+2102,Mejillones,21,Antofagasta,2,Antofagasta,Antofagasta
+2103,Sierra Gorda,21,Antofagasta,2,Antofagasta,Antofagasta
+2104,Taltal,21,Antofagasta,2,Antofagasta,Antofagasta
+2201,Calama,22,El Loa,2,Antofagasta,Antofagasta
+2202,Ollagüe,22,El Loa,2,Antofagasta,Antofagasta
+2203,San Pedro de Atacama,22,El Loa,2,Antofagasta,Antofagasta
+2301,Tocopilla,23,Tocopilla,2,Antofagasta,Antofagasta
+2302,María Elena,23,Tocopilla,2,Antofagasta,Antofagasta
+3101,Copiapó,31,Copiapó,3,Atacama,Atacama
+3102,Caldera,31,Copiapó,3,Atacama,Atacama
+3103,Tierra Amarilla,31,Copiapó,3,Atacama,Atacama
+3201,Chañaral,32,Chañaral,3,Atacama,Atacama
+3202,Diego de Almagro,32,Chañaral,3,Atacama,Atacama
+3301,Vallenar,33,Huasco,3,Atacama,Atacama
+3302,Alto del Carmen,33,Huasco,3,Atacama,Atacama
+3303,Freirina,33,Huasco,3,Atacama,Atacama
+3304,Huasco,33,Huasco,3,Atacama,Atacama
+4101,La Serena,41,Elqui,4,Coquimbo,Coquimbo
+4102,Coquimbo,41,Elqui,4,Coquimbo,Coquimbo
+4103,Andacollo,41,Elqui,4,Coquimbo,Coquimbo
+4104,La Higuera,41,Elqui,4,Coquimbo,Coquimbo
+4105,Paihuano,41,Elqui,4,Coquimbo,Coquimbo
+4106,Vicuña,41,Elqui,4,Coquimbo,Coquimbo
+4201,Illapel,42,Choapa,4,Coquimbo,Coquimbo
+4202,Canela,42,Choapa,4,Coquimbo,Coquimbo
+4203,Los Vilos,42,Choapa,4,Coquimbo,Coquimbo
+4204,Salamanca,42,Choapa,4,Coquimbo,Coquimbo
+4301,Ovalle,43,Limarí,4,Coquimbo,Coquimbo
+4302,Combarbalá,43,Limarí,4,Coquimbo,Coquimbo
+4303,Monte Patria,43,Limarí,4,Coquimbo,Coquimbo
+4304,Punitaqui,43,Limarí,4,Coquimbo,Coquimbo
+4305,Río Hurtado,43,Limarí,4,Coquimbo,Coquimbo
+5101,Valparaíso,51,Valparaíso,5,Valparaíso,Valparaíso
+5102,Casablanca,51,Valparaíso,5,Valparaíso,Valparaíso
+5103,Concón,51,Valparaíso,5,Valparaíso,Valparaíso
+5104,Juan Fernández,51,Valparaíso,5,Valparaíso,Valparaíso
+5105,Puchuncaví,51,Valparaíso,5,Valparaíso,Valparaíso
+5107,Quintero,51,Valparaíso,5,Valparaíso,Valparaíso
+5109,Viña del Mar,51,Valparaíso,5,Valparaíso,Valparaíso
+5201,Isla de Pascua,52,Isla de Pascua,5,Valparaíso,Valparaíso
+5301,Los Andes,53,Los Andes,5,Valparaíso,Valparaíso
+5302,Calle Larga,53,Los Andes,5,Valparaíso,Valparaíso
+5303,Rinconada,53,Los Andes,5,Valparaíso,Valparaíso
+5304,San Esteban,53,Los Andes,5,Valparaíso,Valparaíso
+5401,La Ligua,54,Petorca,5,Valparaíso,Valparaíso
+5402,Cabildo,54,Petorca,5,Valparaíso,Valparaíso
+5403,Papudo,54,Petorca,5,Valparaíso,Valparaíso
+5404,Petorca,54,Petorca,5,Valparaíso,Valparaíso
+5405,Zapallar,54,Petorca,5,Valparaíso,Valparaíso
+5501,Quillota,55,Quillota,5,Valparaíso,Valparaíso
+5502,La Calera,55,Quillota,5,Valparaíso,Valparaíso
+5503,Hijuelas,55,Quillota,5,Valparaíso,Valparaíso
+5504,La Cruz,55,Quillota,5,Valparaíso,Valparaíso
+5506,Nogales,55,Quillota,5,Valparaíso,Valparaíso
+5601,San Antonio,56,San Antonio,5,Valparaíso,Valparaíso
+5602,Algarrobo,56,San Antonio,5,Valparaíso,Valparaíso
+5603,Cartagena,56,San Antonio,5,Valparaíso,Valparaíso
+5604,El Quisco,56,San Antonio,5,Valparaíso,Valparaíso
+5605,El Tabo,56,San Antonio,5,Valparaíso,Valparaíso
+5606,Santo Domingo,56,San Antonio,5,Valparaíso,Valparaíso
+5701,San Felipe,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5702,Catemu,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5703,Llay Llay,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5704,Panquehue,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5705,Putaendo,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5706,Santa María,57,San Felipe de Aconcagua,5,Valparaíso,Valparaíso
+5801,Quilpué,58,Marga Marga,5,Valparaíso,Valparaíso
+5802,Limache,58,Marga Marga,5,Valparaíso,Valparaíso
+5803,Olmué,58,Marga Marga,5,Valparaíso,Valparaíso
+5804,Villa Alemana,58,Marga Marga,5,Valparaíso,Valparaíso
+6101,Rancagua,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6102,Codegua,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6103,Coinco,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6104,Coltauco,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6105,Doñihue,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6106,Graneros,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6107,Las Cabras,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6108,Machalí,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6109,Malloa,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6110,Mostazal,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6111,Olivar,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6112,Peumo,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6113,Pichidegua,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6114,Quinta de Tilcoco,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6115,Rengo,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6116,Requínoa,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6117,San Vicente,61,Cachapoal,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6201,Pichilemu,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6202,La Estrella,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6203,Litueche,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6204,Marchihue,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6205,Navidad,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6206,Paredones,62,Cardenal Caro,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6301,San Fernando,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6302,Chépica,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6303,Chimbarongo,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6304,Lolol,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6305,Nancagua,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6306,Palmilla,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6307,Peralillo,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6308,Placilla,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6309,Pumanque,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+6310,Santa Cruz,63,Colchagua,6,Región del Libertador Gral. Bernardo O'Higgins,O'Higgins
+7101,Talca,71,Talca,7,Región del Maule,Maule
+7102,Constitución,71,Talca,7,Región del Maule,Maule
+7103,Curepto,71,Talca,7,Región del Maule,Maule
+7104,Empedrado,71,Talca,7,Región del Maule,Maule
+7105,Maule,71,Talca,7,Región del Maule,Maule
+7106,Pelarco,71,Talca,7,Región del Maule,Maule
+7107,Pencahue,71,Talca,7,Región del Maule,Maule
+7108,Río Claro,71,Talca,7,Región del Maule,Maule
+7109,San Clemente,71,Talca,7,Región del Maule,Maule
+7110,San Rafael,71,Talca,7,Región del Maule,Maule
+7201,Cauquenes,72,Cauquenes,7,Región del Maule,Maule
+7202,Chanco,72,Cauquenes,7,Región del Maule,Maule
+7203,Pelluhue,72,Cauquenes,7,Región del Maule,Maule
+7301,Curicó,73,Curicó,7,Región del Maule,Maule
+7302,Hualañé,73,Curicó,7,Región del Maule,Maule
+7303,Licantén,73,Curicó,7,Región del Maule,Maule
+7304,Molina,73,Curicó,7,Región del Maule,Maule
+7305,Rauco,73,Curicó,7,Región del Maule,Maule
+7306,Romeral,73,Curicó,7,Región del Maule,Maule
+7307,Sagrada Familia,73,Curicó,7,Región del Maule,Maule
+7308,Teno,73,Curicó,7,Región del Maule,Maule
+7309,Vichuquén,73,Curicó,7,Región del Maule,Maule
+7401,Linares,74,Linares,7,Región del Maule,Maule
+7402,Colbún,74,Linares,7,Región del Maule,Maule
+7403,Longaví,74,Linares,7,Región del Maule,Maule
+7404,Parral,74,Linares,7,Región del Maule,Maule
+7405,Retiro,74,Linares,7,Región del Maule,Maule
+7406,San Javier,74,Linares,7,Región del Maule,Maule
+7407,Villa Alegre,74,Linares,7,Región del Maule,Maule
+7408,Yerbas Buenas,74,Linares,7,Región del Maule,Maule
+8101,Concepción,81,Concepción,8,Región del Biobío,Biobío
+8102,Coronel,81,Concepción,8,Región del Biobío,Biobío
+8103,Chiguayante,81,Concepción,8,Región del Biobío,Biobío
+8104,Florida,81,Concepción,8,Región del Biobío,Biobío
+8105,Hualqui,81,Concepción,8,Región del Biobío,Biobío
+8106,Lota,81,Concepción,8,Región del Biobío,Biobío
+8107,Penco,81,Concepción,8,Región del Biobío,Biobío
+8108,San Pedro de la Paz,81,Concepción,8,Región del Biobío,Biobío
+8109,Santa Juana,81,Concepción,8,Región del Biobío,Biobío
+8110,Talcahuano,81,Concepción,8,Región del Biobío,Biobío
+8111,Tomé,81,Concepción,8,Región del Biobío,Biobío
+8112,Hualpén,81,Concepción,8,Región del Biobío,Biobío
+8201,Lebu,82,Arauco,8,Región del Biobío,Biobío
+8202,Arauco,82,Arauco,8,Región del Biobío,Biobío
+8203,Cañete,82,Arauco,8,Región del Biobío,Biobío
+8204,Contulmo,82,Arauco,8,Región del Biobío,Biobío
+8205,Curanilahue,82,Arauco,8,Región del Biobío,Biobío
+8206,Los Álamos,82,Arauco,8,Región del Biobío,Biobío
+8207,Tirúa,82,Arauco,8,Región del Biobío,Biobío
+8301,Los Ángeles,83,Biobío,8,Región del Biobío,Biobío
+8302,Antuco,83,Biobío,8,Región del Biobío,Biobío
+8303,Cabrero,83,Biobío,8,Región del Biobío,Biobío
+8304,Laja,83,Biobío,8,Región del Biobío,Biobío
+8305,Mulchén,83,Biobío,8,Región del Biobío,Biobío
+8306,Nacimiento,83,Biobío,8,Región del Biobío,Biobío
+8307,Negrete,83,Biobío,8,Región del Biobío,Biobío
+8308,Quilaco,83,Biobío,8,Región del Biobío,Biobío
+8309,Quilleco,83,Biobío,8,Región del Biobío,Biobío
+8310,San Rosendo,83,Biobío,8,Región del Biobío,Biobío
+8311,Santa Bárbara,83,Biobío,8,Región del Biobío,Biobío
+8312,Tucapel,83,Biobío,8,Región del Biobío,Biobío
+8313,Yumbel,83,Biobío,8,Región del Biobío,Biobío
+8314,Alto Biobío,83,Biobío,8,Región del Biobío,Biobío
+9101,Temuco,91,Cautín,9,Región de la Araucanía,La Araucanía
+9102,Carahue,91,Cautín,9,Región de la Araucanía,La Araucanía
+9103,Cunco,91,Cautín,9,Región de la Araucanía,La Araucanía
+9104,Curarrehue,91,Cautín,9,Región de la Araucanía,La Araucanía
+9105,Freire,91,Cautín,9,Región de la Araucanía,La Araucanía
+9106,Galvarino,91,Cautín,9,Región de la Araucanía,La Araucanía
+9107,Gorbea,91,Cautín,9,Región de la Araucanía,La Araucanía
+9108,Lautaro,91,Cautín,9,Región de la Araucanía,La Araucanía
+9109,Loncoche,91,Cautín,9,Región de la Araucanía,La Araucanía
+9110,Melipeuco,91,Cautín,9,Región de la Araucanía,La Araucanía
+9111,Nueva Imperial,91,Cautín,9,Región de la Araucanía,La Araucanía
+9112,Padre las Casas,91,Cautín,9,Región de la Araucanía,La Araucanía
+9113,Perquenco,91,Cautín,9,Región de la Araucanía,La Araucanía
+9114,Pitrufquén,91,Cautín,9,Región de la Araucanía,La Araucanía
+9115,Pucón,91,Cautín,9,Región de la Araucanía,La Araucanía
+9116,Saavedra,91,Cautín,9,Región de la Araucanía,La Araucanía
+9117,Teodoro Schmidt,91,Cautín,9,Región de la Araucanía,La Araucanía
+9118,Toltén,91,Cautín,9,Región de la Araucanía,La Araucanía
+9119,Vilcún,91,Cautín,9,Región de la Araucanía,La Araucanía
+9120,Villarrica,91,Cautín,9,Región de la Araucanía,La Araucanía
+9121,Cholchol,91,Cautín,9,Región de la Araucanía,La Araucanía
+9201,Angol,92,Malleco,9,Región de la Araucanía,La Araucanía
+9202,Collipulli,92,Malleco,9,Región de la Araucanía,La Araucanía
+9203,Curacautín,92,Malleco,9,Región de la Araucanía,La Araucanía
+9204,Ercilla,92,Malleco,9,Región de la Araucanía,La Araucanía
+9205,Lonquimay,92,Malleco,9,Región de la Araucanía,La Araucanía
+9206,Los Sauces,92,Malleco,9,Región de la Araucanía,La Araucanía
+9207,Lumaco,92,Malleco,9,Región de la Araucanía,La Araucanía
+9208,Purén,92,Malleco,9,Región de la Araucanía,La Araucanía
+9209,Renaico,92,Malleco,9,Región de la Araucanía,La Araucanía
+9210,Traiguén,92,Malleco,9,Región de la Araucanía,La Araucanía
+9211,Victoria,92,Malleco,9,Región de la Araucanía,La Araucanía
+10101,Puerto Montt,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10102,Calbuco,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10103,Cochamó,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10104,Fresia,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10105,Frutillar,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10106,Los Muermos,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10107,Llanquihue,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10108,Maullín,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10109,Puerto Varas,101,Llanquihue,10,Región de Los Lagos,Los Lagos
+10201,Castro,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10202,Ancud,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10203,Chonchi,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10204,Curaco de Vélez,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10205,Dalcahue,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10206,Puqueldón,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10207,Queilén,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10208,Quellón,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10209,Quemchi,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10210,Quinchao,102,Chiloé,10,Región de Los Lagos,Los Lagos
+10301,Osorno,103,Osorno,10,Región de Los Lagos,Los Lagos
+10302,Puerto Octay,103,Osorno,10,Región de Los Lagos,Los Lagos
+10303,Purranque,103,Osorno,10,Región de Los Lagos,Los Lagos
+10304,Puyehue,103,Osorno,10,Región de Los Lagos,Los Lagos
+10305,Río Negro,103,Osorno,10,Región de Los Lagos,Los Lagos
+10306,San Juan de la Costa,103,Osorno,10,Región de Los Lagos,Los Lagos
+10307,San Pablo,103,Osorno,10,Región de Los Lagos,Los Lagos
+10401,Chaitén,104,Palena,10,Región de Los Lagos,Los Lagos
+10402,Futaleufú,104,Palena,10,Región de Los Lagos,Los Lagos
+10403,Hualaihué,104,Palena,10,Región de Los Lagos,Los Lagos
+10404,Palena,104,Palena,10,Región de Los Lagos,Los Lagos
+11101,Coyhaique,111,Coihaique,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11102,Lago Verde,111,Coihaique,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11201,Aysén,112,Aisén,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11202,Cisnes,112,Aisén,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11203,Guaitecas,112,Aisén,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11301,Cochrane,113,Capitán Prat,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11302,O'Higgins,113,Capitán Prat,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11303,Tortel,113,Capitán Prat,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11401,Chile Chico,114,General Carrera,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+11402,Río Ibáñez,114,General Carrera,11,Región Aisén del Gral. Carlos Ibáñez del Campo,Aysén
+12101,Punta Arenas,121,Magallanes,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12102,Laguna Blanca,121,Magallanes,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12103,Río Verde,121,Magallanes,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12104,San Gregorio,121,Magallanes,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12201,Cabo de Hornos,122,Antártica Chilena,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12202,Antártica,122,Antártica Chilena,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12301,Porvenir,123,Tierra del Fuego,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12302,Primavera,123,Tierra del Fuego,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12303,Timaukel,123,Tierra del Fuego,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12401,Natales,124,Última Esperanza,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+12402,Torres del Paine,124,Última Esperanza,12,Región de Magallanes y de la Antártica Chilena,Magallanes
+13101,Santiago,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13102,Cerrillos,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13103,Cerro Navia,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13104,Conchalí,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13105,El Bosque,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13106,Estación Central,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13107,Huechuraba,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13108,Independencia,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13109,La Cisterna,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13110,La Florida,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13111,La Granja,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13112,La Pintana,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13113,La Reina,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13114,Las Condes,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13115,Lo Barnechea,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13116,Lo Espejo,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13117,Lo Prado,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13118,Macul,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13119,Maipú,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13120,Ñuñoa,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13121,Pedro Aguirre Cerda,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13122,Peñalolén,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13123,Providencia,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13124,Pudahuel,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13125,Quilicura,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13126,Quinta Normal,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13127,Recoleta,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13128,Renca,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13129,San Joaquín,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13130,San Miguel,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13131,San Ramón,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13132,Vitacura,131,Santiago,13,Región Metropolitana de Santiago,Metropolitana
+13201,Puente Alto,132,Cordillera,13,Región Metropolitana de Santiago,Metropolitana
+13202,Pirque,132,Cordillera,13,Región Metropolitana de Santiago,Metropolitana
+13203,San José de Maipo,132,Cordillera,13,Región Metropolitana de Santiago,Metropolitana
+13301,Colina,133,Chacabuco,13,Región Metropolitana de Santiago,Metropolitana
+13302,Lampa,133,Chacabuco,13,Región Metropolitana de Santiago,Metropolitana
+13303,Tiltil,133,Chacabuco,13,Región Metropolitana de Santiago,Metropolitana
+13401,San Bernardo,134,Maipo,13,Región Metropolitana de Santiago,Metropolitana
+13402,Buin,134,Maipo,13,Región Metropolitana de Santiago,Metropolitana
+13403,Calera de Tango,134,Maipo,13,Región Metropolitana de Santiago,Metropolitana
+13404,Paine,134,Maipo,13,Región Metropolitana de Santiago,Metropolitana
+13501,Melipilla,135,Melipilla,13,Región Metropolitana de Santiago,Metropolitana
+13502,Alhué,135,Melipilla,13,Región Metropolitana de Santiago,Metropolitana
+13503,Curacaví,135,Melipilla,13,Región Metropolitana de Santiago,Metropolitana
+13504,María Pinto,135,Melipilla,13,Región Metropolitana de Santiago,Metropolitana
+13505,San Pedro,135,Melipilla,13,Región Metropolitana de Santiago,Metropolitana
+13601,Talagante,136,Talagante,13,Región Metropolitana de Santiago,Metropolitana
+13602,El Monte,136,Talagante,13,Región Metropolitana de Santiago,Metropolitana
+13603,Isla de Maipo,136,Talagante,13,Región Metropolitana de Santiago,Metropolitana
+13604,Padre Hurtado,136,Talagante,13,Región Metropolitana de Santiago,Metropolitana
+13605,Peñaflor,136,Talagante,13,Región Metropolitana de Santiago,Metropolitana
+14101,Valdivia,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14102,Corral,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14103,Lanco,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14104,Los Lagos,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14105,Máfil,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14106,Mariquina,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14107,Paillaco,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14108,Panguipulli,141,Valdivia,14,Región de Los Ríos,Los Ríos
+14201,La Unión,142,Ranco,14,Región de Los Ríos,Los Ríos
+14202,Futrono,142,Ranco,14,Región de Los Ríos,Los Ríos
+14203,Lago Ranco,142,Ranco,14,Región de Los Ríos,Los Ríos
+14204,Río Bueno,142,Ranco,14,Región de Los Ríos,Los Ríos
+15101,Arica,151,Arica,15,Arica y Parinacota,Arica y Parinacota
+15102,Camarones,151,Arica,15,Arica y Parinacota,Arica y Parinacota
+15201,Putre,152,Parinacota,15,Arica y Parinacota,Arica y Parinacota
+15202,General Lagos,152,Parinacota,15,Arica y Parinacota,Arica y Parinacota
+16101,Chillán,161,Diguillín,16,Región de Ñuble,Ñuble
+16102,Bulnes,161,Diguillín,16,Región de Ñuble,Ñuble
+16103,Chillán Viejo,161,Diguillín,16,Región de Ñuble,Ñuble
+16104,El Carmen,161,Diguillín,16,Región de Ñuble,Ñuble
+16105,Pemuco,161,Diguillín,16,Región de Ñuble,Ñuble
+16106,Pinto,161,Diguillín,16,Región de Ñuble,Ñuble
+16107,Quillón,161,Diguillín,16,Región de Ñuble,Ñuble
+16108,San Ignacio,161,Diguillín,16,Región de Ñuble,Ñuble
+16109,Yungay,161,Diguillín,16,Región de Ñuble,Ñuble
+16201,Quirihue,162,Itata,16,Región de Ñuble,Ñuble
+16202,Cobquecura,162,Itata,16,Región de Ñuble,Ñuble
+16203,Coelemu,162,Itata,16,Región de Ñuble,Ñuble
+16204,Ninhue,162,Itata,16,Región de Ñuble,Ñuble
+16205,Portezuelo,162,Itata,16,Región de Ñuble,Ñuble
+16206,Ránquil,162,Itata,16,Región de Ñuble,Ñuble
+16207,Treguaco,162,Itata,16,Región de Ñuble,Ñuble
+16301,San Carlos,163,Punilla,16,Región de Ñuble,Ñuble
+16302,Coihueco,163,Punilla,16,Región de Ñuble,Ñuble
+16303,Ñiquén,163,Punilla,16,Región de Ñuble,Ñuble
+16304,San Fabián,163,Punilla,16,Región de Ñuble,Ñuble
+16305,San Nicolás,163,Punilla,16,Región de Ñuble,Ñuble

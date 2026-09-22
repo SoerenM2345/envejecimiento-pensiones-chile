@@ -1,0 +1,662 @@
+anio,region_label,region_id,region_nombre,cotizantes
+1985,I,1.0,Tarapacá,39924
+1986,I,1.0,Tarapacá,44913
+1987,I,1.0,Tarapacá,49585
+1988,I,1.0,Tarapacá,51035
+1989,I,1.0,Tarapacá,54426
+1990,I,1.0,Tarapacá,53536
+1991,I,1.0,Tarapacá,56440
+1992,I,1.0,Tarapacá,60143
+1993,I,1.0,Tarapacá,60853
+1994,I,1.0,Tarapacá,61497
+1995,I,1.0,Tarapacá,63673
+1996,I,1.0,Tarapacá,62542
+1997,I,1.0,Tarapacá,71424
+1998,I,1.0,Tarapacá,68855
+1999,I,1.0,Tarapacá,68396
+2000,I,1.0,Tarapacá,69447
+2001,I,1.0,Tarapacá,72829
+2002,I,1.0,Tarapacá,75562
+2003,I,1.0,Tarapacá,79013
+2004,I,1.0,Tarapacá,83220
+2005,I,1.0,Tarapacá,90546
+2006,I,1.0,Tarapacá,93749
+2007,I,1.0,Tarapacá,60109
+2008,I,1.0,Tarapacá,63763
+2009,I,1.0,Tarapacá,65883
+2010,I,1.0,Tarapacá,70764
+2011,I,1.0,Tarapacá,78006
+2012,I,1.0,Tarapacá,81935
+2013,I,1.0,Tarapacá,87496
+2014,I,1.0,Tarapacá,90019
+2015,I,1.0,Tarapacá,91194
+2016,I,1.0,Tarapacá,90702
+2017,I,1.0,Tarapacá,91956
+2018,I,1.0,Tarapacá,93744
+2019,I,1.0,Tarapacá,98034
+2020,I,1.0,Tarapacá,94656
+2021,I,1.0,Tarapacá,105264
+2022,I,1.0,Tarapacá,108632
+2023,I,1.0,Tarapacá,108494
+2024,I,1.0,Tarapacá,110058
+2025,I,1.0,Tarapacá,113317
+1985,II,2.0,Antofagasta,46633
+1986,II,2.0,Antofagasta,53236
+1987,II,2.0,Antofagasta,58190
+1988,II,2.0,Antofagasta,61551
+1989,II,2.0,Antofagasta,68163
+1990,II,2.0,Antofagasta,68948
+1991,II,2.0,Antofagasta,69873
+1992,II,2.0,Antofagasta,74422
+1993,II,2.0,Antofagasta,76593
+1994,II,2.0,Antofagasta,76158
+1995,II,2.0,Antofagasta,80207
+1996,II,2.0,Antofagasta,81042
+1997,II,2.0,Antofagasta,89014
+1998,II,2.0,Antofagasta,89328
+1999,II,2.0,Antofagasta,87003
+2000,II,2.0,Antofagasta,90167
+2001,II,2.0,Antofagasta,95722
+2002,II,2.0,Antofagasta,98357
+2003,II,2.0,Antofagasta,101153
+2004,II,2.0,Antofagasta,108043
+2005,II,2.0,Antofagasta,116896
+2006,II,2.0,Antofagasta,120881
+2007,II,2.0,Antofagasta,137009
+2008,II,2.0,Antofagasta,138957
+2009,II,2.0,Antofagasta,145227
+2010,II,2.0,Antofagasta,155100
+2011,II,2.0,Antofagasta,161388
+2012,II,2.0,Antofagasta,170364
+2013,II,2.0,Antofagasta,182172
+2014,II,2.0,Antofagasta,190517
+2015,II,2.0,Antofagasta,189304
+2016,II,2.0,Antofagasta,191196
+2017,II,2.0,Antofagasta,192998
+2018,II,2.0,Antofagasta,200717
+2019,II,2.0,Antofagasta,203681
+2020,II,2.0,Antofagasta,205650
+2021,II,2.0,Antofagasta,224395
+2022,II,2.0,Antofagasta,231120
+2023,II,2.0,Antofagasta,231407
+2024,II,2.0,Antofagasta,233008
+2025,II,2.0,Antofagasta,241298
+1985,III,3.0,Atacama,23541
+1986,III,3.0,Atacama,26316
+1987,III,3.0,Atacama,29483
+1988,III,3.0,Atacama,31265
+1989,III,3.0,Atacama,33247
+1990,III,3.0,Atacama,35250
+1991,III,3.0,Atacama,36687
+1992,III,3.0,Atacama,38586
+1993,III,3.0,Atacama,39625
+1994,III,3.0,Atacama,41420
+1995,III,3.0,Atacama,42005
+1996,III,3.0,Atacama,42300
+1997,III,3.0,Atacama,44953
+1998,III,3.0,Atacama,43957
+1999,III,3.0,Atacama,45128
+2000,III,3.0,Atacama,47801
+2001,III,3.0,Atacama,49282
+2002,III,3.0,Atacama,49498
+2003,III,3.0,Atacama,50929
+2004,III,3.0,Atacama,55445
+2005,III,3.0,Atacama,58777
+2006,III,3.0,Atacama,62671
+2007,III,3.0,Atacama,67786
+2008,III,3.0,Atacama,69369
+2009,III,3.0,Atacama,71340
+2010,III,3.0,Atacama,75755
+2011,III,3.0,Atacama,78635
+2012,III,3.0,Atacama,82285
+2013,III,3.0,Atacama,85545
+2014,III,3.0,Atacama,88134
+2015,III,3.0,Atacama,87409
+2016,III,3.0,Atacama,87346
+2017,III,3.0,Atacama,89844
+2018,III,3.0,Atacama,91421
+2019,III,3.0,Atacama,91369
+2020,III,3.0,Atacama,92361
+2021,III,3.0,Atacama,98805
+2022,III,3.0,Atacama,99750
+2023,III,3.0,Atacama,97362
+2024,III,3.0,Atacama,99766
+2025,III,3.0,Atacama,101877
+1985,IV,4.0,Coquimbo,33486
+1986,IV,4.0,Coquimbo,38928
+1987,IV,4.0,Coquimbo,44654
+1988,IV,4.0,Coquimbo,49094
+1989,IV,4.0,Coquimbo,53597
+1990,IV,4.0,Coquimbo,55866
+1991,IV,4.0,Coquimbo,60521
+1992,IV,4.0,Coquimbo,65997
+1993,IV,4.0,Coquimbo,69500
+1994,IV,4.0,Coquimbo,72614
+1995,IV,4.0,Coquimbo,74924
+1996,IV,4.0,Coquimbo,77377
+1997,IV,4.0,Coquimbo,78453
+1998,IV,4.0,Coquimbo,77330
+1999,IV,4.0,Coquimbo,83021
+2000,IV,4.0,Coquimbo,84116
+2001,IV,4.0,Coquimbo,87118
+2002,IV,4.0,Coquimbo,87391
+2003,IV,4.0,Coquimbo,92593
+2004,IV,4.0,Coquimbo,101823
+2005,IV,4.0,Coquimbo,111701
+2006,IV,4.0,Coquimbo,113820
+2007,IV,4.0,Coquimbo,128476
+2008,IV,4.0,Coquimbo,131337
+2009,IV,4.0,Coquimbo,135395
+2010,IV,4.0,Coquimbo,146581
+2011,IV,4.0,Coquimbo,157125
+2012,IV,4.0,Coquimbo,166880
+2013,IV,4.0,Coquimbo,175263
+2014,IV,4.0,Coquimbo,181783
+2015,IV,4.0,Coquimbo,185772
+2016,IV,4.0,Coquimbo,188002
+2017,IV,4.0,Coquimbo,195708
+2018,IV,4.0,Coquimbo,200585
+2019,IV,4.0,Coquimbo,201638
+2020,IV,4.0,Coquimbo,202393
+2021,IV,4.0,Coquimbo,221250
+2022,IV,4.0,Coquimbo,222701
+2023,IV,4.0,Coquimbo,217595
+2024,IV,4.0,Coquimbo,226224
+2025,IV,4.0,Coquimbo,230128
+1985,V,5.0,Valparaíso,133249
+1986,V,5.0,Valparaíso,147716
+1987,V,5.0,Valparaíso,166140
+1988,V,5.0,Valparaíso,174411
+1989,V,5.0,Valparaíso,187324
+1990,V,5.0,Valparaíso,187933
+1991,V,5.0,Valparaíso,201888
+1992,V,5.0,Valparaíso,220747
+1993,V,5.0,Valparaíso,228614
+1994,V,5.0,Valparaíso,238211
+1995,V,5.0,Valparaíso,241691
+1996,V,5.0,Valparaíso,241623
+1997,V,5.0,Valparaíso,258777
+1998,V,5.0,Valparaíso,251678
+1999,V,5.0,Valparaíso,262805
+2000,V,5.0,Valparaíso,261930
+2001,V,5.0,Valparaíso,272345
+2002,V,5.0,Valparaíso,269693
+2003,V,5.0,Valparaíso,277012
+2004,V,5.0,Valparaíso,292228
+2005,V,5.0,Valparaíso,319879
+2006,V,5.0,Valparaíso,322501
+2007,V,5.0,Valparaíso,358684
+2008,V,5.0,Valparaíso,371221
+2009,V,5.0,Valparaíso,386272
+2010,V,5.0,Valparaíso,404669
+2011,V,5.0,Valparaíso,421275
+2012,V,5.0,Valparaíso,436537
+2013,V,5.0,Valparaíso,458622
+2014,V,5.0,Valparaíso,471722
+2015,V,5.0,Valparaíso,484294
+2016,V,5.0,Valparaíso,490803
+2017,V,5.0,Valparaíso,498783
+2018,V,5.0,Valparaíso,511448
+2019,V,5.0,Valparaíso,516488
+2020,V,5.0,Valparaíso,501361
+2021,V,5.0,Valparaíso,548471
+2022,V,5.0,Valparaíso,546390
+2023,V,5.0,Valparaíso,531979
+2024,V,5.0,Valparaíso,533152
+2025,V,5.0,Valparaíso,538683
+1985,VI,6.0,O'Higgins,63689
+1986,VI,6.0,O'Higgins,70579
+1987,VI,6.0,O'Higgins,79791
+1988,VI,6.0,O'Higgins,85224
+1989,VI,6.0,O'Higgins,93190
+1990,VI,6.0,O'Higgins,95168
+1991,VI,6.0,O'Higgins,103788
+1992,VI,6.0,O'Higgins,112555
+1993,VI,6.0,O'Higgins,114371
+1994,VI,6.0,O'Higgins,114331
+1995,VI,6.0,O'Higgins,117058
+1996,VI,6.0,O'Higgins,118545
+1997,VI,6.0,O'Higgins,121120
+1998,VI,6.0,O'Higgins,124570
+1999,VI,6.0,O'Higgins,126634
+2000,VI,6.0,O'Higgins,132351
+2001,VI,6.0,O'Higgins,135890
+2002,VI,6.0,O'Higgins,140045
+2003,VI,6.0,O'Higgins,146837
+2004,VI,6.0,O'Higgins,162752
+2005,VI,6.0,O'Higgins,176665
+2006,VI,6.0,O'Higgins,180514
+2007,VI,6.0,O'Higgins,198799
+2008,VI,6.0,O'Higgins,207594
+2009,VI,6.0,O'Higgins,208324
+2010,VI,6.0,O'Higgins,220430
+2011,VI,6.0,O'Higgins,227149
+2012,VI,6.0,O'Higgins,230059
+2013,VI,6.0,O'Higgins,242487
+2014,VI,6.0,O'Higgins,256612
+2015,VI,6.0,O'Higgins,258875
+2016,VI,6.0,O'Higgins,268937
+2017,VI,6.0,O'Higgins,276887
+2018,VI,6.0,O'Higgins,283577
+2019,VI,6.0,O'Higgins,291144
+2020,VI,6.0,O'Higgins,290064
+2021,VI,6.0,O'Higgins,304527
+2022,VI,6.0,O'Higgins,320142
+2023,VI,6.0,O'Higgins,305081
+2024,VI,6.0,O'Higgins,328076
+2025,VI,6.0,O'Higgins,333620
+1985,VII,7.0,Maule,63242
+1986,VII,7.0,Maule,70590
+1987,VII,7.0,Maule,80415
+1988,VII,7.0,Maule,85539
+1989,VII,7.0,Maule,92323
+1990,VII,7.0,Maule,94671
+1991,VII,7.0,Maule,101577
+1992,VII,7.0,Maule,111410
+1993,VII,7.0,Maule,111314
+1994,VII,7.0,Maule,117547
+1995,VII,7.0,Maule,119720
+1996,VII,7.0,Maule,125756
+1997,VII,7.0,Maule,129575
+1998,VII,7.0,Maule,130340
+1999,VII,7.0,Maule,134188
+2000,VII,7.0,Maule,139087
+2001,VII,7.0,Maule,143867
+2002,VII,7.0,Maule,143215
+2003,VII,7.0,Maule,151119
+2004,VII,7.0,Maule,156281
+2005,VII,7.0,Maule,176683
+2006,VII,7.0,Maule,183928
+2007,VII,7.0,Maule,200972
+2008,VII,7.0,Maule,210552
+2009,VII,7.0,Maule,210362
+2010,VII,7.0,Maule,225047
+2011,VII,7.0,Maule,237355
+2012,VII,7.0,Maule,245905
+2013,VII,7.0,Maule,256401
+2014,VII,7.0,Maule,269186
+2015,VII,7.0,Maule,273596
+2016,VII,7.0,Maule,287003
+2017,VII,7.0,Maule,292118
+2018,VII,7.0,Maule,306088
+2019,VII,7.0,Maule,310858
+2020,VII,7.0,Maule,311002
+2021,VII,7.0,Maule,325411
+2022,VII,7.0,Maule,326184
+2023,VII,7.0,Maule,309779
+2024,VII,7.0,Maule,329692
+2025,VII,7.0,Maule,334444
+1985,VIII,8.0,Biobío,143381
+1986,VIII,8.0,Biobío,163056
+1987,VIII,8.0,Biobío,183622
+1988,VIII,8.0,Biobío,199930
+1989,VIII,8.0,Biobío,217894
+1990,VIII,8.0,Biobío,222067
+1991,VIII,8.0,Biobío,231188
+1992,VIII,8.0,Biobío,245404
+1993,VIII,8.0,Biobío,259601
+1994,VIII,8.0,Biobío,267180
+1995,VIII,8.0,Biobío,272695
+1996,VIII,8.0,Biobío,276653
+1997,VIII,8.0,Biobío,284380
+1998,VIII,8.0,Biobío,276785
+1999,VIII,8.0,Biobío,292035
+2000,VIII,8.0,Biobío,290902
+2001,VIII,8.0,Biobío,301873
+2002,VIII,8.0,Biobío,303120
+2003,VIII,8.0,Biobío,315889
+2004,VIII,8.0,Biobío,328825
+2005,VIII,8.0,Biobío,363821
+2006,VIII,8.0,Biobío,371712
+2007,VIII,8.0,Biobío,398779
+2008,VIII,8.0,Biobío,413932
+2009,VIII,8.0,Biobío,422834
+2010,VIII,8.0,Biobío,455127
+2011,VIII,8.0,Biobío,464154
+2012,VIII,8.0,Biobío,485038
+2013,VIII,8.0,Biobío,504908
+2014,VIII,8.0,Biobío,517718
+2015,VIII,8.0,Biobío,527613
+2016,VIII,8.0,Biobío,539691
+2017,VIII,8.0,Biobío,547140
+2018,VIII,8.0,Biobío,442499
+2019,VIII,8.0,Biobío,450315
+2020,VIII,8.0,Biobío,447971
+2021,VIII,8.0,Biobío,485318
+2022,VIII,8.0,Biobío,483334
+2023,VIII,8.0,Biobío,467956
+2024,VIII,8.0,Biobío,473583
+2025,VIII,8.0,Biobío,475087
+1985,IX,9.0,La Araucanía,47095
+1986,IX,9.0,La Araucanía,53727
+1987,IX,9.0,La Araucanía,58566
+1988,IX,9.0,La Araucanía,62991
+1989,IX,9.0,La Araucanía,68922
+1990,IX,9.0,La Araucanía,71163
+1991,IX,9.0,La Araucanía,77286
+1992,IX,9.0,La Araucanía,86067
+1993,IX,9.0,La Araucanía,89693
+1994,IX,9.0,La Araucanía,91582
+1995,IX,9.0,La Araucanía,95242
+1996,IX,9.0,La Araucanía,95060
+1997,IX,9.0,La Araucanía,98220
+1998,IX,9.0,La Araucanía,98028
+1999,IX,9.0,La Araucanía,103975
+2000,IX,9.0,La Araucanía,108550
+2001,IX,9.0,La Araucanía,108848
+2002,IX,9.0,La Araucanía,110473
+2003,IX,9.0,La Araucanía,113851
+2004,IX,9.0,La Araucanía,121097
+2005,IX,9.0,La Araucanía,133784
+2006,IX,9.0,La Araucanía,137101
+2007,IX,9.0,La Araucanía,151480
+2008,IX,9.0,La Araucanía,156497
+2009,IX,9.0,La Araucanía,160899
+2010,IX,9.0,La Araucanía,171090
+2011,IX,9.0,La Araucanía,181046
+2012,IX,9.0,La Araucanía,190570
+2013,IX,9.0,La Araucanía,202398
+2014,IX,9.0,La Araucanía,210244
+2015,IX,9.0,La Araucanía,217332
+2016,IX,9.0,La Araucanía,222233
+2017,IX,9.0,La Araucanía,226521
+2018,IX,9.0,La Araucanía,232507
+2019,IX,9.0,La Araucanía,233826
+2020,IX,9.0,La Araucanía,229010
+2021,IX,9.0,La Araucanía,248570
+2022,IX,9.0,La Araucanía,247718
+2023,IX,9.0,La Araucanía,239784
+2024,IX,9.0,La Araucanía,245194
+2025,IX,9.0,La Araucanía,246892
+1985,X,10.0,Los Lagos,71825
+1986,X,10.0,Los Lagos,81473
+1987,X,10.0,Los Lagos,92691
+1988,X,10.0,Los Lagos,100857
+1989,X,10.0,Los Lagos,109627
+1990,X,10.0,Los Lagos,111212
+1991,X,10.0,Los Lagos,120764
+1992,X,10.0,Los Lagos,130114
+1993,X,10.0,Los Lagos,135049
+1994,X,10.0,Los Lagos,138826
+1995,X,10.0,Los Lagos,142763
+1996,X,10.0,Los Lagos,144407
+1997,X,10.0,Los Lagos,148325
+1998,X,10.0,Los Lagos,148168
+1999,X,10.0,Los Lagos,153875
+2000,X,10.0,Los Lagos,160191
+2001,X,10.0,Los Lagos,167465
+2002,X,10.0,Los Lagos,168036
+2003,X,10.0,Los Lagos,176299
+2004,X,10.0,Los Lagos,188778
+2005,X,10.0,Los Lagos,205770
+2006,X,10.0,Los Lagos,217730
+2007,X,10.0,Los Lagos,170142
+2008,X,10.0,Los Lagos,170807
+2009,X,10.0,Los Lagos,165461
+2010,X,10.0,Los Lagos,180899
+2011,X,10.0,Los Lagos,190519
+2012,X,10.0,Los Lagos,201723
+2013,X,10.0,Los Lagos,213369
+2014,X,10.0,Los Lagos,222297
+2015,X,10.0,Los Lagos,224849
+2016,X,10.0,Los Lagos,227401
+2017,X,10.0,Los Lagos,236565
+2018,X,10.0,Los Lagos,244740
+2019,X,10.0,Los Lagos,250816
+2020,X,10.0,Los Lagos,254684
+2021,X,10.0,Los Lagos,266281
+2022,X,10.0,Los Lagos,265499
+2023,X,10.0,Los Lagos,261724
+2024,X,10.0,Los Lagos,265631
+2025,X,10.0,Los Lagos,268001
+1985,XI,11.0,Aysén,7073
+1986,XI,11.0,Aysén,8409
+1987,XI,11.0,Aysén,9129
+1988,XI,11.0,Aysén,9676
+1989,XI,11.0,Aysén,9933
+1990,XI,11.0,Aysén,10326
+1991,XI,11.0,Aysén,11158
+1992,XI,11.0,Aysén,11620
+1993,XI,11.0,Aysén,12078
+1994,XI,11.0,Aysén,12755
+1995,XI,11.0,Aysén,13112
+1996,XI,11.0,Aysén,13801
+1997,XI,11.0,Aysén,14437
+1998,XI,11.0,Aysén,14485
+1999,XI,11.0,Aysén,15762
+2000,XI,11.0,Aysén,15888
+2001,XI,11.0,Aysén,16691
+2002,XI,11.0,Aysén,16641
+2003,XI,11.0,Aysén,17024
+2004,XI,11.0,Aysén,18816
+2005,XI,11.0,Aysén,20272
+2006,XI,11.0,Aysén,21867
+2007,XI,11.0,Aysén,22234
+2008,XI,11.0,Aysén,22917
+2009,XI,11.0,Aysén,22976
+2010,XI,11.0,Aysén,23434
+2011,XI,11.0,Aysén,25809
+2012,XI,11.0,Aysén,26324
+2013,XI,11.0,Aysén,27325
+2014,XI,11.0,Aysén,28281
+2015,XI,11.0,Aysén,29009
+2016,XI,11.0,Aysén,29129
+2017,XI,11.0,Aysén,29312
+2018,XI,11.0,Aysén,29334
+2019,XI,11.0,Aysén,29911
+2020,XI,11.0,Aysén,30674
+2021,XI,11.0,Aysén,32213
+2022,XI,11.0,Aysén,31358
+2023,XI,11.0,Aysén,31255
+2024,XI,11.0,Aysén,33004
+2025,XI,11.0,Aysén,33805
+1985,XII,12.0,Magallanes,20629
+1986,XII,12.0,Magallanes,23304
+1987,XII,12.0,Magallanes,25683
+1988,XII,12.0,Magallanes,25442
+1989,XII,12.0,Magallanes,26104
+1990,XII,12.0,Magallanes,26454
+1991,XII,12.0,Magallanes,28233
+1992,XII,12.0,Magallanes,29334
+1993,XII,12.0,Magallanes,30287
+1994,XII,12.0,Magallanes,30895
+1995,XII,12.0,Magallanes,31667
+1996,XII,12.0,Magallanes,31826
+1997,XII,12.0,Magallanes,32643
+1998,XII,12.0,Magallanes,32884
+1999,XII,12.0,Magallanes,33459
+2000,XII,12.0,Magallanes,33693
+2001,XII,12.0,Magallanes,35234
+2002,XII,12.0,Magallanes,35027
+2003,XII,12.0,Magallanes,36031
+2004,XII,12.0,Magallanes,37616
+2005,XII,12.0,Magallanes,39324
+2006,XII,12.0,Magallanes,40689
+2007,XII,12.0,Magallanes,42963
+2008,XII,12.0,Magallanes,46058
+2009,XII,12.0,Magallanes,45922
+2010,XII,12.0,Magallanes,47593
+2011,XII,12.0,Magallanes,49419
+2012,XII,12.0,Magallanes,51426
+2013,XII,12.0,Magallanes,53158
+2014,XII,12.0,Magallanes,53974
+2015,XII,12.0,Magallanes,53649
+2016,XII,12.0,Magallanes,54770
+2017,XII,12.0,Magallanes,56240
+2018,XII,12.0,Magallanes,58350
+2019,XII,12.0,Magallanes,59850
+2020,XII,12.0,Magallanes,55037
+2021,XII,12.0,Magallanes,60184
+2022,XII,12.0,Magallanes,60734
+2023,XII,12.0,Magallanes,59899
+2024,XII,12.0,Magallanes,62119
+2025,XII,12.0,Magallanes,63120
+1985,R. Metropolitana,13.0,Metropolitana,626830
+1986,R. Metropolitana,13.0,Metropolitana,710357
+1987,R. Metropolitana,13.0,Metropolitana,797581
+1988,R. Metropolitana,13.0,Metropolitana,835288
+1989,R. Metropolitana,13.0,Metropolitana,902824
+1990,R. Metropolitana,13.0,Metropolitana,928676
+1991,R. Metropolitana,13.0,Metropolitana,1018170
+1992,R. Metropolitana,13.0,Metropolitana,1107724
+1993,R. Metropolitana,13.0,Metropolitana,1138411
+1994,R. Metropolitana,13.0,Metropolitana,1166821
+1995,R. Metropolitana,13.0,Metropolitana,1192679
+1996,R. Metropolitana,13.0,Metropolitana,1233602
+1997,R. Metropolitana,13.0,Metropolitana,1289488
+1998,R. Metropolitana,13.0,Metropolitana,1262796
+1999,R. Metropolitana,13.0,Metropolitana,1283893
+2000,R. Metropolitana,13.0,Metropolitana,1312443
+2001,R. Metropolitana,13.0,Metropolitana,1347501
+2002,R. Metropolitana,13.0,Metropolitana,1359450
+2003,R. Metropolitana,13.0,Metropolitana,1422137
+2004,R. Metropolitana,13.0,Metropolitana,1374604
+2005,R. Metropolitana,13.0,Metropolitana,1500989
+2006,R. Metropolitana,13.0,Metropolitana,1605487
+2007,R. Metropolitana,13.0,Metropolitana,1806729
+2008,R. Metropolitana,13.0,Metropolitana,1849106
+2009,R. Metropolitana,13.0,Metropolitana,1898495
+2010,R. Metropolitana,13.0,Metropolitana,2068472
+2011,R. Metropolitana,13.0,Metropolitana,2186987
+2012,R. Metropolitana,13.0,Metropolitana,2320706
+2013,R. Metropolitana,13.0,Metropolitana,2211783
+2014,R. Metropolitana,13.0,Metropolitana,2272084
+2015,R. Metropolitana,13.0,Metropolitana,2331902
+2016,R. Metropolitana,13.0,Metropolitana,2377863
+2017,R. Metropolitana,13.0,Metropolitana,2435604
+2018,R. Metropolitana,13.0,Metropolitana,2531014
+2019,R. Metropolitana,13.0,Metropolitana,2551438
+2020,R. Metropolitana,13.0,Metropolitana,2465087
+2021,R. Metropolitana,13.0,Metropolitana,2652048
+2022,R. Metropolitana,13.0,Metropolitana,2670191
+2023,R. Metropolitana,13.0,Metropolitana,2602958
+2024,R. Metropolitana,13.0,Metropolitana,2626092
+2025,R. Metropolitana,13.0,Metropolitana,2678039
+2007,XIV,14.0,Los Ríos,66900
+2008,XIV,14.0,Los Ríos,66666
+2009,XIV,14.0,Los Ríos,69858
+2010,XIV,14.0,Los Ríos,73096
+2011,XIV,14.0,Los Ríos,75267
+2012,XIV,14.0,Los Ríos,78099
+2013,XIV,14.0,Los Ríos,83837
+2014,XIV,14.0,Los Ríos,86948
+2015,XIV,14.0,Los Ríos,89822
+2016,XIV,14.0,Los Ríos,92628
+2017,XIV,14.0,Los Ríos,94779
+2018,XIV,14.0,Los Ríos,97544
+2019,XIV,14.0,Los Ríos,98160
+2020,XIV,14.0,Los Ríos,97756
+2021,XIV,14.0,Los Ríos,104880
+2022,XIV,14.0,Los Ríos,103830
+2023,XIV,14.0,Los Ríos,100313
+2024,XIV,14.0,Los Ríos,102312
+2025,XIV,14.0,Los Ríos,103506
+2007,XV,15.0,Arica y Parinacota,42508
+2008,XV,15.0,Arica y Parinacota,42671
+2009,XV,15.0,Arica y Parinacota,45136
+2010,XV,15.0,Arica y Parinacota,48778
+2011,XV,15.0,Arica y Parinacota,51499
+2012,XV,15.0,Arica y Parinacota,54624
+2013,XV,15.0,Arica y Parinacota,57499
+2014,XV,15.0,Arica y Parinacota,58848
+2015,XV,15.0,Arica y Parinacota,59539
+2016,XV,15.0,Arica y Parinacota,59048
+2017,XV,15.0,Arica y Parinacota,59893
+2018,XV,15.0,Arica y Parinacota,62526
+2019,XV,15.0,Arica y Parinacota,63501
+2020,XV,15.0,Arica y Parinacota,62365
+2021,XV,15.0,Arica y Parinacota,68911
+2022,XV,15.0,Arica y Parinacota,68660
+2023,XV,15.0,Arica y Parinacota,66923
+2024,XV,15.0,Arica y Parinacota,66458
+2025,XV,15.0,Arica y Parinacota,67106
+2018,XVI,16.0,Ñuble,121592
+2019,XVI,16.0,Ñuble,122751
+2020,XVI,16.0,Ñuble,122154
+2021,XVI,16.0,Ñuble,132381
+2022,XVI,16.0,Ñuble,130841
+2023,XVI,16.0,Ñuble,124151
+2024,XVI,16.0,Ñuble,128514
+2025,XVI,16.0,Ñuble,131591
+1985,Sin Información,,,1341
+1986,Sin Información,,,964
+1987,Sin Información,,,85
+1988,Sin Información,,,68
+1989,Sin Información,,,55
+1990,Sin Información,,,277
+1991,Sin Información,,,800
+1992,Sin Información,,,3730
+1993,Sin Información,,,1651
+1994,Sin Información,,,6429
+1995,Sin Información,,,2097
+1996,Sin Información,,,3828
+1997,Sin Información,,,796
+1998,Sin Información,,,412
+1999,Sin Información,,,427
+2000,Sin Información,,,1007
+2001,Sin Información,,,829
+2002,Sin Información,,,6894
+2003,Sin Información,,,2918
+2004,Sin Información,,,7459
+2005,Sin Información,,,6686
+2006,Sin Información,,,2189
+2007,Sin Información,,,8448
+2008,Sin Información,,,61349
+2009,Sin Información,,,49118
+2010,Sin Información,,,53473
+2011,Sin Información,,,54379
+2012,Sin Información,,,49357
+2013,Sin Información,,,150056
+2014,Sin Información,,,95305
+2015,Sin Información,,,88466
+2016,Sin Información,,,77585
+2017,Sin Información,,,68684
+2018,Sin Información,,,51398
+2019,Sin Información,,,45174
+2020,Sin Información,,,46063
+2021,Sin Información,,,48138
+2022,Sin Información,,,51163
+2023,Sin Información,,,53407
+2024,Sin Información,,,56094
+2025,Sin Información,,,13914
+1985,Total,,,1321938
+1986,Total,,,1493568
+1987,Total,,,1675615
+1988,Total,,,1772371
+1989,Total,,,1917629
+1990,Total,,,1961547
+1991,Total,,,2118373
+1992,Total,,,2297853
+1993,Total,,,2367640
+1994,Total,,,2436266
+1995,Total,,,2489533
+1996,Total,,,2548362
+1997,Total,,,2661605
+1998,Total,,,2619616
+1999,Total,,,2690601
+2000,Total,,,2747573
+2001,Total,,,2835494
+2002,Total,,,2863402
+2003,Total,,,2982805
+2004,Total,,,3036987
+2005,Total,,,3321793
+2006,Total,,,3474839
+2007,Total,,,3862018
+2008,Total,,,4022796
+2009,Total,,,4103502
+2010,Total,,,4420308
+2011,Total,,,4640012
+2012,Total,,,4871832
+2013,Total,,,4992319
+2014,Total,,,5093672
+2015,Total,,,5192625
+2016,Total,,,5284337
+2017,Total,,,5393032
+2018,Total,,,5559084
+2019,Total,,,5618954
+2020,Total,,,5508288
+2021,Total,,,5927047
+2022,Total,,,5968247
+2023,Total,,,5810067
+2024,Total,,,5918977
+2025,Total,,,5974428

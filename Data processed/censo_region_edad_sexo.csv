@@ -1,0 +1,1153 @@
+region,region_nombre,area,sexo,edad_quinquenal,poblacion
+1,Tarapacá,2,1,0,471
+1,Tarapacá,1,1,0,10887
+1,Tarapacá,2,1,5,534
+1,Tarapacá,1,1,5,13632
+1,Tarapacá,2,1,10,570
+1,Tarapacá,1,1,10,14822
+1,Tarapacá,2,1,15,593
+1,Tarapacá,1,1,15,13484
+1,Tarapacá,1,1,20,13318
+1,Tarapacá,2,1,20,918
+1,Tarapacá,2,1,25,901
+1,Tarapacá,1,1,25,14894
+1,Tarapacá,1,1,30,15981
+1,Tarapacá,2,1,30,852
+1,Tarapacá,2,1,35,763
+1,Tarapacá,1,1,35,14098
+1,Tarapacá,1,1,40,12560
+1,Tarapacá,2,1,40,655
+1,Tarapacá,1,1,45,10377
+1,Tarapacá,2,1,45,525
+1,Tarapacá,2,1,50,429
+1,Tarapacá,1,1,50,9457
+1,Tarapacá,2,1,55,413
+1,Tarapacá,1,1,55,8143
+1,Tarapacá,2,1,60,421
+1,Tarapacá,1,1,60,7395
+1,Tarapacá,2,1,65,365
+1,Tarapacá,1,1,65,6133
+1,Tarapacá,2,1,70,290
+1,Tarapacá,1,1,70,4164
+1,Tarapacá,2,1,75,180
+1,Tarapacá,1,1,75,2567
+1,Tarapacá,1,1,80,1405
+1,Tarapacá,2,1,80,115
+1,Tarapacá,2,1,85,63
+1,Tarapacá,1,1,85,968
+1,Tarapacá,2,2,0,468
+1,Tarapacá,1,2,0,10506
+1,Tarapacá,2,2,5,535
+1,Tarapacá,1,2,5,13429
+1,Tarapacá,1,2,10,14145
+1,Tarapacá,2,2,10,533
+1,Tarapacá,2,2,15,400
+1,Tarapacá,1,2,15,12684
+1,Tarapacá,2,2,20,429
+1,Tarapacá,1,2,20,12921
+1,Tarapacá,1,2,25,15294
+1,Tarapacá,2,2,25,502
+1,Tarapacá,2,2,30,508
+1,Tarapacá,1,2,30,16203
+1,Tarapacá,2,2,35,488
+1,Tarapacá,1,2,35,14867
+1,Tarapacá,2,2,40,420
+1,Tarapacá,1,2,40,13329
+1,Tarapacá,2,2,45,344
+1,Tarapacá,1,2,45,11010
+1,Tarapacá,1,2,50,10353
+1,Tarapacá,2,2,50,335
+1,Tarapacá,2,2,55,345
+1,Tarapacá,1,2,55,8706
+1,Tarapacá,1,2,60,8293
+1,Tarapacá,2,2,60,338
+1,Tarapacá,2,2,65,282
+1,Tarapacá,1,2,65,6576
+1,Tarapacá,1,2,70,4677
+1,Tarapacá,2,2,70,227
+1,Tarapacá,2,2,75,167
+1,Tarapacá,1,2,75,3132
+1,Tarapacá,1,2,80,1964
+1,Tarapacá,2,2,80,96
+1,Tarapacá,2,2,85,84
+1,Tarapacá,1,2,85,1873
+2,Antofagasta,2,1,0,474
+2,Antofagasta,1,1,0,16750
+2,Antofagasta,2,1,5,489
+2,Antofagasta,1,1,5,21440
+2,Antofagasta,1,1,10,24051
+2,Antofagasta,2,1,10,580
+2,Antofagasta,2,1,15,501
+2,Antofagasta,1,1,15,22737
+2,Antofagasta,2,1,20,679
+2,Antofagasta,1,1,20,23143
+2,Antofagasta,1,1,25,27094
+2,Antofagasta,2,1,25,784
+2,Antofagasta,2,1,30,821
+2,Antofagasta,1,1,30,28951
+2,Antofagasta,2,1,35,803
+2,Antofagasta,1,1,35,25851
+2,Antofagasta,2,1,40,730
+2,Antofagasta,1,1,40,21666
+2,Antofagasta,2,1,45,555
+2,Antofagasta,1,1,45,19436
+2,Antofagasta,1,1,50,18455
+2,Antofagasta,2,1,50,541
+2,Antofagasta,2,1,55,481
+2,Antofagasta,1,1,55,15363
+2,Antofagasta,1,1,60,14082
+2,Antofagasta,2,1,60,442
+2,Antofagasta,2,1,65,331
+2,Antofagasta,1,1,65,10835
+2,Antofagasta,1,1,70,7106
+2,Antofagasta,2,1,70,218
+2,Antofagasta,2,1,75,110
+2,Antofagasta,1,1,75,4354
+2,Antofagasta,1,1,80,2453
+2,Antofagasta,2,1,80,70
+2,Antofagasta,2,1,85,59
+2,Antofagasta,1,1,85,1560
+2,Antofagasta,2,2,0,409
+2,Antofagasta,1,2,0,15876
+2,Antofagasta,2,2,5,463
+2,Antofagasta,1,2,5,20699
+2,Antofagasta,2,2,10,525
+2,Antofagasta,1,2,10,23196
+2,Antofagasta,2,2,15,434
+2,Antofagasta,1,2,15,21386
+2,Antofagasta,1,2,20,22081
+2,Antofagasta,2,2,20,414
+2,Antofagasta,1,2,25,26813
+2,Antofagasta,2,2,25,525
+2,Antofagasta,2,2,30,584
+2,Antofagasta,1,2,30,29465
+2,Antofagasta,2,2,35,598
+2,Antofagasta,1,2,35,26174
+2,Antofagasta,1,2,40,22755
+2,Antofagasta,2,2,40,511
+2,Antofagasta,1,2,45,21008
+2,Antofagasta,2,2,45,444
+2,Antofagasta,2,2,50,412
+2,Antofagasta,1,2,50,19817
+2,Antofagasta,2,2,55,378
+2,Antofagasta,1,2,55,16248
+2,Antofagasta,2,2,60,329
+2,Antofagasta,1,2,60,15404
+2,Antofagasta,2,2,65,256
+2,Antofagasta,1,2,65,11788
+2,Antofagasta,2,2,70,167
+2,Antofagasta,1,2,70,8612
+2,Antofagasta,2,2,75,127
+2,Antofagasta,1,2,75,5905
+2,Antofagasta,1,2,80,3922
+2,Antofagasta,2,2,80,80
+2,Antofagasta,2,2,85,75
+2,Antofagasta,1,2,85,3541
+3,Atacama,1,1,0,6876
+3,Atacama,2,1,0,779
+3,Atacama,2,1,5,1116
+3,Atacama,1,1,5,9450
+3,Atacama,2,1,10,1184
+3,Atacama,1,1,10,10865
+3,Atacama,1,1,15,10099
+3,Atacama,2,1,15,1029
+3,Atacama,2,1,20,828
+3,Atacama,1,1,20,9335
+3,Atacama,2,1,25,858
+3,Atacama,1,1,25,10489
+3,Atacama,2,1,30,1147
+3,Atacama,1,1,30,11380
+3,Atacama,2,1,35,1100
+3,Atacama,1,1,35,10109
+3,Atacama,1,1,40,8665
+3,Atacama,2,1,40,1067
+3,Atacama,1,1,45,7663
+3,Atacama,2,1,45,1062
+3,Atacama,1,1,50,7628
+3,Atacama,2,1,50,1213
+3,Atacama,1,1,55,7504
+3,Atacama,2,1,55,1252
+3,Atacama,2,1,60,1215
+3,Atacama,1,1,60,6913
+3,Atacama,2,1,65,982
+3,Atacama,1,1,65,5469
+3,Atacama,1,1,70,3820
+3,Atacama,2,1,70,714
+3,Atacama,2,1,75,501
+3,Atacama,1,1,75,2539
+3,Atacama,1,1,80,1665
+3,Atacama,2,1,80,303
+3,Atacama,2,1,85,248
+3,Atacama,1,1,85,1196
+3,Atacama,1,2,0,6486
+3,Atacama,2,2,0,707
+3,Atacama,1,2,5,8789
+3,Atacama,2,2,5,1024
+3,Atacama,1,2,10,10652
+3,Atacama,2,2,10,1175
+3,Atacama,1,2,15,9148
+3,Atacama,2,2,15,937
+3,Atacama,2,2,20,764
+3,Atacama,1,2,20,8621
+3,Atacama,2,2,25,923
+3,Atacama,1,2,25,10473
+3,Atacama,1,2,30,11469
+3,Atacama,2,2,30,1143
+3,Atacama,1,2,35,10406
+3,Atacama,2,2,35,1099
+3,Atacama,1,2,40,9169
+3,Atacama,2,2,40,1033
+3,Atacama,2,2,45,968
+3,Atacama,1,2,45,8368
+3,Atacama,2,2,50,1008
+3,Atacama,1,2,50,8258
+3,Atacama,1,2,55,8106
+3,Atacama,2,2,55,1084
+3,Atacama,2,2,60,983
+3,Atacama,1,2,60,7913
+3,Atacama,1,2,65,5984
+3,Atacama,2,2,65,817
+3,Atacama,2,2,70,575
+3,Atacama,1,2,70,4445
+3,Atacama,1,2,75,3133
+3,Atacama,2,2,75,384
+3,Atacama,2,2,80,254
+3,Atacama,1,2,80,2267
+3,Atacama,1,2,85,2100
+3,Atacama,2,2,85,252
+4,Coquimbo,1,1,0,15518
+4,Coquimbo,2,1,0,3644
+4,Coquimbo,1,1,5,22295
+4,Coquimbo,2,1,5,5024
+4,Coquimbo,2,1,10,5916
+4,Coquimbo,1,1,10,26148
+4,Coquimbo,1,1,15,23946
+4,Coquimbo,2,1,15,5202
+4,Coquimbo,1,1,20,23706
+4,Coquimbo,2,1,20,4861
+4,Coquimbo,2,1,25,5059
+4,Coquimbo,1,1,25,24894
+4,Coquimbo,1,1,30,26621
+4,Coquimbo,2,1,30,5658
+4,Coquimbo,1,1,35,24337
+4,Coquimbo,2,1,35,5602
+4,Coquimbo,1,1,40,21209
+4,Coquimbo,2,1,40,5277
+4,Coquimbo,1,1,45,19026
+4,Coquimbo,2,1,45,5398
+4,Coquimbo,2,1,50,5813
+4,Coquimbo,1,1,50,18914
+4,Coquimbo,1,1,55,17847
+4,Coquimbo,2,1,55,6151
+4,Coquimbo,2,1,60,5926
+4,Coquimbo,1,1,60,16542
+4,Coquimbo,1,1,65,13769
+4,Coquimbo,2,1,65,5149
+4,Coquimbo,2,1,70,3885
+4,Coquimbo,1,1,70,10042
+4,Coquimbo,1,1,75,7104
+4,Coquimbo,2,1,75,2735
+4,Coquimbo,2,1,80,1840
+4,Coquimbo,1,1,80,4546
+4,Coquimbo,1,1,85,3383
+4,Coquimbo,2,1,85,1410
+4,Coquimbo,2,2,0,3563
+4,Coquimbo,1,2,0,15304
+4,Coquimbo,1,2,5,21518
+4,Coquimbo,2,2,5,4878
+4,Coquimbo,1,2,10,25095
+4,Coquimbo,2,2,10,5526
+4,Coquimbo,2,2,15,4712
+4,Coquimbo,1,2,15,23282
+4,Coquimbo,1,2,20,23322
+4,Coquimbo,2,2,20,4258
+4,Coquimbo,1,2,25,25254
+4,Coquimbo,2,2,25,4795
+4,Coquimbo,1,2,30,27997
+4,Coquimbo,2,2,30,5577
+4,Coquimbo,1,2,35,26207
+4,Coquimbo,2,2,35,5529
+4,Coquimbo,2,2,40,5147
+4,Coquimbo,1,2,40,23723
+4,Coquimbo,2,2,45,5276
+4,Coquimbo,1,2,45,22015
+4,Coquimbo,2,2,50,5526
+4,Coquimbo,1,2,50,21534
+4,Coquimbo,2,2,55,5906
+4,Coquimbo,1,2,55,21379
+4,Coquimbo,1,2,60,19816
+4,Coquimbo,2,2,60,5415
+4,Coquimbo,1,2,65,16458
+4,Coquimbo,2,2,65,4496
+4,Coquimbo,2,2,70,3480
+4,Coquimbo,1,2,70,12555
+4,Coquimbo,1,2,75,9157
+4,Coquimbo,2,2,75,2641
+4,Coquimbo,2,2,80,1895
+4,Coquimbo,1,2,80,6680
+4,Coquimbo,1,2,85,6611
+4,Coquimbo,2,2,85,1940
+5,Valparaíso,1,1,0,37199
+5,Valparaíso,2,1,0,4878
+5,Valparaíso,1,1,5,50862
+5,Valparaíso,2,1,5,6396
+5,Valparaíso,2,1,10,7033
+5,Valparaíso,1,1,10,56105
+5,Valparaíso,1,1,15,55930
+5,Valparaíso,2,1,15,6324
+5,Valparaíso,1,1,20,61053
+5,Valparaíso,2,1,20,5678
+5,Valparaíso,2,1,25,6018
+5,Valparaíso,1,1,25,62107
+5,Valparaíso,1,1,30,66313
+5,Valparaíso,2,1,30,6560
+5,Valparaíso,1,1,35,60530
+5,Valparaíso,2,1,35,6902
+5,Valparaíso,1,1,40,54057
+5,Valparaíso,2,1,40,6899
+5,Valparaíso,1,1,45,47523
+5,Valparaíso,2,1,45,6621
+5,Valparaíso,2,1,50,6538
+5,Valparaíso,1,1,50,47675
+5,Valparaíso,1,1,55,47389
+5,Valparaíso,2,1,55,7013
+5,Valparaíso,2,1,60,6967
+5,Valparaíso,1,1,60,47096
+5,Valparaíso,1,1,65,40605
+5,Valparaíso,2,1,65,6068
+5,Valparaíso,2,1,70,4558
+5,Valparaíso,1,1,70,30927
+5,Valparaíso,1,1,75,22634
+5,Valparaíso,2,1,75,3161
+5,Valparaíso,2,1,80,1927
+5,Valparaíso,1,1,80,14172
+5,Valparaíso,1,1,85,10579
+5,Valparaíso,2,1,85,1346
+5,Valparaíso,2,2,0,4641
+5,Valparaíso,1,2,0,35550
+5,Valparaíso,2,2,5,6264
+5,Valparaíso,1,2,5,48909
+5,Valparaíso,1,2,10,54200
+5,Valparaíso,2,2,10,6692
+5,Valparaíso,2,2,15,5998
+5,Valparaíso,1,2,15,53031
+5,Valparaíso,2,2,20,5519
+5,Valparaíso,1,2,20,58764
+5,Valparaíso,1,2,25,60972
+5,Valparaíso,2,2,25,5857
+5,Valparaíso,2,2,30,6863
+5,Valparaíso,1,2,30,67108
+5,Valparaíso,2,2,35,7032
+5,Valparaíso,1,2,35,62743
+5,Valparaíso,2,2,40,6957
+5,Valparaíso,1,2,40,58392
+5,Valparaíso,2,2,45,6480
+5,Valparaíso,1,2,45,53393
+5,Valparaíso,1,2,50,54038
+5,Valparaíso,2,2,50,6445
+5,Valparaíso,2,2,55,6950
+5,Valparaíso,1,2,55,56310
+5,Valparaíso,1,2,60,57979
+5,Valparaíso,2,2,60,6957
+5,Valparaíso,2,2,65,5608
+5,Valparaíso,1,2,65,49806
+5,Valparaíso,1,2,70,38511
+5,Valparaíso,2,2,70,4158
+5,Valparaíso,2,2,75,2858
+5,Valparaíso,1,2,75,30420
+5,Valparaíso,1,2,80,21612
+5,Valparaíso,2,2,80,1977
+5,Valparaíso,2,2,85,1819
+5,Valparaíso,1,2,85,21597
+6,O'Higgins,1,1,0,17541
+6,O'Higgins,2,1,0,6369
+6,O'Higgins,1,1,5,23697
+6,O'Higgins,2,1,5,8127
+6,O'Higgins,2,1,10,8676
+6,O'Higgins,1,1,10,26548
+6,O'Higgins,1,1,15,24998
+6,O'Higgins,2,1,15,7928
+6,O'Higgins,1,1,20,23236
+6,O'Higgins,2,1,20,7580
+6,O'Higgins,2,1,25,8269
+6,O'Higgins,1,1,25,25737
+6,O'Higgins,1,1,30,28366
+6,O'Higgins,2,1,30,9576
+6,O'Higgins,1,1,35,26220
+6,O'Higgins,2,1,35,9303
+6,O'Higgins,1,1,40,23662
+6,O'Higgins,2,1,40,8922
+6,O'Higgins,1,1,45,21587
+6,O'Higgins,2,1,45,8784
+6,O'Higgins,2,1,50,9354
+6,O'Higgins,1,1,50,21307
+6,O'Higgins,1,1,55,20826
+6,O'Higgins,2,1,55,9907
+6,O'Higgins,2,1,60,9681
+6,O'Higgins,1,1,60,19387
+6,O'Higgins,1,1,65,15905
+6,O'Higgins,2,1,65,8262
+6,O'Higgins,2,1,70,5929
+6,O'Higgins,1,1,70,12011
+6,O'Higgins,1,1,75,8700
+6,O'Higgins,2,1,75,4351
+6,O'Higgins,2,1,80,2622
+6,O'Higgins,1,1,80,5141
+6,O'Higgins,1,1,85,3498
+6,O'Higgins,2,1,85,1941
+6,O'Higgins,1,2,0,17050
+6,O'Higgins,2,2,0,6038
+6,O'Higgins,1,2,5,22739
+6,O'Higgins,2,2,5,7830
+6,O'Higgins,2,2,10,8292
+6,O'Higgins,1,2,10,25410
+6,O'Higgins,1,2,15,23650
+6,O'Higgins,2,2,15,7300
+6,O'Higgins,1,2,20,22276
+6,O'Higgins,2,2,20,6713
+6,O'Higgins,2,2,25,7915
+6,O'Higgins,1,2,25,26057
+6,O'Higgins,1,2,30,29677
+6,O'Higgins,2,2,30,9119
+6,O'Higgins,1,2,35,28154
+6,O'Higgins,2,2,35,9269
+6,O'Higgins,1,2,40,25632
+6,O'Higgins,2,2,40,8528
+6,O'Higgins,1,2,45,24445
+6,O'Higgins,2,2,45,8387
+6,O'Higgins,2,2,50,9000
+6,O'Higgins,1,2,50,24242
+6,O'Higgins,1,2,55,23826
+6,O'Higgins,2,2,55,9654
+6,O'Higgins,2,2,60,9184
+6,O'Higgins,1,2,60,23046
+6,O'Higgins,1,2,65,18888
+6,O'Higgins,2,2,65,7501
+6,O'Higgins,2,2,70,5604
+6,O'Higgins,1,2,70,14493
+6,O'Higgins,1,2,75,10772
+6,O'Higgins,2,2,75,4120
+6,O'Higgins,2,2,80,2643
+6,O'Higgins,1,2,80,6926
+6,O'Higgins,1,2,85,6404
+6,O'Higgins,2,2,85,2496
+7,Maule,1,1,0,20397
+7,Maule,2,1,0,7236
+7,Maule,1,1,5,26915
+7,Maule,2,1,5,9581
+7,Maule,1,1,10,29125
+7,Maule,2,1,10,10412
+7,Maule,1,1,15,27959
+7,Maule,2,1,15,9961
+7,Maule,1,1,20,27053
+7,Maule,2,1,20,8831
+7,Maule,2,1,25,9243
+7,Maule,1,1,25,28456
+7,Maule,1,1,30,31514
+7,Maule,2,1,30,10119
+7,Maule,1,1,35,28481
+7,Maule,2,1,35,9955
+7,Maule,2,1,40,10159
+7,Maule,1,1,40,24804
+7,Maule,2,1,45,10759
+7,Maule,1,1,45,22880
+7,Maule,2,1,50,11775
+7,Maule,1,1,50,22530
+7,Maule,2,1,55,12903
+7,Maule,1,1,55,22221
+7,Maule,2,1,60,12365
+7,Maule,1,1,60,20885
+7,Maule,1,1,65,17003
+7,Maule,2,1,65,10595
+7,Maule,2,1,70,8166
+7,Maule,1,1,70,13043
+7,Maule,1,1,75,9006
+7,Maule,2,1,75,5786
+7,Maule,1,1,80,5381
+7,Maule,2,1,80,3465
+7,Maule,2,1,85,2396
+7,Maule,1,1,85,3895
+7,Maule,2,2,0,6987
+7,Maule,1,2,0,19869
+7,Maule,2,2,5,9322
+7,Maule,1,2,5,26205
+7,Maule,2,2,10,9730
+7,Maule,1,2,10,27951
+7,Maule,2,2,15,9163
+7,Maule,1,2,15,26812
+7,Maule,1,2,20,26699
+7,Maule,2,2,20,8533
+7,Maule,1,2,25,29479
+7,Maule,2,2,25,9032
+7,Maule,2,2,30,10550
+7,Maule,1,2,30,33199
+7,Maule,2,2,35,10211
+7,Maule,1,2,35,31410
+7,Maule,1,2,40,28748
+7,Maule,2,2,40,10084
+7,Maule,1,2,45,26663
+7,Maule,2,2,45,10509
+7,Maule,2,2,50,11480
+7,Maule,1,2,50,26696
+7,Maule,2,2,55,12270
+7,Maule,1,2,55,27241
+7,Maule,2,2,60,11541
+7,Maule,1,2,60,25230
+7,Maule,2,2,65,9398
+7,Maule,1,2,65,20867
+7,Maule,2,2,70,7339
+7,Maule,1,2,70,16062
+7,Maule,2,2,75,5033
+7,Maule,1,2,75,11658
+7,Maule,1,2,80,7997
+7,Maule,2,2,80,3486
+7,Maule,2,2,85,3007
+7,Maule,1,2,85,7292
+8,Biobío,1,1,0,32435
+8,Biobío,2,1,0,5236
+8,Biobío,1,1,5,43330
+8,Biobío,2,1,5,6698
+8,Biobío,2,1,10,7332
+8,Biobío,1,1,10,48998
+8,Biobío,1,1,15,49094
+8,Biobío,2,1,15,7190
+8,Biobío,1,1,20,50966
+8,Biobío,2,1,20,6050
+8,Biobío,2,1,25,5872
+8,Biobío,1,1,25,51022
+8,Biobío,1,1,30,54318
+8,Biobío,2,1,30,7070
+8,Biobío,1,1,35,47681
+8,Biobío,2,1,35,6763
+8,Biobío,1,1,40,43509
+8,Biobío,2,1,40,7124
+8,Biobío,1,1,45,39066
+8,Biobío,2,1,45,6738
+8,Biobío,2,1,50,8040
+8,Biobío,1,1,50,41539
+8,Biobío,1,1,55,41460
+8,Biobío,2,1,55,8218
+8,Biobío,2,1,60,7808
+8,Biobío,1,1,60,38131
+8,Biobío,1,1,65,30278
+8,Biobío,2,1,65,6659
+8,Biobío,2,1,70,5061
+8,Biobío,1,1,70,22382
+8,Biobío,1,1,75,15419
+8,Biobío,2,1,75,3568
+8,Biobío,2,1,80,2249
+8,Biobío,1,1,80,9693
+8,Biobío,1,1,85,6916
+8,Biobío,2,1,85,1582
+8,Biobío,2,2,0,5121
+8,Biobío,1,2,0,31281
+8,Biobío,1,2,5,41762
+8,Biobío,2,2,5,6467
+8,Biobío,1,2,10,47008
+8,Biobío,2,2,10,7021
+8,Biobío,2,2,15,6557
+8,Biobío,1,2,15,46617
+8,Biobío,1,2,20,50809
+8,Biobío,2,2,20,5831
+8,Biobío,1,2,25,51249
+8,Biobío,2,2,25,6182
+8,Biobío,1,2,30,57146
+8,Biobío,2,2,30,7335
+8,Biobío,1,2,35,51946
+8,Biobío,2,2,35,7056
+8,Biobío,2,2,40,6869
+8,Biobío,1,2,40,49287
+8,Biobío,2,2,45,6665
+8,Biobío,1,2,45,45888
+8,Biobío,2,2,50,7775
+8,Biobío,1,2,50,48812
+8,Biobío,2,2,55,7693
+8,Biobío,1,2,55,48654
+8,Biobío,1,2,60,45219
+8,Biobío,2,2,60,7290
+8,Biobío,1,2,65,36716
+8,Biobío,2,2,65,6021
+8,Biobío,2,2,70,4494
+8,Biobío,1,2,70,28742
+8,Biobío,1,2,75,21303
+8,Biobío,2,2,75,3339
+8,Biobío,2,2,80,2253
+8,Biobío,1,2,80,14969
+8,Biobío,1,2,85,14056
+8,Biobío,2,2,85,2131
+9,La Araucanía,1,1,0,16411
+9,La Araucanía,2,1,0,8064
+9,La Araucanía,1,1,5,22478
+9,La Araucanía,2,1,5,10757
+9,La Araucanía,2,1,10,12003
+9,La Araucanía,1,1,10,24420
+9,La Araucanía,2,1,15,11142
+9,La Araucanía,1,1,15,24170
+9,La Araucanía,2,1,20,9264
+9,La Araucanía,1,1,20,23811
+9,La Araucanía,1,1,25,25078
+9,La Araucanía,2,1,25,9191
+9,La Araucanía,1,1,30,26548
+9,La Araucanía,2,1,30,10340
+9,La Araucanía,1,1,35,22890
+9,La Araucanía,2,1,35,10324
+9,La Araucanía,2,1,40,10563
+9,La Araucanía,1,1,40,20527
+9,La Araucanía,2,1,45,10842
+9,La Araucanía,1,1,45,18252
+9,La Araucanía,1,1,50,19541
+9,La Araucanía,2,1,50,12269
+9,La Araucanía,1,1,55,18374
+9,La Araucanía,2,1,55,12153
+9,La Araucanía,2,1,60,11641
+9,La Araucanía,1,1,60,16988
+9,La Araucanía,2,1,65,10150
+9,La Araucanía,1,1,65,13666
+9,La Araucanía,2,1,70,7544
+9,La Araucanía,1,1,70,10046
+9,La Araucanía,1,1,75,7258
+9,La Araucanía,2,1,75,5560
+9,La Araucanía,2,1,80,3492
+9,La Araucanía,1,1,80,4594
+9,La Araucanía,1,1,85,3606
+9,La Araucanía,2,1,85,2761
+9,La Araucanía,1,2,0,15970
+9,La Araucanía,2,2,0,7942
+9,La Araucanía,2,2,5,10534
+9,La Araucanía,1,2,5,21450
+9,La Araucanía,2,2,10,11216
+9,La Araucanía,1,2,10,23491
+9,La Araucanía,2,2,15,10306
+9,La Araucanía,1,2,15,23601
+9,La Araucanía,2,2,20,9017
+9,La Araucanía,1,2,20,24561
+9,La Araucanía,1,2,25,26040
+9,La Araucanía,2,2,25,9435
+9,La Araucanía,1,2,30,29118
+9,La Araucanía,2,2,30,10782
+9,La Araucanía,1,2,35,26226
+9,La Araucanía,2,2,35,10639
+9,La Araucanía,1,2,40,24394
+9,La Araucanía,2,2,40,10528
+9,La Araucanía,2,2,45,10250
+9,La Araucanía,1,2,45,22475
+9,La Araucanía,1,2,50,23813
+9,La Araucanía,2,2,50,11540
+9,La Araucanía,2,2,55,11455
+9,La Araucanía,1,2,55,22762
+9,La Araucanía,1,2,60,20719
+9,La Araucanía,2,2,60,10833
+9,La Araucanía,2,2,65,9220
+9,La Araucanía,1,2,65,17066
+9,La Araucanía,1,2,70,13296
+9,La Araucanía,2,2,70,7006
+9,La Araucanía,1,2,75,10420
+9,La Araucanía,2,2,75,5265
+9,La Araucanía,1,2,80,7448
+9,La Araucanía,2,2,80,3765
+9,La Araucanía,2,2,85,3686
+9,La Araucanía,1,2,85,7436
+10,Los Lagos,2,1,0,5860
+10,Los Lagos,1,1,0,15156
+10,Los Lagos,1,1,5,20292
+10,Los Lagos,2,1,5,7806
+10,Los Lagos,1,1,10,22853
+10,Los Lagos,2,1,10,8597
+10,Los Lagos,2,1,15,8090
+10,Los Lagos,1,1,15,22931
+10,Los Lagos,1,1,20,22050
+10,Los Lagos,2,1,20,6762
+10,Los Lagos,1,1,25,24925
+10,Los Lagos,2,1,25,7326
+10,Los Lagos,1,1,30,27004
+10,Los Lagos,2,1,30,8709
+10,Los Lagos,1,1,35,24035
+10,Los Lagos,2,1,35,8834
+10,Los Lagos,2,1,40,9018
+10,Los Lagos,1,1,40,21591
+10,Los Lagos,2,1,45,9406
+10,Los Lagos,1,1,45,19346
+10,Los Lagos,2,1,50,10322
+10,Los Lagos,1,1,50,19326
+10,Los Lagos,2,1,55,10264
+10,Los Lagos,1,1,55,18044
+10,Los Lagos,1,1,60,15466
+10,Los Lagos,2,1,60,9345
+10,Los Lagos,1,1,65,11928
+10,Los Lagos,2,1,65,7550
+10,Los Lagos,2,1,70,5375
+10,Los Lagos,1,1,70,8373
+10,Los Lagos,1,1,75,5779
+10,Los Lagos,2,1,75,4035
+10,Los Lagos,2,1,80,2637
+10,Los Lagos,1,1,80,3592
+10,Los Lagos,1,1,85,2668
+10,Los Lagos,2,1,85,1974
+10,Los Lagos,1,2,0,14811
+10,Los Lagos,2,2,0,5553
+10,Los Lagos,1,2,5,19446
+10,Los Lagos,2,2,5,7342
+10,Los Lagos,2,2,10,7889
+10,Los Lagos,1,2,10,22233
+10,Los Lagos,1,2,15,21584
+10,Los Lagos,2,2,15,7502
+10,Los Lagos,1,2,20,21304
+10,Los Lagos,2,2,20,6223
+10,Los Lagos,2,2,25,7164
+10,Los Lagos,1,2,25,24591
+10,Los Lagos,1,2,30,27829
+10,Los Lagos,2,2,30,8807
+10,Los Lagos,1,2,35,25566
+10,Los Lagos,2,2,35,8875
+10,Los Lagos,1,2,40,23454
+10,Los Lagos,2,2,40,8884
+10,Los Lagos,1,2,45,21757
+10,Los Lagos,2,2,45,8747
+10,Los Lagos,2,2,50,9196
+10,Los Lagos,1,2,50,21807
+10,Los Lagos,1,2,55,20737
+10,Los Lagos,2,2,55,9284
+10,Los Lagos,2,2,60,8641
+10,Los Lagos,1,2,60,18072
+10,Los Lagos,1,2,65,14106
+10,Los Lagos,2,2,65,6888
+10,Los Lagos,2,2,70,5309
+10,Los Lagos,1,2,70,10506
+10,Los Lagos,1,2,75,7979
+10,Los Lagos,2,2,75,4068
+10,Los Lagos,2,2,80,3038
+10,Los Lagos,1,2,80,5573
+10,Los Lagos,1,2,85,5377
+10,Los Lagos,2,2,85,2873
+11,Aysén,1,1,0,1869
+11,Aysén,2,1,0,580
+11,Aysén,1,1,5,2613
+11,Aysén,2,1,5,766
+11,Aysén,1,1,10,3163
+11,Aysén,2,1,10,812
+11,Aysén,1,1,15,3153
+11,Aysén,2,1,15,634
+11,Aysén,2,1,20,435
+11,Aysén,1,1,20,2229
+11,Aysén,2,1,25,597
+11,Aysén,1,1,25,2764
+11,Aysén,1,1,30,3106
+11,Aysén,2,1,30,955
+11,Aysén,1,1,35,2983
+11,Aysén,2,1,35,1012
+11,Aysén,2,1,40,986
+11,Aysén,1,1,40,2768
+11,Aysén,2,1,45,858
+11,Aysén,1,1,45,2517
+11,Aysén,1,1,50,2202
+11,Aysén,2,1,50,926
+11,Aysén,1,1,55,2171
+11,Aysén,2,1,55,898
+11,Aysén,1,1,60,1897
+11,Aysén,2,1,60,832
+11,Aysén,1,1,65,1599
+11,Aysén,2,1,65,694
+11,Aysén,1,1,70,1056
+11,Aysén,2,1,70,541
+11,Aysén,1,1,75,733
+11,Aysén,2,1,75,321
+11,Aysén,2,1,80,215
+11,Aysén,1,1,80,450
+11,Aysén,1,1,85,359
+11,Aysén,2,1,85,147
+11,Aysén,2,2,0,576
+11,Aysén,1,2,0,1785
+11,Aysén,2,2,5,706
+11,Aysén,1,2,5,2561
+11,Aysén,2,2,10,705
+11,Aysén,1,2,10,3063
+11,Aysén,2,2,15,538
+11,Aysén,1,2,15,2801
+11,Aysén,1,2,20,2066
+11,Aysén,2,2,20,382
+11,Aysén,1,2,25,2838
+11,Aysén,2,2,25,672
+11,Aysén,2,2,30,996
+11,Aysén,1,2,30,3501
+11,Aysén,2,2,35,1008
+11,Aysén,1,2,35,3366
+11,Aysén,1,2,40,2990
+11,Aysén,2,2,40,829
+11,Aysén,1,2,45,2765
+11,Aysén,2,2,45,793
+11,Aysén,2,2,50,749
+11,Aysén,1,2,50,2613
+11,Aysén,2,2,55,724
+11,Aysén,1,2,55,2402
+11,Aysén,2,2,60,676
+11,Aysén,1,2,60,2209
+11,Aysén,2,2,65,540
+11,Aysén,1,2,65,1752
+11,Aysén,2,2,70,427
+11,Aysén,1,2,70,1231
+11,Aysén,2,2,75,275
+11,Aysén,1,2,75,807
+11,Aysén,1,2,80,628
+11,Aysén,2,2,80,201
+11,Aysén,2,2,85,174
+11,Aysén,1,2,85,555
+12,Magallanes,2,1,0,295
+12,Magallanes,1,1,0,3394
+12,Magallanes,2,1,5,374
+12,Magallanes,1,1,5,4576
+12,Magallanes,1,1,10,5079
+12,Magallanes,2,1,10,383
+12,Magallanes,2,1,15,351
+12,Magallanes,1,1,15,5301
+12,Magallanes,2,1,20,283
+12,Magallanes,1,1,20,4783
+12,Magallanes,1,1,25,5786
+12,Magallanes,2,1,25,413
+12,Magallanes,2,1,30,496
+12,Magallanes,1,1,30,6454
+12,Magallanes,2,1,35,537
+12,Magallanes,1,1,35,6289
+12,Magallanes,2,1,40,544
+12,Magallanes,1,1,40,5684
+12,Magallanes,2,1,45,462
+12,Magallanes,1,1,45,5188
+12,Magallanes,1,1,50,4562
+12,Magallanes,2,1,50,508
+12,Magallanes,2,1,55,431
+12,Magallanes,1,1,55,4339
+12,Magallanes,1,1,60,4472
+12,Magallanes,2,1,60,406
+12,Magallanes,2,1,65,343
+12,Magallanes,1,1,65,3859
+12,Magallanes,1,1,70,2672
+12,Magallanes,2,1,70,241
+12,Magallanes,2,1,75,132
+12,Magallanes,1,1,75,1793
+12,Magallanes,1,1,80,1121
+12,Magallanes,2,1,80,74
+12,Magallanes,2,1,85,36
+12,Magallanes,1,1,85,820
+12,Magallanes,2,2,0,314
+12,Magallanes,1,2,0,3198
+12,Magallanes,2,2,5,360
+12,Magallanes,1,2,5,4301
+12,Magallanes,2,2,10,379
+12,Magallanes,1,2,10,5146
+12,Magallanes,2,2,15,300
+12,Magallanes,1,2,15,4810
+12,Magallanes,1,2,20,4367
+12,Magallanes,2,2,20,265
+12,Magallanes,1,2,25,5719
+12,Magallanes,2,2,25,327
+12,Magallanes,2,2,30,483
+12,Magallanes,1,2,30,6410
+12,Magallanes,2,2,35,533
+12,Magallanes,1,2,35,6460
+12,Magallanes,1,2,40,5685
+12,Magallanes,2,2,40,454
+12,Magallanes,1,2,45,5291
+12,Magallanes,2,2,45,370
+12,Magallanes,2,2,50,307
+12,Magallanes,1,2,50,4896
+12,Magallanes,2,2,55,350
+12,Magallanes,1,2,55,4912
+12,Magallanes,2,2,60,348
+12,Magallanes,1,2,60,4960
+12,Magallanes,2,2,65,253
+12,Magallanes,1,2,65,4148
+12,Magallanes,2,2,70,161
+12,Magallanes,1,2,70,2894
+12,Magallanes,2,2,75,121
+12,Magallanes,1,2,75,2171
+12,Magallanes,1,2,80,1631
+12,Magallanes,2,2,80,77
+12,Magallanes,2,2,85,68
+12,Magallanes,1,2,85,1587
+13,Metropolitana,2,1,0,7101
+13,Metropolitana,1,1,0,170423
+13,Metropolitana,2,1,5,9717
+13,Metropolitana,1,1,5,219289
+13,Metropolitana,2,1,10,10590
+13,Metropolitana,1,1,10,234528
+13,Metropolitana,1,1,15,233730
+13,Metropolitana,2,1,15,9917
+13,Metropolitana,1,1,20,261799
+13,Metropolitana,2,1,20,9504
+13,Metropolitana,1,1,25,287228
+13,Metropolitana,2,1,25,8973
+13,Metropolitana,2,1,30,9475
+13,Metropolitana,1,1,30,317925
+13,Metropolitana,2,1,35,9382
+13,Metropolitana,1,1,35,287741
+13,Metropolitana,1,1,40,247868
+13,Metropolitana,2,1,40,9535
+13,Metropolitana,1,1,45,212086
+13,Metropolitana,2,1,45,9208
+13,Metropolitana,2,1,50,9709
+13,Metropolitana,1,1,50,209333
+13,Metropolitana,1,1,55,191750
+13,Metropolitana,2,1,55,9364
+13,Metropolitana,2,1,60,8930
+13,Metropolitana,1,1,60,182040
+13,Metropolitana,1,1,65,139860
+13,Metropolitana,2,1,65,7255
+13,Metropolitana,2,1,70,5183
+13,Metropolitana,1,1,70,98514
+13,Metropolitana,1,1,75,71411
+13,Metropolitana,2,1,75,3661
+13,Metropolitana,2,1,80,2212
+13,Metropolitana,1,1,80,44364
+13,Metropolitana,2,1,85,1608
+13,Metropolitana,1,1,85,31620
+13,Metropolitana,2,2,0,6998
+13,Metropolitana,1,2,0,164024
+13,Metropolitana,2,2,5,9165
+13,Metropolitana,1,2,5,211829
+13,Metropolitana,1,2,10,224906
+13,Metropolitana,2,2,10,9987
+13,Metropolitana,2,2,15,8966
+13,Metropolitana,1,2,15,222900
+13,Metropolitana,2,2,20,8938
+13,Metropolitana,1,2,20,253562
+13,Metropolitana,1,2,25,282528
+13,Metropolitana,2,2,25,8865
+13,Metropolitana,2,2,30,9564
+13,Metropolitana,1,2,30,312842
+13,Metropolitana,2,2,35,9823
+13,Metropolitana,1,2,35,287783
+13,Metropolitana,2,2,40,9919
+13,Metropolitana,1,2,40,257189
+13,Metropolitana,2,2,45,9445
+13,Metropolitana,1,2,45,231499
+13,Metropolitana,1,2,50,236364
+13,Metropolitana,2,2,50,9543
+13,Metropolitana,2,2,55,9377
+13,Metropolitana,1,2,55,225793
+13,Metropolitana,1,2,60,219021
+13,Metropolitana,2,2,60,8682
+13,Metropolitana,2,2,65,6793
+13,Metropolitana,1,2,65,174388
+13,Metropolitana,1,2,70,129664
+13,Metropolitana,2,2,70,4957
+13,Metropolitana,2,2,75,3503
+13,Metropolitana,1,2,75,101713
+13,Metropolitana,1,2,80,71705
+13,Metropolitana,2,2,80,2373
+13,Metropolitana,2,2,85,2276
+13,Metropolitana,1,2,85,71024
+14,Los Ríos,2,1,0,3031
+14,Los Ríos,1,1,0,5856
+14,Los Ríos,2,1,5,4078
+14,Los Ríos,1,1,5,8013
+14,Los Ríos,1,1,10,9245
+14,Los Ríos,2,1,10,4599
+14,Los Ríos,2,1,15,4278
+14,Los Ríos,1,1,15,9590
+14,Los Ríos,2,1,20,3371
+14,Los Ríos,1,1,20,10246
+14,Los Ríos,1,1,25,10247
+14,Los Ríos,2,1,25,3603
+14,Los Ríos,2,1,30,4341
+14,Los Ríos,1,1,30,10503
+14,Los Ríos,2,1,35,4167
+14,Los Ríos,1,1,35,9353
+14,Los Ríos,2,1,40,4158
+14,Los Ríos,1,1,40,8109
+14,Los Ríos,2,1,45,4236
+14,Los Ríos,1,1,45,7228
+14,Los Ríos,1,1,50,7445
+14,Los Ríos,2,1,50,4753
+14,Los Ríos,2,1,55,5042
+14,Los Ríos,1,1,55,7767
+14,Los Ríos,1,1,60,7225
+14,Los Ríos,2,1,60,4710
+14,Los Ríos,2,1,65,3948
+14,Los Ríos,1,1,65,5901
+14,Los Ríos,1,1,70,4228
+14,Los Ríos,2,1,70,2897
+14,Los Ríos,2,1,75,2006
+14,Los Ríos,1,1,75,3068
+14,Los Ríos,1,1,80,1927
+14,Los Ríos,2,1,80,1185
+14,Los Ríos,2,1,85,918
+14,Los Ríos,1,1,85,1462
+14,Los Ríos,1,2,0,5688
+14,Los Ríos,2,2,0,2982
+14,Los Ríos,1,2,5,7838
+14,Los Ríos,2,2,5,3901
+14,Los Ríos,1,2,10,9014
+14,Los Ríos,2,2,10,4467
+14,Los Ríos,1,2,15,9459
+14,Los Ríos,2,2,15,3909
+14,Los Ríos,2,2,20,3373
+14,Los Ríos,1,2,20,10343
+14,Los Ríos,2,2,25,3692
+14,Los Ríos,1,2,25,10164
+14,Los Ríos,1,2,30,11124
+14,Los Ríos,2,2,30,4621
+14,Los Ríos,1,2,35,10027
+14,Los Ríos,2,2,35,4439
+14,Los Ríos,2,2,40,4168
+14,Los Ríos,1,2,40,9414
+14,Los Ríos,2,2,45,4070
+14,Los Ríos,1,2,45,8445
+14,Los Ríos,1,2,50,8705
+14,Los Ríos,2,2,50,4584
+14,Los Ríos,1,2,55,9205
+14,Los Ríos,2,2,55,4794
+14,Los Ríos,1,2,60,8777
+14,Los Ríos,2,2,60,4546
+14,Los Ríos,1,2,65,6972
+14,Los Ríos,2,2,65,3552
+14,Los Ríos,1,2,70,5670
+14,Los Ríos,2,2,70,2692
+14,Los Ríos,1,2,75,4309
+14,Los Ríos,2,2,75,1878
+14,Los Ríos,2,2,80,1375
+14,Los Ríos,1,2,80,2995
+14,Los Ríos,1,2,85,3048
+14,Los Ríos,2,2,85,1256
+15,Arica y Parinacota,2,1,0,900
+15,Arica y Parinacota,1,1,0,5505
+15,Arica y Parinacota,2,1,5,925
+15,Arica y Parinacota,1,1,5,7418
+15,Arica y Parinacota,1,1,10,8724
+15,Arica y Parinacota,2,1,10,904
+15,Arica y Parinacota,2,1,15,757
+15,Arica y Parinacota,1,1,15,8087
+15,Arica y Parinacota,2,1,20,1100
+15,Arica y Parinacota,1,1,20,8200
+15,Arica y Parinacota,1,1,25,8685
+15,Arica y Parinacota,2,1,25,1250
+15,Arica y Parinacota,2,1,30,1253
+15,Arica y Parinacota,1,1,30,8837
+15,Arica y Parinacota,2,1,35,1184
+15,Arica y Parinacota,1,1,35,8425
+15,Arica y Parinacota,2,1,40,1002
+15,Arica y Parinacota,1,1,40,7106
+15,Arica y Parinacota,2,1,45,853
+15,Arica y Parinacota,1,1,45,6395
+15,Arica y Parinacota,1,1,50,6612
+15,Arica y Parinacota,2,1,50,708
+15,Arica y Parinacota,2,1,55,561
+15,Arica y Parinacota,1,1,55,5380
+15,Arica y Parinacota,1,1,60,5084
+15,Arica y Parinacota,2,1,60,477
+15,Arica y Parinacota,2,1,65,402
+15,Arica y Parinacota,1,1,65,4546
+15,Arica y Parinacota,1,1,70,3392
+15,Arica y Parinacota,2,1,70,293
+15,Arica y Parinacota,2,1,75,242
+15,Arica y Parinacota,1,1,75,2467
+15,Arica y Parinacota,1,1,80,1530
+15,Arica y Parinacota,2,1,80,102
+15,Arica y Parinacota,2,1,85,76
+15,Arica y Parinacota,1,1,85,999
+15,Arica y Parinacota,2,2,0,840
+15,Arica y Parinacota,1,2,0,5574
+15,Arica y Parinacota,2,2,5,878
+15,Arica y Parinacota,1,2,5,7193
+15,Arica y Parinacota,1,2,10,8255
+15,Arica y Parinacota,2,2,10,914
+15,Arica y Parinacota,2,2,15,702
+15,Arica y Parinacota,1,2,15,7748
+15,Arica y Parinacota,2,2,20,760
+15,Arica y Parinacota,1,2,20,7999
+15,Arica y Parinacota,1,2,25,8490
+15,Arica y Parinacota,2,2,25,954
+15,Arica y Parinacota,2,2,30,865
+15,Arica y Parinacota,1,2,30,8784
+15,Arica y Parinacota,2,2,35,837
+15,Arica y Parinacota,1,2,35,8500
+15,Arica y Parinacota,2,2,40,741
+15,Arica y Parinacota,1,2,40,7851
+15,Arica y Parinacota,2,2,45,586
+15,Arica y Parinacota,1,2,45,7008
+15,Arica y Parinacota,1,2,50,7443
+15,Arica y Parinacota,2,2,50,562
+15,Arica y Parinacota,2,2,55,435
+15,Arica y Parinacota,1,2,55,6400
+15,Arica y Parinacota,1,2,60,6257
+15,Arica y Parinacota,2,2,60,425
+15,Arica y Parinacota,2,2,65,280
+15,Arica y Parinacota,1,2,65,5026
+15,Arica y Parinacota,1,2,70,4086
+15,Arica y Parinacota,2,2,70,238
+15,Arica y Parinacota,2,2,75,191
+15,Arica y Parinacota,1,2,75,3125
+15,Arica y Parinacota,1,2,80,2110
+15,Arica y Parinacota,2,2,80,116
+15,Arica y Parinacota,2,2,85,84
+15,Arica y Parinacota,1,2,85,1931
+16,Ñuble,2,1,0,3807
+16,Ñuble,1,1,0,8086
+16,Ñuble,2,1,5,4856
+16,Ñuble,1,1,5,10674
+16,Ñuble,1,1,10,11579
+16,Ñuble,2,1,10,5440
+16,Ñuble,2,1,15,5364
+16,Ñuble,1,1,15,11516
+16,Ñuble,2,1,20,4697
+16,Ñuble,1,1,20,11062
+16,Ñuble,1,1,25,11424
+16,Ñuble,2,1,25,4642
+16,Ñuble,2,1,30,5294
+16,Ñuble,1,1,30,12426
+16,Ñuble,2,1,35,5385
+16,Ñuble,1,1,35,11253
+16,Ñuble,2,1,40,5362
+16,Ñuble,1,1,40,10080
+16,Ñuble,2,1,45,5484
+16,Ñuble,1,1,45,9147
+16,Ñuble,1,1,50,10233
+16,Ñuble,2,1,50,6834
+16,Ñuble,2,1,55,7024
+16,Ñuble,1,1,55,10046
+16,Ñuble,1,1,60,9257
+16,Ñuble,2,1,60,7016
+16,Ñuble,2,1,65,5922
+16,Ñuble,1,1,65,7394
+16,Ñuble,1,1,70,5473
+16,Ñuble,2,1,70,4478
+16,Ñuble,2,1,75,3244
+16,Ñuble,1,1,75,4149
+16,Ñuble,1,1,80,2638
+16,Ñuble,2,1,80,1975
+16,Ñuble,2,1,85,1337
+16,Ñuble,1,1,85,1839
+16,Ñuble,2,2,0,3697
+16,Ñuble,1,2,0,7857
+16,Ñuble,1,2,5,10268
+16,Ñuble,2,2,5,4692
+16,Ñuble,1,2,10,11173
+16,Ñuble,2,2,10,5167
+16,Ñuble,2,2,15,5052
+16,Ñuble,1,2,15,11072
+16,Ñuble,1,2,20,10826
+16,Ñuble,2,2,20,4422
+16,Ñuble,1,2,25,12301
+16,Ñuble,2,2,25,4738
+16,Ñuble,1,2,30,13456
+16,Ñuble,2,2,30,5451
+16,Ñuble,1,2,35,13040
+16,Ñuble,2,2,35,5595
+16,Ñuble,2,2,40,5465
+16,Ñuble,1,2,40,12078
+16,Ñuble,2,2,45,5520
+16,Ñuble,1,2,45,11384
+16,Ñuble,2,2,50,6417
+16,Ñuble,1,2,50,12591
+16,Ñuble,2,2,55,6791
+16,Ñuble,1,2,55,12369
+16,Ñuble,1,2,60,11217
+16,Ñuble,2,2,60,6428
+16,Ñuble,1,2,65,9420
+16,Ñuble,2,2,65,5510
+16,Ñuble,2,2,70,4041
+16,Ñuble,1,2,70,7300
+16,Ñuble,1,2,75,5691
+16,Ñuble,2,2,75,2947
+16,Ñuble,2,2,80,2160
+16,Ñuble,1,2,80,4053
+16,Ñuble,1,2,85,3777
+16,Ñuble,2,2,85,1886

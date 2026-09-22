@@ -1,0 +1,221 @@
+tramo_edad,tipo_pension,sexo,numero_pensionados,monto_miles_pesos
+- 20,Antigüedad,Hombres,0,0.0
+- 20,Antigüedad,Mujeres,0,0.0
+- 20,Vejez,Hombres,0,0.0
+- 20,Vejez,Mujeres,0,0.0
+- 20,Invalidez,Hombres,0,0.0
+- 20,Invalidez,Mujeres,0,0.0
+- 20,Ley Especial,Hombres,0,0.0
+- 20,Ley Especial,Mujeres,0,0.0
+- 20,Sobrevivencia,Hombres,131,15697.7
+- 20,Sobrevivencia,Mujeres,165,16609.7
+- 20,Sin información de tipo/sexo,Sin información,0,0.0
++20 - 25,Antigüedad,Hombres,0,0.0
++20 - 25,Antigüedad,Mujeres,0,0.0
++20 - 25,Vejez,Hombres,0,0.0
++20 - 25,Vejez,Mujeres,0,0.0
++20 - 25,Invalidez,Hombres,0,0.0
++20 - 25,Invalidez,Mujeres,0,0.0
++20 - 25,Ley Especial,Hombres,0,0.0
++20 - 25,Ley Especial,Mujeres,0,0.0
++20 - 25,Sobrevivencia,Hombres,108,13483.7
++20 - 25,Sobrevivencia,Mujeres,130,15020.9
++20 - 25,Sin información de tipo/sexo,Sin información,0,0.0
++25 - 30,Antigüedad,Hombres,0,0.0
++25 - 30,Antigüedad,Mujeres,0,0.0
++25 - 30,Vejez,Hombres,0,0.0
++25 - 30,Vejez,Mujeres,0,0.0
++25 - 30,Invalidez,Hombres,0,0.0
++25 - 30,Invalidez,Mujeres,0,0.0
++25 - 30,Ley Especial,Hombres,0,0.0
++25 - 30,Ley Especial,Mujeres,0,0.0
++25 - 30,Sobrevivencia,Hombres,14,3389.5
++25 - 30,Sobrevivencia,Mujeres,55,14571.3
++25 - 30,Sin información de tipo/sexo,Sin información,0,0.0
++30 - 35,Antigüedad,Hombres,0,0.0
++30 - 35,Antigüedad,Mujeres,0,0.0
++30 - 35,Vejez,Hombres,0,0.0
++30 - 35,Vejez,Mujeres,0,0.0
++30 - 35,Invalidez,Hombres,0,0.0
++30 - 35,Invalidez,Mujeres,0,0.0
++30 - 35,Ley Especial,Hombres,0,0.0
++30 - 35,Ley Especial,Mujeres,0,0.0
++30 - 35,Sobrevivencia,Hombres,32,8757.2
++30 - 35,Sobrevivencia,Mujeres,153,43853.6
++30 - 35,Sin información de tipo/sexo,Sin información,0,0.0
++35 - 40,Antigüedad,Hombres,0,0.0
++35 - 40,Antigüedad,Mujeres,0,0.0
++35 - 40,Vejez,Hombres,0,0.0
++35 - 40,Vejez,Mujeres,0,0.0
++35 - 40,Invalidez,Hombres,0,0.0
++35 - 40,Invalidez,Mujeres,0,0.0
++35 - 40,Ley Especial,Hombres,0,0.0
++35 - 40,Ley Especial,Mujeres,0,0.0
++35 - 40,Sobrevivencia,Hombres,43,6913.5
++35 - 40,Sobrevivencia,Mujeres,289,93361.0
++35 - 40,Sin información de tipo/sexo,Sin información,0,0.0
++40 - 45,Antigüedad,Hombres,0,0.0
++40 - 45,Antigüedad,Mujeres,0,0.0
++40 - 45,Vejez,Hombres,0,0.0
++40 - 45,Vejez,Mujeres,0,0.0
++40 - 45,Invalidez,Hombres,0,0.0
++40 - 45,Invalidez,Mujeres,0,0.0
++40 - 45,Ley Especial,Hombres,0,0.0
++40 - 45,Ley Especial,Mujeres,0,0.0
++40 - 45,Sobrevivencia,Hombres,74,13663.7
++40 - 45,Sobrevivencia,Mujeres,486,132483.2
++40 - 45,Sin información de tipo/sexo,Sin información,0,0.0
++45 - 50,Antigüedad,Hombres,0,0.0
++45 - 50,Antigüedad,Mujeres,0,0.0
++45 - 50,Vejez,Hombres,0,0.0
++45 - 50,Vejez,Mujeres,0,0.0
++45 - 50,Invalidez,Hombres,0,0.0
++45 - 50,Invalidez,Mujeres,0,0.0
++45 - 50,Ley Especial,Hombres,0,0.0
++45 - 50,Ley Especial,Mujeres,0,0.0
++45 - 50,Sobrevivencia,Hombres,180,31608.7
++45 - 50,Sobrevivencia,Mujeres,957,256388.3
++45 - 50,Sin información de tipo/sexo,Sin información,0,0.0
++50 - 55,Antigüedad,Hombres,0,0.0
++50 - 55,Antigüedad,Mujeres,0,0.0
++50 - 55,Vejez,Hombres,0,0.0
++50 - 55,Vejez,Mujeres,0,0.0
++50 - 55,Invalidez,Hombres,1,1630.9
++50 - 55,Invalidez,Mujeres,3,4505.7
++50 - 55,Ley Especial,Hombres,0,0.0
++50 - 55,Ley Especial,Mujeres,0,0.0
++50 - 55,Sobrevivencia,Hombres,309,61024.8
++50 - 55,Sobrevivencia,Mujeres,1801,449000.1
++50 - 55,Sin información de tipo/sexo,Sin información,0,0.0
++55 - 60,Antigüedad,Hombres,0,0.0
++55 - 60,Antigüedad,Mujeres,0,0.0
++55 - 60,Vejez,Hombres,0,0.0
++55 - 60,Vejez,Mujeres,0,0.0
++55 - 60,Invalidez,Hombres,53,76452.9
++55 - 60,Invalidez,Mujeres,6,5230.0
++55 - 60,Ley Especial,Hombres,0,0.0
++55 - 60,Ley Especial,Mujeres,0,0.0
++55 - 60,Sobrevivencia,Hombres,419,77090.1
++55 - 60,Sobrevivencia,Mujeres,3264,786595.7
++55 - 60,Sin información de tipo/sexo,Sin información,0,0.0
++60 - 65,Antigüedad,Hombres,0,0.0
++60 - 65,Antigüedad,Mujeres,0,0.0
++60 - 65,Vejez,Hombres,90,118123.2
++60 - 65,Vejez,Mujeres,2688,746041.3
++60 - 65,Invalidez,Hombres,603,430157.4
++60 - 65,Invalidez,Mujeres,286,70132.6
++60 - 65,Ley Especial,Hombres,7,8044.8
++60 - 65,Ley Especial,Mujeres,2,1841.2
++60 - 65,Sobrevivencia,Hombres,583,123917.1
++60 - 65,Sobrevivencia,Mujeres,7140,1753876.1
++60 - 65,Sin información de tipo/sexo,Sin información,0,0.0
++65 - 70,Antigüedad,Hombres,1,198.4
++65 - 70,Antigüedad,Mujeres,0,0.0
++65 - 70,Vejez,Hombres,7167,3886648.8
++65 - 70,Vejez,Mujeres,13624,4432987.8
++65 - 70,Invalidez,Hombres,2143,851294.3
++65 - 70,Invalidez,Mujeres,1538,391670.8
++65 - 70,Ley Especial,Hombres,67,72475.1
++65 - 70,Ley Especial,Mujeres,51,59528.8
++65 - 70,Sobrevivencia,Hombres,569,124581.8
++65 - 70,Sobrevivencia,Mujeres,12249,3005345.2
++65 - 70,Sin información de tipo/sexo,Sin información,0,0.0
++70 - 75,Antigüedad,Hombres,6,1855.2
++70 - 75,Antigüedad,Mujeres,0,0.0
++70 - 75,Vejez,Hombres,13750,7120493.5
++70 - 75,Vejez,Mujeres,24496,8510529.9
++70 - 75,Invalidez,Hombres,4186,1533438.9
++70 - 75,Invalidez,Mujeres,3331,931883.9
++70 - 75,Ley Especial,Hombres,335,394198.4
++70 - 75,Ley Especial,Mujeres,194,236964.2
++70 - 75,Sobrevivencia,Hombres,421,95113.3
++70 - 75,Sobrevivencia,Mujeres,18501,4921418.8
++70 - 75,Sin información de tipo/sexo,Sin información,0,0.0
++75 - 80,Antigüedad,Hombres,85,33188.2
++75 - 80,Antigüedad,Mujeres,10,3928.8
++75 - 80,Vejez,Hombres,18121,9027240.7
++75 - 80,Vejez,Mujeres,33740,11985510.5
++75 - 80,Invalidez,Hombres,6943,2667370.9
++75 - 80,Invalidez,Mujeres,5066,1455940.7
++75 - 80,Ley Especial,Hombres,531,626477.0
++75 - 80,Ley Especial,Mujeres,423,555928.4
++75 - 80,Sobrevivencia,Hombres,250,58792.4
++75 - 80,Sobrevivencia,Mujeres,26164,7392455.3
++75 - 80,Sin información de tipo/sexo,Sin información,0,0.0
++80 - 85,Antigüedad,Hombres,375,140218.7
++80 - 85,Antigüedad,Mujeres,117,89837.4
++80 - 85,Vejez,Hombres,17702,8496522.2
++80 - 85,Vejez,Mujeres,33862,11698027.0
++80 - 85,Invalidez,Hombres,7695,2916053.6
++80 - 85,Invalidez,Mujeres,4708,1383436.8
++80 - 85,Ley Especial,Hombres,1180,1132085.8
++80 - 85,Ley Especial,Mujeres,815,761653.4
++80 - 85,Sobrevivencia,Hombres,150,43740.3
++80 - 85,Sobrevivencia,Mujeres,32823,9630915.6
++80 - 85,Sin información de tipo/sexo,Sin información,0,0.0
++85 - 90,Antigüedad,Hombres,875,487626.5
++85 - 90,Antigüedad,Mujeres,840,759931.8
++85 - 90,Vejez,Hombres,12895,6126632.0
++85 - 90,Vejez,Mujeres,24229,8056743.5
++85 - 90,Invalidez,Hombres,5299,2148680.0
++85 - 90,Invalidez,Mujeres,3126,916586.1
++85 - 90,Ley Especial,Hombres,1513,1166874.9
++85 - 90,Ley Especial,Mujeres,1282,853810.7
++85 - 90,Sobrevivencia,Hombres,106,40054.3
++85 - 90,Sobrevivencia,Mujeres,31109,9525361.3
++85 - 90,Sin información de tipo/sexo,Sin información,0,0.0
++90 - 95,Antigüedad,Hombres,1358,1055533.8
++90 - 95,Antigüedad,Mujeres,1256,812317.3
++90 - 95,Vejez,Hombres,6148,2842481.7
++90 - 95,Vejez,Mujeres,13243,4275225.9
++90 - 95,Invalidez,Hombres,2198,936245.7
++90 - 95,Invalidez,Mujeres,1662,491430.7
++90 - 95,Ley Especial,Hombres,941,671164.3
++90 - 95,Ley Especial,Mujeres,933,544066.1
++90 - 95,Sobrevivencia,Hombres,57,21922.5
++90 - 95,Sobrevivencia,Mujeres,20929,6786167.6
++90 - 95,Sin información de tipo/sexo,Sin información,0,0.0
++95 - 100,Antigüedad,Hombres,1005,746553.6
++95 - 100,Antigüedad,Mujeres,1094,609372.7
++95 - 100,Vejez,Hombres,1851,797307.3
++95 - 100,Vejez,Mujeres,4952,1415112.5
++95 - 100,Invalidez,Hombres,572,247452.7
++95 - 100,Invalidez,Mujeres,684,202861.6
++95 - 100,Ley Especial,Hombres,264,186222.8
++95 - 100,Ley Especial,Mujeres,245,139321.8
++95 - 100,Sobrevivencia,Hombres,26,9120.7
++95 - 100,Sobrevivencia,Mujeres,9121,2981332.6
++95 - 100,Sin información de tipo/sexo,Sin información,0,0.0
++100,Antigüedad,Hombres,204,155683.8
++100,Antigüedad,Mujeres,274,147102.1
++100,Vejez,Hombres,229,81394.6
++100,Vejez,Mujeres,901,234813.3
++100,Invalidez,Hombres,48,19030.0
++100,Invalidez,Mujeres,80,24737.7
++100,Ley Especial,Hombres,18,13553.7
++100,Ley Especial,Mujeres,30,16899.2
++100,Sobrevivencia,Hombres,3,800.4
++100,Sobrevivencia,Mujeres,1712,551821.6
++100,Sin información de tipo/sexo,Sin información,0,0.0
+Sin información,Antigüedad,Hombres,0,0.0
+Sin información,Antigüedad,Mujeres,0,0.0
+Sin información,Vejez,Hombres,0,0.0
+Sin información,Vejez,Mujeres,0,0.0
+Sin información,Invalidez,Hombres,0,0.0
+Sin información,Invalidez,Mujeres,0,0.0
+Sin información,Ley Especial,Hombres,0,0.0
+Sin información,Ley Especial,Mujeres,0,0.0
+Sin información,Sobrevivencia,Hombres,0,0.0
+Sin información,Sobrevivencia,Mujeres,0,0.0
+Sin información,Sin información de tipo/sexo,Sin información,8,1780.7
+Total,Antigüedad,Hombres,3909,2620858.2
+Total,Antigüedad,Mujeres,3591,2422490.1
+Total,Vejez,Hombres,77953,38496844.0
+Total,Vejez,Mujeres,151735,51354991.6
+Total,Invalidez,Hombres,29741,11827807.3
+Total,Invalidez,Mujeres,20490,5878416.7
+Total,Ley Especial,Hombres,4856,4271096.8
+Total,Ley Especial,Mujeres,3975,3170013.9
+Total,Sobrevivencia,Hombres,3475,749671.8
+Total,Sobrevivencia,Mujeres,167048,48356578.0
+Total,Sin información de tipo/sexo,Sin información,8,1780.7

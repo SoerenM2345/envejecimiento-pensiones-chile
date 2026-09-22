@@ -1,0 +1,276 @@
+ex_caja,tipo_pension,sexo,numero_pensionados,monto_miles_pesos
+Empart,Antigüedad,Hombres,891,702260.4
+Empart,Antigüedad,Mujeres,480,290964.4
+Empart,Vejez,Hombres,26095,14353878.0
+Empart,Vejez,Mujeres,16595,7330975.9
+Empart,Invalidez,Hombres,3975,2090522.7
+Empart,Invalidez,Mujeres,1616,538542.4
+Empart,Ley Especial,Hombres,0,0.0
+Empart,Ley Especial,Mujeres,0,0.0
+Empart,Sobrevivencia,Hombres,631,111861.7
+Empart,Sobrevivencia,Mujeres,33371,10209583.4
+Empart,Sin información de tipo/sexo,Sin información,0,0.0
+Bancaria,Antigüedad,Hombres,282,162383.7
+Bancaria,Antigüedad,Mujeres,80,39454.4
+Bancaria,Vejez,Hombres,58,50194.6
+Bancaria,Vejez,Mujeres,48,51216.9
+Bancaria,Invalidez,Hombres,21,17200.9
+Bancaria,Invalidez,Mujeres,11,4799.6
+Bancaria,Ley Especial,Hombres,0,0.0
+Bancaria,Ley Especial,Mujeres,0,0.0
+Bancaria,Sobrevivencia,Hombres,46,18501.0
+Bancaria,Sobrevivencia,Mujeres,1051,544214.4
+Bancaria,Sin información de tipo/sexo,Sin información,0,0.0
+Caprebech,Antigüedad,Hombres,67,123662.4
+Caprebech,Antigüedad,Mujeres,89,95972.6
+Caprebech,Vejez,Hombres,75,128694.4
+Caprebech,Vejez,Mujeres,60,73513.8
+Caprebech,Invalidez,Hombres,27,30137.0
+Caprebech,Invalidez,Mujeres,18,15161.8
+Caprebech,Ley Especial,Hombres,0,0.0
+Caprebech,Ley Especial,Mujeres,0,0.0
+Caprebech,Sobrevivencia,Hombres,41,31400.0
+Caprebech,Sobrevivencia,Mujeres,806,687671.9
+Caprebech,Sin información de tipo/sexo,Sin información,0,0.0
+Capremer,Antigüedad,Hombres,173,185265.7
+Capremer,Antigüedad,Mujeres,35,32032.9
+Capremer,Vejez,Hombres,429,511706.7
+Capremer,Vejez,Mujeres,119,133037.5
+Capremer,Invalidez,Hombres,886,1050119.6
+Capremer,Invalidez,Mujeres,74,64559.7
+Capremer,Ley Especial,Hombres,12,15351.3
+Capremer,Ley Especial,Mujeres,14,9254.5
+Capremer,Sobrevivencia,Hombres,174,73628.1
+Capremer,Sobrevivencia,Mujeres,6014,2637169.6
+Capremer,Sin información de tipo/sexo,Sin información,0,0.0
+Triomar,Antigüedad,Hombres,3,3736.5
+Triomar,Antigüedad,Mujeres,0,0.0
+Triomar,Vejez,Hombres,671,449491.6
+Triomar,Vejez,Mujeres,5,2862.5
+Triomar,Invalidez,Hombres,1709,1281334.7
+Triomar,Invalidez,Mujeres,3,930.3
+Triomar,Ley Especial,Hombres,1,70.1
+Triomar,Ley Especial,Mujeres,1,99.4
+Triomar,Sobrevivencia,Hombres,113,13121.4
+Triomar,Sobrevivencia,Mujeres,2928,1089810.5
+Triomar,Sin información de tipo/sexo,Sin información,0,0.0
+Hípica,Antigüedad,Hombres,411,125357.2
+Hípica,Antigüedad,Mujeres,19,8947.9
+Hípica,Vejez,Hombres,140,103237.0
+Hípica,Vejez,Mujeres,8,4790.3
+Hípica,Invalidez,Hombres,73,45714.0
+Hípica,Invalidez,Mujeres,1,231.4
+Hípica,Ley Especial,Hombres,1,959.3
+Hípica,Ley Especial,Mujeres,0,0.0
+Hípica,Sobrevivencia,Hombres,19,2643.6
+Hípica,Sobrevivencia,Mujeres,882,212326.2
+Hípica,Sin información de tipo/sexo,Sin información,0,0.0
+Servicio Seguro Social,Antigüedad,Hombres,0,0.0
+Servicio Seguro Social,Antigüedad,Mujeres,0,0.0
+Servicio Seguro Social,Vejez,Hombres,40478,11394291.3
+Servicio Seguro Social,Vejez,Mujeres,120987,27543068.9
+Servicio Seguro Social,Invalidez,Hombres,20033,4921508.5
+Servicio Seguro Social,Invalidez,Mujeres,15969,3566462.1
+Servicio Seguro Social,Ley Especial,Hombres,0,0.0
+Servicio Seguro Social,Ley Especial,Mujeres,0,0.0
+Servicio Seguro Social,Sobrevivencia,Hombres,732,48985.3
+Servicio Seguro Social,Sobrevivencia,Mujeres,72693,15833765.2
+Servicio Seguro Social,Sin información de tipo/sexo,Sin información,0,0.0
+Emos (empleados),Antigüedad,Hombres,2,2438.7
+Emos (empleados),Antigüedad,Mujeres,0,0.0
+Emos (empleados),Vejez,Hombres,6,6549.3
+Emos (empleados),Vejez,Mujeres,4,5813.7
+Emos (empleados),Invalidez,Hombres,28,38701.1
+Emos (empleados),Invalidez,Mujeres,6,1287.8
+Emos (empleados),Ley Especial,Hombres,16,5412.5
+Emos (empleados),Ley Especial,Mujeres,2,626.2
+Emos (empleados),Sobrevivencia,Hombres,7,1238.9
+Emos (empleados),Sobrevivencia,Mujeres,162,65322.9
+Emos (empleados),Sin información de tipo/sexo,Sin información,0,0.0
+Emos (obreros),Antigüedad,Hombres,0,0.0
+Emos (obreros),Antigüedad,Mujeres,0,0.0
+Emos (obreros),Vejez,Hombres,6,6821.5
+Emos (obreros),Vejez,Mujeres,0,0.0
+Emos (obreros),Invalidez,Hombres,77,92567.3
+Emos (obreros),Invalidez,Mujeres,2,899.8
+Emos (obreros),Ley Especial,Hombres,27,7171.4
+Emos (obreros),Ley Especial,Mujeres,0,0.0
+Emos (obreros),Sobrevivencia,Hombres,4,1592.6
+Emos (obreros),Sobrevivencia,Mujeres,187,75519.8
+Emos (obreros),Sin información de tipo/sexo,Sin información,0,0.0
+Ferrocarriles,Antigüedad,Hombres,685,381818.2
+Ferrocarriles,Antigüedad,Mujeres,60,31078.0
+Ferrocarriles,Vejez,Hombres,608,556105.9
+Ferrocarriles,Vejez,Mujeres,36,36904.0
+Ferrocarriles,Invalidez,Hombres,943,906065.8
+Ferrocarriles,Invalidez,Mujeres,57,57521.6
+Ferrocarriles,Ley Especial,Hombres,56,37606.3
+Ferrocarriles,Ley Especial,Mujeres,15,13408.0
+Ferrocarriles,Sobrevivencia,Hombres,216,67966.2
+Ferrocarriles,Sobrevivencia,Mujeres,18064,5321040.8
+Ferrocarriles,Sin información de tipo/sexo,Sin información,0,0.0
+Empleados públicos,Antigüedad,Hombres,582,455040.6
+Empleados públicos,Antigüedad,Mujeres,2690,1828755.8
+Empleados públicos,Vejez,Hombres,6615,8845941.3
+Empleados públicos,Vejez,Mujeres,12336,14874157.1
+Empleados públicos,Invalidez,Hombres,1085,878409.5
+Empleados públicos,Invalidez,Mujeres,2568,1551018.6
+Empleados públicos,Ley Especial,Hombres,3882,3755210.7
+Empleados públicos,Ley Especial,Mujeres,3632,2983485.4
+Empleados públicos,Sobrevivencia,Hombres,1336,350327.9
+Empleados públicos,Sobrevivencia,Mujeres,20980,9486402.3
+Empleados públicos,Sin información de tipo/sexo,Sin información,0,0.0
+Sector Periodistas,Antigüedad,Hombres,343,239467.7
+Sector Periodistas,Antigüedad,Mujeres,34,27862.9
+Sector Periodistas,Vejez,Hombres,513,403312.7
+Sector Periodistas,Vejez,Mujeres,181,137551.4
+Sector Periodistas,Invalidez,Hombres,197,134480.4
+Sector Periodistas,Invalidez,Mujeres,28,13844.2
+Sector Periodistas,Ley Especial,Hombres,3,3998.4
+Sector Periodistas,Ley Especial,Mujeres,0,0.0
+Sector Periodistas,Sobrevivencia,Hombres,90,16006.7
+Sector Periodistas,Sobrevivencia,Mujeres,5471,901833.3
+Sector Periodistas,Sin información de tipo/sexo,Sin información,0,0.0
+Empleados Mun. Santiago,Antigüedad,Hombres,13,8829.3
+Empleados Mun. Santiago,Antigüedad,Mujeres,6,4661.6
+Empleados Mun. Santiago,Vejez,Hombres,82,89339.6
+Empleados Mun. Santiago,Vejez,Mujeres,49,52402.0
+Empleados Mun. Santiago,Invalidez,Hombres,8,2483.1
+Empleados Mun. Santiago,Invalidez,Mujeres,2,815.9
+Empleados Mun. Santiago,Ley Especial,Hombres,40,13189.5
+Empleados Mun. Santiago,Ley Especial,Mujeres,9,3249.7
+Empleados Mun. Santiago,Sobrevivencia,Hombres,4,972.1
+Empleados Mun. Santiago,Sobrevivencia,Mujeres,374,108844.9
+Empleados Mun. Santiago,Sin información de tipo/sexo,Sin información,0,0.0
+Camuval,Antigüedad,Hombres,8,4018.7
+Camuval,Antigüedad,Mujeres,8,5884.0
+Camuval,Vejez,Hombres,16,19507.9
+Camuval,Vejez,Mujeres,17,22063.3
+Camuval,Invalidez,Hombres,2,2171.9
+Camuval,Invalidez,Mujeres,1,933.6
+Camuval,Ley Especial,Hombres,0,0.0
+Camuval,Ley Especial,Mujeres,0,0.0
+Camuval,Sobrevivencia,Hombres,1,147.3
+Camuval,Sobrevivencia,Mujeres,54,26101.6
+Camuval,Sin información de tipo/sexo,Sin información,0,0.0
+Empleados Mun. República,Antigüedad,Hombres,9,8590.0
+Empleados Mun. República,Antigüedad,Mujeres,10,11047.0
+Empleados Mun. República,Vejez,Hombres,697,822272.0
+Empleados Mun. República,Vejez,Mujeres,747,833720.6
+Empleados Mun. República,Invalidez,Hombres,44,35816.4
+Empleados Mun. República,Invalidez,Mujeres,34,21082.7
+Empleados Mun. República,Ley Especial,Hombres,92,48148.2
+Empleados Mun. República,Ley Especial,Mujeres,54,28156.7
+Empleados Mun. República,Sobrevivencia,Hombres,24,4879.8
+Empleados Mun. República,Sobrevivencia,Mujeres,993,384992.1
+Empleados Mun. República,Sin información de tipo/sexo,Sin información,0,0.0
+Obreros Mun. República,Antigüedad,Hombres,67,17160.2
+Obreros Mun. República,Antigüedad,Mujeres,3,715.7
+Obreros Mun. República,Vejez,Hombres,574,415364.9
+Obreros Mun. República,Vejez,Mujeres,104,64534.4
+Obreros Mun. República,Invalidez,Hombres,90,35849.1
+Obreros Mun. República,Invalidez,Mujeres,8,3208.4
+Obreros Mun. República,Ley Especial,Hombres,121,30522.4
+Obreros Mun. República,Ley Especial,Mujeres,3,705.5
+Obreros Mun. República,Sobrevivencia,Hombres,18,2193.1
+Obreros Mun. República,Sobrevivencia,Mujeres,1670,396855.5
+Obreros Mun. República,Sin información de tipo/sexo,Sin información,0,0.0
+Salitre,Antigüedad,Hombres,4,4393.9
+Salitre,Antigüedad,Mujeres,1,409.7
+Salitre,Vejez,Hombres,14,15131.5
+Salitre,Vejez,Mujeres,4,178.5
+Salitre,Invalidez,Hombres,25,18288.9
+Salitre,Invalidez,Mujeres,10,3440.8
+Salitre,Ley Especial,Hombres,0,0.0
+Salitre,Ley Especial,Mujeres,0,0.0
+Salitre,Sobrevivencia,Hombres,8,1866.4
+Salitre,Sobrevivencia,Mujeres,338,131615.8
+Salitre,Sin información de tipo/sexo,Sin información,0,0.0
+C.C.U.,Antigüedad,Hombres,3,3734.4
+C.C.U.,Antigüedad,Mujeres,0,0.0
+C.C.U.,Vejez,Hombres,3,282.9
+C.C.U.,Vejez,Mujeres,3,2892.8
+C.C.U.,Invalidez,Hombres,3,842.1
+C.C.U.,Invalidez,Mujeres,0,0.0
+C.C.U.,Ley Especial,Hombres,0,0.0
+C.C.U.,Ley Especial,Mujeres,0,0.0
+C.C.U.,Sobrevivencia,Hombres,2,550.1
+C.C.U.,Sobrevivencia,Mujeres,73,26393.1
+C.C.U.,Sin información de tipo/sexo,Sin información,0,0.0
+Gildemeister,Antigüedad,Hombres,4,4074.7
+Gildemeister,Antigüedad,Mujeres,2,2062.7
+Gildemeister,Vejez,Hombres,1,16.8
+Gildemeister,Vejez,Mujeres,0,0.0
+Gildemeister,Invalidez,Hombres,0,0.0
+Gildemeister,Invalidez,Mujeres,1,385.3
+Gildemeister,Ley Especial,Hombres,0,0.0
+Gildemeister,Ley Especial,Mujeres,0,0.0
+Gildemeister,Sobrevivencia,Hombres,2,577.5
+Gildemeister,Sobrevivencia,Mujeres,40,17446.4
+Gildemeister,Sin información de tipo/sexo,Sin información,0,0.0
+M. Hochschild,Antigüedad,Hombres,1,753.3
+M. Hochschild,Antigüedad,Mujeres,0,0.0
+M. Hochschild,Vejez,Hombres,0,0.0
+M. Hochschild,Vejez,Mujeres,0,0.0
+M. Hochschild,Invalidez,Hombres,0,0.0
+M. Hochschild,Invalidez,Mujeres,0,0.0
+M. Hochschild,Ley Especial,Hombres,0,0.0
+M. Hochschild,Ley Especial,Mujeres,0,0.0
+M. Hochschild,Sobrevivencia,Hombres,0,0.0
+M. Hochschild,Sobrevivencia,Mujeres,1,445.8
+M. Hochschild,Sin información de tipo/sexo,Sin información,0,0.0
+Gasco,Antigüedad,Hombres,7,8543.7
+Gasco,Antigüedad,Mujeres,1,1281.3
+Gasco,Vejez,Hombres,3,1951.7
+Gasco,Vejez,Mujeres,0,0.0
+Gasco,Invalidez,Hombres,3,1657.6
+Gasco,Invalidez,Mujeres,0,0.0
+Gasco,Ley Especial,Hombres,0,0.0
+Gasco,Ley Especial,Mujeres,0,0.0
+Gasco,Sobrevivencia,Hombres,1,764.6
+Gasco,Sobrevivencia,Mujeres,65,33340.4
+Gasco,Sin información de tipo/sexo,Sin información,0,0.0
+Carozzinos,Antigüedad,Hombres,0,0.0
+Carozzinos,Antigüedad,Mujeres,0,0.0
+Carozzinos,Vejez,Hombres,0,0.0
+Carozzinos,Vejez,Mujeres,0,0.0
+Carozzinos,Invalidez,Hombres,0,0.0
+Carozzinos,Invalidez,Mujeres,0,0.0
+Carozzinos,Ley Especial,Hombres,24,5738.3
+Carozzinos,Ley Especial,Mujeres,0,0.0
+Carozzinos,Sobrevivencia,Hombres,0,0.0
+Carozzinos,Sobrevivencia,Mujeres,37,7327.1
+Carozzinos,Sin información de tipo/sexo,Sin información,8,1780.7
+Traspaso quiebra Le Mans (3),Antigüedad,Hombres,0,0.0
+Traspaso quiebra Le Mans (3),Antigüedad,Mujeres,0,0.0
+Traspaso quiebra Le Mans (3),Vejez,Hombres,662,208512.4
+Traspaso quiebra Le Mans (3),Vejez,Mujeres,302,92775.5
+Traspaso quiebra Le Mans (3),Invalidez,Hombres,8,1979.1
+Traspaso quiebra Le Mans (3),Invalidez,Mujeres,9,3038.4
+Traspaso quiebra Le Mans (3),Ley Especial,Hombres,0,0.0
+Traspaso quiebra Le Mans (3),Ley Especial,Mujeres,0,0.0
+Traspaso quiebra Le Mans (3),Sobrevivencia,Hombres,6,447.8
+Traspaso quiebra Le Mans (3),Sobrevivencia,Mujeres,779,154820.1
+Traspaso quiebra Le Mans (3),Sin información de tipo/sexo,Sin información,0,0.0
+Exonerados con abono de tiempo (5),Antigüedad,Hombres,354,179329.0
+Exonerados con abono de tiempo (5),Antigüedad,Mujeres,73,41359.3
+Exonerados con abono de tiempo (5),Vejez,Hombres,207,114240.0
+Exonerados con abono de tiempo (5),Vejez,Mujeres,130,92532.5
+Exonerados con abono de tiempo (5),Invalidez,Hombres,504,241957.6
+Exonerados con abono de tiempo (5),Invalidez,Mujeres,72,30252.2
+Exonerados con abono de tiempo (5),Ley Especial,Hombres,581,347718.4
+Exonerados con abono de tiempo (5),Ley Especial,Mujeres,245,131028.3
+Exonerados con abono de tiempo (5),Sobrevivencia,Hombres,0,0.0
+Exonerados con abono de tiempo (5),Sobrevivencia,Mujeres,15,3734.8
+Exonerados con abono de tiempo (5),Sin información de tipo/sexo,Sin información,0,0.0
+Total,Antigüedad,Hombres,3909,2620858.2
+Total,Antigüedad,Mujeres,3591,2422490.1
+Total,Vejez,Hombres,77953,38496844.0
+Total,Vejez,Mujeres,151735,51354991.6
+Total,Invalidez,Hombres,29741,11827807.3
+Total,Invalidez,Mujeres,20490,5878416.7
+Total,Ley Especial,Hombres,4856,4271096.8
+Total,Ley Especial,Mujeres,3975,3170013.9
+Total,Sobrevivencia,Hombres,3475,749671.8
+Total,Sobrevivencia,Mujeres,167048,48356578.0
+Total,Sin información de tipo/sexo,Sin información,8,1780.7

@@ -1,0 +1,186 @@
+# Catálogo de KPIs — Desafío 1: Envejecimiento demográfico y sostenibilidad de las pensiones
+#
+# Cada KPI documenta: fórmula, fuente(s), grano (comuna/región/país), archivo
+# donde vive ya calculado, y el track del enunciado al que responde. Los
+# scripts que los calculan están en ../Scripts/ (referenciados en `script`).
+
+kpis:
+
+  - id: pct_65_mas
+    nombre: "% población 65+"
+    formula: "100 * pob_65_mas / pob_total"
+    grano: [comuna, region, pais]
+    fuente: [Censo 2024]
+    archivo: [indicadores_comuna.csv, indicadores_region.csv, proyeccion_envejecimiento_pais.csv]
+    script: 01_procesar_censo.py
+    track: "Identificar regiones y comunas con mayor envejecimiento"
+
+  - id: indice_envejecimiento
+    nombre: "Índice de envejecimiento"
+    formula: "100 * pob_65_mas / pob_0_14"
+    interpretacion: ">100 significa más adultos mayores que niños/as (0-14)"
+    grano: [comuna, region, pais]
+    fuente: [Censo 2024]
+    archivo: [indicadores_comuna.csv, indicadores_region.csv, proyeccion_envejecimiento_pais.csv]
+    script: 01_procesar_censo.py
+    track: "Identificar regiones y comunas con mayor envejecimiento"
+
+  - id: indice_dependencia_vejez
+    nombre: "Índice de dependencia de vejez (razón de soporte inversa)"
+    formula: "100 * pob_65_mas / pob_15_64"
+    interpretacion: "adultos mayores por cada 100 personas en edad de trabajar"
+    grano: [comuna, region, pais]
+    fuente: [Censo 2024]
+    archivo: [indicadores_comuna.csv, indicadores_region.csv, proyeccion_envejecimiento_pais.csv]
+    script: 01_procesar_censo.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: pct_80_mas
+    nombre: "% población 80+ (cuarta edad)"
+    formula: "100 * pob_80_mas / pob_total"
+    interpretacion: "proxy de mayor demanda de cuidados/salud (dependencia severa)"
+    grano: [comuna, region, pais]
+    fuente: [Censo 2024]
+    archivo: [indicadores_comuna.csv, indicadores_region.csv]
+    script: 01_procesar_censo.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: cobertura_previsional
+    nombre: "Cobertura previsional (cotizantes / población 15-64)"
+    formula: "100 * cotizantes_2025 / pob_15_64_2024"
+    interpretacion: "qué fracción de la población en edad de trabajar cotiza activamente; el resto está fuera del sistema (informalidad, inactividad, cesantía)"
+    grano: [region, pais]
+    fuente: [Cotizantes Superintendencia de Pensiones 2025, Censo 2024]
+    archivo: [kpi_presion_previsional_region.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: razon_soporte_previsional
+    nombre: "Razón de soporte previsional (cotizantes por adulto mayor)"
+    formula: "cotizantes_2025 / pob_65_mas_2024"
+    interpretacion: "cuántos cotizantes activos hay por cada persona de 65+; a menor valor, mayor presión sobre el sistema de pensiones en esa región"
+    grano: [region, pais]
+    fuente: [Cotizantes Superintendencia de Pensiones 2025, Censo 2024]
+    archivo: [kpi_presion_previsional_region.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: razon_pensionados_cotizantes_sistema_antiguo
+    nombre: "Pensionados (sistema IPS/reparto) por cada 100 cotizantes AFP, por tramo de edad"
+    formula: "100 * pensionados_tramo / cotizantes_tramo"
+    interpretacion: >
+      Contexto histórico, NO es la razón de sostenibilidad del sistema AFP
+      (los pensionados aquí son del sistema antiguo pre-1981, cohorte
+      decreciente; los cotizantes son del sistema AFP actual). Ilustra el
+      peso remanente del sistema de reparto en las edades avanzadas.
+    grano: [tramo_edad, pais]
+    fuente: ["c3_202607.xlsx (Superintendencia de Pensiones, jul-2026)", cotizantes_edad.xls]
+    archivo: [kpi_presion_previsional_edad.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: indice_demanda_salud
+    nombre: "Índice de presión potencial sobre salud"
+    formula: "z(pct_65_mas) + z(pct_80_mas) + z(delta_pct_65_mas_proyectado_2035)"
+    interpretacion: >
+      Índice compuesto (suma de puntajes estandarizados, sin datos DEIS de
+      egresos hospitalarios): combina envejecimiento actual (65+, 80+) con
+      la velocidad de envejecimiento proyectada a 2035 (método de reparto de
+      tasas nacionales por región, ver kpi_proyeccion_regional.csv). Es un
+      proxy de demanda futura de salud geriátrica, no una medición de uso
+      real de servicios — pendiente cruzar con DEIS/MINSAL cuando esté
+      disponible.
+    grano: [region]
+    fuente: [Censo 2024, proyección INE nacional apportioned]
+    archivo: [kpi_proyeccion_regional.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: pob_65_mas_proyectada_region
+    nombre: "Población 65+ proyectada por región (2024→2035→2050)"
+    formula: >
+      Método de reparto (shift-share): a cada región se le aplica, por
+      grupo etario (0-14/15-64/65+/80+), la misma tasa de crecimiento que
+      proyecta el INE a nivel nacional para ese grupo etario, partiendo de
+      la estructura real de esa región en el Censo 2024. Aproximación
+      explícita porque el INE aún no publica proyecciones sub-nacionales
+      en base 2024.
+    grano: [region]
+    fuente: [Censo 2024, proyeccion_envejecimiento_pais.csv]
+    archivo: [kpi_proyeccion_regional.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Proyectar la presión sobre salud y pensiones"
+
+  - id: correlacion_urbanizacion_envejecimiento
+    nombre: "Relación % urbano vs % 65+ por comuna"
+    formula: "correlación de Pearson/Spearman entre pct_urbano y pct_65_mas (346 comunas)"
+    interpretacion: "r=-0.43 (Pearson), rho=-0.47 (Spearman): comunas más rurales tienden a estar más envejecidas (éxodo de población joven)"
+    grano: [comuna]
+    fuente: [Censo 2024]
+    archivo: [kpi_urbanizacion_envejecimiento.csv]
+    script: 07_kpis_pension_salud.py
+    track: "Relacionar con variables socioeconómicas (ingresos, urbanización)"
+
+  - id: ingreso_per_capita
+    nombre: "Ingreso per cápita promedio (ponderado)"
+    formula: "media ponderada por factor de expansión CASEN (expc) de ypc"
+    interpretacion: >
+      Única fuente de ingresos disponible (el Censo es censo de derecho y no
+      pregunta ingresos). CASEN 2022 es una ENCUESTA muestral, no un censo:
+      334/346 comunas tienen estimación directa (12 comunas pequeñas/aisladas
+      no están en la muestra); se reporta `n_muestra` por comuna para juzgar
+      precisión — mediana ~298 casos/comuna, mínimo 11.
+    grano: [comuna, region]
+    fuente: ["CASEN 2022 (microdatos vía bastianolea/casen_comparador_ingresos, Ministerio de Desarrollo Social)"]
+    archivo: [kpi_ingresos_comuna.csv, kpi_ingresos_region.csv]
+    script: 08_ingresos_casen.py
+    track: "Relacionar con variables socioeconómicas (ingresos, urbanización)"
+
+  - id: correlacion_ingreso_envejecimiento
+    nombre: "Relación ingreso per cápita vs % 65+ por comuna"
+    formula: "correlación de Pearson/Spearman entre ingreso_per_capita_prom y pct_65_mas (n=326, pob>=500)"
+    interpretacion: >
+      r=-0.19 (Pearson, débil) pero rho=-0.42 (Spearman, moderada): la
+      relación no es lineal simple. Hay dos patrones de envejecimiento
+      distintos que se cancelan parcialmente en Pearson: comunas rurales
+      pobres envejecidas por éxodo juvenil (ej. Saavedra, Cholchol, La
+      Araucanía) Y comunas urbanas ricas envejecidas "in place" (ej.
+      Vitacura, Providencia, Las Condes) — ver kpi_ingreso_envejecimiento.csv.
+    grano: [comuna]
+    fuente: [CASEN 2022, Censo 2024]
+    archivo: [kpi_ingreso_envejecimiento.csv]
+    script: 08_ingresos_casen.py
+    track: "Relacionar con variables socioeconómicas (ingresos, urbanización)"
+
+  - id: piramide_comuna_region_pais
+    nombre: "Pirámide demográfica"
+    formula: "conteo por edad_quinquenal x sexo"
+    grano: [comuna, region, pais]
+    fuente: [Censo 2024]
+    archivo: [censo_comuna_edad_sexo.csv, censo_region_edad_sexo.csv, censo_pais_edad_simple.csv]
+    script: 01_procesar_censo.py
+    track: "Construir pirámides demográficas y su evolución"
+
+  - id: piramide_pais_evolucion
+    nombre: "Evolución de la pirámide nacional 1992-2070"
+    formula: "conteo por edad simple x sexo x año (corte 30-jun)"
+    grano: [pais]
+    fuente: [Proyecciones INE base 2024]
+    archivo: [proyeccion_pais_edad_sexo.csv]
+    script: 02_procesar_proyecciones.py
+    track: "Construir pirámides demográficas y su evolución"
+
+  - id: mapa_choropleth_envejecimiento
+    nombre: "Mapa territorial del % 65+ por comuna y región"
+    grano: [comuna, region]
+    fuente: [Censo 2024, geometría pachadotdev/chilemapas]
+    archivo: [geo/comunas_chile.geojson, geo/regiones_chile.geojson]
+    script: 06_construir_mapas.py
+    track: "Mapas territoriales del envejecimiento"
+
+# Datos que el enunciado pide pero NO están disponibles en ninguna fuente
+# entregada (ver Data processed/README.md para el detalle y alternativas):
+pendientes:
+  - egresos_hospitalarios_defunciones: "No hay archivo DEIS/MINSAL en Data raw. El índice de presión de salud es un proxy demográfico, no de uso real de servicios."
+  - proyeccion_poblacion_subnacional: "El Excel de proyecciones INE solo trae NIVEL='PAÍS'. La proyección regional en kpi_proyeccion_regional.csv es una aproximación por reparto de tasas nacionales, no una proyección oficial INE por región."
+  - ingreso_12_comunas: "12 comunas pequeñas/aisladas (Juan Fernández, Isla de Pascua, Antártica, O'Higgins, Guaitecas, etc.) no están en la muestra CASEN 2022 — sin estimación de ingreso posible sin encuesta propia."

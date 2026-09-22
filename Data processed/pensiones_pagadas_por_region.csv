@@ -1,0 +1,188 @@
+region_nombre,tipo_pension,sexo,numero_pensionados,monto_miles_pesos,region_id
+Tarapacá,Antigüedad,Hombres,69,48289.1,1.0
+Tarapacá,Antigüedad,Mujeres,49,31093.2,1.0
+Tarapacá,Vejez,Hombres,847,446132.3,1.0
+Tarapacá,Vejez,Mujeres,2372,741495.1,1.0
+Tarapacá,Invalidez,Hombres,363,283011.8,1.0
+Tarapacá,Invalidez,Mujeres,232,63379.7,1.0
+Tarapacá,Ley Especial,Hombres,78,66848.3,1.0
+Tarapacá,Ley Especial,Mujeres,22,19859.8,1.0
+Tarapacá,Sobrevivencia,Hombres,67,16807.3,1.0
+Tarapacá,Sobrevivencia,Mujeres,2260,753578.9,1.0
+Tarapacá,Sin información de tipo/sexo,Sin información,0,0.0,1.0
+Antofagasta,Antigüedad,Hombres,61,52341.6,2.0
+Antofagasta,Antigüedad,Mujeres,55,42882.7,2.0
+Antofagasta,Vejez,Hombres,1517,973569.9,2.0
+Antofagasta,Vejez,Mujeres,3332,1173523.9,2.0
+Antofagasta,Invalidez,Hombres,402,245193.5,2.0
+Antofagasta,Invalidez,Mujeres,355,99411.5,2.0
+Antofagasta,Ley Especial,Hombres,190,198941.6,2.0
+Antofagasta,Ley Especial,Mujeres,45,46701.4,2.0
+Antofagasta,Sobrevivencia,Hombres,75,14553.7,2.0
+Antofagasta,Sobrevivencia,Mujeres,3698,1220522.7,2.0
+Antofagasta,Sin información de tipo/sexo,Sin información,0,0.0,2.0
+Atacama,Antigüedad,Hombres,48,40148.1,3.0
+Atacama,Antigüedad,Mujeres,22,15880.3,3.0
+Atacama,Vejez,Hombres,1361,706192.6,3.0
+Atacama,Vejez,Mujeres,1563,501696.9,3.0
+Atacama,Invalidez,Hombres,247,84148.9,3.0
+Atacama,Invalidez,Mujeres,260,65161.1,3.0
+Atacama,Ley Especial,Hombres,32,25016.1,3.0
+Atacama,Ley Especial,Mujeres,15,11277.9,3.0
+Atacama,Sobrevivencia,Hombres,17,2455.8,3.0
+Atacama,Sobrevivencia,Mujeres,2508,707643.1,3.0
+Atacama,Sin información de tipo/sexo,Sin información,0,0.0,3.0
+Coquimbo,Antigüedad,Hombres,202,148684.0,4.0
+Coquimbo,Antigüedad,Mujeres,112,64564.2,4.0
+Coquimbo,Vejez,Hombres,4687,2147572.5,4.0
+Coquimbo,Vejez,Mujeres,6757,2001296.1,4.0
+Coquimbo,Invalidez,Hombres,933,332510.3,4.0
+Coquimbo,Invalidez,Mujeres,624,156028.0,4.0
+Coquimbo,Ley Especial,Hombres,190,145724.0,4.0
+Coquimbo,Ley Especial,Mujeres,168,104572.6,4.0
+Coquimbo,Sobrevivencia,Hombres,159,28226.0,4.0
+Coquimbo,Sobrevivencia,Mujeres,8163,2271097.0,4.0
+Coquimbo,Sin información de tipo/sexo,Sin información,0,0.0,4.0
+Valparaíso,Antigüedad,Hombres,621,440086.5,5.0
+Valparaíso,Antigüedad,Mujeres,494,320165.4,5.0
+Valparaíso,Vejez,Hombres,10782,5533614.6,5.0
+Valparaíso,Vejez,Mujeres,20588,6883187.9,5.0
+Valparaíso,Invalidez,Hombres,4295,2209424.4,5.0
+Valparaíso,Invalidez,Mujeres,3251,950321.1,5.0
+Valparaíso,Ley Especial,Hombres,902,851688.8,5.0
+Valparaíso,Ley Especial,Mujeres,510,450238.4,5.0
+Valparaíso,Sobrevivencia,Hombres,668,143629.0,5.0
+Valparaíso,Sobrevivencia,Mujeres,23406,7548220.1,5.0
+Valparaíso,Sin información de tipo/sexo,Sin información,8,1780.7,5.0
+Libertador Gral. Bernardo O'Higgins,Antigüedad,Hombres,101,74787.5,6.0
+Libertador Gral. Bernardo O'Higgins,Antigüedad,Mujeres,98,60643.8,6.0
+Libertador Gral. Bernardo O'Higgins,Vejez,Hombres,4755,2381324.8,6.0
+Libertador Gral. Bernardo O'Higgins,Vejez,Mujeres,5414,1704851.0,6.0
+Libertador Gral. Bernardo O'Higgins,Invalidez,Hombres,4932,1772729.1,6.0
+Libertador Gral. Bernardo O'Higgins,Invalidez,Mujeres,1842,464606.0,6.0
+Libertador Gral. Bernardo O'Higgins,Ley Especial,Hombres,110,71017.9,6.0
+Libertador Gral. Bernardo O'Higgins,Ley Especial,Mujeres,83,53328.7,6.0
+Libertador Gral. Bernardo O'Higgins,Sobrevivencia,Hombres,138,30332.3,6.0
+Libertador Gral. Bernardo O'Higgins,Sobrevivencia,Mujeres,9828,2780645.8,6.0
+Libertador Gral. Bernardo O'Higgins,Sin información de tipo/sexo,Sin información,0,0.0,6.0
+Maule,Antigüedad,Hombres,129,83403.1,7.0
+Maule,Antigüedad,Mujeres,206,144980.5,7.0
+Maule,Vejez,Hombres,6208,2233026.5,7.0
+Maule,Vejez,Mujeres,7736,2628342.7,7.0
+Maule,Invalidez,Hombres,1926,582450.2,7.0
+Maule,Invalidez,Mujeres,861,250517.8,7.0
+Maule,Ley Especial,Hombres,149,100610.5,7.0
+Maule,Ley Especial,Mujeres,151,91090.5,7.0
+Maule,Sobrevivencia,Hombres,147,23823.4,7.0
+Maule,Sobrevivencia,Mujeres,11334,2808229.0,7.0
+Maule,Sin información de tipo/sexo,Sin información,0,0.0,7.0
+Biobío,Antigüedad,Hombres,276,186779.5,8.0
+Biobío,Antigüedad,Mujeres,234,154717.8,8.0
+Biobío,Vejez,Hombres,5954,2996105.9,8.0
+Biobío,Vejez,Mujeres,8941,3117262.5,8.0
+Biobío,Invalidez,Hombres,5337,2196659.0,8.0
+Biobío,Invalidez,Mujeres,2505,743550.5,8.0
+Biobío,Ley Especial,Hombres,158,121526.9,8.0
+Biobío,Ley Especial,Mujeres,130,78654.4,8.0
+Biobío,Sobrevivencia,Hombres,324,70974.9,8.0
+Biobío,Sobrevivencia,Mujeres,17500,4917879.9,8.0
+Biobío,Sin información de tipo/sexo,Sin información,0,0.0,8.0
+La Araucanía,Antigüedad,Hombres,161,98357.2,9.0
+La Araucanía,Antigüedad,Mujeres,185,134421.2,9.0
+La Araucanía,Vejez,Hombres,3753,1582554.3,9.0
+La Araucanía,Vejez,Mujeres,6052,2006019.9,9.0
+La Araucanía,Invalidez,Hombres,1219,424844.9,9.0
+La Araucanía,Invalidez,Mujeres,767,217177.0,9.0
+La Araucanía,Ley Especial,Hombres,137,101419.0,9.0
+La Araucanía,Ley Especial,Mujeres,142,90711.5,9.0
+La Araucanía,Sobrevivencia,Hombres,106,24474.9,9.0
+La Araucanía,Sobrevivencia,Mujeres,9220,2337083.9,9.0
+La Araucanía,Sin información de tipo/sexo,Sin información,0,0.0,9.0
+Los Lagos,Antigüedad,Hombres,85,60751.1,10.0
+Los Lagos,Antigüedad,Mujeres,110,74327.9,10.0
+Los Lagos,Vejez,Hombres,2900,1269500.6,10.0
+Los Lagos,Vejez,Mujeres,5053,1812135.5,10.0
+Los Lagos,Invalidez,Hombres,756,276660.7,10.0
+Los Lagos,Invalidez,Mujeres,567,171363.4,10.0
+Los Lagos,Ley Especial,Hombres,116,85963.2,10.0
+Los Lagos,Ley Especial,Mujeres,80,41017.5,10.0
+Los Lagos,Sobrevivencia,Hombres,89,23107.1,10.0
+Los Lagos,Sobrevivencia,Mujeres,6197,1617563.9,10.0
+Los Lagos,Sin información de tipo/sexo,Sin información,0,0.0,10.0
+Aysén del Gral. Carlos Ibáñez del Campo,Antigüedad,Hombres,4,3391.8,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Antigüedad,Mujeres,11,9458.5,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Vejez,Hombres,286,188626.1,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Vejez,Mujeres,466,201021.0,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Invalidez,Hombres,89,28181.5,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Invalidez,Mujeres,91,25732.3,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Ley Especial,Hombres,18,21501.8,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Ley Especial,Mujeres,5,3303.9,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Sobrevivencia,Hombres,11,2452.2,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Sobrevivencia,Mujeres,612,156293.0,11.0
+Aysén del Gral. Carlos Ibáñez del Campo,Sin información de tipo/sexo,Sin información,0,0.0,11.0
+Magallanes y de la Antártica Chilena,Antigüedad,Hombres,33,28887.3,12.0
+Magallanes y de la Antártica Chilena,Antigüedad,Mujeres,21,15483.1,12.0
+Magallanes y de la Antártica Chilena,Vejez,Hombres,532,323724.6,12.0
+Magallanes y de la Antártica Chilena,Vejez,Mujeres,1638,541176.5,12.0
+Magallanes y de la Antártica Chilena,Invalidez,Hombres,122,72792.6,12.0
+Magallanes y de la Antártica Chilena,Invalidez,Mujeres,181,60616.2,12.0
+Magallanes y de la Antártica Chilena,Ley Especial,Hombres,26,31143.5,12.0
+Magallanes y de la Antártica Chilena,Ley Especial,Mujeres,14,13177.5,12.0
+Magallanes y de la Antártica Chilena,Sobrevivencia,Hombres,20,3803.3,12.0
+Magallanes y de la Antártica Chilena,Sobrevivencia,Mujeres,1265,456662.2,12.0
+Magallanes y de la Antártica Chilena,Sin información de tipo/sexo,Sin información,0,0.0,12.0
+Metropolitana de Santiago,Antigüedad,Hombres,1938,1234580.8,13.0
+Metropolitana de Santiago,Antigüedad,Mujeres,1820,1238024.5,13.0
+Metropolitana de Santiago,Vejez,Hombres,29611,15724528.9,13.0
+Metropolitana de Santiago,Vejez,Mujeres,73666,25500115.9,13.0
+Metropolitana de Santiago,Invalidez,Hombres,5773,2288620.1,13.0
+Metropolitana de Santiago,Invalidez,Mujeres,6998,2051431.5,13.0
+Metropolitana de Santiago,Ley Especial,Hombres,2539,2281151.4,13.0
+Metropolitana de Santiago,Ley Especial,Mujeres,2486,2089583.6,13.0
+Metropolitana de Santiago,Sobrevivencia,Hombres,1404,310145.6,13.0
+Metropolitana de Santiago,Sobrevivencia,Mujeres,58713,17564858.0,13.0
+Metropolitana de Santiago,Sin información de tipo/sexo,Sin información,0,0.0,13.0
+Los Ríos,Antigüedad,Hombres,64,45028.1,14.0
+Los Ríos,Antigüedad,Mujeres,69,45874.0,14.0
+Los Ríos,Vejez,Hombres,1530,706330.5,14.0
+Los Ríos,Vejez,Mujeres,2659,867673.1,14.0
+Los Ríos,Invalidez,Hombres,243,85915.4,14.0
+Los Ríos,Invalidez,Mujeres,151,41891.5,14.0
+Los Ríos,Ley Especial,Hombres,44,34621.3,14.0
+Los Ríos,Ley Especial,Mujeres,40,21153.6,14.0
+Los Ríos,Sobrevivencia,Hombres,53,9953.2,14.0
+Los Ríos,Sobrevivencia,Mujeres,3721,939269.6,14.0
+Los Ríos,Sin información de tipo/sexo,Sin información,0,0.0,14.0
+Arica y Parinacota,Antigüedad,Hombres,50,33989.4,15.0
+Arica y Parinacota,Antigüedad,Mujeres,32,26192.1,15.0
+Arica y Parinacota,Vejez,Hombres,1113,498617.5,15.0
+Arica y Parinacota,Vejez,Mujeres,2661,764572.5,15.0
+Arica y Parinacota,Invalidez,Hombres,241,135204.2,15.0
+Arica y Parinacota,Invalidez,Mujeres,186,45184.0,15.0
+Arica y Parinacota,Ley Especial,Hombres,80,80501.7,15.0
+Arica y Parinacota,Ley Especial,Mujeres,22,18011.5,15.0
+Arica y Parinacota,Sobrevivencia,Hombres,92,18161.4,15.0
+Arica y Parinacota,Sobrevivencia,Mujeres,2455,754764.0,15.0
+Arica y Parinacota,Sin información de tipo/sexo,Sin información,0,0.0,15.0
+Ñuble,Antigüedad,Hombres,67,41353.1,16.0
+Ñuble,Antigüedad,Mujeres,73,43780.8,16.0
+Ñuble,Vejez,Hombres,2117,785422.5,16.0
+Ñuble,Vejez,Mujeres,2837,910621.0,16.0
+Ñuble,Invalidez,Hombres,2863,809460.4,16.0
+Ñuble,Invalidez,Mujeres,1619,472044.9,16.0
+Ñuble,Ley Especial,Hombres,87,53420.9,16.0
+Ñuble,Ley Especial,Mujeres,62,37331.0,16.0
+Ñuble,Sobrevivencia,Hombres,105,26771.7,16.0
+Ñuble,Sobrevivencia,Mujeres,6168,1522266.9,16.0
+Ñuble,Sin información de tipo/sexo,Sin información,0,0.0,16.0
+Total,Antigüedad,Hombres,3909,2620858.2,
+Total,Antigüedad,Mujeres,3591,2422490.1,
+Total,Vejez,Hombres,77953,38496844.0,
+Total,Vejez,Mujeres,151735,51354991.6,
+Total,Invalidez,Hombres,29741,11827807.3,
+Total,Invalidez,Mujeres,20490,5878416.7,
+Total,Ley Especial,Hombres,4856,4271096.8,
+Total,Ley Especial,Mujeres,3975,3170013.9,
+Total,Sobrevivencia,Hombres,3475,749671.8,
+Total,Sobrevivencia,Mujeres,167048,48356578.0,
+Total,Sin información de tipo/sexo,Sin información,8,1780.7,
