@@ -4,7 +4,7 @@ una segmentación de comunas construida con los propios datos del proyecto
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, PLOTLY_LAYOUT, CATEGORICAL
+from utils import load_csv, PLOTLY_LAYOUT, CATEGORICAL, PLOTLY_DL_CONFIG
 
 st.set_page_config(page_title="Políticas de envejecimiento activo", page_icon="📋", layout="wide")
 st.title("📋 Propuestas de políticas de envejecimiento activo")
@@ -47,7 +47,7 @@ with col1:
         labels={"ingreso_per_capita_prom": "Ingreso per cápita ($)", "pct_urbano": "% urbano"},
     )
     fig.update_layout(**PLOTLY_LAYOUT, title="Mapa de segmentos (tamaño = población)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 with col2:
     conteo = ing["segmento"].value_counts().reindex(orden_segmentos).fillna(0).astype(int)
     st.dataframe(conteo.rename("N° comunas"), use_container_width=True)

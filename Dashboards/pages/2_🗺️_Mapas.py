@@ -2,7 +2,7 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, load_geojson, PLOTLY_LAYOUT
+from utils import load_csv, load_geojson, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
 
 st.set_page_config(page_title="Mapas territoriales", page_icon="🗺️", layout="wide")
 st.title("🗺️ Mapas territoriales del envejecimiento")
@@ -53,7 +53,7 @@ fig = px.choropleth_map(
 )
 fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=0, r=0, t=30, b=0)}, height=720,
                    title=f"{var_label} — {nivel.lower()}")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 
 if nivel == "Comuna":
     st.caption("Nota: la comuna Antártica (12202) no tiene geometría publicada en la fuente usada y queda fuera del mapa (sí está en las tablas).")

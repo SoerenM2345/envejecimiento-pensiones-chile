@@ -34,6 +34,7 @@ add script `09_procesar_deis.py`, and add the unzipped CSVs to `.gitignore` beca
 | Masculinity index 65+ | 🟢 GO (snapshot) / 🟡 trend | 2024 by comuna: yes. **"Trend" is national only** (projection file). There's no comunal or regional trend without a second census. |
 | Differential growth rate (65+ vs total) | 🟢 national / 🔴 regional & comunal | National: fine (projection). Regional: **circular**, because `kpi_proyeccion_regional.csv` is shift-share and applies the *national* growth rate of each age group to every region, so regional differences only reflect the 2024 age mix, not real dynamics. |
 | Comunal evolution by "logistic replication" | 🔴 DON'T (as written) → ⬜ OPEN | No such model exists in the project, and building an ad-hoc comunal projection isn't defensible for a course project. **Better alternative (open task):** download the Censo 2017 comuna × age table (INE, public) and compute the **real 2017→2024 intercensal change** per comuna. That gives observed data rather than modelled data. |
+| Regional aging index / old-age dependency ratio as a 3-point series (2024/2035/2050) | ✅ DONE | `07_kpis_pension_salud.py` now exports `indice_envejecimiento_proy`/`indice_dependencia_vejez_proy` in `kpi_proyeccion_regional.csv` (previously only `pob_0_14_proy`/`pob_15_64_proy` were computed in-loop, not exported). Same shift-share caveat as the row above — used in the dashboard (Pirámides, Pensiones y Salud) captioned as an approximation, not an official regional projection. |
 
 ## 3. Maps
 

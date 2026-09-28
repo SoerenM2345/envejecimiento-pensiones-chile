@@ -101,6 +101,8 @@ for anio_destino in (2035, 2050):
             "pob_80_mas_proy": round(p80),
             "pct_65_mas_proy": round(100 * p65 / ptot, 2),
             "pct_80_mas_proy": round(100 * p80 / ptot, 2),
+            "indice_envejecimiento_proy": round(100 * p65 / p0_14, 2),
+            "indice_dependencia_vejez_proy": round(100 * p65 / p15_64, 2),
         })
 proy_regional = pd.DataFrame(filas)
 

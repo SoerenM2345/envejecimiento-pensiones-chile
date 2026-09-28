@@ -43,6 +43,11 @@ REGION_ORDER = [
     "Magallanes", "Metropolitana", "Arica y Parinacota",
 ]
 
+# Config para st.plotly_chart: hace que el botón de cámara (descargar PNG) del
+# toolbar exporte a 4x la resolución de pantalla en vez de la imagen de baja
+# calidad por defecto (util para figuras/anexos).
+PLOTLY_DL_CONFIG = {"toImageButtonOptions": {"format": "png", "scale": 4}}
+
 PLOTLY_LAYOUT = dict(
     font=dict(family="system-ui, -apple-system, Segoe UI, sans-serif", color=INK_PRIMARY, size=13),
     paper_bgcolor=SURFACE,
@@ -85,6 +90,17 @@ KEY_ALIASES = {
 def standardize_keys(df: pd.DataFrame) -> pd.DataFrame:
     rename = {c: KEY_ALIASES[c] for c in df.columns if c in KEY_ALIASES and KEY_ALIASES[c] != c}
     return df.rename(columns=rename)
+
+
+def lighten(hex_color: str, ratio: float = 0.55) -> str:
+    """Mezcla un color hex con blanco (ratio=0 -> igual, ratio=1 -> blanco).
+    Util para distinguir subgrupos (p.ej. tramos de edad) dentro de la misma serie."""
+    hex_color = hex_color.lstrip("#")
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+    r2 = round(r + (255 - r) * ratio)
+    g2 = round(g + (255 - g) * ratio)
+    b2 = round(b + (255 - b) * ratio)
+    return f"#{r2:02x}{g2:02x}{b2:02x}"
 
 
 def kpi_card_row(cols_data):

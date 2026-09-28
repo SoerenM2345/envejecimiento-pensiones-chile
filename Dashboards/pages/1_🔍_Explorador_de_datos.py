@@ -8,7 +8,7 @@ preguntas ad-hoc del tipo "dame la suma de X por región, filtrando Y".
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import list_processed_csvs, load_csv, standardize_keys, CATEGORICAL, PLOTLY_LAYOUT
+from utils import list_processed_csvs, load_csv, standardize_keys, CATEGORICAL, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
 
 st.set_page_config(page_title="Explorador de datos", page_icon="🔍", layout="wide")
 st.title("🔍 Explorador de datos")
@@ -123,7 +123,7 @@ if group_cols and value_col:
             fig = px.bar(agg, x=group_cols[0], y=value_col, color=group_cols[1], barmode="group",
                          color_discrete_sequence=CATEGORICAL)
         fig.update_layout(**PLOTLY_LAYOUT, title=f"{func}({value_col}) por {', '.join(group_cols)}")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     else:
         st.caption("Demasiadas categorías o dimensiones para graficar automáticamente — usa la tabla o descarga el CSV.")
 else:

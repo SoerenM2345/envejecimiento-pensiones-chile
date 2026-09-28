@@ -2,7 +2,7 @@
 ingresos (CASEN 2022, única fuente disponible — encuesta muestral, no censo)."""
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, kpi_card_row, PLOTLY_LAYOUT, MACROZONA, MACROZONA_ORDER, CATEGORICAL
+from utils import load_csv, kpi_card_row, PLOTLY_LAYOUT, MACROZONA, MACROZONA_ORDER, CATEGORICAL, PLOTLY_DL_CONFIG
 
 st.set_page_config(page_title="Socioeconómico", page_icon="🏙️", layout="wide")
 st.title("🏙️ Envejecimiento y variables socioeconómicas")
@@ -39,7 +39,7 @@ with col1:
         trendline="ols", trendline_scope="overall", trendline_color_override="#52514e",
     )
     fig.update_layout(**PLOTLY_LAYOUT, title="Urbanización vs envejecimiento (346 comunas)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.caption("Comunas más rurales tienden a estar más envejecidas (correlación negativa moderada): el éxodo de "
                "población joven hacia zonas urbanas deja una estructura etaria más vieja en el campo.")
 
@@ -52,7 +52,7 @@ with col2:
         trendline="ols", trendline_scope="overall", trendline_color_override="#52514e",
     )
     fig.update_layout(**PLOTLY_LAYOUT, title="Ingreso per cápita vs envejecimiento (326 comunas, pob≥500)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.caption("La relación NO es lineal simple (Pearson débil, Spearman moderado): conviven dos patrones de "
                "envejecimiento — comunas rurales pobres envejecidas por éxodo juvenil, y comunas urbanas ricas "
                "envejecidas 'in situ' (población que envejece sin irse). Ver tablas abajo.")
@@ -79,4 +79,4 @@ fig = px.bar(ing_region.sort_values("ingreso_per_capita_prom"), x="ingreso_per_c
              orientation="h", color_discrete_sequence=[CATEGORICAL[0]],
              labels={"ingreso_per_capita_prom": "Ingreso per cápita promedio ($)", "region_casen": ""})
 fig.update_layout(**PLOTLY_LAYOUT, title="Ingreso per cápita por región")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)

@@ -2,8 +2,9 @@
 proyección regional 2024→2035→2050 e índice de demanda de salud."""
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
-from utils import load_csv, kpi_card_row, CATEGORICAL, PLOTLY_LAYOUT
+from utils import load_csv, kpi_card_row, CATEGORICAL, PLOTLY_LAYOUT, RED, INK_MUTED, PLOTLY_DL_CONFIG
 
 st.set_page_config(page_title="Pensiones y salud", page_icon="💰", layout="wide")
 st.title("💰 Presión sobre pensiones y salud")
@@ -33,7 +34,7 @@ with col1:
                   annotation_text=f"País: {nacional_soporte:.2f}", annotation_position="top")
     fig.update_layout(**PLOTLY_LAYOUT, title="Razón de soporte previsional por región")
     fig.update_yaxes(categoryorder="total ascending")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.caption("Cotizantes AFP 2025 por cada persona de 65+ (Censo 2024). A menor valor, mayor presión sobre el sistema en esa región.")
 
 with col2:
@@ -45,7 +46,7 @@ with col2:
                   annotation_text=f"País: {nacional_cobertura:.1f}%", annotation_position="top")
     fig.update_layout(**PLOTLY_LAYOUT, title="Cobertura previsional por región")
     fig.update_yaxes(categoryorder="total ascending")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.caption("Cotizantes 2025 sobre población en edad de trabajar (15-64, Censo 2024). El resto está fuera del sistema activo (informalidad, cesantía, inactividad).")
 
 st.divider()
@@ -69,9 +70,47 @@ if sel_regiones:
                   markers=True, color_discrete_sequence=CATEGORICAL,
                   labels={"pct_65_mas_proy": "% población 65+", "anio": "Año", "region_nombre": "Región"})
     fig.update_layout(**PLOTLY_LAYOUT, title="Evolución proyectada de % 65+ por región")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 else:
     st.info("Elige al menos una región.")
+
+st.divider()
+st.subheader("Valparaíso vs. país: el envejecimiento avanza más rápido en la región")
+st.caption(
+    "Línea gris: índice de envejecimiento nacional 1992-2070 (INE, proyección base 2024 — ver también página "
+    "Pirámides), ya en franca aceleración. Puntos rojos: Valparaíso, con su valor real 2024 (Censo) y su "
+    "proyección 2035/2050 por reparto de tasas nacionales (misma aproximación de la sección anterior; no es una "
+    "proyección oficial INE por región). Valparaíso ya parte más envejecida que el país (98.6 vs 80.0 en 2024) y "
+    "la brecha se mantiene hacia 2035/2050 — mientras tanto, la región ya muestra solo 1.71 cotizantes por cada "
+    "adulto mayor (gráfico de razón de soporte, arriba): menos personas activas sosteniendo a más adultos mayores."
+)
+
+proy_pais_full = load_csv("proyeccion_envejecimiento_pais.csv")
+valpo_2024_idx = float(ind_region.loc[ind_region.region_nombre == "Valparaíso", "indice_envejecimiento"].iloc[0])
+valpo_proy_idx = proy_reg.loc[proy_reg.region_nombre == "Valparaíso", ["anio", "indice_envejecimiento_proy"]]
+valpo_serie = pd.concat([
+    pd.DataFrame([{"anio": 2024, "indice_envejecimiento": valpo_2024_idx}]),
+    valpo_proy_idx.rename(columns={"indice_envejecimiento_proy": "indice_envejecimiento"}),
+]).sort_values("anio")
+
+fig_val = go.Figure()
+fig_val.add_trace(go.Scatter(
+    x=proy_pais_full["anio"], y=proy_pais_full["indice_envejecimiento"], mode="lines",
+    name="Chile (país)", line=dict(color=INK_MUTED, width=2),
+    hovertemplate="Año %{x:.0f}<br>País: %{y:.0f} mayores por c/100 niños<extra></extra>",
+))
+fig_val.add_trace(go.Scatter(
+    x=valpo_serie["anio"], y=valpo_serie["indice_envejecimiento"], mode="lines+markers",
+    name="Valparaíso", line=dict(color=RED, width=3), marker=dict(size=9, color=RED),
+    hovertemplate="Año %{x:.0f}<br>Valparaíso: %{y:.0f} mayores por c/100 niños<extra></extra>",
+))
+fig_val.update_layout(
+    **PLOTLY_LAYOUT,
+    title="Índice de envejecimiento: Valparaíso vs. Chile",
+)
+fig_val.update_xaxes(title_text="Año")
+fig_val.update_yaxes(title_text="Mayores de 65 por c/100 niños de 0-14")
+st.plotly_chart(fig_val, use_container_width=True, config=PLOTLY_DL_CONFIG)
 
 st.divider()
 st.subheader("Índice de presión potencial sobre salud (proxy demográfico)")
@@ -81,7 +120,7 @@ fig = px.bar(demanda.sort_values("indice_demanda_salud"), x="indice_demanda_salu
              color="indice_demanda_salud", color_continuous_scale="Blues",
              labels={"indice_demanda_salud": "Índice (score-z)", "region_nombre": ""})
 fig.update_layout(**PLOTLY_LAYOUT, title="Índice de demanda de salud por envejecimiento", coloraxis_showscale=False)
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 
 st.divider()
 st.subheader("⚠️ Contexto: sistema antiguo (IPS) vs sistema AFP")
