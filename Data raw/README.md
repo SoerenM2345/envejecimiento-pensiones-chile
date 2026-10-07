@@ -11,10 +11,10 @@ Reorganizado el 2026-10-07. Cada archivo está en una de tres zonas.
 | `cotizantes_region.xls` | KPI 1.1 y 1.2 (cotizantes por región) | 03 |
 | `_external/16_bevoelkerungsvorausberechnung_daten.csv` | Pirámide de Alemania (Destatis) | 10 |
 | `_external/pilar_solidario/` | Informes de cierre (OND) 2023, 2024 y 2025: PGU/PBS/APS. KPI 2.1 y 2.2 | 12 |
-| `_external/dipres/` | Estadísticas de las Finanzas Públicas 2016-2025 (PDF y Excel, gasto funcional "7102 Edad avanzada"), pasivos y activos, nota técnica FAPP. KPI 2.1, 2.2, 1.3 | por hacer |
-| `_external/macro/CCNN2018_P0_V2.xlsx` | PIB anual a precios corrientes y encadenado 2013-2025 (Banco Central). KPI 2.1, 2.2 | por hacer |
+| `_external/dipres/` | Estadísticas de las Finanzas Públicas 2016-2025 (PDF y Excel, gasto funcional "7102 Edad avanzada"), pasivos y activos, nota técnica FAPP. KPI 2.1, 2.2, 1.3 | 13 |
+| `_external/macro/CCNN2018_P0_V2.xlsx` | PIB anual a precios corrientes y encadenado 2013-2025 (Banco Central). KPI 2.1, 2.2 | 13 |
 | `_external/fapp/` | Estados financieros del FAPP al 31-dic-2025 y al 30-jun-2026. KPI 1.3, 2.2 | por hacer |
-| `_external/casen2022/` | CASEN 2022 completa (`casen_2022.dta`, 501 MB, no versionado), libro de códigos, nota de uso y líneas de pobreza. KPI 2.3 | por hacer |
+| `_external/casen2022/` | CASEN 2022 completa (`casen_2022.dta`, 501 MB, no versionado), libro de códigos, nota de uso y líneas de pobreza. KPI 2.3 | 14 |
 
 ## 2. `development sources/`: usados por el modo desarrollador, no por los 6 KPIs
 

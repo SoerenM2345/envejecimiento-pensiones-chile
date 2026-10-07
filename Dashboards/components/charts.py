@@ -140,3 +140,46 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str)
     fig.update_xaxes(title="Año", tickvals=list(pts.anio))
     fig.update_yaxes(title="Cotizantes por persona de 65+", rangemode="tozero")
     return fig
+
+
+def cost_vs_economy_index(idx: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: índice (base primer año = 100) del costo real por persona 65+ y del PIB per cápita real.
+    idx: anio, idx_costo_65, idx_pib_pc."""
+    fig = go.Figure()
+    fig.add_scatter(x=idx.anio, y=idx.idx_costo_65, mode="lines+markers", name="Costo público real por persona 65+",
+                    line=dict(color=RED, width=3))
+    fig.add_scatter(x=idx.anio, y=idx.idx_pib_pc, mode="lines+markers", name="PIB per cápita real",
+                    line=dict(color=BLUE, width=3))
+    fig.add_hline(y=100, line_dash="dot", line_color=INK_MUTED)
+    fig.update_layout(**PLOTLY_LAYOUT, title=f"Costo por adulto mayor vs. economía (índice, {int(idx.anio.min())} = 100)")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="Índice")
+    return fig
+
+
+def spending_pct_pib(df: pd.DataFrame) -> go.Figure:
+    """KPI 2.2 (ratio 1): % del PIB. df: anio, pilar_pct_pib, edad_avanzada_pct_pib (esta última puede traer NaN)."""
+    fig = go.Figure()
+    fig.add_scatter(x=df.anio, y=df.pilar_pct_pib, mode="lines+markers", name="PGU + pensiones solidarias (PBS/APS)",
+                    line=dict(color=ORANGE, width=3))
+    ea = df.dropna(subset=["edad_avanzada_pct_pib"])
+    fig.add_scatter(x=ea.anio, y=ea.edad_avanzada_pct_pib, mode="lines+markers", name="Gasto total del Gobierno Central en edad avanzada",
+                    line=dict(color=VIOLET, width=3, dash="dash"))
+    fig.update_layout(**PLOTLY_LAYOUT, title="Peso fiscal de las pensiones no contributivas (% del PIB)")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="% del PIB", rangemode="tozero")
+    return fig
+
+
+def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 2.3: % de personas 65+ en pobreza por ingresos por región, con IC 95%. df: region_nombre, pct_pobreza_65, ic95_inf, ic95_sup."""
+    d = df.sort_values("pct_pobreza_65")
+    fig = go.Figure(go.Bar(
+        y=d.region_nombre, x=d.pct_pobreza_65, orientation="h", marker_color=ORANGE,
+        error_x=dict(type="data", symmetric=False, array=d.ic95_sup - d.pct_pobreza_65, arrayminus=d.pct_pobreza_65 - d.ic95_inf),
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+    ))
+    fig.add_vline(x=nacional, line_dash="dash", line_color="#52514e", annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Pobreza por ingresos en personas de 65+ (% con IC 95%)")
+    fig.update_xaxes(title="% de personas 65+ en pobreza")
+    return fig

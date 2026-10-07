@@ -9,9 +9,9 @@ Revisado dos veces: inventario con `find` y, de forma independiente, con `os.wal
 | 1.1 Cobertura regional | Cotizantes por región (Superintendencia) + Censo 2024 | Completo |
 | 1.2 Razón de soporte | Ídem + proyecciones INE nacionales | Completo (proyección regional = reparto de tasas nacionales, no oficial) |
 | 1.3 Participación partes interesadas | Estados financieros FAPP dic-2025 y jun-2026, nota técnica DIPRES | **Incompleto: falta el denominador** |
-| 2.1 Costo real por adulto mayor | DIPRES gasto "7102 Edad avanzada" 2016-2025, PGU/PBS/APS mensual 2008-2025, PIB Banco Central 2013-2025, población 65+ INE | Datos completos, cálculo por implementar |
-| 2.2 Financiamiento dedicado | Ídem + nota FAPP | **Ratio 1 completo; ratio 2 incompleto** |
-| 2.3 Pobreza en la vejez | CASEN 2022 completa (`edad`, `region`, `pobreza`, `expr`, `varstrat`, `varunit`) | Datos completos, cálculo por implementar |
+| 2.1 Costo real por adulto mayor | DIPRES gasto "7102 Edad avanzada" 2016-2025, PGU/PBS/APS mensual 2008-2025, PIB Banco Central 2013-2025, población 65+ INE | **Calculado** (script 13, dashboard) |
+| 2.2 Financiamiento dedicado | Ídem + nota FAPP | **Ratio 1 calculado; ratio 2 incompleto** |
+| 2.3 Pobreza en la vejez | CASEN 2022 completa (`edad`, `region`, `pobreza`, `expr`, `varstrat`, `varunit`) | **Calculado** (script 14, dashboard) |
 
 ## Lo que sigue abierto
 
@@ -21,7 +21,7 @@ Revisado dos veces: inventario con `find` y, de forma independiente, con `os.wal
 
 ## Decisiones, no archivos
 
-- **CASEN 2024 ya existe.** El informe de líneas de pobreza (dic-2025) indica una nueva metodología de pobreza (2024). Tenemos CASEN 2022 con la metodología anterior: usar 2022 y declararlo, o descargar 2024.
+- **CASEN: metodología.** La base `casen_2022.dta` ya trae `pobreza` recalculada con la metodología 2024: da 20,49% de pobreza por ingresos en 2022 (oficial con metodología 2024: 20,5%; con la anterior eran 6,5%). Es coherente con el informe de líneas de pobreza (dic-2025), pero no se debe comparar con cifras publicadas en 2023. CASEN 2024 (17,3%) existe y daría un dato más reciente; usarlo es opcional.
 - **Cotizantes dic-2024:** `cotizantes_region.xls` ya tiene la serie anual 1985-2025, así que se puede alinear con el Censo 2024 sin descargar nada.
 - **Sistema antiguo (IPS):** no hace falta el gasto anual del IPS aparte; el gasto DIPRES "Edad avanzada" ya lo incluye.
 

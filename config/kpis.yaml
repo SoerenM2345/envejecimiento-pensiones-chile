@@ -222,27 +222,33 @@ kpis_presentacion:
     descripcion: "Si el costo por persona crece más rápido que la economía"
     formula: "(Costo público total / Población 65+) vs Δ% PIB per cápita"
     visualizacion: lineas_indexadas
-    status: pending
-    pendiente_motivo: "Los datos ya están en el proyecto (DIPRES gasto en edad avanzada 2016-2025, PGU/PBS/APS 2008-2025, PIB Banco Central, población 65+ INE). Falta implementar el cálculo."
-
+    status: live
+    archivo: [gasto_proteccion_social.csv, macro_pib_anual.csv, proyeccion_envejecimiento_pais.csv]
+    fuente: ["DIPRES, Estadísticas de las Finanzas Públicas 2016-2025 (clasificación funcional, Edad avanzada)", "Banco Central (PIB, referencia 2018)", "INE proyecciones"]
+    script: 13_procesar_macro_gasto.py
+    caveat: "Costo público = gasto del Gobierno Central en 'Edad avanzada' (incluye sistema antiguo, PGU y aportes solidarios), en pesos de 2025. El PIB per cápita real usa el volumen encadenado del Banco Central; ambos se comparan como índice base 2016 = 100."
   - id: "2.2"
     nombre: "Financiamiento dedicado"
     objetivo: "Objetivo 2: Controlar el costo por cliente"
     descripcion: "Peso fiscal del gasto y cobertura del fondo frente al déficit proyectado"
     formula: "(PGU + Pensión solidaria) / PIB ; (Activos + Reservas) / VP del déficit"
     visualizacion: lineas
-    status: pending
-    pendiente_motivo: "Ratio 1 ((PGU + pensión solidaria) / PIB): datos listos, falta el cálculo. Ratio 2: falta el valor presente del déficit (decisión del equipo: reemplazarlo por saldo del fondo / gasto anual en PGU y APS). Ver docs/DATOS_ABIERTOS.md."
-
+    status: partial
+    archivo: [pgu_pbs_aps_nacional_anual.csv, macro_pib_anual.csv, gasto_proteccion_social.csv]
+    fuente: ["Subsecretaría de Previsión Social (Pilar Solidario)", "Banco Central", "DIPRES"]
+    script: "12_procesar_pilar_solidario.py, 13_procesar_macro_gasto.py"
+    caveat: "Ratio 1 calculado. Ratio 2 pendiente: falta el valor presente del déficit (ver docs/DATOS_ABIERTOS.md). 'Total' del Pilar incluye PBS/APS de invalidez además de vejez."
   - id: "2.3"
     nombre: "Pobreza en la vejez"
     objetivo: "Objetivo 2: Controlar el costo por cliente"
     descripcion: "Que la contención de costos no aumente la pobreza en adultos mayores"
     formula: "Personas 65+ bajo línea de pobreza / Población 65+"
     visualizacion: mapa
-    status: pending
-    pendiente_motivo: "Los datos ya están en el proyecto (CASEN 2022 completa con edad, pobreza y factores de expansión). Falta implementar el cálculo."
-
+    status: live
+    archivo: [pobreza_65_region.csv]
+    fuente: ["CASEN 2022 completa (Ministerio de Desarrollo Social)"]
+    script: 14_procesar_casen_pobreza.py
+    caveat: "CASEN 2022 con la metodología de pobreza 2024 (20,5% en total ese año; con la metodología anterior eran 6,5%). Encuesta muestral: en regiones pequeñas los intervalos de confianza son amplios."
 # Datos que el enunciado pide pero NO están disponibles en ninguna fuente
 # entregada (ver Data processed/README.md para el detalle y alternativas):
 pendientes:
