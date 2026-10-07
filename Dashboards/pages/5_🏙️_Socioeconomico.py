@@ -2,9 +2,9 @@
 ingresos (CASEN 2022, única fuente disponible — encuesta muestral, no censo)."""
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, kpi_card_row, PLOTLY_LAYOUT, MACROZONA, MACROZONA_ORDER, CATEGORICAL, PLOTLY_DL_CONFIG
+from utils import load_csv, kpi_card_row, page_config, PLOTLY_LAYOUT, MACROZONA, MACROZONA_ORDER, CATEGORICAL, PLOTLY_DL_CONFIG
 
-st.set_page_config(page_title="Socioeconómico", page_icon="🏙️", layout="wide")
+page_config(page_title="Socioeconómico", page_icon="🏙️")
 st.title("🏙️ Envejecimiento y variables socioeconómicas")
 st.info(
     "El Censo 2024 es un **censo de derecho** y no pregunta ingresos. La única fuente de ingresos "

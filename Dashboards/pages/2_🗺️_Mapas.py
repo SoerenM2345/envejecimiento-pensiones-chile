@@ -2,9 +2,9 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, load_geojson, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
+from utils import load_csv, load_geojson, page_config, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
 
-st.set_page_config(page_title="Mapas territoriales", page_icon="🗺️", layout="wide")
+page_config(page_title="Mapas territoriales", page_icon="🗺️")
 st.title("🗺️ Mapas territoriales del envejecimiento")
 
 nivel = st.radio("Nivel", ["Comuna", "Región"], horizontal=True)

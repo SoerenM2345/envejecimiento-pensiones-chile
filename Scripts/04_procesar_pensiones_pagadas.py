@@ -24,7 +24,7 @@ columna agregada que no discrimina por sexo (no está desagregada por tipo).
 import pandas as pd
 from pathlib import Path
 
-RAW = Path(__file__).resolve().parent.parent / "Data raw"
+RAW = Path(__file__).resolve().parent.parent / "Data raw" / "development sources"  # c1/c2/c3: solo páginas dev
 OUT = Path(__file__).resolve().parent.parent / "Data processed"
 OUT.mkdir(parents=True, exist_ok=True)
 

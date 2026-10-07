@@ -4,9 +4,9 @@ una segmentación de comunas construida con los propios datos del proyecto
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import load_csv, PLOTLY_LAYOUT, CATEGORICAL, PLOTLY_DL_CONFIG
+from utils import load_csv, page_config, PLOTLY_LAYOUT, CATEGORICAL, PLOTLY_DL_CONFIG
 
-st.set_page_config(page_title="Políticas de envejecimiento activo", page_icon="📋", layout="wide")
+page_config(page_title="Políticas de envejecimiento activo", page_icon="📋")
 st.title("📋 Propuestas de políticas de envejecimiento activo")
 st.caption("Segmentación construida a partir de indicadores_comuna.csv + kpi_ingreso_envejecimiento.csv — no es una lista genérica.")
 

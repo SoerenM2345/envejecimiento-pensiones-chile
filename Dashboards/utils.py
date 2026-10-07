@@ -103,6 +103,46 @@ def lighten(hex_color: str, ratio: float = 0.55) -> str:
     return f"#{r2:02x}{g2:02x}{b2:02x}"
 
 
+# --- modo desarrollador / final ---------------------------------------------
+# "final" (por defecto): los 6 KPIs de la presentación + análisis del problema.
+# "dev": además, todas las páginas de análisis/exploración existentes.
+MODES = ("final", "dev")
+
+
+def get_mode() -> str:
+    """Modo activo ('final' o 'dev'), según el toggle del sidebar."""
+    return "dev" if st.session_state.get("dev_mode") else "final"
+
+
+def mode_toggle() -> str:
+    """Toggle 'Modo desarrollador' en el sidebar, sincronizado con ?mode=dev en la URL.
+    Una URL con ?mode=dev abre directamente en modo dev (solo se lee al iniciar la sesión)."""
+    if "dev_mode" not in st.session_state:
+        st.session_state["dev_mode"] = st.query_params.get("mode") == "dev"
+
+    def _sync_url():
+        if st.session_state["dev_mode"]:
+            st.query_params["mode"] = "dev"
+        elif "mode" in st.query_params:
+            del st.query_params["mode"]
+
+    st.sidebar.toggle("Modo desarrollador", key="dev_mode", on_change=_sync_url,
+                      help="Muestra todas las páginas de análisis y exploración. Equivale a abrir la app con ?mode=dev.")
+    mode = get_mode()
+    if mode == "dev":
+        st.sidebar.warning("DEV: vista con todo el análisis")
+    return mode
+
+
+def page_config(**kwargs):
+    """st.set_page_config para páginas individuales. Con st.navigation (Inicio.py) la
+    configuración se fija una sola vez en el entry point, así que aquí es un no-op;
+    ejecutada directamente (streamlit run pages/X.py) sigue funcionando como antes."""
+    if st.session_state.get("_nav_active"):
+        return
+    st.set_page_config(layout="wide", **kwargs)
+
+
 def kpi_card_row(cols_data):
     """cols_data: list of (label, value, help) tuples."""
     cols = st.columns(len(cols_data))

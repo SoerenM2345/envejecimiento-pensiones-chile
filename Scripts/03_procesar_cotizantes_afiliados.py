@@ -26,6 +26,7 @@ import pandas as pd
 from pathlib import Path
 
 RAW = Path(__file__).resolve().parent.parent / "Data raw"
+DEV = RAW / "development sources"  # cotizantes_edad.xls y afiliados_region_edad.xls: solo los usan las páginas dev
 OUT = Path(__file__).resolve().parent.parent / "Data processed"
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -73,7 +74,7 @@ def to_int_or_none(v):
 # 1) cotizantes_edad.xls -> anual, por tramo de edad
 # ---------------------------------------------------------------------------
 print("1) cotizantes_edad.xls ...")
-df = pd.read_excel(RAW / "cotizantes_edad.xls", header=None)
+df = pd.read_excel(DEV / "cotizantes_edad.xls", header=None)
 years = df.iloc[5, 1:42].astype(int).tolist()
 rows = []
 for r in range(7, 20):  # Hasta 20 ... Total (13 categorias)
@@ -121,7 +122,7 @@ print("  filas:", len(cot_region), "| regiones:", cot_region['region_label'].nun
 # 3) afiliados_region_edad.xls -> mensual, por region x tramo edad
 # ---------------------------------------------------------------------------
 print("3) afiliados_region_edad.xls ...")
-df = pd.read_excel(RAW / "afiliados_region_edad.xls", header=None)
+df = pd.read_excel(DEV / "afiliados_region_edad.xls", header=None)
 tramo_cols = {
     3: "Hasta 20", 4: "20-25", 5: "25-30", 6: "30-35", 7: "35-40", 8: "40-45",
     9: "45-50", 10: "50-55", 11: "55-60", 12: "60-65", 13: "65 y más", 14: "S/I",

@@ -1,69 +1,41 @@
+"""Entry point del dashboard: `cd Dashboards && streamlit run Inicio.py`.
+
+Dos modos (ver utils.mode_toggle):
+  - final (por defecto): problema + los 6 KPIs de la presentación, en final_pages/.
+  - dev (toggle del sidebar o ?mode=dev): además, todas las páginas de análisis en pages/.
+"""
 import streamlit as st
-from utils import load_csv, kpi_card_row, REGION_ORDER
+from utils import mode_toggle
 
 st.set_page_config(
     page_title="Envejecimiento demográfico y pensiones — Chile",
     page_icon="👴",
     layout="wide",
 )
+# Con st.navigation la config de página vive solo aquí; las páginas llaman a utils.page_config(), que queda en no-op.
+st.session_state["_nav_active"] = True
 
-st.title("Envejecimiento demográfico y sostenibilidad de las pensiones")
-st.caption("Desafío 1 — Censo 2024, proyecciones INE, Superintendencia de Pensiones, CASEN 2022")
+mode = mode_toggle()
 
-reg = load_csv("indicadores_region.csv")
-proy = load_csv("proyeccion_envejecimiento_pais.csv")
-pres = load_csv("kpi_presion_previsional_region.csv")
+final_pages = [
+    st.Page("final_pages/resumen.py", title="Resumen", icon="📌", url_path="resumen", default=True),
+    st.Page("final_pages/problema.py", title="Problema", icon="🔎", url_path="problema"),
+    st.Page("final_pages/objetivo1.py", title="Objetivo 1: base activa", icon="🎯", url_path="objetivo-1"),
+    st.Page("final_pages/objetivo2.py", title="Objetivo 2: costo por cliente", icon="💰", url_path="objetivo-2"),
+    st.Page("final_pages/fuentes.py", title="Fuentes y método", icon="📚", url_path="fuentes"),
+]
+nav = {"Dashboard": final_pages}
 
-national_pct = 100 * reg["pob_65_mas"].sum() / reg["pob_total"].sum()
-pct_2050 = proy.loc[proy.anio == 2050, "pct_65_mas"].iloc[0]
-soporte_nacional = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
-region_top = reg.sort_values("pct_65_mas", ascending=False).iloc[0]
+if mode == "dev":
+    nav["Modo desarrollador"] = [
+        st.Page("pages/0_🏠_Panorama_general.py", title="Panorama general", icon="🏠", url_path="dev-panorama"),
+        st.Page("pages/1_🔍_Explorador_de_datos.py", title="Explorador de datos", icon="🔍", url_path="dev-explorador"),
+        st.Page("pages/2_🗺️_Mapas.py", title="Mapas", icon="🗺️", url_path="dev-mapas"),
+        st.Page("pages/3_📊_Piramides.py", title="Pirámides", icon="📊", url_path="dev-piramides"),
+        st.Page("pages/4_💰_Pensiones_y_Salud.py", title="Pensiones y salud", icon="💰", url_path="dev-pensiones-salud"),
+        st.Page("pages/5_🏙️_Socioeconomico.py", title="Socioeconómico", icon="🏙️", url_path="dev-socioeconomico"),
+        st.Page("pages/6_📋_Politicas.py", title="Políticas", icon="📋", url_path="dev-politicas"),
+        st.Page("pages/7_🧪_Estado_de_datos.py", title="Estado de datos y KPIs", icon="🧪", url_path="dev-estado-datos"),
+    ]
 
-kpi_card_row([
-    ("Población 65+ (Censo 2024)", f"{national_pct:.1f}%", "Sobre 18.480.432 personas censadas"),
-    ("Proyección 65+ a 2050", f"{pct_2050:.0f}%", "INE, proyecciones base 2024 (nacional)"),
-    ("Cotizantes por adulto mayor", f"{soporte_nacional:.2f}", "Cotizantes AFP 2025 / población 65+ censada"),
-    ("Región más envejecida", region_top["region_nombre"], f"{region_top['pct_65_mas']:.1f}% de 65+"),
-])
-
-st.divider()
-
-col1, col2 = st.columns([3, 2])
-with col1:
-    st.subheader("Qué hay en este dashboard")
-    st.markdown("""
-- **🔍 Explorador de datos** — vista "backend": elige cualquier archivo procesado, filtra, agrupa y suma
-  (por región, comuna, año, sexo…) y cruza hasta dos fuentes a la vez. Para explorar antes de decidir qué graficar.
-- **🗺️ Mapas** — choropleth de envejecimiento por comuna y por región.
-- **📊 Pirámides** — pirámide nacional (Censo 2024) y su evolución proyectada 1992–2070; comparador de pirámides por región.
-- **💰 Pensiones y salud** — cobertura previsional, razón de soporte (cotizantes por adulto mayor), proyección regional 2024→2035→2050 y un índice de presión sobre salud.
-- **🏙️ Socioeconómico** — cruce con urbanización (Censo) e ingresos (CASEN 2022); único proxy socioeconómico disponible, con sus limitaciones documentadas.
-- **📋 Políticas** — propuestas de envejecimiento activo priorizadas por los propios datos (qué región/comuna necesita qué tipo de política).
-    """)
-with col2:
-    st.subheader("Fuentes")
-    st.markdown("""
-| Fuente | Cobertura |
-|---|---|
-| Censo 2024 (INE) | 18.480.432 personas, 346 comunas |
-| Proyecciones INE base 2024 | Nacional, 1992–2070 |
-| Superintendencia de Pensiones | Cotizantes/afiliados 1985–2026; pago de pensiones jul-2026 |
-| CASEN 2022 | Ingresos, muestra n=202.231, 334/346 comunas |
-| chilemapas (geometría) | 345/346 comunas |
-    """)
-    st.caption("Ver `Data processed/README.md` y `config/kpis.yaml` para el detalle metodológico completo de cada indicador.")
-
-st.divider()
-st.subheader("Ranking regional rápido")
-st.dataframe(
-    reg.sort_values("pct_65_mas", ascending=False)[[
-        "region_nombre", "pob_total", "pct_65_mas", "pct_0_14", "indice_envejecimiento",
-        "indice_dependencia_vejez", "edad_mediana", "pct_urbano",
-    ]].rename(columns={
-        "region_nombre": "Región", "pob_total": "Población", "pct_65_mas": "% 65+",
-        "pct_0_14": "% 0-14", "indice_envejecimiento": "Índice envejecimiento",
-        "indice_dependencia_vejez": "Dependencia vejez", "edad_mediana": "Edad mediana",
-        "pct_urbano": "% urbano",
-    }),
-    hide_index=True, use_container_width=True,
-)
+st.navigation(nav).run()

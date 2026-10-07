@@ -4,9 +4,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from utils import load_csv, kpi_card_row, CATEGORICAL, PLOTLY_LAYOUT, RED, INK_MUTED, PLOTLY_DL_CONFIG
+from utils import load_csv, kpi_card_row, page_config, CATEGORICAL, PLOTLY_LAYOUT, RED, INK_MUTED, PLOTLY_DL_CONFIG
 
-st.set_page_config(page_title="Pensiones y salud", page_icon="💰", layout="wide")
+page_config(page_title="Pensiones y salud", page_icon="💰")
 st.title("💰 Presión sobre pensiones y salud")
 
 pres = load_csv("kpi_presion_previsional_region.csv").sort_values("razon_soporte_previsional")

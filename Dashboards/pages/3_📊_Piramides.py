@@ -5,9 +5,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 from utils import (load_csv, BLUE, ORANGE, RED, AQUA, VIOLET, INK_PRIMARY, INK_MUTED, GRIDLINE, SURFACE, lighten,
-                    PLOTLY_DL_CONFIG)
+                    PLOTLY_DL_CONFIG, page_config)
 
-st.set_page_config(page_title="Pirámides demográficas", page_icon="📊", layout="wide")
+page_config(page_title="Pirámides demográficas", page_icon="📊")
 st.title("📊 Pirámides demográficas y su evolución")
 
 BLUE_LIGHT = lighten(BLUE)

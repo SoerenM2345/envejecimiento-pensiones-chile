@@ -6,7 +6,7 @@ Fuente: microdatos CASEN 2022 ya extraídos (columnas de ingreso, comuna,
 región, factor de expansión `expc`) desde el repo público
 bastianolea/casen_comparador_ingresos (GitHub), que a su vez viene del
 Ministerio de Desarrollo Social. Se descarga una vez a
-Data raw/_external/casen_ingresos.parquet.
+Data raw/development sources/casen_ingresos.parquet.
 
 Advertencia metodológica: CASEN es una ENCUESTA muestral (n=202.231 personas
 a nivel nacional), no un censo. A nivel comunal la muestra tiene entre 11 y
@@ -27,7 +27,7 @@ from pathlib import Path
 
 RAW = Path(__file__).resolve().parent.parent / "Data raw"
 DP = Path(__file__).resolve().parent.parent / "Data processed"
-EXT = RAW / "_external"
+EXT = RAW / "development sources"  # extracto CASEN 2022 de terceros: solo páginas dev (KPI 2.3 usa casen_2022.dta)
 EXT.mkdir(exist_ok=True)
 
 PARQUET_URL = "https://raw.githubusercontent.com/bastianolea/casen_comparador_ingresos/main/datos/casen_ingresos.parquet"

@@ -8,9 +8,9 @@ preguntas ad-hoc del tipo "dame la suma de X por región, filtrando Y".
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from utils import list_processed_csvs, load_csv, standardize_keys, CATEGORICAL, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
+from utils import list_processed_csvs, load_csv, standardize_keys, page_config, CATEGORICAL, PLOTLY_LAYOUT, PLOTLY_DL_CONFIG
 
-st.set_page_config(page_title="Explorador de datos", page_icon="🔍", layout="wide")
+page_config(page_title="Explorador de datos", page_icon="🔍")
 st.title("🔍 Explorador de datos")
 st.caption("Selecciona fuente(s), filtra, agrupa y suma/promedia. Todas las tablas de `Data processed/`.")
 

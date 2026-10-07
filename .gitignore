@@ -10,3 +10,6 @@ __pycache__/
 Data raw/personas_censo2024.csv
 Data raw/_external/deis/
 *.zip
+
+Data raw/_external/casen2022/casen_2022.dta
+.pytest_cache/

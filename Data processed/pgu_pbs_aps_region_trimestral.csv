@@ -1,0 +1,811 @@
+trimestre,region_id,region_nombre,tipo_beneficio,sexo,n_beneficiarios,monto_total_mm
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU no contributiva,Mujeres,3362.0,2064.921745120115
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU no contributiva,Hombres,1444.0,886.8486435923364
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU no contributiva,Total,4806.0,2951.7703887124508
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU contributiva,Mujeres,10114.666666666666,6158.628820416488
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU contributiva,Hombres,8450.333333333334,5100.433126925262
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PGU contributiva,Total,18565.0,11259.06194734175
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS vejez,Mujeres,1321.0,936.9630739427107
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS vejez,Hombres,748.0,535.732112919723
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS vejez,Total,2069.0,1472.6951868624335
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PBS invalidez,Mujeres,1141.6666666666667,705.2286604238303
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PBS invalidez,Hombres,1155.0,713.5996049422488
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,PBS invalidez,Total,2296.6666666666665,1418.8282653660788
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS invalidez,Mujeres,465.6666666666667,238.4946721800443
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS invalidez,Hombres,565.6666666666666,275.7115005262986
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,APS invalidez,Total,1031.3333333333333,514.206172706343
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,Total,Mujeres,16405.0,10104.236972083187
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,Total,Hombres,12363.0,7512.324988905869
+octubre 2023 a diciembre 2023,15,Arica y Parinacota,Total,Total,28768.0,17616.561960989056
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU no contributiva,Mujeres,3727.6666666666665,2294.1915294369383
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU no contributiva,Hombres,1636.3333333333333,1005.5513327334248
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU no contributiva,Total,5364.0,3299.742862170363
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU contributiva,Mujeres,10913.333333333334,6643.196573926179
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU contributiva,Hombres,9961.0,5973.70214470806
+octubre 2023 a diciembre 2023,1,Tarapacá,PGU contributiva,Total,20874.333333333332,12616.898718634238
+octubre 2023 a diciembre 2023,1,Tarapacá,APS vejez,Mujeres,1627.3333333333333,1156.5737413746106
+octubre 2023 a diciembre 2023,1,Tarapacá,APS vejez,Hombres,875.6666666666666,629.0587417236432
+octubre 2023 a diciembre 2023,1,Tarapacá,APS vejez,Total,2503.0,1785.632483098254
+octubre 2023 a diciembre 2023,1,Tarapacá,PBS invalidez,Mujeres,1388.0,857.5477979504715
+octubre 2023 a diciembre 2023,1,Tarapacá,PBS invalidez,Hombres,1171.6666666666667,723.4322713647616
+octubre 2023 a diciembre 2023,1,Tarapacá,PBS invalidez,Total,2559.6666666666665,1580.980069315233
+octubre 2023 a diciembre 2023,1,Tarapacá,APS invalidez,Mujeres,665.6666666666666,344.8955606845289
+octubre 2023 a diciembre 2023,1,Tarapacá,APS invalidez,Hombres,772.0,374.91204208564994
+octubre 2023 a diciembre 2023,1,Tarapacá,APS invalidez,Total,1437.6666666666667,719.8076027701788
+octubre 2023 a diciembre 2023,1,Tarapacá,Total,Mujeres,18322.0,11296.405203372726
+octubre 2023 a diciembre 2023,1,Tarapacá,Total,Hombres,14416.666666666666,8706.65653261554
+octubre 2023 a diciembre 2023,1,Tarapacá,Total,Total,32738.666666666668,20003.061735988267
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU no contributiva,Mujeres,7025.666666666667,4325.277091124577
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU no contributiva,Hombres,2213.6666666666665,1354.1416885918106
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU no contributiva,Total,9239.333333333334,5679.418779716387
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU contributiva,Mujeres,19999.333333333332,12149.541781871418
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU contributiva,Hombres,16666.333333333332,9708.162597086437
+octubre 2023 a diciembre 2023,2,Antofagasta,PGU contributiva,Total,36665.666666666664,21857.704378957857
+octubre 2023 a diciembre 2023,2,Antofagasta,APS vejez,Mujeres,2536.3333333333335,1791.1201613081303
+octubre 2023 a diciembre 2023,2,Antofagasta,APS vejez,Hombres,1093.0,791.8729042808955
+octubre 2023 a diciembre 2023,2,Antofagasta,APS vejez,Total,3629.3333333333335,2582.9930655890257
+octubre 2023 a diciembre 2023,2,Antofagasta,PBS invalidez,Mujeres,2065.6666666666665,1275.8094069452677
+octubre 2023 a diciembre 2023,2,Antofagasta,PBS invalidez,Hombres,1552.0,958.4423525333314
+octubre 2023 a diciembre 2023,2,Antofagasta,PBS invalidez,Total,3617.6666666666665,2234.2517594785995
+octubre 2023 a diciembre 2023,2,Antofagasta,APS invalidez,Mujeres,819.0,416.60139261907915
+octubre 2023 a diciembre 2023,2,Antofagasta,APS invalidez,Hombres,856.3333333333334,418.6540874273063
+octubre 2023 a diciembre 2023,2,Antofagasta,APS invalidez,Total,1675.3333333333333,835.2554800463855
+octubre 2023 a diciembre 2023,2,Antofagasta,Total,Mujeres,32446.0,19958.349833868473
+octubre 2023 a diciembre 2023,2,Antofagasta,Total,Hombres,22381.333333333332,13231.27362991978
+octubre 2023 a diciembre 2023,2,Antofagasta,Total,Total,54827.333333333336,33189.62346378825
+octubre 2023 a diciembre 2023,3,Atacama,PGU no contributiva,Mujeres,5100.666666666667,3131.588852093373
+octubre 2023 a diciembre 2023,3,Atacama,PGU no contributiva,Hombres,1959.0,1202.9866366411131
+octubre 2023 a diciembre 2023,3,Atacama,PGU no contributiva,Total,7059.666666666667,4334.575488734486
+octubre 2023 a diciembre 2023,3,Atacama,PGU contributiva,Mujeres,12052.333333333334,7329.797442519726
+octubre 2023 a diciembre 2023,3,Atacama,PGU contributiva,Hombres,11380.333333333334,6783.514446940109
+octubre 2023 a diciembre 2023,3,Atacama,PGU contributiva,Total,23432.666666666668,14113.311889459836
+octubre 2023 a diciembre 2023,3,Atacama,APS vejez,Mujeres,1596.6666666666667,1119.8713616190535
+octubre 2023 a diciembre 2023,3,Atacama,APS vejez,Hombres,998.6666666666666,716.9510807456376
+octubre 2023 a diciembre 2023,3,Atacama,APS vejez,Total,2595.3333333333335,1836.8224423646914
+octubre 2023 a diciembre 2023,3,Atacama,PBS invalidez,Mujeres,1510.0,932.9234875030181
+octubre 2023 a diciembre 2023,3,Atacama,PBS invalidez,Hombres,1157.3333333333333,714.9871407752933
+octubre 2023 a diciembre 2023,3,Atacama,PBS invalidez,Total,2667.3333333333335,1647.9106282783114
+octubre 2023 a diciembre 2023,3,Atacama,APS invalidez,Mujeres,586.6666666666666,313.36705753974826
+octubre 2023 a diciembre 2023,3,Atacama,APS invalidez,Hombres,704.6666666666666,346.6468057124244
+octubre 2023 a diciembre 2023,3,Atacama,APS invalidez,Total,1291.3333333333333,660.0138632521728
+octubre 2023 a diciembre 2023,3,Atacama,Total,Mujeres,20846.333333333332,12827.54820127492
+octubre 2023 a diciembre 2023,3,Atacama,Total,Hombres,16200.0,9765.086110814576
+octubre 2023 a diciembre 2023,3,Atacama,Total,Total,37046.333333333336,22592.634312089496
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU no contributiva,Mujeres,16283.666666666666,10007.478011480687
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU no contributiva,Hombres,7040.0,4335.469507652876
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU no contributiva,Total,23323.666666666668,14342.947519133564
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU contributiva,Mujeres,37294.666666666664,22719.706330925266
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU contributiva,Hombres,32268.333333333332,19328.51341990712
+octubre 2023 a diciembre 2023,4,Coquimbo,PGU contributiva,Total,69563.0,42048.21975083239
+octubre 2023 a diciembre 2023,4,Coquimbo,APS vejez,Mujeres,4350.0,3074.3939370202474
+octubre 2023 a diciembre 2023,4,Coquimbo,APS vejez,Hombres,2826.6666666666665,2032.8677346794373
+octubre 2023 a diciembre 2023,4,Coquimbo,APS vejez,Total,7176.666666666667,5107.261671699685
+octubre 2023 a diciembre 2023,4,Coquimbo,PBS invalidez,Mujeres,4627.666666666667,2857.2372582889834
+octubre 2023 a diciembre 2023,4,Coquimbo,PBS invalidez,Hombres,3944.6666666666665,2436.747158603771
+octubre 2023 a diciembre 2023,4,Coquimbo,PBS invalidez,Total,8572.333333333334,5293.984416892755
+octubre 2023 a diciembre 2023,4,Coquimbo,APS invalidez,Mujeres,1911.3333333333333,996.082469473439
+octubre 2023 a diciembre 2023,4,Coquimbo,APS invalidez,Hombres,2172.3333333333335,1077.8239915846757
+octubre 2023 a diciembre 2023,4,Coquimbo,APS invalidez,Total,4083.6666666666665,2073.9064610581145
+octubre 2023 a diciembre 2023,4,Coquimbo,Total,Mujeres,64467.333333333336,39654.89800718862
+octubre 2023 a diciembre 2023,4,Coquimbo,Total,Hombres,48252.0,29211.42181242788
+octubre 2023 a diciembre 2023,4,Coquimbo,Total,Total,112719.33333333333,68866.31981961652
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU no contributiva,Mujeres,33965.333333333336,20877.143325083704
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU no contributiva,Hombres,13148.333333333334,8088.247887470714
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU no contributiva,Total,47113.666666666664,28965.39121255442
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU contributiva,Mujeres,101469.0,61696.3678908951
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU contributiva,Hombres,80590.0,48314.52659110228
+octubre 2023 a diciembre 2023,5,Valparaíso,PGU contributiva,Total,182059.0,110010.89448199737
+octubre 2023 a diciembre 2023,5,Valparaíso,APS vejez,Mujeres,13045.333333333334,9255.661863065903
+octubre 2023 a diciembre 2023,5,Valparaíso,APS vejez,Hombres,6702.666666666667,4829.001813941039
+octubre 2023 a diciembre 2023,5,Valparaíso,APS vejez,Total,19748.0,14084.663677006944
+octubre 2023 a diciembre 2023,5,Valparaíso,PBS invalidez,Mujeres,10421.0,6436.413592398961
+octubre 2023 a diciembre 2023,5,Valparaíso,PBS invalidez,Hombres,8656.666666666666,5346.107165331168
+octubre 2023 a diciembre 2023,5,Valparaíso,PBS invalidez,Total,19077.666666666668,11782.52075773013
+octubre 2023 a diciembre 2023,5,Valparaíso,APS invalidez,Mujeres,5332.0,2734.021730850359
+octubre 2023 a diciembre 2023,5,Valparaíso,APS invalidez,Hombres,5382.333333333333,2620.2057237518684
+octubre 2023 a diciembre 2023,5,Valparaíso,APS invalidez,Total,10714.333333333334,5354.227454602227
+octubre 2023 a diciembre 2023,5,Valparaíso,Total,Mujeres,164232.66666666666,100999.60840229403
+octubre 2023 a diciembre 2023,5,Valparaíso,Total,Hombres,114480.0,69198.08918159705
+octubre 2023 a diciembre 2023,5,Valparaíso,Total,Total,278712.6666666667,170197.69758389113
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU no contributiva,Mujeres,113639.66666666667,69874.21035257203
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU no contributiva,Hombres,41524.666666666664,25551.321474436296
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU no contributiva,Total,155164.33333333334,95425.53182700831
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU contributiva,Mujeres,322795.3333333333,196459.016608486
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU contributiva,Hombres,250843.0,151279.4955883004
+octubre 2023 a diciembre 2023,13,Metropolitana,PGU contributiva,Total,573638.3333333334,347738.5121967864
+octubre 2023 a diciembre 2023,13,Metropolitana,APS vejez,Mujeres,45063.0,32030.521216994835
+octubre 2023 a diciembre 2023,13,Metropolitana,APS vejez,Hombres,19832.333333333332,14336.028787391802
+octubre 2023 a diciembre 2023,13,Metropolitana,APS vejez,Total,64895.333333333336,46366.550004386634
+octubre 2023 a diciembre 2023,13,Metropolitana,PBS invalidez,Mujeres,33998.0,20994.701958491674
+octubre 2023 a diciembre 2023,13,Metropolitana,PBS invalidez,Hombres,27268.333333333332,16839.440647713
+octubre 2023 a diciembre 2023,13,Metropolitana,PBS invalidez,Total,61266.333333333336,37834.142606204674
+octubre 2023 a diciembre 2023,13,Metropolitana,APS invalidez,Mujeres,16148.0,8542.460849279836
+octubre 2023 a diciembre 2023,13,Metropolitana,APS invalidez,Hombres,14961.0,7437.071824627775
+octubre 2023 a diciembre 2023,13,Metropolitana,APS invalidez,Total,31109.0,15979.532673907612
+octubre 2023 a diciembre 2023,13,Metropolitana,Total,Mujeres,531644.0,327900.91098582436
+octubre 2023 a diciembre 2023,13,Metropolitana,Total,Hombres,354429.3333333333,215443.35832246923
+octubre 2023 a diciembre 2023,13,Metropolitana,Total,Total,886073.3333333334,543344.2693082936
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU no contributiva,Mujeres,17486.333333333332,10717.402229388665
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU no contributiva,Hombres,6803.333333333333,4184.329625627229
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU no contributiva,Total,24289.666666666668,14901.731855015893
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU contributiva,Mujeres,45536.666666666664,27701.567182589195
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU contributiva,Hombres,42858.0,25698.97765210102
+octubre 2023 a diciembre 2023,6,O'Higgins,PGU contributiva,Total,88394.66666666667,53400.54483469021
+octubre 2023 a diciembre 2023,6,O'Higgins,APS vejez,Mujeres,6171.333333333333,4344.58779715454
+octubre 2023 a diciembre 2023,6,O'Higgins,APS vejez,Hombres,3643.3333333333335,2623.6597481285025
+octubre 2023 a diciembre 2023,6,O'Higgins,APS vejez,Total,9814.666666666666,6968.247545283042
+octubre 2023 a diciembre 2023,6,O'Higgins,PBS invalidez,Mujeres,5655.0,3490.5253189283726
+octubre 2023 a diciembre 2023,6,O'Higgins,PBS invalidez,Hombres,4410.666666666667,2721.2582347515367
+octubre 2023 a diciembre 2023,6,O'Higgins,PBS invalidez,Total,10065.666666666666,6211.783553679908
+octubre 2023 a diciembre 2023,6,O'Higgins,APS invalidez,Mujeres,3510.0,1828.9161491828052
+octubre 2023 a diciembre 2023,6,O'Higgins,APS invalidez,Hombres,3349.0,1612.761730875774
+octubre 2023 a diciembre 2023,6,O'Higgins,APS invalidez,Total,6859.0,3441.67788005858
+octubre 2023 a diciembre 2023,6,O'Higgins,Total,Mujeres,78359.33333333333,48082.99867724357
+octubre 2023 a diciembre 2023,6,O'Higgins,Total,Hombres,61064.333333333336,36840.98699148406
+octubre 2023 a diciembre 2023,6,O'Higgins,Total,Total,139423.66666666666,84923.98566872763
+octubre 2023 a diciembre 2023,7,Maule,PGU no contributiva,Mujeres,24206.333333333332,14808.959950846222
+octubre 2023 a diciembre 2023,7,Maule,PGU no contributiva,Hombres,10436.0,6430.8809021237375
+octubre 2023 a diciembre 2023,7,Maule,PGU no contributiva,Total,34642.333333333336,21239.840852969955
+octubre 2023 a diciembre 2023,7,Maule,PGU contributiva,Mujeres,50985.0,31085.822114081733
+octubre 2023 a diciembre 2023,7,Maule,PGU contributiva,Hombres,48046.333333333336,29309.258880436235
+octubre 2023 a diciembre 2023,7,Maule,PGU contributiva,Total,99031.33333333333,60395.08099451797
+octubre 2023 a diciembre 2023,7,Maule,APS vejez,Mujeres,6382.666666666667,4496.401375942705
+octubre 2023 a diciembre 2023,7,Maule,APS vejez,Hombres,5315.0,3784.7774650643196
+octubre 2023 a diciembre 2023,7,Maule,APS vejez,Total,11697.666666666666,8281.178841007024
+octubre 2023 a diciembre 2023,7,Maule,PBS invalidez,Mujeres,7487.333333333333,4621.026186884786
+octubre 2023 a diciembre 2023,7,Maule,PBS invalidez,Hombres,5951.0,3672.6658864231313
+octubre 2023 a diciembre 2023,7,Maule,PBS invalidez,Total,13438.333333333334,8293.692073307915
+octubre 2023 a diciembre 2023,7,Maule,APS invalidez,Mujeres,3327.3333333333335,1789.5003250657362
+octubre 2023 a diciembre 2023,7,Maule,APS invalidez,Hombres,3723.6666666666665,1886.6367369443547
+octubre 2023 a diciembre 2023,7,Maule,APS invalidez,Total,7051.0,3676.137062010091
+octubre 2023 a diciembre 2023,7,Maule,Total,Mujeres,92388.66666666667,56801.709952821184
+octubre 2023 a diciembre 2023,7,Maule,Total,Hombres,73472.0,45084.21987099177
+octubre 2023 a diciembre 2023,7,Maule,Total,Total,165860.66666666666,101885.92982381297
+octubre 2023 a diciembre 2023,16,Ñuble,PGU no contributiva,Mujeres,15029.333333333334,9189.753783680795
+octubre 2023 a diciembre 2023,16,Ñuble,PGU no contributiva,Hombres,6465.333333333333,3986.9150416858065
+octubre 2023 a diciembre 2023,16,Ñuble,PGU no contributiva,Total,21494.666666666668,13176.668825366602
+octubre 2023 a diciembre 2023,16,Ñuble,PGU contributiva,Mujeres,23634.333333333332,14376.198474215938
+octubre 2023 a diciembre 2023,16,Ñuble,PGU contributiva,Hombres,21766.333333333332,13216.361902470266
+octubre 2023 a diciembre 2023,16,Ñuble,PGU contributiva,Total,45400.666666666664,27592.560376686204
+octubre 2023 a diciembre 2023,16,Ñuble,APS vejez,Mujeres,2412.0,1697.3998134500616
+octubre 2023 a diciembre 2023,16,Ñuble,APS vejez,Hombres,2224.6666666666665,1587.6928681576048
+octubre 2023 a diciembre 2023,16,Ñuble,APS vejez,Total,4636.666666666667,3285.0926816076662
+octubre 2023 a diciembre 2023,16,Ñuble,PBS invalidez,Mujeres,6555.0,4046.1715742913916
+octubre 2023 a diciembre 2023,16,Ñuble,PBS invalidez,Hombres,4757.0,2939.036157928863
+octubre 2023 a diciembre 2023,16,Ñuble,PBS invalidez,Total,11312.0,6985.207732220253
+octubre 2023 a diciembre 2023,16,Ñuble,APS invalidez,Mujeres,2568.0,1385.1974646152328
+octubre 2023 a diciembre 2023,16,Ñuble,APS invalidez,Hombres,2823.0,1466.0308036956756
+octubre 2023 a diciembre 2023,16,Ñuble,APS invalidez,Total,5391.0,2851.228268310908
+octubre 2023 a diciembre 2023,16,Ñuble,Total,Mujeres,50198.666666666664,30694.72111025342
+octubre 2023 a diciembre 2023,16,Ñuble,Total,Hombres,38036.333333333336,23196.036773938213
+octubre 2023 a diciembre 2023,16,Ñuble,Total,Total,88235.0,53890.75788419163
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU no contributiva,Mujeres,30362.333333333332,18634.625558122385
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU no contributiva,Hombres,14948.333333333334,9225.261586551273
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU no contributiva,Total,45310.666666666664,27859.88714467366
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU contributiva,Mujeres,40398.333333333336,24598.71975420639
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU contributiva,Hombres,37032.666666666664,22568.79572616154
+octubre 2023 a diciembre 2023,9,La Araucanía,PGU contributiva,Total,77431.0,47167.51548036793
+octubre 2023 a diciembre 2023,9,La Araucanía,APS vejez,Mujeres,4760.333333333333,3354.1494517993765
+octubre 2023 a diciembre 2023,9,La Araucanía,APS vejez,Hombres,4204.0,2979.559893405182
+octubre 2023 a diciembre 2023,9,La Araucanía,APS vejez,Total,8964.333333333334,6333.709345204558
+octubre 2023 a diciembre 2023,9,La Araucanía,PBS invalidez,Mujeres,8208.666666666666,5069.351922685816
+octubre 2023 a diciembre 2023,9,La Araucanía,PBS invalidez,Hombres,6530.666666666667,4033.593961173152
+octubre 2023 a diciembre 2023,9,La Araucanía,PBS invalidez,Total,14739.333333333334,9102.945883858967
+octubre 2023 a diciembre 2023,9,La Araucanía,APS invalidez,Mujeres,2443.6666666666665,1325.7283550203942
+octubre 2023 a diciembre 2023,9,La Araucanía,APS invalidez,Hombres,3552.3333333333335,1867.4927239557699
+octubre 2023 a diciembre 2023,9,La Araucanía,APS invalidez,Total,5996.0,3193.221078976164
+octubre 2023 a diciembre 2023,9,La Araucanía,Total,Mujeres,86173.33333333333,52982.57504183437
+octubre 2023 a diciembre 2023,9,La Araucanía,Total,Hombres,66268.0,40674.703891246914
+octubre 2023 a diciembre 2023,9,La Araucanía,Total,Total,152441.33333333334,93657.27893308128
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU no contributiva,Mujeres,10054.333333333334,6156.161555433627
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU no contributiva,Hombres,4368.0,2691.342922256676
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU no contributiva,Total,14422.333333333334,8847.504477690301
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU contributiva,Mujeres,17837.666666666668,10859.45063406645
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU contributiva,Hombres,15995.0,9731.818202871751
+octubre 2023 a diciembre 2023,14,Los Ríos,PGU contributiva,Total,33832.666666666664,20591.2688369382
+octubre 2023 a diciembre 2023,14,Los Ríos,APS vejez,Mujeres,2246.3333333333335,1575.1346883033812
+octubre 2023 a diciembre 2023,14,Los Ríos,APS vejez,Hombres,1901.0,1349.3035678973827
+octubre 2023 a diciembre 2023,14,Los Ríos,APS vejez,Total,4147.333333333333,2924.4382562007645
+octubre 2023 a diciembre 2023,14,Los Ríos,PBS invalidez,Mujeres,3365.6666666666665,2077.6146870453736
+octubre 2023 a diciembre 2023,14,Los Ríos,PBS invalidez,Hombres,2408.3333333333335,1487.5126756881414
+octubre 2023 a diciembre 2023,14,Los Ríos,PBS invalidez,Total,5774.0,3565.127362733515
+octubre 2023 a diciembre 2023,14,Los Ríos,APS invalidez,Mujeres,1389.3333333333333,761.7369344434459
+octubre 2023 a diciembre 2023,14,Los Ríos,APS invalidez,Hombres,1815.3333333333333,928.0626845717676
+octubre 2023 a diciembre 2023,14,Los Ríos,APS invalidez,Total,3204.6666666666665,1689.7996190152137
+octubre 2023 a diciembre 2023,14,Los Ríos,Total,Mujeres,34893.333333333336,21430.09849929228
+octubre 2023 a diciembre 2023,14,Los Ríos,Total,Hombres,26487.666666666668,16188.040053285722
+octubre 2023 a diciembre 2023,14,Los Ríos,Total,Total,61381.0,37618.138552578
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU no contributiva,Mujeres,21474.333333333332,13188.759419722814
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU no contributiva,Hombres,10931.666666666666,6744.219041179843
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU no contributiva,Total,32406.0,19932.978460902657
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU contributiva,Mujeres,32908.666666666664,20044.523289791698
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU contributiva,Hombres,29448.666666666668,17921.8290103076
+octubre 2023 a diciembre 2023,10,Los Lagos,PGU contributiva,Total,62357.333333333336,37966.352300099294
+octubre 2023 a diciembre 2023,10,Los Lagos,APS vejez,Mujeres,4767.666666666667,3363.6167322262677
+octubre 2023 a diciembre 2023,10,Los Lagos,APS vejez,Hombres,3831.6666666666665,2723.599452671832
+octubre 2023 a diciembre 2023,10,Los Lagos,APS vejez,Total,8599.333333333334,6087.2161848981
+octubre 2023 a diciembre 2023,10,Los Lagos,PBS invalidez,Mujeres,7093.0,4381.500453889363
+octubre 2023 a diciembre 2023,10,Los Lagos,PBS invalidez,Hombres,5582.0,3447.8840339297326
+octubre 2023 a diciembre 2023,10,Los Lagos,PBS invalidez,Total,12675.0,7829.384487819097
+octubre 2023 a diciembre 2023,10,Los Lagos,APS invalidez,Mujeres,3095.0,1693.6720856683028
+octubre 2023 a diciembre 2023,10,Los Lagos,APS invalidez,Hombres,3277.6666666666665,1721.321868945229
+octubre 2023 a diciembre 2023,10,Los Lagos,APS invalidez,Total,6372.666666666667,3414.993954613531
+octubre 2023 a diciembre 2023,10,Los Lagos,Total,Mujeres,69338.66666666667,42672.07198129844
+octubre 2023 a diciembre 2023,10,Los Lagos,Total,Hombres,53071.666666666664,32558.853407034232
+octubre 2023 a diciembre 2023,10,Los Lagos,Total,Total,122410.33333333333,75230.92538833266
+octubre 2023 a diciembre 2023,11,Aysén,PGU no contributiva,Mujeres,1897.6666666666667,1161.5747340536382
+octubre 2023 a diciembre 2023,11,Aysén,PGU no contributiva,Hombres,1104.6666666666667,680.463038530951
+octubre 2023 a diciembre 2023,11,Aysén,PGU no contributiva,Total,3002.3333333333335,1842.037772584589
+octubre 2023 a diciembre 2023,11,Aysén,PGU contributiva,Mujeres,3632.0,2208.851890387669
+octubre 2023 a diciembre 2023,11,Aysén,PGU contributiva,Hombres,3623.0,2204.999112701472
+octubre 2023 a diciembre 2023,11,Aysén,PGU contributiva,Total,7255.0,4413.85100308914
+octubre 2023 a diciembre 2023,11,Aysén,APS vejez,Mujeres,604.0,424.07890249956324
+octubre 2023 a diciembre 2023,11,Aysén,APS vejez,Hombres,570.3333333333334,406.5212430757239
+octubre 2023 a diciembre 2023,11,Aysén,APS vejez,Total,1174.3333333333333,830.6001455752871
+octubre 2023 a diciembre 2023,11,Aysén,PBS invalidez,Mujeres,505.6666666666667,312.4208938270809
+octubre 2023 a diciembre 2023,11,Aysén,PBS invalidez,Hombres,412.0,254.54906204649438
+octubre 2023 a diciembre 2023,11,Aysén,PBS invalidez,Total,917.6666666666666,566.9699558735751
+octubre 2023 a diciembre 2023,11,Aysén,APS invalidez,Mujeres,296.6666666666667,158.4459124815678
+octubre 2023 a diciembre 2023,11,Aysén,APS invalidez,Hombres,348.3333333333333,183.61381604345192
+octubre 2023 a diciembre 2023,11,Aysén,APS invalidez,Total,645.0,342.0597285250198
+octubre 2023 a diciembre 2023,11,Aysén,Total,Mujeres,6936.0,4265.372333249518
+octubre 2023 a diciembre 2023,11,Aysén,Total,Hombres,6058.333333333333,3730.1462723980935
+octubre 2023 a diciembre 2023,11,Aysén,Total,Total,12994.333333333334,7995.5186056476105
+octubre 2023 a diciembre 2023,12,Magallanes,PGU no contributiva,Mujeres,2306.3333333333335,1413.9481196449271
+octubre 2023 a diciembre 2023,12,Magallanes,PGU no contributiva,Hombres,1017.0,626.1092800890906
+octubre 2023 a diciembre 2023,12,Magallanes,PGU no contributiva,Total,3323.3333333333335,2040.0573997340177
+octubre 2023 a diciembre 2023,12,Magallanes,PGU contributiva,Mujeres,7730.0,4665.924575309557
+octubre 2023 a diciembre 2023,12,Magallanes,PGU contributiva,Hombres,6114.333333333333,3661.1444708007502
+octubre 2023 a diciembre 2023,12,Magallanes,PGU contributiva,Total,13844.333333333334,8327.069046110308
+octubre 2023 a diciembre 2023,12,Magallanes,APS vejez,Mujeres,1117.6666666666667,789.7820839478167
+octubre 2023 a diciembre 2023,12,Magallanes,APS vejez,Hombres,689.0,496.5340612925876
+octubre 2023 a diciembre 2023,12,Magallanes,APS vejez,Total,1806.6666666666667,1286.3161452404042
+octubre 2023 a diciembre 2023,12,Magallanes,PBS invalidez,Mujeres,582.3333333333334,359.78341500679267
+octubre 2023 a diciembre 2023,12,Magallanes,PBS invalidez,Hombres,533.3333333333334,329.0839591167203
+octubre 2023 a diciembre 2023,12,Magallanes,PBS invalidez,Total,1115.6666666666667,688.867374123513
+octubre 2023 a diciembre 2023,12,Magallanes,APS invalidez,Mujeres,406.6666666666667,206.07386673601104
+octubre 2023 a diciembre 2023,12,Magallanes,APS invalidez,Hombres,358.6666666666667,174.29766125460114
+octubre 2023 a diciembre 2023,12,Magallanes,APS invalidez,Total,765.3333333333334,380.37152799061215
+octubre 2023 a diciembre 2023,12,Magallanes,Total,Mujeres,12143.0,7435.512060645104
+octubre 2023 a diciembre 2023,12,Magallanes,Total,Hombres,8712.333333333334,5287.16943255375
+octubre 2023 a diciembre 2023,12,Magallanes,Total,Total,20855.333333333332,12722.681493198856
+cuarto trimestre 2024,15,Arica y Parinacota,PGU no contributiva,Mujeres,4121.333333333333,2632.461815553746
+cuarto trimestre 2024,15,Arica y Parinacota,PGU no contributiva,Hombres,1720.0,1104.057767899531
+cuarto trimestre 2024,15,Arica y Parinacota,PGU no contributiva,Total,5841.333333333333,3736.519583453278
+cuarto trimestre 2024,15,Arica y Parinacota,PGU contributiva,Mujeres,10121.66666666667,6405.455843281878
+cuarto trimestre 2024,15,Arica y Parinacota,PGU contributiva,Hombres,8786.666666666666,5506.660394908361
+cuarto trimestre 2024,15,Arica y Parinacota,PGU contributiva,Total,18908.33333333333,11912.11623819024
+cuarto trimestre 2024,15,Arica y Parinacota,APS vejez,Mujeres,1278.666666666667,948.9793518033493
+cuarto trimestre 2024,15,Arica y Parinacota,APS vejez,Hombres,693.6666666666666,522.0980977754829
+cuarto trimestre 2024,15,Arica y Parinacota,APS vejez,Total,1972.333333333333,1471.077449578832
+cuarto trimestre 2024,15,Arica y Parinacota,PBS invalidez,Mujeres,1221.0,784.2708411644351
+cuarto trimestre 2024,15,Arica y Parinacota,PBS invalidez,Hombres,1273.666666666667,817.4844306475145
+cuarto trimestre 2024,15,Arica y Parinacota,PBS invalidez,Total,2494.666666666667,1601.75527181195
+cuarto trimestre 2024,15,Arica y Parinacota,APS invalidez,Mujeres,470.0,244.1928471113519
+cuarto trimestre 2024,15,Arica y Parinacota,APS invalidez,Hombres,609.3333333333334,298.47158196444
+cuarto trimestre 2024,15,Arica y Parinacota,APS invalidez,Total,1079.333333333333,542.6644290757919
+cuarto trimestre 2024,15,Arica y Parinacota,Total,Mujeres,17212.66666666667,11015.36069891476
+cuarto trimestre 2024,15,Arica y Parinacota,Total,Hombres,13083.33333333333,8248.772273195329
+cuarto trimestre 2024,15,Arica y Parinacota,Total,Total,30296.0,19264.13297211009
+cuarto trimestre 2024,1,Tarapacá,PGU no contributiva,Mujeres,4566.666666666667,2925.271778433021
+cuarto trimestre 2024,1,Tarapacá,PGU no contributiva,Hombres,1946.666666666667,1248.916203211828
+cuarto trimestre 2024,1,Tarapacá,PGU no contributiva,Total,6513.333333333333,4174.187981644849
+cuarto trimestre 2024,1,Tarapacá,PGU contributiva,Mujeres,10990.66666666667,6946.516254128288
+cuarto trimestre 2024,1,Tarapacá,PGU contributiva,Hombres,10516.66666666667,6535.714346765475
+cuarto trimestre 2024,1,Tarapacá,PGU contributiva,Total,21507.33333333333,13482.23060089376
+cuarto trimestre 2024,1,Tarapacá,APS vejez,Mujeres,1576.666666666667,1174.179042068406
+cuarto trimestre 2024,1,Tarapacá,APS vejez,Hombres,829.0,629.5147421880172
+cuarto trimestre 2024,1,Tarapacá,APS vejez,Total,2405.666666666667,1803.693784256424
+cuarto trimestre 2024,1,Tarapacá,PBS invalidez,Mujeres,1449.333333333333,931.3035394723494
+cuarto trimestre 2024,1,Tarapacá,PBS invalidez,Hombres,1220.333333333333,783.6818847568318
+cuarto trimestre 2024,1,Tarapacá,PBS invalidez,Total,2669.666666666667,1714.985424229181
+cuarto trimestre 2024,1,Tarapacá,APS invalidez,Mujeres,654.3333333333334,349.0442708838547
+cuarto trimestre 2024,1,Tarapacá,APS invalidez,Hombres,770.6666666666666,388.1947354349876
+cuarto trimestre 2024,1,Tarapacá,APS invalidez,Total,1425.0,737.2390063188423
+cuarto trimestre 2024,1,Tarapacá,Total,Mujeres,19237.66666666667,12326.31488498592
+cuarto trimestre 2024,1,Tarapacá,Total,Hombres,15283.33333333333,9586.021912357139
+cuarto trimestre 2024,1,Tarapacá,Total,Total,34521.0,21912.33679734306
+cuarto trimestre 2024,2,Antofagasta,PGU no contributiva,Mujeres,9031.666666666666,5786.32368705624
+cuarto trimestre 2024,2,Antofagasta,PGU no contributiva,Hombres,2545.333333333333,1628.605702115961
+cuarto trimestre 2024,2,Antofagasta,PGU no contributiva,Total,11577.0,7414.929389172201
+cuarto trimestre 2024,2,Antofagasta,PGU contributiva,Mujeres,19923.0,12529.84981044206
+cuarto trimestre 2024,2,Antofagasta,PGU contributiva,Hombres,18017.0,10836.42115547432
+cuarto trimestre 2024,2,Antofagasta,PGU contributiva,Total,37940.0,23366.27096591637
+cuarto trimestre 2024,2,Antofagasta,APS vejez,Mujeres,2443.0,1804.917675614404
+cuarto trimestre 2024,2,Antofagasta,APS vejez,Hombres,1010.333333333333,776.4461274562102
+cuarto trimestre 2024,2,Antofagasta,APS vejez,Total,3453.333333333333,2581.363803070614
+cuarto trimestre 2024,2,Antofagasta,PBS invalidez,Mujeres,2254.0,1447.361072290705
+cuarto trimestre 2024,2,Antofagasta,PBS invalidez,Hombres,1675.666666666667,1076.183192628774
+cuarto trimestre 2024,2,Antofagasta,PBS invalidez,Total,3929.666666666667,2523.54426491948
+cuarto trimestre 2024,2,Antofagasta,APS invalidez,Mujeres,866.3333333333334,455.1544904641158
+cuarto trimestre 2024,2,Antofagasta,APS invalidez,Hombres,917.0,456.8262122282323
+cuarto trimestre 2024,2,Antofagasta,APS invalidez,Total,1783.333333333333,911.9807026923481
+cuarto trimestre 2024,2,Antofagasta,Total,Mujeres,34518.0,22023.60673586752
+cuarto trimestre 2024,2,Antofagasta,Total,Hombres,24165.33333333333,14774.48238990349
+cuarto trimestre 2024,2,Antofagasta,Total,Total,58683.33333333334,36798.08912577102
+cuarto trimestre 2024,3,Atacama,PGU no contributiva,Mujeres,6535.666666666667,4177.267587302314
+cuarto trimestre 2024,3,Atacama,PGU no contributiva,Hombres,2291.666666666667,1466.886091920393
+cuarto trimestre 2024,3,Atacama,PGU no contributiva,Total,8827.333333333334,5644.153679222708
+cuarto trimestre 2024,3,Atacama,PGU contributiva,Mujeres,11724.66666666667,7397.691385971317
+cuarto trimestre 2024,3,Atacama,PGU contributiva,Hombres,12143.0,7501.471816481247
+cuarto trimestre 2024,3,Atacama,PGU contributiva,Total,23867.66666666667,14899.16320245256
+cuarto trimestre 2024,3,Atacama,APS vejez,Mujeres,1539.333333333333,1128.700452618956
+cuarto trimestre 2024,3,Atacama,APS vejez,Hombres,935.6666666666666,709.5674463860225
+cuarto trimestre 2024,3,Atacama,APS vejez,Total,2475.0,1838.267899004978
+cuarto trimestre 2024,3,Atacama,PBS invalidez,Mujeres,1566.333333333333,1006.483412431418
+cuarto trimestre 2024,3,Atacama,PBS invalidez,Hombres,1211.333333333333,778.2871580540921
+cuarto trimestre 2024,3,Atacama,PBS invalidez,Total,2777.666666666667,1784.77057048551
+cuarto trimestre 2024,3,Atacama,APS invalidez,Mujeres,589.6666666666666,324.4023900078579
+cuarto trimestre 2024,3,Atacama,APS invalidez,Hombres,719.0,367.2654051243616
+cuarto trimestre 2024,3,Atacama,APS invalidez,Total,1308.666666666667,691.6677951322195
+cuarto trimestre 2024,3,Atacama,Total,Mujeres,21955.66666666667,14034.54522833186
+cuarto trimestre 2024,3,Atacama,Total,Hombres,17300.66666666667,10823.47791796612
+cuarto trimestre 2024,3,Atacama,Total,Total,39256.33333333334,24858.02314629798
+cuarto trimestre 2024,4,Coquimbo,PGU no contributiva,Mujeres,20303.66666666667,12985.54982693032
+cuarto trimestre 2024,4,Coquimbo,PGU no contributiva,Hombres,8793.333333333334,5642.553121121243
+cuarto trimestre 2024,4,Coquimbo,PGU no contributiva,Total,29097.0,18628.10294805156
+cuarto trimestre 2024,4,Coquimbo,PGU contributiva,Mujeres,36171.66666666666,22868.58148239318
+cuarto trimestre 2024,4,Coquimbo,PGU contributiva,Hombres,33232.0,20630.31302199572
+cuarto trimestre 2024,4,Coquimbo,PGU contributiva,Total,69403.66666666667,43498.8945043889
+cuarto trimestre 2024,4,Coquimbo,APS vejez,Mujeres,4203.0,3113.441884306212
+cuarto trimestre 2024,4,Coquimbo,APS vejez,Hombres,2697.0,2047.181708733981
+cuarto trimestre 2024,4,Coquimbo,APS vejez,Total,6900.0,5160.623593040193
+cuarto trimestre 2024,4,Coquimbo,PBS invalidez,Mujeres,4840.666666666667,3108.861835711914
+cuarto trimestre 2024,4,Coquimbo,PBS invalidez,Hombres,4178.0,2684.669470286302
+cuarto trimestre 2024,4,Coquimbo,PBS invalidez,Total,9018.666666666666,5793.531305998216
+cuarto trimestre 2024,4,Coquimbo,APS invalidez,Mujeres,1984.333333333333,1062.9021447919
+cuarto trimestre 2024,4,Coquimbo,APS invalidez,Hombres,2321.333333333333,1177.645876878478
+cuarto trimestre 2024,4,Coquimbo,APS invalidez,Total,4305.666666666667,2240.548021670378
+cuarto trimestre 2024,4,Coquimbo,Total,Mujeres,67503.33333333333,43139.33717413352
+cuarto trimestre 2024,4,Coquimbo,Total,Hombres,51221.66666666666,32182.36319901572
+cuarto trimestre 2024,4,Coquimbo,Total,Total,118725.0,75321.70037314924
+cuarto trimestre 2024,5,Valparaíso,PGU no contributiva,Mujeres,43668.66666666666,27935.88049629046
+cuarto trimestre 2024,5,Valparaíso,PGU no contributiva,Hombres,15819.0,10151.15083924386
+cuarto trimestre 2024,5,Valparaíso,PGU no contributiva,Total,59487.66666666666,38087.03133553432
+cuarto trimestre 2024,5,Valparaíso,PGU contributiva,Mujeres,99013.66666666667,62467.08367112269
+cuarto trimestre 2024,5,Valparaíso,PGU contributiva,Hombres,83687.0,52029.24232497679
+cuarto trimestre 2024,5,Valparaíso,PGU contributiva,Total,182700.6666666667,114496.3259960995
+cuarto trimestre 2024,5,Valparaíso,APS vejez,Mujeres,12591.33333333333,9354.996517528518
+cuarto trimestre 2024,5,Valparaíso,APS vejez,Hombres,6283.333333333333,4776.686266109114
+cuarto trimestre 2024,5,Valparaíso,APS vejez,Total,18874.66666666667,14131.68278363763
+cuarto trimestre 2024,5,Valparaíso,PBS invalidez,Mujeres,10686.66666666667,6865.703511989347
+cuarto trimestre 2024,5,Valparaíso,PBS invalidez,Hombres,8989.0,5773.831227523723
+cuarto trimestre 2024,5,Valparaíso,PBS invalidez,Total,19675.66666666667,12639.53473951307
+cuarto trimestre 2024,5,Valparaíso,APS invalidez,Mujeres,5356.0,2815.002572380432
+cuarto trimestre 2024,5,Valparaíso,APS invalidez,Hombres,5509.0,2767.23550370121
+cuarto trimestre 2024,5,Valparaíso,APS invalidez,Total,10865.0,5582.238076081641
+cuarto trimestre 2024,5,Valparaíso,Total,Mujeres,171316.3333333333,109438.6667693114
+cuarto trimestre 2024,5,Valparaíso,Total,Hombres,120287.3333333333,75498.1461615547
+cuarto trimestre 2024,5,Valparaíso,Total,Total,291603.6666666667,184936.8129308661
+cuarto trimestre 2024,13,Metropolitana,PGU no contributiva,Mujeres,141853.3333333333,90718.36362167851
+cuarto trimestre 2024,13,Metropolitana,PGU no contributiva,Hombres,49041.66666666666,31439.40626361295
+cuarto trimestre 2024,13,Metropolitana,PGU no contributiva,Total,190895.0,122157.7698852914
+cuarto trimestre 2024,13,Metropolitana,PGU contributiva,Mujeres,325709.0,205610.8096771592
+cuarto trimestre 2024,13,Metropolitana,PGU contributiva,Hombres,270971.0,169408.8690266486
+cuarto trimestre 2024,13,Metropolitana,PGU contributiva,Total,596680.0,375019.6787038078
+cuarto trimestre 2024,13,Metropolitana,APS vejez,Mujeres,43478.66666666666,32356.98403945634
+cuarto trimestre 2024,13,Metropolitana,APS vejez,Hombres,18625.66666666667,14225.97029480576
+cuarto trimestre 2024,13,Metropolitana,APS vejez,Total,62104.33333333334,46582.9543342621
+cuarto trimestre 2024,13,Metropolitana,PBS invalidez,Mujeres,35629.66666666666,22880.34487181649
+cuarto trimestre 2024,13,Metropolitana,PBS invalidez,Hombres,28555.66666666667,18339.3235047461
+cuarto trimestre 2024,13,Metropolitana,PBS invalidez,Total,64185.33333333334,41219.66837656259
+cuarto trimestre 2024,13,Metropolitana,APS invalidez,Mujeres,16576.66666666667,8977.32117599459
+cuarto trimestre 2024,13,Metropolitana,APS invalidez,Hombres,15957.66666666667,8057.193805909346
+cuarto trimestre 2024,13,Metropolitana,APS invalidez,Total,32534.33333333333,17034.51498190394
+cuarto trimestre 2024,13,Metropolitana,Total,Mujeres,563247.3333333334,360543.8233861051
+cuarto trimestre 2024,13,Metropolitana,Total,Hombres,383151.6666666667,241470.7628957227
+cuarto trimestre 2024,13,Metropolitana,Total,Total,946399.0,602014.5862818279
+cuarto trimestre 2024,6,O'Higgins,PGU no contributiva,Mujeres,23262.66666666667,14837.77863611809
+cuarto trimestre 2024,6,O'Higgins,PGU no contributiva,Hombres,8415.666666666666,5397.311845718094
+cuarto trimestre 2024,6,O'Higgins,PGU no contributiva,Total,31678.33333333333,20235.09048183619
+cuarto trimestre 2024,6,O'Higgins,PGU contributiva,Mujeres,43779.66666666666,27658.96335617468
+cuarto trimestre 2024,6,O'Higgins,PGU contributiva,Hombres,44719.33333333334,27834.46586492861
+cuarto trimestre 2024,6,O'Higgins,PGU contributiva,Total,88499.0,55493.42922110329
+cuarto trimestre 2024,6,O'Higgins,APS vejez,Mujeres,5997.0,4407.024161240328
+cuarto trimestre 2024,6,O'Higgins,APS vejez,Hombres,3421.0,2591.383489201425
+cuarto trimestre 2024,6,O'Higgins,APS vejez,Total,9418.0,6998.407650441754
+cuarto trimestre 2024,6,O'Higgins,PBS invalidez,Mujeres,5869.666666666667,3767.678875384649
+cuarto trimestre 2024,6,O'Higgins,PBS invalidez,Hombres,4605.333333333333,2955.340903187566
+cuarto trimestre 2024,6,O'Higgins,PBS invalidez,Total,10475.0,6723.019778572216
+cuarto trimestre 2024,6,O'Higgins,APS invalidez,Mujeres,3549.666666666667,1902.062525378897
+cuarto trimestre 2024,6,O'Higgins,APS invalidez,Hombres,3447.333333333333,1703.931068603132
+cuarto trimestre 2024,6,O'Higgins,APS invalidez,Total,6997.0,3605.993593982029
+cuarto trimestre 2024,6,O'Higgins,Total,Mujeres,82458.66666666667,52573.50755429665
+cuarto trimestre 2024,6,O'Higgins,Total,Hombres,64608.66666666666,40482.43317163883
+cuarto trimestre 2024,6,O'Higgins,Total,Total,147067.3333333333,93055.94072593548
+cuarto trimestre 2024,7,Maule,PGU no contributiva,Mujeres,29968.33333333333,19095.26628406127
+cuarto trimestre 2024,7,Maule,PGU no contributiva,Hombres,13679.33333333333,8778.72963276364
+cuarto trimestre 2024,7,Maule,PGU no contributiva,Total,43647.66666666666,27873.9959168249
+cuarto trimestre 2024,7,Maule,PGU contributiva,Mujeres,49475.66666666666,31338.80664343328
+cuarto trimestre 2024,7,Maule,PGU contributiva,Hombres,48719.33333333334,30855.5589232433
+cuarto trimestre 2024,7,Maule,PGU contributiva,Total,98195.0,62194.36556667658
+cuarto trimestre 2024,7,Maule,APS vejez,Mujeres,6223.666666666667,4585.504047118428
+cuarto trimestre 2024,7,Maule,APS vejez,Hombres,5031.666666666667,3762.963543219405
+cuarto trimestre 2024,7,Maule,APS vejez,Total,11255.33333333333,8348.467590337832
+cuarto trimestre 2024,7,Maule,PBS invalidez,Mujeres,7768.333333333333,4986.091358248059
+cuarto trimestre 2024,7,Maule,PBS invalidez,Hombres,6105.333333333333,3917.581732781364
+cuarto trimestre 2024,7,Maule,PBS invalidez,Total,13873.66666666667,8903.673091029423
+cuarto trimestre 2024,7,Maule,APS invalidez,Mujeres,3343.0,1855.724636173098
+cuarto trimestre 2024,7,Maule,APS invalidez,Hombres,3831.0,1990.960008055594
+cuarto trimestre 2024,7,Maule,APS invalidez,Total,7174.0,3846.684644228692
+cuarto trimestre 2024,7,Maule,Total,Mujeres,96779.0,61861.39296903413
+cuarto trimestre 2024,7,Maule,Total,Hombres,77366.66666666667,49305.79384006331
+cuarto trimestre 2024,7,Maule,Total,Total,174145.6666666667,111167.1868090974
+cuarto trimestre 2024,16,Ñuble,PGU no contributiva,Mujeres,17752.66666666667,11300.99733086692
+cuarto trimestre 2024,16,Ñuble,PGU no contributiva,Hombres,8654.666666666666,5557.631183380204
+cuarto trimestre 2024,16,Ñuble,PGU no contributiva,Total,26407.33333333333,16858.62851424713
+cuarto trimestre 2024,16,Ñuble,PGU contributiva,Mujeres,22884.0,14458.11951978452
+cuarto trimestre 2024,16,Ñuble,PGU contributiva,Hombres,21368.33333333333,13452.3666403886
+cuarto trimestre 2024,16,Ñuble,PGU contributiva,Total,44252.33333333334,27910.48616017312
+cuarto trimestre 2024,16,Ñuble,APS vejez,Mujeres,2347.666666666667,1728.140504248495
+cuarto trimestre 2024,16,Ñuble,APS vejez,Hombres,2111.333333333333,1585.248480436456
+cuarto trimestre 2024,16,Ñuble,APS vejez,Total,4459.0,3313.388984684952
+cuarto trimestre 2024,16,Ñuble,PBS invalidez,Mujeres,6610.666666666667,4245.276522903875
+cuarto trimestre 2024,16,Ñuble,PBS invalidez,Hombres,4797.0,3082.428645830127
+cuarto trimestre 2024,16,Ñuble,PBS invalidez,Total,11407.66666666667,7327.705168734003
+cuarto trimestre 2024,16,Ñuble,APS invalidez,Mujeres,2553.0,1420.253646622877
+cuarto trimestre 2024,16,Ñuble,APS invalidez,Hombres,2838.333333333333,1516.341921254349
+cuarto trimestre 2024,16,Ñuble,APS invalidez,Total,5391.333333333333,2936.595567877226
+cuarto trimestre 2024,16,Ñuble,Total,Mujeres,52148.0,33152.78752442669
+cuarto trimestre 2024,16,Ñuble,Total,Hombres,39769.66666666666,25194.01687128974
+cuarto trimestre 2024,16,Ñuble,Total,Total,91917.66666666667,58346.80439571643
+cuarto trimestre 2024,9,La Araucanía,PGU no contributiva,Mujeres,35300.0,22510.41135859297
+cuarto trimestre 2024,9,La Araucanía,PGU no contributiva,Hombres,19235.33333333333,12351.95249025256
+cuarto trimestre 2024,9,La Araucanía,PGU no contributiva,Total,54535.33333333334,34862.36384884553
+cuarto trimestre 2024,9,La Araucanía,PGU contributiva,Mujeres,38922.66666666666,24632.10101504928
+cuarto trimestre 2024,9,La Araucanía,PGU contributiva,Hombres,36166.66666666666,22859.08063444303
+cuarto trimestre 2024,9,La Araucanía,PGU contributiva,Total,75089.33333333333,47491.18164949231
+cuarto trimestre 2024,9,La Araucanía,APS vejez,Mujeres,4636.666666666667,3418.791167330544
+cuarto trimestre 2024,9,La Araucanía,APS vejez,Hombres,3955.333333333333,2940.718823398318
+cuarto trimestre 2024,9,La Araucanía,APS vejez,Total,8592.0,6359.509990728862
+cuarto trimestre 2024,9,La Araucanía,PBS invalidez,Mujeres,8422.333333333334,5409.288006833911
+cuarto trimestre 2024,9,La Araucanía,PBS invalidez,Hombres,6659.666666666667,4277.913334077453
+cuarto trimestre 2024,9,La Araucanía,PBS invalidez,Total,15082.0,9687.201340911364
+cuarto trimestre 2024,9,La Araucanía,APS invalidez,Mujeres,2471.0,1375.847153776941
+cuarto trimestre 2024,9,La Araucanía,APS invalidez,Hombres,3668.0,1982.074155186583
+cuarto trimestre 2024,9,La Araucanía,APS invalidez,Total,6139.0,3357.921308963525
+cuarto trimestre 2024,9,La Araucanía,Total,Mujeres,89752.66666666667,57346.43870158365
+cuarto trimestre 2024,9,La Araucanía,Total,Hombres,69685.0,44411.73943735794
+cuarto trimestre 2024,9,La Araucanía,Total,Total,159437.6666666667,101758.1781389416
+cuarto trimestre 2024,14,Los Ríos,PGU no contributiva,Mujeres,11937.66666666667,7609.133673806737
+cuarto trimestre 2024,14,Los Ríos,PGU no contributiva,Hombres,5433.333333333333,3487.328098047766
+cuarto trimestre 2024,14,Los Ríos,PGU no contributiva,Total,17371.0,11096.4617718545
+cuarto trimestre 2024,14,Los Ríos,PGU contributiva,Mujeres,17408.66666666667,11008.56565003154
+cuarto trimestre 2024,14,Los Ríos,PGU contributiva,Hombres,16351.33333333333,10322.91779674064
+cuarto trimestre 2024,14,Los Ríos,PGU contributiva,Total,33760.0,21331.48344677218
+cuarto trimestre 2024,14,Los Ríos,APS vejez,Mujeres,2183.333333333333,1599.727303148255
+cuarto trimestre 2024,14,Los Ríos,APS vejez,Hombres,1786.666666666667,1333.056124668959
+cuarto trimestre 2024,14,Los Ríos,APS vejez,Total,3970.0,2932.783427817214
+cuarto trimestre 2024,14,Los Ríos,PBS invalidez,Mujeres,3484.333333333333,2236.973612535995
+cuarto trimestre 2024,14,Los Ríos,PBS invalidez,Hombres,2518.0,1618.000641045309
+cuarto trimestre 2024,14,Los Ríos,PBS invalidez,Total,6002.333333333333,3854.974253581305
+cuarto trimestre 2024,14,Los Ríos,APS invalidez,Mujeres,1432.333333333333,810.490307834938
+cuarto trimestre 2024,14,Los Ríos,APS invalidez,Hombres,1873.0,986.5552120087882
+cuarto trimestre 2024,14,Los Ríos,APS invalidez,Total,3305.333333333333,1797.045519843726
+cuarto trimestre 2024,14,Los Ríos,Total,Mujeres,36446.33333333334,23264.89054735746
+cuarto trimestre 2024,14,Los Ríos,Total,Hombres,27962.33333333333,17747.85787251146
+cuarto trimestre 2024,14,Los Ríos,Total,Total,64408.66666666666,41012.74841986893
+cuarto trimestre 2024,10,Los Lagos,PGU no contributiva,Mujeres,25372.66666666667,16212.16089506689
+cuarto trimestre 2024,10,Los Lagos,PGU no contributiva,Hombres,13666.66666666667,8776.014414631076
+cuarto trimestre 2024,10,Los Lagos,PGU no contributiva,Total,39039.33333333334,24988.17530969797
+cuarto trimestre 2024,10,Los Lagos,PGU contributiva,Mujeres,32151.66666666667,20344.97569385038
+cuarto trimestre 2024,10,Los Lagos,PGU contributiva,Hombres,29675.66666666667,18731.84125644501
+cuarto trimestre 2024,10,Los Lagos,PGU contributiva,Total,61827.33333333334,39076.81695029539
+cuarto trimestre 2024,10,Los Lagos,APS vejez,Mujeres,4644.333333333333,3427.372997890222
+cuarto trimestre 2024,10,Los Lagos,APS vejez,Hombres,3629.666666666667,2709.476487107283
+cuarto trimestre 2024,10,Los Lagos,APS vejez,Total,8274.0,6136.849484997505
+cuarto trimestre 2024,10,Los Lagos,PBS invalidez,Mujeres,7340.333333333333,4715.850877598203
+cuarto trimestre 2024,10,Los Lagos,PBS invalidez,Hombres,5809.0,3731.930925627323
+cuarto trimestre 2024,10,Los Lagos,PBS invalidez,Total,13149.33333333333,8447.781803225525
+cuarto trimestre 2024,10,Los Lagos,APS invalidez,Mujeres,3142.666666666667,1768.321431811564
+cuarto trimestre 2024,10,Los Lagos,APS invalidez,Hombres,3422.666666666667,1849.059790509127
+cuarto trimestre 2024,10,Los Lagos,APS invalidez,Total,6565.333333333333,3617.381222320691
+cuarto trimestre 2024,10,Los Lagos,Total,Mujeres,72651.66666666667,46468.68189621725
+cuarto trimestre 2024,10,Los Lagos,Total,Hombres,56203.66666666666,35798.32287431982
+cuarto trimestre 2024,10,Los Lagos,Total,Total,128855.3333333333,82267.00477053708
+cuarto trimestre 2024,11,Aysén,PGU no contributiva,Mujeres,2445.333333333333,1556.495149283265
+cuarto trimestre 2024,11,Aysén,PGU no contributiva,Hombres,1604.666666666667,1030.284775613698
+cuarto trimestre 2024,11,Aysén,PGU no contributiva,Total,4050.0,2586.779924896962
+cuarto trimestre 2024,11,Aysén,PGU contributiva,Mujeres,3522.666666666667,2227.204146235065
+cuarto trimestre 2024,11,Aysén,PGU contributiva,Hombres,3525.666666666667,2226.819582729142
+cuarto trimestre 2024,11,Aysén,PGU contributiva,Total,7048.333333333333,4454.023728964207
+cuarto trimestre 2024,11,Aysén,APS vejez,Mujeres,587.0,431.0944004832849
+cuarto trimestre 2024,11,Aysén,APS vejez,Hombres,544.3333333333334,408.7014900602809
+cuarto trimestre 2024,11,Aysén,APS vejez,Total,1131.333333333333,839.7958905435656
+cuarto trimestre 2024,11,Aysén,PBS invalidez,Mujeres,518.3333333333334,333.0672665485397
+cuarto trimestre 2024,11,Aysén,PBS invalidez,Hombres,433.3333333333333,278.4470813082935
+cuarto trimestre 2024,11,Aysén,PBS invalidez,Total,951.6666666666666,611.5143478568333
+cuarto trimestre 2024,11,Aysén,APS invalidez,Mujeres,289.6666666666667,158.7987655966956
+cuarto trimestre 2024,11,Aysén,APS invalidez,Hombres,352.3333333333333,190.3600713337048
+cuarto trimestre 2024,11,Aysén,APS invalidez,Total,642.0,349.1588369304003
+cuarto trimestre 2024,11,Aysén,Total,Mujeres,7363.0,4706.659728146849
+cuarto trimestre 2024,11,Aysén,Total,Hombres,6460.333333333333,4134.61300104512
+cuarto trimestre 2024,11,Aysén,Total,Total,13823.33333333333,8841.27272919197
+cuarto trimestre 2024,12,Magallanes,PGU no contributiva,Mujeres,3117.333333333333,1988.103240826675
+cuarto trimestre 2024,12,Magallanes,PGU no contributiva,Hombres,1203.333333333333,770.8819923462258
+cuarto trimestre 2024,12,Magallanes,PGU no contributiva,Total,4320.666666666667,2758.985233172901
+cuarto trimestre 2024,12,Magallanes,PGU contributiva,Mujeres,7738.0,4846.083393392117
+cuarto trimestre 2024,12,Magallanes,PGU contributiva,Hombres,6557.666666666667,4075.40214576655
+cuarto trimestre 2024,12,Magallanes,PGU contributiva,Total,14295.66666666667,8921.485539158668
+cuarto trimestre 2024,12,Magallanes,APS vejez,Mujeres,1082.0,800.0538218516515
+cuarto trimestre 2024,12,Magallanes,APS vejez,Hombres,643.6666666666666,487.9247816249685
+cuarto trimestre 2024,12,Magallanes,APS vejez,Total,1725.666666666667,1287.97860347662
+cuarto trimestre 2024,12,Magallanes,PBS invalidez,Mujeres,609.3333333333334,391.5422311012233
+cuarto trimestre 2024,12,Magallanes,PBS invalidez,Hombres,536.6666666666666,344.377158973595
+cuarto trimestre 2024,12,Magallanes,PBS invalidez,Total,1146.0,735.9193900748184
+cuarto trimestre 2024,12,Magallanes,APS invalidez,Mujeres,429.3333333333333,222.3745574885546
+cuarto trimestre 2024,12,Magallanes,APS invalidez,Hombres,360.3333333333333,179.6965491184204
+cuarto trimestre 2024,12,Magallanes,APS invalidez,Total,789.6666666666666,402.071106606975
+cuarto trimestre 2024,12,Magallanes,Total,Mujeres,12976.0,8248.157244660222
+cuarto trimestre 2024,12,Magallanes,Total,Hombres,9301.666666666666,5858.28262782976
+cuarto trimestre 2024,12,Magallanes,Total,Total,22277.66666666667,14106.43987248998
+Trimestre,15,Arica y Parinacota,PGU no contributiva,Mujeres,4251.333333333333,970.0102624584378
+Trimestre,15,Arica y Parinacota,PGU no contributiva,Hombres,1834.0,419.6347438103746
+Trimestre,15,Arica y Parinacota,PGU no contributiva,Total,6085.333333333333,1389.6450062688123
+Trimestre,15,Arica y Parinacota,PGU contributiva,Mujeres,10674.333333333334,2419.016592651296
+Trimestre,15,Arica y Parinacota,PGU contributiva,Hombres,9156.333333333334,2037.7215958514141
+Trimestre,15,Arica y Parinacota,PGU contributiva,Total,19830.666666666668,4456.73818850271
+Trimestre,15,Arica y Parinacota,APS vejez,Mujeres,1244.0,324.07471191179553
+Trimestre,15,Arica y Parinacota,APS vejez,Hombres,652.3333333333334,175.1512677291992
+Trimestre,15,Arica y Parinacota,APS vejez,Total,1896.3333333333333,499.22597964099475
+Trimestre,15,Arica y Parinacota,PBS invalidez,Mujeres,1362.3333333333333,340.7169798974642
+Trimestre,15,Arica y Parinacota,PBS invalidez,Hombres,1353.3333333333333,338.3512484825516
+Trimestre,15,Arica y Parinacota,PBS invalidez,Total,2715.6666666666665,679.0682283800159
+Trimestre,15,Arica y Parinacota,APS invalidez,Mujeres,500.3333333333333,103.5801118668981
+Trimestre,15,Arica y Parinacota,APS invalidez,Hombres,671.6666666666666,132.23643453116804
+Trimestre,15,Arica y Parinacota,APS invalidez,Total,1172.0,235.81654639806612
+Trimestre,15,Arica y Parinacota,Total,Mujeres,18032.333333333332,4157.398658785892
+Trimestre,15,Arica y Parinacota,Total,Hombres,13667.666666666666,3103.0952904047076
+Trimestre,15,Arica y Parinacota,Total,Total,31700.0,7260.493949190599
+Trimestre,1,Tarapacá,PGU no contributiva,Mujeres,4717.0,1072.31284970719
+Trimestre,1,Tarapacá,PGU no contributiva,Hombres,2051.6666666666665,467.30502617062047
+Trimestre,1,Tarapacá,PGU no contributiva,Total,6768.666666666667,1539.6178758778105
+Trimestre,1,Tarapacá,PGU contributiva,Mujeres,11716.666666666666,2640.2040059298047
+Trimestre,1,Tarapacá,PGU contributiva,Hombres,11061.333333333334,2432.42859880268
+Trimestre,1,Tarapacá,PGU contributiva,Total,22778.0,5072.632604732485
+Trimestre,1,Tarapacá,APS vejez,Mujeres,1528.3333333333333,398.1503576639934
+Trimestre,1,Tarapacá,APS vejez,Hombres,782.0,211.21170450848842
+Trimestre,1,Tarapacá,APS vejez,Total,2310.3333333333335,609.3620621724818
+Trimestre,1,Tarapacá,PBS invalidez,Mujeres,1471.3333333333333,367.9870444010016
+Trimestre,1,Tarapacá,PBS invalidez,Hombres,1292.6666666666667,323.2449630410593
+Trimestre,1,Tarapacá,PBS invalidez,Total,2764.0,691.2320074420609
+Trimestre,1,Tarapacá,APS invalidez,Mujeres,642.6666666666666,136.69064898001065
+Trimestre,1,Tarapacá,APS invalidez,Hombres,788.3333333333334,158.56734468721675
+Trimestre,1,Tarapacá,APS invalidez,Total,1431.0,295.2579936672274
+Trimestre,1,Tarapacá,Total,Mujeres,20076.0,4615.344906681999
+Trimestre,1,Tarapacá,Total,Hombres,15976.0,3592.7576372100643
+Trimestre,1,Tarapacá,Total,Total,36052.0,8208.102543892064
+Trimestre,2,Antofagasta,PGU no contributiva,Mujeres,9353.666666666666,2125.460698301978
+Trimestre,2,Antofagasta,PGU no contributiva,Hombres,2641.0,600.5813529140428
+Trimestre,2,Antofagasta,PGU no contributiva,Total,11994.666666666666,2726.042051216021
+Trimestre,2,Antofagasta,PGU contributiva,Mujeres,21223.0,4768.1851344413635
+Trimestre,2,Antofagasta,PGU contributiva,Hombres,19079.666666666668,4062.6449737810567
+Trimestre,2,Antofagasta,PGU contributiva,Total,40302.666666666664,8830.83010822242
+Trimestre,2,Antofagasta,APS vejez,Mujeres,2356.6666666666665,611.3514284371239
+Trimestre,2,Antofagasta,APS vejez,Hombres,948.6666666666666,259.22879957308174
+Trimestre,2,Antofagasta,APS vejez,Total,3305.3333333333335,870.5802280102057
+Trimestre,2,Antofagasta,PBS invalidez,Mujeres,2351.3333333333335,588.0221222881538
+Trimestre,2,Antofagasta,PBS invalidez,Hombres,1766.3333333333333,441.71084650462467
+Trimestre,2,Antofagasta,PBS invalidez,Total,4117.666666666667,1029.7329687927786
+Trimestre,2,Antofagasta,APS invalidez,Mujeres,884.0,186.24966978093178
+Trimestre,2,Antofagasta,APS invalidez,Hombres,998.0,196.9571480086628
+Trimestre,2,Antofagasta,APS invalidez,Total,1882.0,383.2068177895946
+Trimestre,2,Antofagasta,Total,Mujeres,36168.666666666664,8279.269053249553
+Trimestre,2,Antofagasta,Total,Hombres,25433.666666666668,5561.123120781468
+Trimestre,2,Antofagasta,Total,Total,61602.333333333336,13840.392174031022
+Trimestre,3,Atacama,PGU no contributiva,Mujeres,6743.666666666667,1536.2827898755393
+Trimestre,3,Atacama,PGU no contributiva,Hombres,2394.6666666666665,548.7469988760303
+Trimestre,3,Atacama,PGU no contributiva,Total,9138.333333333334,2085.0297887515694
+Trimestre,3,Atacama,PGU contributiva,Mujeres,12462.666666666666,2817.562098905362
+Trimestre,3,Atacama,PGU contributiva,Hombres,12839.333333333334,2811.6572870497635
+Trimestre,3,Atacama,PGU contributiva,Total,25302.0,5629.219385955125
+Trimestre,3,Atacama,APS vejez,Mujeres,1495.3333333333333,385.355903019207
+Trimestre,3,Atacama,APS vejez,Hombres,896.0,243.23936876311248
+Trimestre,3,Atacama,APS vejez,Total,2391.3333333333335,628.5952717823195
+Trimestre,3,Atacama,PBS invalidez,Mujeres,1601.0,400.4169530761401
+Trimestre,3,Atacama,PBS invalidez,Hombres,1232.0,308.12801778525403
+Trimestre,3,Atacama,PBS invalidez,Total,2833.0,708.5449708613942
+Trimestre,3,Atacama,APS invalidez,Mujeres,595.3333333333334,128.88531441214042
+Trimestre,3,Atacama,APS invalidez,Hombres,742.3333333333334,151.78559175813825
+Trimestre,3,Atacama,APS invalidez,Total,1337.6666666666667,280.67090617027867
+Trimestre,3,Atacama,Total,Mujeres,22898.0,5268.503059288389
+Trimestre,3,Atacama,Total,Hombres,18104.333333333332,4063.557264232298
+Trimestre,3,Atacama,Total,Total,41002.333333333336,9332.060323520687
+Trimestre,4,Coquimbo,PGU no contributiva,Mujeres,20765.0,4746.824120993214
+Trimestre,4,Coquimbo,PGU no contributiva,Hombres,9327.0,2138.200526612331
+Trimestre,4,Coquimbo,PGU no contributiva,Total,30092.0,6885.024647605545
+Trimestre,4,Coquimbo,PGU contributiva,Mujeres,38015.0,8623.820266747183
+Trimestre,4,Coquimbo,PGU contributiva,Hombres,34795.333333333336,7675.359784708602
+Trimestre,4,Coquimbo,PGU contributiva,Total,72810.33333333333,16299.180051455785
+Trimestre,4,Coquimbo,APS vejez,Mujeres,4093.6666666666665,1063.248002464243
+Trimestre,4,Coquimbo,APS vejez,Hombres,2570.0,693.6069886384221
+Trimestre,4,Coquimbo,APS vejez,Total,6663.666666666667,1756.854991102665
+Trimestre,4,Coquimbo,PBS invalidez,Mujeres,4909.0,1227.6383728851351
+Trimestre,4,Coquimbo,PBS invalidez,Hombres,4274.0,1068.9448565333357
+Trimestre,4,Coquimbo,PBS invalidez,Total,9183.0,2296.583229418471
+Trimestre,4,Coquimbo,APS invalidez,Mujeres,2002.3333333333333,425.7376595317346
+Trimestre,4,Coquimbo,APS invalidez,Hombres,2393.0,487.8578562003801
+Trimestre,4,Coquimbo,APS invalidez,Total,4395.333333333333,913.5955157321148
+Trimestre,4,Coquimbo,Total,Mujeres,69785.0,16087.268422621508
+Trimestre,4,Coquimbo,Total,Hombres,53359.333333333336,12063.97001269307
+Trimestre,4,Coquimbo,Total,Total,123144.33333333333,28151.238435314575
+Trimestre,5,Valparaíso,PGU no contributiva,Mujeres,45602.666666666664,10391.01709791345
+Trimestre,5,Valparaíso,PGU no contributiva,Hombres,16546.0,3773.3643792975895
+Trimestre,5,Valparaíso,PGU no contributiva,Total,62148.666666666664,14164.381477211038
+Trimestre,5,Valparaíso,PGU contributiva,Mujeres,103560.66666666667,23423.52602238559
+Trimestre,5,Valparaíso,PGU contributiva,Hombres,87393.66666666667,19297.966920759733
+Trimestre,5,Valparaíso,PGU contributiva,Total,190954.33333333334,42721.49294314532
+Trimestre,5,Valparaíso,APS vejez,Mujeres,12244.666666666666,3189.857820971122
+Trimestre,5,Valparaíso,APS vejez,Hombres,5957.333333333333,1609.6328188715815
+Trimestre,5,Valparaíso,APS vejez,Total,18202.0,4799.490639842703
+Trimestre,5,Valparaíso,PBS invalidez,Mujeres,10791.333333333334,2698.8913338837974
+Trimestre,5,Valparaíso,PBS invalidez,Hombres,9202.666666666666,2301.399410716375
+Trimestre,5,Valparaíso,PBS invalidez,Total,19994.0,5000.290744600172
+Trimestre,5,Valparaíso,APS invalidez,Mujeres,5335.666666666667,1116.1425526524447
+Trimestre,5,Valparaíso,APS invalidez,Hombres,5560.0,1123.5876205467132
+Trimestre,5,Valparaíso,APS invalidez,Total,10895.666666666666,2239.730173199158
+Trimestre,5,Valparaíso,Total,Mujeres,177535.0,40819.4348278064
+Trimestre,5,Valparaíso,Total,Hombres,124659.66666666667,28105.95115019199
+Trimestre,5,Valparaíso,Total,Total,302194.6666666667,68925.38597799839
+Trimestre,13,Metropolitana,PGU no contributiva,Mujeres,147830.0,33793.30479411384
+Trimestre,13,Metropolitana,PGU no contributiva,Hombres,52366.333333333336,11969.008670729962
+Trimestre,13,Metropolitana,PGU no contributiva,Total,200196.33333333334,45762.313464843806
+Trimestre,13,Metropolitana,PGU contributiva,Mujeres,351154.6666666667,79428.32404382125
+Trimestre,13,Metropolitana,PGU contributiva,Hombres,297208.6666666667,65883.8778020774
+Trimestre,13,Metropolitana,PGU contributiva,Total,648363.3333333334,145312.20184589864
+Trimestre,13,Metropolitana,APS vejez,Mujeres,42252.666666666664,11029.60285205063
+Trimestre,13,Metropolitana,APS vejez,Hombres,17505.0,4763.823265360316
+Trimestre,13,Metropolitana,APS vejez,Total,59757.666666666664,15793.426117410945
+Trimestre,13,Metropolitana,PBS invalidez,Mujeres,37002.0,9253.45096833493
+Trimestre,13,Metropolitana,PBS invalidez,Hombres,29450.333333333332,7364.593321234523
+Trimestre,13,Metropolitana,PBS invalidez,Total,66452.33333333333,16618.04428956945
+Trimestre,13,Metropolitana,APS invalidez,Mujeres,17567.0,3746.5566135356257
+Trimestre,13,Metropolitana,APS invalidez,Hombres,17459.333333333332,3498.8755654903234
+Trimestre,13,Metropolitana,APS invalidez,Total,35026.333333333336,7245.432179025949
+Trimestre,13,Metropolitana,Total,Mujeres,595806.3333333334,137251.2392718563
+Trimestre,13,Metropolitana,Total,Hombres,413989.6666666667,93480.17862489253
+Trimestre,13,Metropolitana,Total,Total,1009796.0,230731.4178967488
+Trimestre,6,O'Higgins,PGU no contributiva,Mujeres,23755.333333333332,5401.421156609421
+Trimestre,6,O'Higgins,PGU no contributiva,Hombres,8977.333333333334,2050.142814551283
+Trimestre,6,O'Higgins,PGU no contributiva,Total,32732.666666666668,7451.563971160704
+Trimestre,6,O'Higgins,PGU contributiva,Mujeres,46516.333333333336,10504.579644863057
+Trimestre,6,O'Higgins,PGU contributiva,Hombres,46773.666666666664,10330.267728677098
+Trimestre,6,O'Higgins,PGU contributiva,Total,93290.0,20834.847373540157
+Trimestre,6,O'Higgins,APS vejez,Mujeres,5825.666666666667,1500.0925471082055
+Trimestre,6,O'Higgins,APS vejez,Hombres,3257.3333333333335,871.0226278399654
+Trimestre,6,O'Higgins,APS vejez,Total,9083.0,2371.115174948171
+Trimestre,6,O'Higgins,PBS invalidez,Mujeres,5917.333333333333,1479.664131130834
+Trimestre,6,O'Higgins,PBS invalidez,Hombres,4719.666666666667,1179.9551202712812
+Trimestre,6,O'Higgins,PBS invalidez,Total,10637.0,2659.619251402115
+Trimestre,6,O'Higgins,APS invalidez,Mujeres,3588.6666666666665,759.9976553594356
+Trimestre,6,O'Higgins,APS invalidez,Hombres,3520.3333333333335,701.9622702095043
+Trimestre,6,O'Higgins,APS invalidez,Total,7109.0,1461.95992556894
+Trimestre,6,O'Higgins,Total,Mujeres,85603.33333333333,19645.75513507095
+Trimestre,6,O'Higgins,Total,Hombres,67248.33333333333,15133.35056154913
+Trimestre,6,O'Higgins,Total,Total,152851.66666666666,34779.105696620085
+Trimestre,7,Maule,PGU no contributiva,Mujeres,30725.666666666668,6976.900420914942
+Trimestre,7,Maule,PGU no contributiva,Hombres,14442.0,3305.240937095863
+Trimestre,7,Maule,PGU no contributiva,Total,45167.666666666664,10282.141358010806
+Trimestre,7,Maule,PGU contributiva,Mujeres,52100.333333333336,11805.348826720028
+Trimestre,7,Maule,PGU contributiva,Hombres,51145.0,11476.360645365605
+Trimestre,7,Maule,PGU contributiva,Total,103245.33333333333,23281.709472085633
+Trimestre,7,Maule,APS vejez,Mujeres,6065.0,1566.2089980011679
+Trimestre,7,Maule,APS vejez,Hombres,4807.0,1269.1232796808574
+Trimestre,7,Maule,APS vejez,Total,10872.0,2835.332277682025
+Trimestre,7,Maule,PBS invalidez,Mujeres,7886.666666666667,1971.884595891998
+Trimestre,7,Maule,PBS invalidez,Hombres,6239.666666666667,1559.932573154666
+Trimestre,7,Maule,PBS invalidez,Total,14126.333333333334,3531.8171690466643
+Trimestre,7,Maule,APS invalidez,Mujeres,3409.3333333333335,745.2225099470378
+Trimestre,7,Maule,APS invalidez,Hombres,3950.3333333333335,821.4483465175613
+Trimestre,7,Maule,APS invalidez,Total,7359.666666666667,1566.6708564645992
+Trimestre,7,Maule,Total,Mujeres,100187.0,23065.565351475176
+Trimestre,7,Maule,Total,Hombres,80584.0,18432.105781814553
+Trimestre,7,Maule,Total,Total,180771.0,41497.671133289725
+Trimestre,16,Ñuble,PGU no contributiva,Mujeres,18127.333333333332,4118.633107422506
+Trimestre,16,Ñuble,PGU no contributiva,Hombres,9189.0,2102.502639350323
+Trimestre,16,Ñuble,PGU no contributiva,Total,27316.333333333332,6221.135746772829
+Trimestre,16,Ñuble,PGU contributiva,Mujeres,24082.333333333332,5463.32926865292
+Trimestre,16,Ñuble,PGU contributiva,Hombres,22559.333333333332,5046.341157842462
+Trimestre,16,Ñuble,PGU contributiva,Total,46641.666666666664,10509.670426495382
+Trimestre,16,Ñuble,APS vejez,Mujeres,2276.3333333333335,589.377938472173
+Trimestre,16,Ñuble,APS vejez,Hombres,2009.6666666666667,533.5251941941254
+Trimestre,16,Ñuble,APS vejez,Total,4286.0,1122.9031326662985
+Trimestre,16,Ñuble,PBS invalidez,Mujeres,6548.666666666667,1637.8473970875104
+Trimestre,16,Ñuble,PBS invalidez,Hombres,4808.0,1202.5013348482805
+Trimestre,16,Ñuble,PBS invalidez,Total,11356.666666666666,2840.348731935791
+Trimestre,16,Ñuble,APS invalidez,Mujeres,2553.0,560.7637445744444
+Trimestre,16,Ñuble,APS invalidez,Hombres,2816.0,597.4573740452732
+Trimestre,16,Ñuble,APS invalidez,Total,5369.0,1158.2211186197178
+Trimestre,16,Ñuble,Total,Mujeres,53587.666666666664,12369.951456209552
+Trimestre,16,Ñuble,Total,Hombres,41382.0,9482.327700280466
+Trimestre,16,Ñuble,Total,Total,94969.66666666667,21852.279156490018
+Trimestre,9,La Araucanía,PGU no contributiva,Mujeres,36163.0,8254.086071062398
+Trimestre,9,La Araucanía,PGU no contributiva,Hombres,20191.333333333332,4637.722663188408
+Trimestre,9,La Araucanía,PGU no contributiva,Total,56354.333333333336,12891.808734250806
+Trimestre,9,La Araucanía,PGU contributiva,Mujeres,40995.333333333336,9294.939354964263
+Trimestre,9,La Araucanía,PGU contributiva,Hombres,38260.333333333336,8569.177939376927
+Trimestre,9,La Araucanía,PGU contributiva,Total,79255.66666666667,17864.117294341188
+Trimestre,9,La Araucanía,APS vejez,Mujeres,4510.0,1168.0363412981662
+Trimestre,9,La Araucanía,APS vejez,Hombres,3747.0,983.6775129742379
+Trimestre,9,La Araucanía,APS vejez,Total,8257.0,2151.713854272404
+Trimestre,9,La Araucanía,PBS invalidez,Mujeres,8390.0,2098.2031355267536
+Trimestre,9,La Araucanía,PBS invalidez,Hombres,6681.333333333333,1670.7450695910784
+Trimestre,9,La Araucanía,PBS invalidez,Total,15071.333333333334,3768.948205117832
+Trimestre,9,La Araucanía,APS invalidez,Mujeres,2521.0,552.2562039985814
+Trimestre,9,La Araucanía,APS invalidez,Hombres,3791.0,812.7136455188843
+Trimestre,9,La Araucanía,APS invalidez,Total,6312.0,1364.9698495174657
+Trimestre,9,La Araucanía,Total,Mujeres,92579.33333333333,21367.521106850163
+Trimestre,9,La Araucanía,Total,Hombres,72671.0,16674.036830649533
+Trimestre,9,La Araucanía,Total,Total,165250.33333333334,38041.557937499696
+Trimestre,14,Los Ríos,PGU no contributiva,Mujeres,12238.0,2788.2457624563745
+Trimestre,14,Los Ríos,PGU no contributiva,Hombres,5661.666666666667,1299.7260652731584
+Trimestre,14,Los Ríos,PGU no contributiva,Total,17899.666666666668,4087.971827729533
+Trimestre,14,Los Ríos,PGU contributiva,Mujeres,18383.666666666668,4165.059774573646
+Trimestre,14,Los Ríos,PGU contributiva,Hombres,17288.0,3866.798328956252
+Trimestre,14,Los Ríos,PGU contributiva,Total,35671.666666666664,8031.858103529898
+Trimestre,14,Los Ríos,APS vejez,Mujeres,2118.6666666666665,544.589969260092
+Trimestre,14,Los Ríos,APS vejez,Hombres,1679.6666666666667,444.8498596172649
+Trimestre,14,Los Ríos,APS vejez,Total,3798.3333333333335,989.4398288773568
+Trimestre,14,Los Ríos,PBS invalidez,Mujeres,3568.6666666666665,892.3682235074006
+Trimestre,14,Los Ríos,PBS invalidez,Hombres,2566.0,641.7679310380435
+Trimestre,14,Los Ríos,PBS invalidez,Total,6134.666666666667,1534.136154545444
+Trimestre,14,Los Ríos,APS invalidez,Mujeres,1445.6666666666667,322.6931148721757
+Trimestre,14,Los Ríos,APS invalidez,Hombres,1931.3333333333333,404.62020484742743
+Trimestre,14,Los Ríos,APS invalidez,Total,3377.0,727.3133197196032
+Trimestre,14,Los Ríos,Total,Mujeres,37754.666666666664,8712.956844669689
+Trimestre,14,Los Ríos,Total,Hombres,29126.666666666668,6657.762389732146
+Trimestre,14,Los Ríos,Total,Total,66881.33333333333,15370.719234401835
+Trimestre,10,Los Lagos,PGU no contributiva,Mujeres,25896.333333333332,5932.418364959939
+Trimestre,10,Los Lagos,PGU no contributiva,Hombres,14317.666666666666,3290.3842273032983
+Trimestre,10,Los Lagos,PGU no contributiva,Total,40214.0,9222.802592263237
+Trimestre,10,Los Lagos,PGU contributiva,Mujeres,34182.333333333336,7732.840613563524
+Trimestre,10,Los Lagos,PGU contributiva,Hombres,31553.333333333332,7049.058250080064
+Trimestre,10,Los Lagos,PGU contributiva,Total,65735.66666666667,14781.898863643588
+Trimestre,10,Los Lagos,APS vejez,Mujeres,4537.666666666667,1172.6441391678115
+Trimestre,10,Los Lagos,APS vejez,Hombres,3444.6666666666665,908.7752282893542
+Trimestre,10,Los Lagos,APS vejez,Total,7982.333333333333,2081.4193674571657
+Trimestre,10,Los Lagos,PBS invalidez,Mujeres,7581.666666666667,1896.2021471195396
+Trimestre,10,Los Lagos,PBS invalidez,Hombres,5955.333333333333,1489.5633307059627
+Trimestre,10,Los Lagos,PBS invalidez,Total,13537.0,3385.7654778255023
+Trimestre,10,Los Lagos,APS invalidez,Mujeres,3226.0,712.3771217905837
+Trimestre,10,Los Lagos,APS invalidez,Hombres,3616.6666666666665,771.9515100174336
+Trimestre,10,Los Lagos,APS invalidez,Total,6842.666666666667,1484.3286318080172
+Trimestre,10,Los Lagos,Total,Mujeres,75424.0,17446.4823866014
+Trimestre,10,Los Lagos,Total,Hombres,58887.666666666664,13509.732546396112
+Trimestre,10,Los Lagos,Total,Total,134311.66666666666,30956.214932997515
+Trimestre,11,Aysén,PGU no contributiva,Mujeres,2527.0,577.8489250389412
+Trimestre,11,Aysén,PGU no contributiva,Hombres,1682.0,386.5046144962092
+Trimestre,11,Aysén,PGU no contributiva,Total,4209.0,964.3535395351503
+Trimestre,11,Aysén,PGU contributiva,Mujeres,3797.0,855.818397401213
+Trimestre,11,Aysén,PGU contributiva,Hombres,3790.0,845.0861552315342
+Trimestre,11,Aysén,PGU contributiva,Total,7587.0,1700.9045526327473
+Trimestre,11,Aysén,APS vejez,Mujeres,568.3333333333334,146.21709463382032
+Trimestre,11,Aysén,APS vejez,Hombres,519.3333333333334,136.609352388333
+Trimestre,11,Aysén,APS vejez,Total,1087.6666666666667,282.82644702215333
+Trimestre,11,Aysén,PBS invalidez,Mujeres,528.3333333333334,132.13749919439047
+Trimestre,11,Aysén,PBS invalidez,Hombres,445.3333333333333,111.38017517693288
+Trimestre,11,Aysén,PBS invalidez,Total,973.6666666666666,243.51767437132335
+Trimestre,11,Aysén,APS invalidez,Mujeres,283.0,62.09381746014944
+Trimestre,11,Aysén,APS invalidez,Hombres,365.3333333333333,78.35283970180039
+Trimestre,11,Aysén,APS invalidez,Total,648.3333333333334,140.44665716194982
+Trimestre,11,Aysén,Total,Mujeres,7703.666666666667,1774.1157337285142
+Trimestre,11,Aysén,Total,Hombres,6802.0,1557.9331369948095
+Trimestre,11,Aysén,Total,Total,14505.666666666666,3332.0488707233235
+Trimestre,12,Magallanes,PGU no contributiva,Mujeres,3265.6666666666665,745.4151637269697
+Trimestre,12,Magallanes,PGU no contributiva,Hombres,1283.6666666666667,293.97429488351463
+Trimestre,12,Magallanes,PGU no contributiva,Total,4549.333333333333,1039.3894586104843
+Trimestre,12,Magallanes,PGU contributiva,Mujeres,8302.0,1862.9931501081094
+Trimestre,12,Magallanes,PGU contributiva,Hombres,7053.333333333333,1551.2612850759126
+Trimestre,12,Magallanes,PGU contributiva,Total,15355.333333333334,3414.254435184022
+Trimestre,12,Magallanes,APS vejez,Mujeres,1049.6666666666667,271.665305696911
+Trimestre,12,Magallanes,APS vejez,Hombres,605.3333333333334,163.83675822812674
+Trimestre,12,Magallanes,APS vejez,Total,1655.0,435.50206392503776
+Trimestre,12,Magallanes,PBS invalidez,Mujeres,641.3333333333334,160.39968894345827
+Trimestre,12,Magallanes,PBS invalidez,Hombres,575.6666666666666,143.92040961059308
+Trimestre,12,Magallanes,PBS invalidez,Total,1217.0,304.32009855405136
+Trimestre,12,Magallanes,APS invalidez,Mujeres,474.6666666666667,97.43026142896457
+Trimestre,12,Magallanes,APS invalidez,Hombres,382.3333333333333,77.47396081842135
+Trimestre,12,Magallanes,APS invalidez,Total,857.0,174.90422224738592
+Trimestre,12,Magallanes,Total,Mujeres,13733.333333333334,3137.903569904413
+Trimestre,12,Magallanes,Total,Hombres,9900.333333333334,2230.4667086165687
+Trimestre,12,Magallanes,Total,Total,23633.666666666668,5368.370278520982

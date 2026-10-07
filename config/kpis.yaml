@@ -178,6 +178,71 @@ kpis:
     script: 06_construir_mapas.py
     track: "Mapas territoriales del envejecimiento"
 
+# KPIs de la presentación aprobada (V4, diapositiva 16): son los que muestra el
+# dashboard en modo "final". `status` lo lee Dashboards/components/kpi_card.py:
+#   live    = calculado y graficado con datos reales
+#   partial = calculado solo en parte (ver `caveat`)
+#   pending = falta data (ver `datos_faltantes`); la tarjeta muestra definición y fórmula
+kpis_presentacion:
+
+  - id: "1.1"
+    nombre: "Cobertura regional"
+    objetivo: "Objetivo 1: Retener y ampliar la base activa"
+    descripcion: "Brecha de cobertura entre regiones, comparada con el promedio nacional"
+    formula: "Cotizantes / Población 15-64"
+    visualizacion: mapa
+    status: live
+    archivo: [kpi_presion_previsional_region.csv]
+    fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024]
+    caveat: "Cotizantes dic-2025 contra población Censo 2024; 13.914 cotizantes sin región informada."
+
+  - id: "1.2"
+    nombre: "Razón de soporte"
+    objetivo: "Objetivo 1: Retener y ampliar la base activa"
+    descripcion: "Cuántos cotizantes sostienen a cada pasivo, por región y año"
+    formula: "Cotizantes / Población 65+"
+    visualizacion: barras_y_proyeccion
+    status: partial
+    archivo: [kpi_presion_previsional_region.csv, kpi_proyeccion_regional.csv]
+    fuente: [Superintendencia de Pensiones, INE Censo 2024, INE proyecciones 1992-2070]
+    caveat: "Valor actual por región: real. Proyección 2035/2050: escenario (cobertura 2025 constante); la población 65+ regional es reparto de tasas nacionales, no proyección oficial INE."
+
+  - id: "1.3"
+    nombre: "Participación partes interesadas"
+    objetivo: "Objetivo 1: Retener y ampliar la base activa"
+    descripcion: "Cuánto del costo se traslada de los trabajadores hacia otros pagadores"
+    formula: "(Aporte empleador + Aporte Estado) / Financiamiento total"
+    visualizacion: barras_apiladas
+    status: pending
+    datos_faltantes: ["Monto en pesos de las cotizaciones de los trabajadores 2024-2025 (Superintendencia de Pensiones: Cotizaciones y Cotizantes; Seguro Social Previsional - Montos de cotizaciones acreditadas). Los estados financieros del FAPP ya están en Data raw/_external/fapp/"]
+
+  - id: "2.1"
+    nombre: "Costo real por adulto mayor"
+    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    descripcion: "Si el costo por persona crece más rápido que la economía"
+    formula: "(Costo público total / Población 65+) vs Δ% PIB per cápita"
+    visualizacion: lineas_indexadas
+    status: pending
+    pendiente_motivo: "Los datos ya están en el proyecto (DIPRES gasto en edad avanzada 2016-2025, PGU/PBS/APS 2008-2025, PIB Banco Central, población 65+ INE). Falta implementar el cálculo."
+
+  - id: "2.2"
+    nombre: "Financiamiento dedicado"
+    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    descripcion: "Peso fiscal del gasto y cobertura del fondo frente al déficit proyectado"
+    formula: "(PGU + Pensión solidaria) / PIB ; (Activos + Reservas) / VP del déficit"
+    visualizacion: lineas
+    status: pending
+    pendiente_motivo: "Ratio 1 ((PGU + pensión solidaria) / PIB): datos listos, falta el cálculo. Ratio 2: falta el valor presente del déficit (decisión del equipo: reemplazarlo por saldo del fondo / gasto anual en PGU y APS). Ver docs/DATOS_ABIERTOS.md."
+
+  - id: "2.3"
+    nombre: "Pobreza en la vejez"
+    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    descripcion: "Que la contención de costos no aumente la pobreza en adultos mayores"
+    formula: "Personas 65+ bajo línea de pobreza / Población 65+"
+    visualizacion: mapa
+    status: pending
+    pendiente_motivo: "Los datos ya están en el proyecto (CASEN 2022 completa con edad, pobreza y factores de expansión). Falta implementar el cálculo."
+
 # Datos que el enunciado pide pero NO están disponibles en ninguna fuente
 # entregada (ver Data processed/README.md para el detalle y alternativas):
 pendientes:
