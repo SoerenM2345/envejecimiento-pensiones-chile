@@ -1,0 +1,194 @@
+<div class="table-responsive">
+<h4>INGRESO IMPONIBLE PROMEDIO POR REGI&Oacute;N Y A.F.P. (1) (Al 31 de Diciembre de 2017)</h4>
+      <table border='1'>
+   
+<thead>
+<tr  >
+<th  rowspan="2" class="NOMBRE" >A.F.P.</th>
+<th  colspan="16" class="TITUuno" >REGI&Oacute;N</th>
+<th  rowspan="2" class="TITUuno" >TOTAL</th>
+</tr>
+
+<tr  >
+<th  class="SUBTITUdos" >I</th>
+<th  class="SUBTITUdos" >II</th>
+<th  class="SUBTITUdos" >III</th>
+<th  class="SUBTITUdos" >IV</th>
+<th  class="SUBTITUdos" >V</th>
+<th  class="SUBTITUdos" >VI</th>
+<th  class="SUBTITUdos" >VII</th>
+<th  class="SUBTITUdos" >VIII</th>
+<th  class="SUBTITUdos" >IX</th>
+<th  class="SUBTITUdos" >X</th>
+<th  class="SUBTITUdos" >XI</th>
+<th  class="SUBTITUdos" >XII</th>
+<th  class="SUBTITUdos" >R. Metrop.</th>
+<th  class="SUBTITUdos" >XIV</th>
+<th  class="SUBTITUdos" >XV</th>
+<th  class="SUBTITUdos" >S/I</th>
+</tr>
+</thead>
+
+<tbody>
+      <tr>
+   <td class='alignLeft'>CAPITAL</td>
+   
+   <td>842.071</td>
+   <td>1.053.689</td>
+   <td>956.590</td>
+   <td>889.864</td>
+   <td>709.661</td>
+   <td>731.444</td>
+   <td>669.666</td>
+   <td>698.328</td>
+   <td>688.930</td>
+   <td>719.712</td>
+   <td>920.175</td>
+   <td>837.358</td>
+   <td>841.131</td>
+   <td>696.471</td>
+   <td>795.014</td>
+   <td>939.698</td>
+   <td class='F1RESUL'>792.544</td>
+   </tr>
+      <tr>
+   <td class='alignLeft'>CUPRUM</td>
+   
+   <td>1.324.873</td>
+   <td>1.428.505</td>
+   <td>1.370.273</td>
+   <td>1.352.411</td>
+   <td>1.289.354</td>
+   <td>1.315.665</td>
+   <td>1.206.515</td>
+   <td>1.289.775</td>
+   <td>1.295.753</td>
+   <td>1.260.617</td>
+   <td>1.336.798</td>
+   <td>1.323.409</td>
+   <td>1.462.179</td>
+   <td>1.289.901</td>
+   <td>1.285.674</td>
+   <td>1.160.547</td>
+   <td class='F1RESUL'>1.379.693</td>
+   </tr>
+      <tr>
+   <td class='alignLeft'>HABITAT</td>
+   
+   <td>855.156</td>
+   <td>1.087.127</td>
+   <td>930.433</td>
+   <td>873.154</td>
+   <td>813.686</td>
+   <td>823.801</td>
+   <td>782.405</td>
+   <td>780.940</td>
+   <td>730.964</td>
+   <td>769.176</td>
+   <td>980.592</td>
+   <td>802.485</td>
+   <td>926.988</td>
+   <td>702.067</td>
+   <td>697.781</td>
+   <td>538.072</td>
+   <td class='F1RESUL'>865.562</td>
+   </tr>
+      <tr>
+   <td class='alignLeft'>MODELO</td>
+   
+   <td>625.661</td>
+   <td>767.828</td>
+   <td>663.689</td>
+   <td>628.298</td>
+   <td>643.742</td>
+   <td>556.084</td>
+   <td>507.511</td>
+   <td>601.048</td>
+   <td>560.320</td>
+   <td>589.440</td>
+   <td>790.870</td>
+   <td>662.508</td>
+   <td>733.473</td>
+   <td>581.501</td>
+   <td>605.751</td>
+   <td>668.368</td>
+   <td class='F1RESUL'>680.445</td>
+   </tr>
+      <tr>
+   <td class='alignLeft'>PLANVITAL</td>
+   
+   <td>510.642</td>
+   <td>566.596</td>
+   <td>541.542</td>
+   <td>515.506</td>
+   <td>487.323</td>
+   <td>444.348</td>
+   <td>431.087</td>
+   <td>508.630</td>
+   <td>509.827</td>
+   <td>532.755</td>
+   <td>612.735</td>
+   <td>532.499</td>
+   <td>578.595</td>
+   <td>584.217</td>
+   <td>468.676</td>
+   <td>0</td>
+   <td class='F1RESUL'>536.622</td>
+   </tr>
+      <tr>
+   <td class='alignLeft'>PROVIDA</td>
+   
+   <td>695.085</td>
+   <td>830.142</td>
+   <td>679.347</td>
+   <td>576.894</td>
+   <td>593.631</td>
+   <td>529.626</td>
+   <td>474.133</td>
+   <td>562.941</td>
+   <td>502.453</td>
+   <td>539.946</td>
+   <td>580.417</td>
+   <td>664.840</td>
+   <td>704.826</td>
+   <td>535.830</td>
+   <td>684.567</td>
+   <td>479.664</td>
+   <td class='F1RESUL'>616.220</td>
+   </tr>
+      <tr class='F1RESUL'>
+   <td class='alignLeft'>Total</td>
+   
+   <td>779.209</td>
+   <td>969.471</td>
+   <td>852.511</td>
+   <td>733.712</td>
+   <td>699.526</td>
+   <td>643.861</td>
+   <td>585.676</td>
+   <td>689.735</td>
+   <td>635.152</td>
+   <td>673.376</td>
+   <td>782.394</td>
+   <td>776.544</td>
+   <td>819.603</td>
+   <td>655.863</td>
+   <td>712.692</td>
+   <td>554.286</td>
+   <td class='F1RESUL'>753.477</td>
+   </tr>
+
+</tbody>
+</table>
+</div>
+
+<ul>
+<li>FUENTE: Informe Estad&iacute;stico Trimestral de Afiliados y Cotizantes.</li>
+<li>(1) Corresponde al n&uacute;mero de afiliados que cotizaron en 201712, por remuneraciones devengadas en Noviembre de 2017.</li>
+<li>S/I Sin informaci&oacute;n</li>
+</ul>
+
+<br>Informaci&oacute;n actualizada el 12 de Febrero de 2018
+<br>
+
+

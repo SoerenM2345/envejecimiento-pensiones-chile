@@ -56,7 +56,7 @@ REGION_KEYS = [  # (fragmento en el nombre, id oficial, nombre corto)
     ("arica", 15, "Arica y Parinacota"), ("tarapac", 1, "Tarapacá"), ("antofagasta", 2, "Antofagasta"),
     ("atacama", 3, "Atacama"), ("coquimbo", 4, "Coquimbo"), ("valpara", 5, "Valparaíso"),
     ("metropolitana", 13, "Metropolitana"), ("o'higgins", 6, "O'Higgins"), ("libertador", 6, "O'Higgins"),
-    ("maule", 7, "Maule"), ("ñuble", 16, "Ñuble"), ("biob", 8, "Biobío"), ("araucan", 9, "La Araucanía"),
+    ("maule", 7, "Maule"), ("ñuble", 16, "Ñuble"), ("biob", 8, "Biobío"), ("bíob", 8, "Biobío"), ("bío-", 8, "Biobío"), ("araucan", 9, "La Araucanía"),
     ("los ríos", 14, "Los Ríos"), ("los lagos", 10, "Los Lagos"), ("ays", 11, "Aysén"),
     ("magallanes", 12, "Magallanes"),
 ]
@@ -179,6 +179,8 @@ def parse_region(path):
     else:
         return []
     trimestre = str(df.iloc[hdr - 2, 1]).strip("() ") if col_total == 3 else str(df.iloc[hdr, col_total]).replace("Total", "").strip()
+    if trimestre.lower() in ("", "trimestre", "nan") and " a " in str(df.iloc[hdr - 2, 1]):
+        trimestre = str(df.iloc[hdr - 2, 1]).strip("() ")  # informe OND-2025: 'octubre 2025 a diciembre 2025'
     unidad_txt = df.iloc[inicio_datos - 1, col_total + 1]
     f = factor_a_mm(unidad_txt)
     out, region_actual = [], None

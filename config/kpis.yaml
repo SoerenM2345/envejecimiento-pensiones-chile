@@ -199,13 +199,13 @@ kpis_presentacion:
   - id: "1.2"
     nombre: "Razón de soporte"
     objetivo: "Objetivo 1: Retener y ampliar la base activa"
-    descripcion: "Cuántos cotizantes sostienen a cada pasivo, por región y año"
-    formula: "Cotizantes / Población 65+"
+    descripcion: "Cuántos cotizantes sostienen a cada pasivo, por región y año. Además, ¿dónde está el punto crítico?: el año en que el costo del Pilar Solidario de vejez (costo por persona de 65+ × población de 65+) supera la capacidad de pago (carga máxima tolerable × ingreso por trabajador × trabajadores)."
+    formula: "Cotizantes / Población 65+  ·  Punto crítico: costo_65 × pob_65+ = carga_máx × ingreso_trabajador × trabajadores"
     visualizacion: barras_y_proyeccion
     status: partial
-    archivo: [kpi_presion_previsional_region.csv, kpi_proyeccion_regional.csv]
-    fuente: [Superintendencia de Pensiones, INE Censo 2024, INE proyecciones 1992-2070]
-    caveat: "Valor actual por región: real. Proyección 2035/2050: escenario (cobertura 2025 constante); la población 65+ regional es reparto de tasas nacionales, no proyección oficial INE."
+    archivo: [kpi_presion_previsional_region.csv, kpi_proyeccion_regional.csv, kpi_pc_nacional.csv, kpi_pc_region.csv, kpi_pc_parametros_reforma.csv]
+    fuente: [Superintendencia de Pensiones (cotizantes e ingreso imponible), INE Censo 2024, INE proyecciones 1992-2070, INE ESI y ENE (ingreso y ocupados), Banco Central (IPC), Superintendencia de Pensiones (PGU/APS/PBS)]
+    caveat: "Valor actual por región: real. Proyección 2035/2050: escenario (cobertura 2025 constante); la población 65+ regional es reparto de tasas nacionales, no proyección oficial INE. Punto crítico: usa datos del mismo año (país 2025, región 2024); el costo es PGU + APS/PBS de vejez, constante en términos reales más la PGU de $250.000 (Ley 21.735); la carga máxima tolerable es un supuesto (10 % = cotización obligatoria). Comuna: aproximación (no hay cotizantes, sueldos ni gasto por comuna); la mediana regional del ingreso imponible se estima con la nacional."
 
   - id: "1.3"
     nombre: "Participación partes interesadas"

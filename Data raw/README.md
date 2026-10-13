@@ -11,14 +11,15 @@ Reorganizado el 2026-10-07. Cada archivo está en una de tres zonas.
 | `cotizantes_region.xls` | KPI 1.1 y 1.2 (cotizantes por región) | 03 |
 | `_external/16_bevoelkerungsvorausberechnung_daten.csv` | Pirámide de Alemania (Destatis) | 10 |
 | `_external/pilar_solidario/` | Informes de cierre (OND) 2023, 2024 y 2025: PGU/PBS/APS. KPI 2.1 y 2.2 | 12 |
-| `_external/dipres/` | Estadísticas de las Finanzas Públicas 2016-2025 (PDF y Excel, gasto funcional "7102 Edad avanzada"), pasivos y activos, nota técnica FAPP. KPI 2.1, 2.2, 1.3 | 13 |
+| `_external/dipres/` | Estadísticas de las Finanzas Públicas 2016-2025 (PDF y Excel, gasto funcional "7102 Edad avanzada"), pasivos y activos, nota técnica FAPP. KPI 2.1, 2.2, 1.3 | 13 (gasto), 16 (pasivos/activos del Gobierno Central y Bonos de Reconocimiento) |
 | `_external/macro/CCNN2018_P0_V2.xlsx` | PIB anual a precios corrientes y encadenado 2013-2025 (Banco Central). KPI 2.1, 2.2 | 13 |
 | `_external/fapp/` | Estados financieros del FAPP al 31-dic-2025 y al 30-jun-2026. KPI 1.3, 2.2 | por hacer |
+| `import_KPI1.2/` | Análisis «punto crítico» del KPI 1.2: cuadros 04A/32C/19B de la SP (ingreso imponible y cotizantes por tramo), ESI y ENE del INE (ingreso y ocupados), IPC del Banco Central. Los 04A faltantes se bajan con el script 15 | 15, 18 |
 | `_external/casen2022/` | CASEN 2022 completa (`casen_2022.dta`, 501 MB, no versionado), libro de códigos, nota de uso y líneas de pobreza. KPI 2.3 | 14 |
 
 ## 2. `development sources/`: usados por el modo desarrollador, no por los 6 KPIs
 
-`afiliados_region_edad.xls`, `cotizantes_edad.xls` (script 03), `c1/c2/c3_202607.xlsx` (script 04, solo sistema antiguo IPS), `casen_ingresos.parquet` (script 08, extracto CASEN de terceros), y tres archivos de la Superintendencia sin script aún: `cotizantes_region_afp.xls`, `cotizantes_tipo_sexo.xls`, `cotizaciones_totales.xls`.
+`afiliados_region_edad.xls`, `cotizantes_edad.xls` (script 03), `c1/c2/c3_202607.xlsx` (script 04, solo sistema antiguo IPS), `casen_ingresos.parquet` (script 08, extracto CASEN de terceros), y tres series de la Superintendencia (script 17): `cotizantes_region_afp.xls`, `cotizantes_tipo_sexo.xls`, `cotizaciones_totales.xls`.
 
 ## 3. `archive/<KPI>/`: no hacen falta (nada se borró)
 
@@ -30,6 +31,6 @@ Reorganizado el 2026-10-07. Cada archivo está en una de tres zonas.
 | `2.1_costo_real_adulto_mayor/` | Informes Pilar Solidario intermedios (trimestres que no son el cierre), informes mensuales de solicitudes, planillas DIPRES de gobierno general y empresas públicas, PIB per cápita del Banco Mundial en USD | La serie mensual 2008-2025 ya sale del informe de cierre; el PIB en USD mezcla tipo de cambio |
 | `2.2_financiamiento_dedicado/` | 8 planillas DIPRES de estados financieros | Son plantillas contables sin montos |
 | `2.3_pobreza_vejez/duplicados/` | Copia de la nota de uso CASEN | Idéntica |
-| `…/duplicados/` (varias) | Copias idénticas (verificadas por hash) | Descargas repetidas |
+| `…/duplicados/` (varias) | Copias de descargas repetidas: idénticas por hash, salvo las 2 de `cotizantes_region.xls` (bytes distintos, pero celdas idénticas al original, comparadas una a una) | Descargas repetidas |
 
 Los nombres originales de las descargas se conservan, salvo los PDF del FAPP (`gcs-file*.pdf`), renombrados para que se entienda qué son.

@@ -14,6 +14,10 @@ originales en `../Data raw/` — esta carpeta se puede borrar y reconstruir.
 | `03_procesar_cotizantes_afiliados.py` | Tidy de las series históricas de Superintendencia de Pensiones (afiliados/cotizantes). |
 | `04_procesar_pensiones_pagadas.py` | Tidy de los informes c1/c2/c3 (pago de pensiones, corte julio 2026). |
 | `05_graficos_exploratorios.py` | Gráficos de validación (no es el dashboard final) en `../Outputs/figures/`. |
+| `17_procesar_series_superintendencia_extra.py` | Tidy de `cotizantes_tipo_sexo.xls`, `cotizantes_region_afp.xls` y `cotizaciones_totales.xls` (`development sources/`). |
+| `15_descargar_sp_ingreso_imponible.py` | Descarga de `spensiones.cl` los meses que faltan del cuadro 04A (cotizantes e ingreso imponible promedio, mensual desde 2002) a `Data raw/import_KPI1.2/04A_descargas/`. Solo biblioteca estándar. |
+| `18_kpi_punto_critico.py` | Tidy de los cuadros SP (04A, 32C, 19B), ESI/ENE del INE e IPC, y construcción de las tablas `kpi_pc_*` del análisis «punto crítico» del KPI 1.2. |
+| `16_procesar_dipres_activos_bonos.py` | Tidy de las hojas de pasivos/activos del Gobierno Central y Bonos de Reconocimiento de DIPRES. |
 
 ## Archivos y su uso
 
@@ -46,6 +50,15 @@ Dos fuentes **distintas y no comparables directamente**:
    - **Importante:** los "ex caja" (Empart, Servicio Seguro Social, Empleados Públicos, etc.) son las cajas de previsión del sistema de reparto **anterior a la reforma de 1981**, hoy administradas por el IPS. Este universo (**466.781 pensionados** a julio 2026, validado de forma cruzada e idéntica en los 3 archivos) es mucho menor que la población de 65+ del Censo (2,56M) — **no equivale** a "todos los adultos mayores con pensión" (no incluye AFP, PGU, etc.). Está fuertemente concentrado en edades 75-90 (cohorte que se extingue), lo cual es en sí mismo relevante para la narrativa de sostenibilidad del sistema antiguo.
    - Cada archivo trae una fila `region_nombre`/`tramo_edad`/`ex_caja` = `"Total"` (agregado) — no sumar junto con el resto de las filas.
 
+#### Series adicionales de la Superintendencia (script 17, modo desarrollador)
+- **`cotizantes_por_tipo_sexo.csv`** — anual 1985-2025: `tipo` (Dependientes / Independientes / Afiliados voluntarios / Total) x `sexo`. Las filas `sexo = Total` son subtotales por tipo: no sumarlas con Masculino/Femenino. En 1985 solo existe `tipo = Total`.
+- **`cotizantes_por_region_afp.csv`** — mensual dic-1993 a jun-2026, región x AFP (29 nombres, incluye `Sistema` = todas las AFP). Trae filas `region_label = TOTAL` y `Sin información` (sin `region_id`): filtrar antes de sumar. Dic-2025, `Sistema`: 5.974.428 cotizantes, igual a `cotizantes_por_region.csv` y `cotizantes_por_tipo_sexo.csv`.
+- **`cotizaciones_por_afp.csv`** — mensual ene-1984 a jul-2026: número de *cotizaciones* (no personas ni pesos) por AFP; `Sistema` es el total y coincide con la suma de las AFP. Sube cada junio por los independientes que paga la Tesorería. No sirve como monto de cotizaciones.
+
+### Finanzas públicas — DIPRES (script 16)
+- **`dipres_pasivos_activos_gc.csv`** — pasivos y activos financieros del Gobierno Central al 31-dic, 2016-2025, en MM$, MMUS$ y % PIB (`unidad`). La línea de activos en dólares `5.3 Otros` mezcla FEES, FRP, FEPP y otras inversiones: el FRP no se puede aislar con este archivo. No sumar filas de distinta `unidad`.
+- **`bonos_reconocimiento.csv`** — bonos liquidados por año y stock actualizado de bonos de reconocimiento 1982-2025 (MM$ y % PIB). Cae de 8.217.112 MM$ (2002) a 49.441 MM$ (2025).
+
 ### Mapas (`geo/`)
 - `geo/comunas_chile.geojson` (345/346 comunas, Antártica sin geometría publicada) y `geo/regiones_chile.geojson` (16/16), geometría simplificada (tolerancia 0.001°) desde `pachadotdev/chilemapas`, ya con todos los indicadores de `indicadores_comuna.csv`/`indicadores_region.csv` embebidos como propiedades. Generados por `06_construir_mapas.py`.
 
@@ -60,6 +73,18 @@ Dos fuentes **distintas y no comparables directamente**:
 - **`kpi_proyeccion_regional.csv`** — proyección 2024→2035→2050 de población por región, método de **reparto de tasas nacionales** (shift-share): se aplica a cada región la tasa de crecimiento que el INE proyecta a nivel país por grupo etario. Es una aproximación explícita, no una proyección oficial INE por región (el INE aún no la publica en base 2024).
 - **`kpi_indice_demanda_salud_region.csv`** — índice compuesto (suma de z-scores de % 65+, % 80+ y velocidad de envejecimiento 2024→2035) como proxy de demanda potencial de salud geriátrica. No usa datos DEIS de uso real de servicios (no disponibles).
 - **`kpi_urbanizacion_envejecimiento.csv`** — comuna x `pct_urbano` x `pct_65_mas` (346 comunas, Censo únicamente).
+
+### Punto crítico del KPI 1.2 (`18_kpi_punto_critico.py`, con `15_descargar_sp_ingreso_imponible.py`)
+Pesos reales = pesos de 2025 (IPC promedio anual). «Cotizantes» e ingreso imponible son de diciembre; los ocupados, del trimestre octubre-diciembre (período de la ESI).
+- **`sp_ingreso_imponible_nacional.csv`** — `periodo, anio, mes, tipo, sexo, cotizantes, ingreso_promedio_nom`; mensual, oct-2002 a ago-2026.
+- **`sp_ingreso_imponible_region.csv`** — ingreso imponible promedio por región (diciembre 2010-2025; Ñuble desde 2018).
+- **`sp_cotizantes_por_tramo.csv`** — cotizantes por tramo de ingreso imponible (miles de pesos), de donde sale la mediana.
+- **`ine_ingresos_ocupados.csv`** — ESI: mediana y media nominal por región/sexo, 2010-2025, y ocupados (`region_id` 0 = país).
+- **`ipc_anual.csv`** — `ipc_prom` y `deflactor_2025`.
+- **`kpi_pc_nacional.csv`** — país 2010-2025: cotizantes, ocupados, ingreso (promedio y mediana; imponible y ESI; nominal y real), costo de vejez del Pilar Solidario (total = PGU + APS/PBS de vejez; real y por persona de 65+), población 65+ y 15-64 INE.
+- **`kpi_pc_region.csv`** — región × año 2010-2025 con lo mismo a nivel regional, más `cuota_gasto_vejez` (parte de cada región en el gasto de vejez; 2023-2025).
+- **`kpi_pc_parametros_reforma.csv`** — PGU de $250.000 (Ley 21.735) como factor de costo: sube por edades en sep-2025 (82+), sep-2026 (75+) y sep-2027 (65+).
+- Las poblaciones 65+ / 15-64 regionales vienen del Censo 2024 y de `kpi_proyeccion_regional.csv`; el motor de cálculo está en `Dashboards/components/critical_point.py`.
 
 Definiciones formales, fórmulas e interpretación de cada KPI: `../config/kpis.yaml`.
 

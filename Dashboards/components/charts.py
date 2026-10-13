@@ -1,5 +1,6 @@
 """Constructores de figuras compartidos por las páginas del modo final.
 Cada función recibe DataFrames ya cargados (no lee archivos) y devuelve un go.Figure."""
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -142,18 +143,28 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str)
     return fig
 
 
-def cost_vs_economy_index(idx: pd.DataFrame) -> go.Figure:
-    """KPI 2.1: índice (base primer año = 100) del costo real por persona 65+ y del PIB per cápita real.
-    idx: anio, idx_costo_65, idx_pib_pc."""
+def cost_per_person_chart(d: pd.DataFrame, anio_hito: int, texto_hito: str) -> go.Figure:
+    """KPI 2.1: costo público real por persona 65+ (millones de $ de 2025). d: anio, costo_65. Marca el año del salto."""
     fig = go.Figure()
-    fig.add_scatter(x=idx.anio, y=idx.idx_costo_65, mode="lines+markers", name="Costo público real por persona 65+",
-                    line=dict(color=RED, width=3))
-    fig.add_scatter(x=idx.anio, y=idx.idx_pib_pc, mode="lines+markers", name="PIB per cápita real",
-                    line=dict(color=BLUE, width=3))
-    fig.add_hline(y=100, line_dash="dot", line_color=INK_MUTED)
-    fig.update_layout(**PLOTLY_LAYOUT, title=f"Costo por adulto mayor vs. economía (índice, {int(idx.anio.min())} = 100)")
+    fig.add_scatter(x=d.anio, y=d.costo_65 / 1e6, mode="lines+markers+text", line=dict(color=RED, width=3),
+                    text=[f"{v / 1e6:.2f}" for v in d.costo_65], textposition="top center", showlegend=False,
+                    hovertemplate="%{x}: $%{y:.2f} millones<extra></extra>")
+    fig.add_vline(x=anio_hito, line_dash="dash", line_color=INK_MUTED, annotation_text=texto_hito, annotation_position="top left")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Costo público real por persona de 65+ (millones de $ de 2025)")
     fig.update_xaxes(title="Año", dtick=1)
-    fig.update_yaxes(title="Índice")
+    fig.update_yaxes(title="Millones de $ de 2025 por persona", rangemode="tozero")
+    return fig
+
+
+def spending_vs_population_growth(d: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: crecimiento anual (%) del gasto real en edad avanzada vs. la población 65+. d: anio, gasto, pob_65."""
+    g = d.set_index("anio")[["gasto", "pob_65"]].pct_change().dropna() * 100
+    fig = go.Figure()
+    fig.add_bar(x=g.index, y=g.gasto, name="Gasto real en edad avanzada", marker_color=RED)
+    fig.add_bar(x=g.index, y=g.pob_65, name="Población 65+", marker_color=BLUE)
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", title="Crecimiento anual: gasto vs. población 65+ (%)")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="Variación anual (%)", zeroline=True, zerolinecolor=INK_MUTED)
     return fig
 
 
@@ -182,4 +193,61 @@ def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     fig.add_vline(x=nacional, line_dash="dash", line_color="#52514e", annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
     fig.update_layout(**PLOTLY_LAYOUT, title="Pobreza por ingresos en personas de 65+ (% con IC 95%)")
     fig.update_xaxes(title="% de personas 65+ en pobreza")
+    return fig
+
+
+def _unidad_dinero(max_clp: float):
+    """Escala legible para masas de dinero en pesos: (divisor, etiqueta del eje)."""
+    if max_clp >= 1e12:
+        return 1e12, "billones de $ de 2025"
+    if max_clp >= 1e9:
+        return 1e9, "miles de millones de $ de 2025"
+    return 1e6, "millones de $ de 2025"
+
+
+def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float) -> go.Figure:
+    """KPI 1.2, análisis del punto crítico. d = salida de critical_point.serie_pais / serie_territorio;
+    pc = critical_point.punto_critico(d); view = 'dinero' | 'razon'.
+    En 'dinero' se superponen el costo (costo por persona de 65+ x población de 65+) y la capacidad (carga máxima x ingreso por
+    trabajador x trabajadores); en 'razon', la razón de soporte observada y la razón de equilibrio R*. El cruce de las dos
+    líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050)."""
+    if view == "dinero":
+        div, unidad = _unidad_dinero(max(d.costo_total.max(), d.capacidad.max()))
+        series = [("Costo del Pilar Solidario de vejez", d.costo_total / div, RED),
+                  (f"Capacidad: {carga_max:.0%} del sueldo de los {trabajadores}", d.capacidad / div, BLUE)]
+        ytitle, fmt = unidad, ",.2f"
+        titulo = f"Costo vs. capacidad de financiamiento, {nombre}"
+    else:
+        series = [(f"Razón de soporte observada ({trabajadores} por persona de 65+)", d.razon_soporte, BLUE),
+                  (f"Razón de equilibrio R* (carga máxima {carga_max:.0%})", d.razon_equilibrio, ORANGE)]
+        ytitle, fmt = f"{trabajadores.capitalize()} por persona de 65+", ".2f"
+        titulo = f"Razón de soporte vs. razón de equilibrio, {nombre}"
+
+    obs, proy = d[~d.proyectado], d[d.proyectado]
+    base = d[~d.proyectado].tail(1)
+    proy_c = pd.concat([base, proy])  # el tramo punteado parte del último punto observado
+    fig = go.Figure()
+    for nom, y, col in series:
+        yo, yp = y.loc[obs.index], y.loc[proy_c.index]
+        fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers" if len(obs) > 1 else "markers", name=nom, legendgroup=nom,
+                        line=dict(color=col, width=3), marker=dict(size=6 if len(obs) > 1 else 10),
+                        hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
+        fig.add_scatter(x=proy_c.anio, y=yp, mode="lines", name=nom + " (escenario)", legendgroup=nom, showlegend=False,
+                        line=dict(color=col, width=3, dash="dash"),
+                        hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + " (escenario)</extra>")
+        if "ancla" in d and d.ancla.any():
+            a = d[d.ancla]
+            fig.add_scatter(x=a.anio, y=y.loc[a.index], mode="markers", legendgroup=nom, showlegend=False,
+                            marker=dict(symbol="diamond", size=12, color=col, line=dict(color="white", width=1.5)),
+                            hoverinfo="skip")
+    if pc["estado"] in ("cruza", "ya_superado"):
+        xc = pc["anio_exacto"]
+        yc = float(np.interp(xc, d.anio, series[0][1].values))
+        fig.add_vline(x=xc, line_dash="dot", line_color=INK_MUTED)
+        fig.add_scatter(x=[xc], y=[yc], mode="markers+text", showlegend=False, hoverinfo="skip",
+                        text=[f"Punto crítico: {pc['anio']}" if pc["estado"] == "cruza" else f"Superado desde {pc['anio']}"],
+                        textposition="top left", marker=dict(symbol="star", size=18, color=VIOLET, line=dict(color="white", width=1.5)))
+    fig.update_layout(**PLOTLY_LAYOUT, title=titulo)
+    fig.update_xaxes(title="Año")
+    fig.update_yaxes(title=ytitle, rangemode="tozero")
     return fig
