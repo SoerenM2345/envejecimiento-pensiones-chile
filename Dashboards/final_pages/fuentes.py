@@ -27,8 +27,8 @@ st.markdown(
 
 st.subheader("Limitaciones a tener presentes")
 st.markdown(
-    "- **Años distintos:** el Censo es 2024 y los cotizantes son de diciembre de 2025.\n"
-    "- **Cotizantes sin región:** 13.914 cotizantes no tienen región informada y quedan fuera del cálculo regional.\n"
+    "- **Años de los cotizantes:** la cobertura (KPI 1.1) usa cotizantes 2024, mismo año que el Censo; la razón de soporte (KPI 1.2) usa cotizantes de diciembre de 2025.\n"
+    "- **Cotizantes sin región:** 56.094 cotizantes en 2024 y 13.914 en 2025 no tienen región informada y quedan fuera del cálculo regional.\n"
     "- **Proyección regional:** el INE aún no publica proyecciones regionales base 2024. La población 65+ por región "
     "en 2035 y 2050 usa un reparto de las tasas nacionales, no es oficial.\n"
     "- **Escenario de razón de soporte:** supone que la cobertura previsional 2025 se mantiene constante; no es un pronóstico.\n"

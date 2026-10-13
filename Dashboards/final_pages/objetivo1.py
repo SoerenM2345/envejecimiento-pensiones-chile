@@ -9,13 +9,13 @@ st.title("Objetivo 1: retener y ampliar la base activa")
 st.markdown("Aumentar y retener la base de cotizantes activos por región, para sostener el ingreso por comisión pese al envejecimiento.")
 
 pres = load_csv("kpi_presion_previsional_region.csv")
-nac_cobertura = 100 * pres["cotizantes"].sum() / pres["pob_15_64"].sum()
+nac_cobertura = 100 * pres["cotizantes_2024"].sum() / pres["pob_15_64"].sum()
 nac_soporte = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
 
 
 def render_1_1():
     kpi_card_row([
-        ("Cobertura nacional", f"{nac_cobertura:.1f}%", "Cotizantes 2025 / población 15-64"),
+        ("Cobertura nacional", f"{nac_cobertura:.1f}%", "Cotizantes 2024 / población 15-64 (Censo 2024)"),
         ("Región con mayor cobertura", pres.sort_values("cobertura_previsional_pct").iloc[-1]["region_nombre"],
          f"{pres['cobertura_previsional_pct'].max():.1f}%"),
         ("Región con menor cobertura", pres.sort_values("cobertura_previsional_pct").iloc[0]["region_nombre"],
@@ -55,7 +55,9 @@ def render_1_2():
         fila = pres[pres.region_nombre == sel].iloc[0]
         r = proy_reg[proy_reg.region_nombre == sel]
         # razón = cobertura × pob15-64 / pob65+ = cobertura / índice de dependencia de vejez
-        filas = pd.DataFrame({"anio": r.anio, "razon": fila.cobertura_previsional_pct / r.indice_dependencia_vejez_proy})
+        # (cobertura con cotizantes 2025, igual que la razón actual; la columna cobertura_previsional_pct es 2024, KPI 1.1)
+        cobertura_2025 = 100 * fila.cotizantes / fila.pob_15_64
+        filas = pd.DataFrame({"anio": r.anio, "razon": cobertura_2025 / r.indice_dependencia_vejez_proy})
         fig = support_ratio_projection(fila.razon_soporte_previsional, filas, sel)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 

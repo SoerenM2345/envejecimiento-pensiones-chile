@@ -47,10 +47,10 @@ kpis:
 
   - id: cobertura_previsional
     nombre: "Cobertura previsional (cotizantes / población 15-64)"
-    formula: "100 * cotizantes_2025 / pob_15_64_2024"
+    formula: "100 * cotizantes_2024 / pob_15_64_2024"
     interpretacion: "qué fracción de la población en edad de trabajar cotiza activamente; el resto está fuera del sistema (informalidad, inactividad, cesantía)"
     grano: [region, pais]
-    fuente: [Cotizantes Superintendencia de Pensiones 2025, Censo 2024]
+    fuente: [Cotizantes Superintendencia de Pensiones 2024, Censo 2024]
     archivo: [kpi_presion_previsional_region.csv]
     script: 07_kpis_pension_salud.py
     track: "Proyectar la presión sobre salud y pensiones"
@@ -194,7 +194,7 @@ kpis_presentacion:
     status: live
     archivo: [kpi_presion_previsional_region.csv]
     fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024]
-    caveat: "Cotizantes dic-2025 contra población Censo 2024; 13.914 cotizantes sin región informada."
+    caveat: "Cotizantes 2024 contra población Censo 2024 (mismo año); 56.094 cotizantes sin región informada quedan fuera del cálculo regional."
 
   - id: "1.2"
     nombre: "Razón de soporte"
