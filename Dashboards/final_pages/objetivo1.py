@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
-from components.charts import region_choropleth, region_bars, support_ratio_projection
+from components.charts import region_choropleth, region_bars, support_ratio_projection, stakeholder_financing_bars
 
 st.title("Objetivo 1: retener y ampliar la base activa")
 st.markdown("Aumentar y retener la base de cotizantes activos por región, para sostener el ingreso por comisión pese al envejecimiento.")
@@ -62,6 +62,18 @@ def render_1_2():
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
 
 
+def render_1_3():
+    part = load_csv("kpi_participacion_partes.csv").sort_values("anio")
+    ult, ant = part.iloc[-1], part.iloc[0]
+    kpi_card_row([
+        (f"Empleador + Estado ({int(ult.anio)})", f"{ult.kpi_1_3_pct:.1f}%", "Del financiamiento total"),
+        (f"Empleador + Estado ({int(ant.anio)})", f"{ant.kpi_1_3_pct:.1f}%", "Antes de la cotización del empleador"),
+        (f"Variación {int(ant.anio)}-{int(ult.anio)}", f"{ult.kpi_1_3_pct - ant.kpi_1_3_pct:+.1f} pp",
+         f"Empleador {int(ult.anio)}: {100 * ult.aporte_empleador / ult.financiamiento_total:.1f}% del total"),
+    ])
+    st.plotly_chart(stakeholder_financing_bars(part), use_container_width=True, config=PLOTLY_DL_CONFIG)
+
+
 kpi_card("1.1", render_1_1)
 kpi_card("1.2", render_1_2)
-kpi_card("1.3")
+kpi_card("1.3", render_1_3)

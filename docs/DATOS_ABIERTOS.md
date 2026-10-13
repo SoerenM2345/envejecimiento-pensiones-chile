@@ -8,14 +8,14 @@ Revisado dos veces: inventario con `find` y, de forma independiente, con `os.wal
 |---|---|---|
 | 1.1 Cobertura regional | Cotizantes por región (Superintendencia) + Censo 2024 | Completo |
 | 1.2 Razón de soporte | Ídem + proyecciones INE nacionales | Completo (proyección regional = reparto de tasas nacionales, no oficial) |
-| 1.3 Participación partes interesadas | Estados financieros FAPP dic-2025 y jun-2026, nota técnica DIPRES | **Incompleto: falta el denominador** |
+| 1.3 Participación partes interesadas | Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio 2024-2025), estados financieros FAPP dic-2025, Pilar Solidario | **Calculado** (script 15, dashboard) |
 | 2.1 Costo real por adulto mayor | DIPRES gasto "7102 Edad avanzada" 2016-2025, PGU/PBS/APS mensual 2008-2025, PIB Banco Central 2013-2025, población 65+ INE | **Calculado** (script 13, dashboard) |
 | 2.2 Financiamiento dedicado | Ídem + nota FAPP | **Ratio 1 calculado; ratio 2 incompleto** |
 | 2.3 Pobreza en la vejez | CASEN 2022 completa (`edad`, `region`, `pobreza`, `expr`, `varstrat`, `varunit`) | **Calculado** (script 14, dashboard) |
 
 ## Lo que sigue abierto
 
-1. **Monto en pesos de las cotizaciones de los trabajadores (2024 y 2025)** (KPI 1.3, denominador "financiamiento total"). Ningún archivo lo trae: `cotizaciones_totales.xls` cuenta cotizaciones, no pesos, y los estados del FAPP solo cubren el ingreso del FAPP. Descargar de la Superintendencia de Pensiones: *Sistema de Pensiones → Cotizaciones y Cotizantes* (montos) y *Seguro Social Previsional → Montos de cotizaciones acreditadas*.
+1. ~~**Monto en pesos de las cotizaciones de los trabajadores (2024 y 2025)**~~ (KPI 1.3). **Resuelto como estimación:** cotizantes × ingreso promedio × 10% de las Fichas Estadísticas Previsionales (`_external/fichas_previsionales/`, 12 meses por año). El monto oficial (*Montos de cotizaciones acreditadas*) serviría para validar, pero ya no bloquea.
 2. **Valor presente del déficit** (KPI 2.2, ratio 2). No está en ningún archivo (la nota DIPRES del FAPP solo estima ingresos y egresos del fondo). Decisión del equipo: reemplazarlo por *saldo del fondo (FAPP + FRP) / gasto anual en PGU y APS* ("años de cobertura"), o buscar el Informe Financiero de la Ley 21.735.
 3. **Saldo del Fondo de Reserva de Pensiones (FRP)**. La publicación DIPRES lo menciona (págs. 126 y 164) pero no está verificado que traiga la serie; extraer en la fase de cálculo. La nota técnica indica que el FRP transfirió hasta US$900 millones al FAPP.
 

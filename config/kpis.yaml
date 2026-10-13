@@ -213,8 +213,11 @@ kpis_presentacion:
     descripcion: "Cuánto del costo se traslada de los trabajadores hacia otros pagadores"
     formula: "(Aporte empleador + Aporte Estado) / Financiamiento total"
     visualizacion: barras_apiladas
-    status: pending
-    datos_faltantes: ["Monto en pesos de las cotizaciones de los trabajadores 2024-2025 (Superintendencia de Pensiones: Cotizaciones y Cotizantes; Seguro Social Previsional - Montos de cotizaciones acreditadas). Los estados financieros del FAPP ya están en Data raw/_external/fapp/"]
+    status: live
+    archivo: [kpi_participacion_partes.csv, fichas_previsionales_mensual.csv]
+    fuente: ["Superintendencia de Pensiones, Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio)", "FAPP, estados financieros al 31-12-2025 (cuentas 40.110 y 40.187)", "Subsecretaría de Previsión Social (Pilar Solidario: PGU, PBS, APS)"]
+    script: 15_kpi_participacion_partes.py
+    caveat: "Aporte trabajadores estimado (cotizantes × ingreso imponible promedio × 10%), el ingreso tiene tope imponible. Aporte empleador = cotizaciones FAPP (vigente desde ago-2025). Aporte Estado = gasto PGU/PBS/APS, que es gasto en beneficios y no cotización (decisión metodológica)."
 
   - id: "2.1"
     nombre: "Costo real por adulto mayor"

@@ -183,3 +183,22 @@ def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     fig.update_layout(**PLOTLY_LAYOUT, title="Pobreza por ingresos en personas de 65+ (% con IC 95%)")
     fig.update_xaxes(title="% de personas 65+ en pobreza")
     return fig
+
+
+def stakeholder_financing_bars(df: pd.DataFrame) -> go.Figure:
+    """KPI 1.3: financiamiento por pagador y año, barras apiladas en billones de pesos (10^12).
+    df: anio, aporte_trabajadores, aporte_empleador, aporte_estado, financiamiento_total, kpi_1_3_pct."""
+    fig = go.Figure()
+    for col, nombre, color in [("aporte_trabajadores", "Trabajadores (10% obligatorio, estimado)", BLUE),
+                               ("aporte_empleador", "Empleador (cotización FAPP)", ORANGE),
+                               ("aporte_estado", "Estado (PGU + PBS + APS)", VIOLET)]:
+        fig.add_bar(x=df.anio.astype(str), y=df[col] / 1e12, name=nombre, marker_color=color,
+                    text=[f"{v / 1e12:.2f}" if v > 0 else "" for v in df[col]], textposition="inside",
+                    customdata=100 * df[col] / df.financiamiento_total,
+                    hovertemplate=nombre + ": %{y:.2f} billones (%{customdata:.1f}%)<extra></extra>")
+    fig.add_scatter(x=df.anio.astype(str), y=df.financiamiento_total / 1e12 * 1.04, mode="text", showlegend=False,
+                    text=[f"Empleador + Estado: {p:.1f}%" for p in df.kpi_1_3_pct], hoverinfo="skip")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Financiamiento previsional por pagador (billones de pesos)")
+    fig.update_xaxes(title="Año")
+    fig.update_yaxes(title="Billones de pesos (10^12)", rangemode="tozero")
+    return fig

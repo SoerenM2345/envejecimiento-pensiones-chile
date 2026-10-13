@@ -66,3 +66,17 @@ def test_kpi_2_tables():
     assert len(pob) == 17 and (pob.region_id == 0).sum() == 1
     assert pob.pct_pobreza_65.between(0, 40).all() and (pob.ic95_inf <= pob.pct_pobreza_65).all()
     assert pob[pob.region_id == 0].pct_pobreza_65.iloc[0] < pob[pob.region_id == 0].pct_pobreza_menores_65.iloc[0]
+
+
+def test_kpi_1_3_participacion():
+    """KPI 1.3: 12 meses por año, control de la ficha N° 157 y empleador solo desde 2025."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    fichas = pd.read_csv(dp / "fichas_previsionales_mensual.csv")
+    f157 = fichas[fichas.n_ficha == 157].iloc[0]
+    assert (f157.cotizantes, f157.ingreso_promedio) == (5795995, 1362207)
+    assert abs(f157.aporte_trabajadores_mes / 1e6 - 789_500) < 100
+    k = pd.read_csv(dp / "kpi_participacion_partes.csv").set_index("anio")
+    assert list(k.index) == [2024, 2025] and (k.n_meses == 12).all()
+    assert k.loc[2024, "aporte_empleador"] == 0 and k.loc[2025, "aporte_empleador"] == 283_048_436_000
+    assert k.kpi_1_3_pct.between(40, 46).all()
