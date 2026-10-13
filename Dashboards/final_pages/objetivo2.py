@@ -3,44 +3,69 @@ import pandas as pd
 import streamlit as st
 from utils import load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
-from components.charts import cost_vs_economy_index, spending_pct_pib, poverty_bars, region_choropleth
+from components.charts import cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, region_choropleth
 
 st.title("Objetivo 2: controlar el costo por cliente")
 st.markdown("Optimizar la estructura de costos para absorber el crecimiento de cuentas inactivas y pensionadas sin perder rentabilidad.")
 
 
+ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
+
+
 @st.cache_data
 def serie_costo_vs_economia() -> pd.DataFrame:
-    """Costo público real por persona 65+ (DIPRES 'Edad avanzada', pesos de 2025) y PIB per cápita real (Banco Central), base 2016 = 100."""
+    """Costo público real por persona 65+ (DIPRES 'Edad avanzada', pesos de 2025) y PIB per cápita real (Banco Central)."""
     gasto = load_csv("gasto_proteccion_social.csv")
     gasto = gasto[gasto.categoria == "Edad avanzada"].set_index("anio")
     pib = load_csv("macro_pib_anual.csv").set_index("anio")
     pob = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio")
     anios = [a for a in gasto.index if a in pib.index and a in pob.index]
     d = pd.DataFrame(index=anios)
-    d["costo_65"] = gasto.loc[anios, "gasto_mm_2025"] * 1e6 / pob.loc[anios, "pob_65_mas"]
+    d["gasto"] = gasto.loc[anios, "gasto_mm_2025"] * 1e6
+    d["pob_65"] = pob.loc[anios, "pob_65_mas"]
+    d["costo_65"] = d.gasto / d.pob_65
     d["pib_pc_real"] = pib.loc[anios, "pib_real_mm_2018"] * 1e6 / pob.loc[anios, "pob_total"]
-    d["idx_costo_65"] = 100 * d.costo_65 / d.costo_65.iloc[0]
-    d["idx_pib_pc"] = 100 * d.pib_pc_real / d.pib_pc_real.iloc[0]
     d.index.name = "anio"
     return d.reset_index()
 
 
 def render_2_1():
     d = serie_costo_vs_economia()
-    a0, a1 = int(d.anio.iloc[0]), int(d.anio.iloc[-1])
-    ult, pri = d.iloc[-1], d.iloc[0]
+    pri, ult = d.iloc[0], d.iloc[-1]
+    a0, a1 = int(pri.anio), int(ult.anio)
+    hito = d[d.anio == ANIO_PGU].iloc[0]
+    n = a1 - ANIO_PGU
+    cagr = lambda col: 100 * ((ult[col] / hito[col]) ** (1 / n) - 1)
+    var_total = 100 * (ult.costo_65 / pri.costo_65 - 1)
+    var_pib = 100 * (ult.pib_pc_real / pri.pib_pc_real - 1)
+    desde_hito = 100 * (ult.costo_65 / hito.costo_65 - 1)
     kpi_card_row([
-        (f"Costo público por persona 65+ ({a1})", f"${ult.costo_65 / 1e6:.2f} millones", "Gasto del Gobierno Central en 'Edad avanzada' (pesos de 2025) / población 65+ (INE)"),
-        (f"Variación real {a0}-{a1}", f"{ult.idx_costo_65 - 100:+.0f}%", "Costo real por persona 65+"),
-        (f"PIB per cápita real {a0}-{a1}", f"{ult.idx_pib_pc - 100:+.0f}%", "Volumen encadenado (Banco Central) / población total (INE)"),
+        (f"Costo público por persona 65+ ({a1})", f"${ult.costo_65 / 1e6:.2f} millones",
+         "Gasto del Gobierno Central en 'Edad avanzada' (pesos de 2025) dividido por la población de 65 años o más (INE)",
+         ["Pensiones del sistema antiguo (IPS y ex cajas)", "Pensión Garantizada Universal (PGU)",
+          "Pensiones básicas y aportes solidarios (PBS/APS)", "Clasificación funcional de DIPRES, código 7102",
+          "En pesos de 2025; se divide por todas las personas 65+, reciban o no pensión del Estado",
+          "No incluye las pensiones pagadas por las AFP"]),
+        (f"Variación real {a0}-{a1}", f"{var_total:+.0f}%",
+         f"Costo real por persona 65+ en {a1} frente a {a0}. PIB per cápita real en el mismo período: {var_pib:+.0f}%",
+         [f"{a0}: ${pri.costo_65 / 1e6:.2f} millones; {a1}: ${ult.costo_65 / 1e6:.2f} millones",
+          f"El PIB per cápita real subió {var_pib:+.0f}% (Banco Central, volumen encadenado / población INE)",
+          f"Casi todo el aumento ocurre en {ANIO_PGU}, con la PGU"]),
+        (f"Desde {ANIO_PGU} (año de la PGU)", f"{desde_hito:+.0f}%",
+         f"Variación real del costo por persona 65+ entre {ANIO_PGU} y {a1}",
+         [f"Gasto real: {cagr('gasto'):+.1f}% al año", f"Población 65+: {cagr('pob_65'):+.1f}% al año",
+          "Cada año hay más personas 65+ entre las que repartir el gasto"]),
     ])
-    st.plotly_chart(cost_vs_economy_index(d), use_container_width=True, config=PLOTLY_DL_CONFIG)
-    mas_rapido = ult.idx_costo_65 > ult.idx_pib_pc
+    c1, c2 = st.columns(2)
+    with c1:
+        st.plotly_chart(cost_per_person_chart(d, ANIO_PGU, "PGU"), use_container_width=True, config=PLOTLY_DL_CONFIG)
+    with c2:
+        st.plotly_chart(spending_vs_population_growth(d), use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.markdown(
-        f"**Lectura:** entre {a0} y {a1} el costo real por adulto mayor "
-        f"{'creció más rápido' if mas_rapido else 'creció más lento'} que la economía por habitante "
-        f"({ult.idx_costo_65 - 100:+.0f}% vs. {ult.idx_pib_pc - 100:+.0f}%)."
+        f"**Lectura:** entre {a0} y {a1} el costo real por adulto mayor subió {var_total:.0f}%, algo más que el PIB per cápita "
+        f"({var_pib:.0f}%), pero no es una tendencia: es un **salto único en {ANIO_PGU}** (la PGU) sobre una base plana. "
+        f"Desde entonces el costo por persona **baja** ({desde_hito:+.0f}%): la población 65+ crece {cagr('pob_65'):.1f}% al año "
+        f"y el gasto real solo {cagr('gasto'):.1f}%. El Estado gasta cada vez más en total, pero menos por persona."
     )
 
 

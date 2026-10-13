@@ -26,7 +26,12 @@ final_pages = [
 ]
 nav = {"Dashboard": final_pages}
 
-if mode == "dev":
+if mode == "final":
+    # Entrada siempre visible: si solo existiera el interruptor del sidebar, el modo dev pasa desapercibido.
+    nav["Modo desarrollador"] = [
+        st.Page("final_pages/activar_dev.py", title="Activar modo desarrollador", icon="🛠️", url_path="activar-dev"),
+    ]
+else:
     nav["Modo desarrollador"] = [
         st.Page("pages/0_🏠_Panorama_general.py", title="Panorama general", icon="🏠", url_path="dev-panorama"),
         st.Page("pages/1_🔍_Explorador_de_datos.py", title="Explorador de datos", icon="🔍", url_path="dev-explorador"),
@@ -38,4 +43,4 @@ if mode == "dev":
         st.Page("pages/7_🧪_Estado_de_datos.py", title="Estado de datos y KPIs", icon="🧪", url_path="dev-estado-datos"),
     ]
 
-st.navigation(nav).run()
+st.navigation(nav, expanded=True).run()  # expanded: sin el "View N more" que escondía las últimas páginas dev

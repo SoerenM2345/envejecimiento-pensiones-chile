@@ -144,7 +144,17 @@ def page_config(**kwargs):
 
 
 def kpi_card_row(cols_data):
-    """cols_data: list of (label, value, help) tuples."""
+    """cols_data: list of (label, value, help) o (label, value, help, detalle).
+    help = nombre completo (tooltip de la "?"). detalle = lista de viñetas cortas con lo que incluye la cifra;
+    si viene, se agrega un botón «Detalle» que abre una ventana con el nombre completo y las viñetas."""
     cols = st.columns(len(cols_data))
-    for col, (label, value, help_text) in zip(cols, cols_data):
+    for col, item in zip(cols, cols_data):
+        label, value, help_text = item[:3]
+        detalle = item[3] if len(item) > 3 else None
         col.metric(label, value, help=help_text)
+        if detalle:
+            with col.popover("Detalle", help=f"Qué incluye: {label}"):
+                st.markdown(f"**{label}**")
+                if help_text:
+                    st.caption(help_text)
+                st.markdown("**Qué incluye**\n" + "\n".join(f"- {b}" for b in detalle))

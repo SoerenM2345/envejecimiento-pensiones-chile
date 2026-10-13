@@ -9,9 +9,11 @@ Método: proporción ponderada con expr; error estándar por linealización de T
 conglomerados varunit), estimando el dominio (65+ en la región) sobre toda la muestra. IC 95% = p ± 1,96 EE.
 
 Metodología: la variable `pobreza` de esta base ya está recalculada con la metodología 2024 del Ministerio (nueva canasta
-básica, escala de equivalencia y línea única urbano/rural; ver Valor_CBA_y_LPs_25.12.pdf). Con ella la pobreza por ingresos de
-2022 es 20,5% (con la metodología anterior eran 6,5%) y la de 2024 es 17,3%. Por eso las cifras de este KPI no se comparan con
-las publicadas en 2023.
+básica saludable según la IX EPF 2021-2022). Con ella la pobreza por ingresos de 2022 es 20,5% (con la metodología anterior
+eran 6,5%) y la de 2024 es 17,3%. Por eso las cifras de este KPI no se comparan con las publicadas en 2023. La misma base trae
+`pobreza_2013` (metodología anterior): 6,5% en todas las personas y 2,2% en los 65+, frente a 14,9% con la 2024.
+Ojo: Data raw/_external/casen2022/Valor_CBA_y_LPs_25.12.pdf está calculado con la metodología 2013 (se publica solo para completar
+la serie 2025), por lo que NO respalda esta variable; es contexto sobre cómo se mide la pobreza por ingresos.
 
 Validación: la pobreza por ingresos de TODAS las personas, a nivel país, debe dar ≈ 20,5% (cifra oficial de 2022 con metodología 2024).
 

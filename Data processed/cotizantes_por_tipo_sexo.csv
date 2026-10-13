@@ -1,0 +1,553 @@
+anio,tipo,sexo,cotizantes
+1986,Dependientes,Total,1445218
+1987,Dependientes,Total,1623004
+1988,Dependientes,Total,1721642
+1989,Dependientes,Total,1866443
+1990,Dependientes,Total,1913625
+1991,Dependientes,Total,2067533
+1992,Dependientes,Total,2246132
+1993,Dependientes,Total,2314983
+1994,Dependientes,Total,2380946
+1995,Dependientes,Total,2432456
+1996,Dependientes,Total,2497019
+1997,Dependientes,Total,2601682
+1998,Dependientes,Total,2560158
+1999,Dependientes,Total,2627602
+2000,Dependientes,Total,2685772
+2001,Dependientes,Total,2768763
+2002,Dependientes,Total,2793677
+2003,Dependientes,Total,2914619
+2004,Dependientes,Total,2977669
+2005,Dependientes,Total,3257371
+2006,Dependientes,Total,3416856
+2007,Dependientes,Total,3801701
+2008,Dependientes,Total,3957398
+2009,Dependientes,Total,4024523
+2010,Dependientes,Total,4325783
+2011,Dependientes,Total,4543860
+2012,Dependientes,Total,4763458
+2013,Dependientes,Total,4874574
+2014,Dependientes,Total,4965216
+2015,Dependientes,Total,5050755
+2016,Dependientes,Total,5139394
+2017,Dependientes,Total,5254910
+2018,Dependientes,Total,5428534
+2019,Dependientes,Total,5532353
+2020,Dependientes,Total,5430737
+2021,Dependientes,Total,5850749
+2022,Dependientes,Total,5905203
+2023,Dependientes,Total,5755832
+2024,Dependientes,Total,5869664
+2025,Dependientes,Total,5927500
+1986,Dependientes,Masculino,993008
+1987,Dependientes,Masculino,1117559
+1988,Dependientes,Masculino,1185593
+1989,Dependientes,Masculino,1280117
+1990,Dependientes,Masculino,1306490
+1991,Dependientes,Masculino,1409879
+1992,Dependientes,Masculino,1525839
+1993,Dependientes,Masculino,1566567
+1994,Dependientes,Masculino,1595627
+1995,Dependientes,Masculino,1617350
+1996,Dependientes,Masculino,1645644
+1997,Dependientes,Masculino,1706229
+1998,Dependientes,Masculino,1645334
+1999,Dependientes,Masculino,1679442
+2000,Dependientes,Masculino,1708027
+2001,Dependientes,Masculino,1754039
+2002,Dependientes,Masculino,1757842
+2003,Dependientes,Masculino,1832375
+2004,Dependientes,Masculino,1873635
+2005,Dependientes,Masculino,2052722
+2006,Dependientes,Masculino,2131736
+2007,Dependientes,Masculino,2364534
+2008,Dependientes,Masculino,2421047
+2009,Dependientes,Masculino,2437933
+2010,Dependientes,Masculino,2621883
+2011,Dependientes,Masculino,2755179
+2012,Dependientes,Masculino,2865467
+2013,Dependientes,Masculino,2902167
+2014,Dependientes,Masculino,2906148
+2015,Dependientes,Masculino,2946803
+2016,Dependientes,Masculino,2971724
+2017,Dependientes,Masculino,3031308
+2018,Dependientes,Masculino,3129490
+2019,Dependientes,Masculino,3182552
+2020,Dependientes,Masculino,3141512
+2021,Dependientes,Masculino,3343322
+2022,Dependientes,Masculino,3338937
+2023,Dependientes,Masculino,3236076
+2024,Dependientes,Masculino,3293072
+2025,Dependientes,Masculino,3320220
+1986,Dependientes,Femenino,452121
+1987,Dependientes,Femenino,505372
+1988,Dependientes,Femenino,535958
+1989,Dependientes,Femenino,586243
+1990,Dependientes,Femenino,607077
+1991,Dependientes,Femenino,657637
+1992,Dependientes,Femenino,720192
+1993,Dependientes,Femenino,748382
+1994,Dependientes,Femenino,785311
+1995,Dependientes,Femenino,815021
+1996,Dependientes,Femenino,850796
+1997,Dependientes,Femenino,892478
+1998,Dependientes,Femenino,907837
+1999,Dependientes,Femenino,946992
+2000,Dependientes,Femenino,977173
+2001,Dependientes,Femenino,1014714
+2002,Dependientes,Femenino,1035805
+2003,Dependientes,Femenino,1082232
+2004,Dependientes,Femenino,1104034
+2005,Dependientes,Femenino,1204649
+2006,Dependientes,Femenino,1285120
+2007,Dependientes,Femenino,1437167
+2008,Dependientes,Femenino,1536351
+2009,Dependientes,Femenino,1586590
+2010,Dependientes,Femenino,1703900
+2011,Dependientes,Femenino,1788681
+2012,Dependientes,Femenino,1897991
+2013,Dependientes,Femenino,1972407
+2014,Dependientes,Femenino,2059068
+2015,Dependientes,Femenino,2103952
+2016,Dependientes,Femenino,2167670
+2017,Dependientes,Femenino,2223602
+2018,Dependientes,Femenino,2299044
+2019,Dependientes,Femenino,2349801
+2020,Dependientes,Femenino,2289225
+2021,Dependientes,Femenino,2507427
+2022,Dependientes,Femenino,2566266
+2023,Dependientes,Femenino,2519756
+2024,Dependientes,Femenino,2576592
+2025,Dependientes,Femenino,2607280
+1986,Dependientes,Sin información,89
+1987,Dependientes,Sin información,73
+1988,Dependientes,Sin información,91
+1989,Dependientes,Sin información,83
+1990,Dependientes,Sin información,58
+1991,Dependientes,Sin información,17
+1992,Dependientes,Sin información,101
+1993,Dependientes,Sin información,34
+1994,Dependientes,Sin información,8
+1995,Dependientes,Sin información,85
+1996,Dependientes,Sin información,579
+1997,Dependientes,Sin información,2975
+1998,Dependientes,Sin información,6987
+1999,Dependientes,Sin información,1168
+2000,Dependientes,Sin información,572
+2001,Dependientes,Sin información,10
+2002,Dependientes,Sin información,30
+2003,Dependientes,Sin información,12
+2004,Dependientes,Sin información,0
+2005,Dependientes,Sin información,0
+2006,Dependientes,Sin información,0
+2007,Dependientes,Sin información,0
+2008,Dependientes,Sin información,0
+2009,Dependientes,Sin información,0
+2010,Dependientes,Sin información,0
+2011,Dependientes,Sin información,0
+2012,Dependientes,Sin información,0
+2013,Dependientes,Sin información,0
+2014,Dependientes,Sin información,0
+2015,Dependientes,Sin información,0
+2016,Dependientes,Sin información,0
+2017,Dependientes,Sin información,0
+2018,Dependientes,Sin información,0
+2019,Dependientes,Sin información,0
+2020,Dependientes,Sin información,0
+2021,Dependientes,Sin información,0
+2022,Dependientes,Sin información,0
+2023,Dependientes,Sin información,0
+2024,Dependientes,Sin información,0
+2025,Dependientes,Sin información,0
+1986,Independientes,Total,48350
+1987,Independientes,Total,52611
+1988,Independientes,Total,50729
+1989,Independientes,Total,51186
+1990,Independientes,Total,47922
+1991,Independientes,Total,50840
+1992,Independientes,Total,51721
+1993,Independientes,Total,52657
+1994,Independientes,Total,55320
+1995,Independientes,Total,57077
+1996,Independientes,Total,51343
+1997,Independientes,Total,59923
+1998,Independientes,Total,59458
+1999,Independientes,Total,62999
+2000,Independientes,Total,61801
+2001,Independientes,Total,66731
+2002,Independientes,Total,69725
+2003,Independientes,Total,68186
+2004,Independientes,Total,59318
+2005,Independientes,Total,64422
+2006,Independientes,Total,57983
+2007,Independientes,Total,60317
+2008,Independientes,Total,65398
+2009,Independientes,Total,73964
+2010,Independientes,Total,91445
+2011,Independientes,Total,94323
+2012,Independientes,Total,107350
+2013,Independientes,Total,116693
+2014,Independientes,Total,127033
+2015,Independientes,Total,140386
+2016,Independientes,Total,142385
+2017,Independientes,Total,135232
+2018,Independientes,Total,128959
+2019,Independientes,Total,84411
+2020,Independientes,Total,75435
+2021,Independientes,Total,75212
+2022,Independientes,Total,62257
+2023,Independientes,Total,53422
+2024,Independientes,Total,48421
+2025,Independientes,Total,45927
+1986,Independientes,Masculino,30277
+1987,Independientes,Masculino,33271
+1988,Independientes,Masculino,31932
+1989,Independientes,Masculino,32287
+1990,Independientes,Masculino,30401
+1991,Independientes,Masculino,32241
+1992,Independientes,Masculino,32468
+1993,Independientes,Masculino,32866
+1994,Independientes,Masculino,34461
+1995,Independientes,Masculino,35246
+1996,Independientes,Masculino,31658
+1997,Independientes,Masculino,36583
+1998,Independientes,Masculino,36471
+1999,Independientes,Masculino,38276
+2000,Independientes,Masculino,37332
+2001,Independientes,Masculino,40280
+2002,Independientes,Masculino,41911
+2003,Independientes,Masculino,41266
+2004,Independientes,Masculino,36149
+2005,Independientes,Masculino,39120
+2006,Independientes,Masculino,34712
+2007,Independientes,Masculino,36334
+2008,Independientes,Masculino,39623
+2009,Independientes,Masculino,44127
+2010,Independientes,Masculino,55018
+2011,Independientes,Masculino,56199
+2012,Independientes,Masculino,64302
+2013,Independientes,Masculino,69577
+2014,Independientes,Masculino,74423
+2015,Independientes,Masculino,78133
+2016,Independientes,Masculino,81913
+2017,Independientes,Masculino,77756
+2018,Independientes,Masculino,73373
+2019,Independientes,Masculino,51277
+2020,Independientes,Masculino,47400
+2021,Independientes,Masculino,46366
+2022,Independientes,Masculino,39228
+2023,Independientes,Masculino,34217
+2024,Independientes,Masculino,30849
+2025,Independientes,Masculino,29099
+1986,Independientes,Femenino,18073
+1987,Independientes,Femenino,19340
+1988,Independientes,Femenino,18797
+1989,Independientes,Femenino,18898
+1990,Independientes,Femenino,17521
+1991,Independientes,Femenino,18599
+1992,Independientes,Femenino,19253
+1993,Independientes,Femenino,19788
+1994,Independientes,Femenino,20858
+1995,Independientes,Femenino,21798
+1996,Independientes,Femenino,19332
+1997,Independientes,Femenino,23243
+1998,Independientes,Femenino,22887
+1999,Independientes,Femenino,24545
+2000,Independientes,Femenino,24314
+2001,Independientes,Femenino,26311
+2002,Independientes,Femenino,27786
+2003,Independientes,Femenino,26906
+2004,Independientes,Femenino,23169
+2005,Independientes,Femenino,25302
+2006,Independientes,Femenino,23271
+2007,Independientes,Femenino,23983
+2008,Independientes,Femenino,25774
+2009,Independientes,Femenino,29837
+2010,Independientes,Femenino,36427
+2011,Independientes,Femenino,38124
+2012,Independientes,Femenino,43048
+2013,Independientes,Femenino,47116
+2014,Independientes,Femenino,52610
+2015,Independientes,Femenino,62253
+2016,Independientes,Femenino,60472
+2017,Independientes,Femenino,57476
+2018,Independientes,Femenino,55586
+2019,Independientes,Femenino,33134
+2020,Independientes,Femenino,28035
+2021,Independientes,Femenino,28846
+2022,Independientes,Femenino,23029
+2023,Independientes,Femenino,19205
+2024,Independientes,Femenino,17572
+2025,Independientes,Femenino,16828
+1986,Independientes,Sin información,0
+1987,Independientes,Sin información,0
+1988,Independientes,Sin información,0
+1989,Independientes,Sin información,1
+1990,Independientes,Sin información,0
+1991,Independientes,Sin información,0
+1992,Independientes,Sin información,0
+1993,Independientes,Sin información,3
+1994,Independientes,Sin información,1
+1995,Independientes,Sin información,33
+1996,Independientes,Sin información,353
+1997,Independientes,Sin información,97
+1998,Independientes,Sin información,100
+1999,Independientes,Sin información,178
+2000,Independientes,Sin información,155
+2001,Independientes,Sin información,140
+2002,Independientes,Sin información,28
+2003,Independientes,Sin información,14
+2004,Independientes,Sin información,0
+2005,Independientes,Sin información,0
+2006,Independientes,Sin información,0
+2007,Independientes,Sin información,0
+2008,Independientes,Sin información,1
+2009,Independientes,Sin información,0
+2010,Independientes,Sin información,0
+2011,Independientes,Sin información,0
+2012,Independientes,Sin información,0
+2013,Independientes,Sin información,0
+2014,Independientes,Sin información,0
+2015,Independientes,Sin información,0
+2016,Independientes,Sin información,0
+2017,Independientes,Sin información,0
+2018,Independientes,Sin información,0
+2019,Independientes,Sin información,0
+2020,Independientes,Sin información,0
+2021,Independientes,Sin información,0
+2022,Independientes,Sin información,0
+2023,Independientes,Sin información,0
+2024,Independientes,Sin información,0
+2025,Independientes,Sin información,0
+2009,Afiliados voluntarios,Total,5015
+2010,Afiliados voluntarios,Total,3080
+2011,Afiliados voluntarios,Total,1829
+2012,Afiliados voluntarios,Total,1024
+2013,Afiliados voluntarios,Total,1052
+2014,Afiliados voluntarios,Total,1423
+2015,Afiliados voluntarios,Total,1484
+2016,Afiliados voluntarios,Total,2558
+2017,Afiliados voluntarios,Total,2890
+2018,Afiliados voluntarios,Total,1591
+2019,Afiliados voluntarios,Total,2190
+2020,Afiliados voluntarios,Total,2116
+2021,Afiliados voluntarios,Total,1086
+2022,Afiliados voluntarios,Total,787
+2023,Afiliados voluntarios,Total,813
+2024,Afiliados voluntarios,Total,892
+2025,Afiliados voluntarios,Total,1001
+2009,Afiliados voluntarios,Masculino,126
+2010,Afiliados voluntarios,Masculino,132
+2011,Afiliados voluntarios,Masculino,94
+2012,Afiliados voluntarios,Masculino,199
+2013,Afiliados voluntarios,Masculino,349
+2014,Afiliados voluntarios,Masculino,463
+2015,Afiliados voluntarios,Masculino,528
+2016,Afiliados voluntarios,Masculino,1024
+2017,Afiliados voluntarios,Masculino,1237
+2018,Afiliados voluntarios,Masculino,565
+2019,Afiliados voluntarios,Masculino,912
+2020,Afiliados voluntarios,Masculino,872
+2021,Afiliados voluntarios,Masculino,406
+2022,Afiliados voluntarios,Masculino,296
+2023,Afiliados voluntarios,Masculino,294
+2024,Afiliados voluntarios,Masculino,358
+2025,Afiliados voluntarios,Masculino,410
+2009,Afiliados voluntarios,Femenino,4889
+2010,Afiliados voluntarios,Femenino,2948
+2011,Afiliados voluntarios,Femenino,1735
+2012,Afiliados voluntarios,Femenino,825
+2013,Afiliados voluntarios,Femenino,703
+2014,Afiliados voluntarios,Femenino,960
+2015,Afiliados voluntarios,Femenino,956
+2016,Afiliados voluntarios,Femenino,1534
+2017,Afiliados voluntarios,Femenino,1653
+2018,Afiliados voluntarios,Femenino,1026
+2019,Afiliados voluntarios,Femenino,1278
+2020,Afiliados voluntarios,Femenino,1244
+2021,Afiliados voluntarios,Femenino,680
+2022,Afiliados voluntarios,Femenino,491
+2023,Afiliados voluntarios,Femenino,519
+2024,Afiliados voluntarios,Femenino,534
+2025,Afiliados voluntarios,Femenino,591
+2009,Afiliados voluntarios,Sin información,0
+2010,Afiliados voluntarios,Sin información,0
+2011,Afiliados voluntarios,Sin información,0
+2012,Afiliados voluntarios,Sin información,0
+2013,Afiliados voluntarios,Sin información,0
+2014,Afiliados voluntarios,Sin información,0
+2015,Afiliados voluntarios,Sin información,0
+2016,Afiliados voluntarios,Sin información,0
+2017,Afiliados voluntarios,Sin información,0
+2018,Afiliados voluntarios,Sin información,0
+2019,Afiliados voluntarios,Sin información,0
+2020,Afiliados voluntarios,Sin información,0
+2021,Afiliados voluntarios,Sin información,0
+2022,Afiliados voluntarios,Sin información,0
+2023,Afiliados voluntarios,Sin información,0
+2024,Afiliados voluntarios,Sin información,0
+2025,Afiliados voluntarios,Sin información,0
+1985,Total,Total,1321938
+1986,Total,Total,1493568
+1987,Total,Total,1675615
+1988,Total,Total,1772371
+1989,Total,Total,1917629
+1990,Total,Total,1961547
+1991,Total,Total,2118373
+1992,Total,Total,2297853
+1993,Total,Total,2367640
+1994,Total,Total,2436266
+1995,Total,Total,2489533
+1996,Total,Total,2548362
+1997,Total,Total,2661605
+1998,Total,Total,2619616
+1999,Total,Total,2690601
+2000,Total,Total,2747573
+2001,Total,Total,2835494
+2002,Total,Total,2863402
+2003,Total,Total,2982805
+2004,Total,Total,3036987
+2005,Total,Total,3321793
+2006,Total,Total,3474839
+2007,Total,Total,3862018
+2008,Total,Total,4022796
+2009,Total,Total,4103502
+2010,Total,Total,4420308
+2011,Total,Total,4640012
+2012,Total,Total,4871832
+2013,Total,Total,4992319
+2014,Total,Total,5093672
+2015,Total,Total,5192625
+2016,Total,Total,5284337
+2017,Total,Total,5393032
+2018,Total,Total,5559084
+2019,Total,Total,5618954
+2020,Total,Total,5508288
+2021,Total,Total,5927047
+2022,Total,Total,5968247
+2023,Total,Total,5810067
+2024,Total,Total,5918977
+2025,Total,Total,5974428
+1985,Total,Masculino,906260
+1986,Total,Masculino,1023285
+1987,Total,Masculino,1150830
+1988,Total,Masculino,1217525
+1989,Total,Masculino,1312404
+1990,Total,Masculino,1336891
+1991,Total,Masculino,1442120
+1992,Total,Masculino,1558307
+1993,Total,Masculino,1599433
+1994,Total,Masculino,1630088
+1995,Total,Masculino,1652596
+1996,Total,Masculino,1677302
+1997,Total,Masculino,1742812
+1998,Total,Masculino,1681805
+1999,Total,Masculino,1717718
+2000,Total,Masculino,1745359
+2001,Total,Masculino,1794319
+2002,Total,Masculino,1799753
+2003,Total,Masculino,1873641
+2004,Total,Masculino,1909784
+2005,Total,Masculino,2091842
+2006,Total,Masculino,2166448
+2007,Total,Masculino,2400868
+2008,Total,Masculino,2460670
+2009,Total,Masculino,2482186
+2010,Total,Masculino,2677033
+2011,Total,Masculino,2811472
+2012,Total,Masculino,2929968
+2013,Total,Masculino,2972093
+2014,Total,Masculino,2981034
+2015,Total,Masculino,3025464
+2016,Total,Masculino,3054661
+2017,Total,Masculino,3110301
+2018,Total,Masculino,3203428
+2019,Total,Masculino,3234741
+2020,Total,Masculino,3189784
+2021,Total,Masculino,3390094
+2022,Total,Masculino,3378461
+2023,Total,Masculino,3270587
+2024,Total,Masculino,3324279
+2025,Total,Masculino,3349729
+1985,Total,Femenino,415566
+1986,Total,Femenino,470194
+1987,Total,Femenino,524712
+1988,Total,Femenino,554755
+1989,Total,Femenino,605141
+1990,Total,Femenino,624598
+1991,Total,Femenino,676236
+1992,Total,Femenino,739445
+1993,Total,Femenino,768170
+1994,Total,Femenino,806169
+1995,Total,Femenino,836819
+1996,Total,Femenino,870128
+1997,Total,Femenino,915721
+1998,Total,Femenino,930724
+1999,Total,Femenino,971537
+2000,Total,Femenino,1001487
+2001,Total,Femenino,1041025
+2002,Total,Femenino,1063591
+2003,Total,Femenino,1109138
+2004,Total,Femenino,1127203
+2005,Total,Femenino,1229951
+2006,Total,Femenino,1308391
+2007,Total,Femenino,1461150
+2008,Total,Femenino,1562125
+2009,Total,Femenino,1621316
+2010,Total,Femenino,1743275
+2011,Total,Femenino,1828540
+2012,Total,Femenino,1941864
+2013,Total,Femenino,2020226
+2014,Total,Femenino,2112638
+2015,Total,Femenino,2167161
+2016,Total,Femenino,2229676
+2017,Total,Femenino,2282731
+2018,Total,Femenino,2355656
+2019,Total,Femenino,2384213
+2020,Total,Femenino,2318504
+2021,Total,Femenino,2536953
+2022,Total,Femenino,2589786
+2023,Total,Femenino,2539480
+2024,Total,Femenino,2594698
+2025,Total,Femenino,2624699
+1985,Total,Sin información,112
+1986,Total,Sin información,89
+1987,Total,Sin información,73
+1988,Total,Sin información,91
+1989,Total,Sin información,84
+1990,Total,Sin información,58
+1991,Total,Sin información,17
+1992,Total,Sin información,101
+1993,Total,Sin información,37
+1994,Total,Sin información,9
+1995,Total,Sin información,118
+1996,Total,Sin información,932
+1997,Total,Sin información,3072
+1998,Total,Sin información,7087
+1999,Total,Sin información,1346
+2000,Total,Sin información,727
+2001,Total,Sin información,150
+2002,Total,Sin información,58
+2003,Total,Sin información,26
+2004,Total,Sin información,0
+2005,Total,Sin información,0
+2006,Total,Sin información,0
+2007,Total,Sin información,0
+2008,Total,Sin información,1
+2009,Total,Sin información,0
+2010,Total,Sin información,0
+2011,Total,Sin información,0
+2012,Total,Sin información,0
+2013,Total,Sin información,0
+2014,Total,Sin información,0
+2015,Total,Sin información,0
+2016,Total,Sin información,0
+2017,Total,Sin información,0
+2018,Total,Sin información,0
+2019,Total,Sin información,0
+2020,Total,Sin información,0
+2021,Total,Sin información,0
+2022,Total,Sin información,0
+2023,Total,Sin información,0
+2024,Total,Sin información,0
+2025,Total,Sin información,0

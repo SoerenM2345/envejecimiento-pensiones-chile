@@ -36,7 +36,7 @@ def test_entrypoint_builds_navigation(mode):
 def test_final_mode_has_no_dev_pages():
     from utils import MODES
     assert MODES == ("final", "dev")
-    assert len(FINAL_PAGES) == 5 and len(DEV_PAGES) >= 8
+    assert len(FINAL_PAGES) == 6 and len(DEV_PAGES) >= 8  # 5 del dashboard + activar_dev
 
 
 def test_regression_national_support_ratio():

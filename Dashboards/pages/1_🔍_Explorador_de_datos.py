@@ -1,8 +1,8 @@
 """
 Explorador de datos ("back end"): carga cualquier archivo de Data processed,
 opcionalmente lo cruza con un segundo archivo, permite filtrar columna por
-columna, y agrupar/sumar (o promediar/contar) por las dimensiones que se
-quiera — todo desde controles, sin tocar código. Pensado para responder
+columna, permite crear una columna calculada (A ÷ B × factor, etc.) y agrupar/sumar
+(o promediar/contar) por las dimensiones que se quiera — todo desde controles, sin tocar código. Pensado para responder
 preguntas ad-hoc del tipo "dame la suma de X por región, filtrando Y".
 """
 import pandas as pd
@@ -53,6 +53,34 @@ if mezclar:
                 f"de agregar, o agrúpala primero con este mismo Explorador."
             )
 
+# ---------------------------------------------------------------------------
+# 1b) Columna calculada (opcional): fila a fila, A (operador) B, por un factor.
+#     Permite armar la fórmula de un KPI (p.ej. cotizantes ÷ pob_15_64 × 100) sin tocar código.
+# ---------------------------------------------------------------------------
+st.sidebar.header("1b. Columna calculada")
+OPERADORES = {"÷ dividir": lambda a, b: a / b, "× multiplicar": lambda a, b: a * b,
+              "− restar": lambda a, b: a - b, "+ sumar": lambda a, b: a + b}
+if st.sidebar.checkbox("Agregar columna calculada", value=False,
+                       help="Crea una columna nueva = A (operador) B × factor, fila a fila, sobre la tabla ya cruzada."):
+    nums_calc = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+    if not nums_calc:
+        st.sidebar.error("La tabla no tiene columnas numéricas.")
+    else:
+        col_a = st.sidebar.selectbox("A (columna)", nums_calc)
+        op = st.sidebar.selectbox("Operador", list(OPERADORES))
+        b_es = st.sidebar.radio("B es…", ["una columna", "un número"], horizontal=True)
+        if b_es == "una columna":
+            serie_b = df[st.sidebar.selectbox("B (columna)", nums_calc, index=min(1, len(nums_calc) - 1))]
+        else:
+            serie_b = st.sidebar.number_input("B (número)", value=1.0, format="%.6f")
+        factor = st.sidebar.number_input("Multiplicar el resultado por", value=1.0, format="%.6f",
+                                         help="Ej.: 100 para obtener un porcentaje; 1000000 para pasar de millones a unidades.")
+        nombre_calc = st.sidebar.text_input("Nombre de la columna nueva", value="kpi_calculado").strip() or "kpi_calculado"
+        if op.startswith("÷"):  # evita ∞: divisor 0 -> vacío
+            serie_b = serie_b.where(serie_b != 0) if hasattr(serie_b, "where") else (serie_b or float("nan"))
+        df[nombre_calc] = OPERADORES[op](df[col_a], serie_b) * factor
+        st.sidebar.caption(f"Nueva columna: `{nombre_calc}` = {col_a} {op.split()[0]} B × {factor:g}")
+
 st.subheader("Vista previa" + (f" — {f1} + {df2_info}" if df2_info else f" — {f1}"))
 st.caption(f"{len(df):,} filas × {df.shape[1]} columnas")
 
@@ -97,7 +125,8 @@ cols_num = [c for c in df_filtrado.columns if pd.api.types.is_numeric_dtype(df_f
 
 c1, c2, c3, c4 = st.columns([2, 2, 1, 1])
 with c1:
-    group_cols = st.multiselect("Agrupar por", cols_categ, default=(["region_nombre"] if "region_nombre" in cols_categ else cols_categ[:1]))
+    group_cols = st.multiselect("Agrupar por", cols_categ, help="Vacío = una sola cifra sobre todas las filas",
+                                default=(["region_nombre"] if "region_nombre" in cols_categ else cols_categ[:1]))
 with c2:
     default_idx = next((i for i, c in enumerate(cols_num) if not c.endswith("_id")), 0) if cols_num else None
     value_col = st.selectbox("Columna a agregar", cols_num, index=default_idx)
@@ -106,7 +135,12 @@ with c3:
 with c4:
     top_n = st.number_input("Mostrar top N (0 = todos)", min_value=0, value=0, step=1)
 
-if group_cols and value_col:
+if value_col and not group_cols:
+    # Sin dimensión de agrupación: una sola cifra sobre todas las filas filtradas (total país, promedio general, etc.)
+    total = df_filtrado[value_col].agg(func)
+    st.metric(f"{func}({value_col}) sobre todas las filas filtradas", f"{total:,.4f}")
+    st.caption("Para un ratio nacional (p.ej. cotizantes ÷ pob_15_64) calcula la suma de cada columna por separado y divide.")
+elif group_cols and value_col:
     agg = df_filtrado.groupby(group_cols, dropna=False)[value_col].agg(func).reset_index()
     agg = agg.sort_values(value_col, ascending=False)
     if top_n:
@@ -127,4 +161,4 @@ if group_cols and value_col:
     else:
         st.caption("Demasiadas categorías o dimensiones para graficar automáticamente — usa la tabla o descarga el CSV.")
 else:
-    st.info("Elige al menos una columna para agrupar y una columna numérica para agregar.")
+    st.info("Elige una columna numérica para agregar (y, si quieres, columnas para agrupar).")
