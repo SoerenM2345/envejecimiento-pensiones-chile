@@ -70,10 +70,10 @@ DP = DASH.parent / "Data processed"
 
 def test_1_1_cobertura_precalculada_y_manual():
     pre = receta(PRES, agrupar=["region_nombre"], columna="cobertura_previsional_pct")
-    assert round(valor(pre, "region_nombre", "Ñuble", "cobertura_previsional_pct"), 2) == 38.73
-    man = receta(PRES, calc=("cotizantes", "÷ dividir", "pob_15_64", 100.0, "cobertura_manual"),
+    assert round(valor(pre, "region_nombre", "Ñuble", "cobertura_previsional_pct"), 2) == 37.83
+    man = receta(PRES, calc=("cotizantes_2024", "÷ dividir", "pob_15_64", 100.0, "cobertura_manual"),
                  agrupar=["region_nombre"], columna="cobertura_manual")
-    assert round(valor(man, "region_nombre", "Ñuble", "cobertura_manual"), 2) == 38.73
+    assert round(valor(man, "region_nombre", "Ñuble", "cobertura_manual"), 2) == 37.83
 
 
 def test_1_2_razon_de_soporte_actual_y_escenario():
@@ -83,7 +83,7 @@ def test_1_2_razon_de_soporte_actual_y_escenario():
     esc = receta("kpi_proyeccion_regional.csv", mezclar=(PRES, "region_id", "left"),
                  calc=("cobertura_previsional_pct", "÷ dividir", "indice_dependencia_vejez_proy", 1.0, "razon_2035"),
                  filtros={"anio": (2035, 2035)}, agrupar=["region_nombre"], columna="razon_2035")
-    esperado = 38.73 / 36.06
+    esperado = 37.83 / 36.06
     assert abs(valor(esc, "region_nombre", "Ñuble", "razon_2035") - esperado) < 0.005
 
 
@@ -130,7 +130,7 @@ def test_2_3_pobreza_65():
 
 
 def test_1_1_total_pais_sin_agrupar():
-    """Agrupar por vacío = una cifra total: cotizantes ÷ pob_15_64 del país (47,2%, la línea 'País' del dashboard)."""
+    """Agrupar por vacío = una cifra total: cotizantes 2024 ÷ pob_15_64 del país (46,5%, la línea 'País' del dashboard)."""
     def total(columna):
         at = AppTest.from_file(PAGE, default_timeout=60)
         at.session_state["_nav_active"] = True
@@ -141,5 +141,5 @@ def test_1_1_total_pais_sin_agrupar():
         w(at, "selectbox", "Función").select("sum").run()
         assert not at.exception, [e.value for e in at.exception]
         return float(at.metric[-1].value.replace(",", ""))
-    cobertura = 100 * total("cotizantes") / total("pob_15_64")
-    assert round(cobertura, 1) == 47.2
+    cobertura = 100 * total("cotizantes_2024") / total("pob_15_64")
+    assert round(cobertura, 1) == 46.5

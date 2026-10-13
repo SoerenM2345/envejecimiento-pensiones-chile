@@ -15,7 +15,7 @@ originales en `../Data raw/` — esta carpeta se puede borrar y reconstruir.
 | `04_procesar_pensiones_pagadas.py` | Tidy de los informes c1/c2/c3 (pago de pensiones, corte julio 2026). |
 | `05_graficos_exploratorios.py` | Gráficos de validación (no es el dashboard final) en `../Outputs/figures/`. |
 | `17_procesar_series_superintendencia_extra.py` | Tidy de `cotizantes_tipo_sexo.xls`, `cotizantes_region_afp.xls` y `cotizaciones_totales.xls` (`development sources/`). |
-| `15_descargar_sp_ingreso_imponible.py` | Descarga de `spensiones.cl` los meses que faltan del cuadro 04A (cotizantes e ingreso imponible promedio, mensual desde 2002) a `Data raw/import_KPI1.2/04A_descargas/`. Solo biblioteca estándar. |
+| `19_descargar_sp_ingreso_imponible.py` | Descarga de `spensiones.cl` los meses que faltan del cuadro 04A (cotizantes e ingreso imponible promedio, mensual desde 2002) a `Data raw/import_KPI1.2/04A_descargas/`. Solo biblioteca estándar. |
 | `18_kpi_punto_critico.py` | Tidy de los cuadros SP (04A, 32C, 19B), ESI/ENE del INE e IPC, y construcción de las tablas `kpi_pc_*` del análisis «punto crítico» del KPI 1.2. |
 | `16_procesar_dipres_activos_bonos.py` | Tidy de las hojas de pasivos/activos del Gobierno Central y Bonos de Reconocimiento de DIPRES. |
 
@@ -68,13 +68,13 @@ Dos fuentes **distintas y no comparables directamente**:
 - CASEN es una **encuesta muestral**, no un censo — es la única fuente de ingresos disponible (el Censo es censo de derecho, no pregunta ingresos). Microdatos vía `bastianolea/casen_comparador_ingresos` (GitHub), originalmente del Ministerio de Desarrollo Social.
 
 ### KPIs de presión previsional y salud (`07_kpis_pension_salud.py`)
-- **`kpi_presion_previsional_region.csv`** — cobertura previsional (cotizantes/pob. 15-64) y razón de soporte (cotizantes por adulto mayor) por región. Usa cotizantes AFP 2025 + Censo 2024, **no** los pensionados del sistema antiguo (ver más abajo).
+- **`kpi_presion_previsional_region.csv`** — cobertura previsional (cotizantes/pob. 15-64) y razón de soporte (cotizantes por adulto mayor) por región. Cobertura con cotizantes AFP 2024 (columna `cotizantes_2024`, mismo año que el Censo); razón de soporte con cotizantes 2025 (columna `cotizantes`) + Censo 2024. **No** los pensionados del sistema antiguo (ver más abajo).
 - **`kpi_presion_previsional_edad.csv`** — contexto histórico: pensionados del sistema antiguo (IPS) vs. cotizantes AFP por tramo de edad. Lectura con cuidado (ver caveat de "dos sistemas" arriba).
 - **`kpi_proyeccion_regional.csv`** — proyección 2024→2035→2050 de población por región, método de **reparto de tasas nacionales** (shift-share): se aplica a cada región la tasa de crecimiento que el INE proyecta a nivel país por grupo etario. Es una aproximación explícita, no una proyección oficial INE por región (el INE aún no la publica en base 2024).
 - **`kpi_indice_demanda_salud_region.csv`** — índice compuesto (suma de z-scores de % 65+, % 80+ y velocidad de envejecimiento 2024→2035) como proxy de demanda potencial de salud geriátrica. No usa datos DEIS de uso real de servicios (no disponibles).
 - **`kpi_urbanizacion_envejecimiento.csv`** — comuna x `pct_urbano` x `pct_65_mas` (346 comunas, Censo únicamente).
 
-### Punto crítico del KPI 1.2 (`18_kpi_punto_critico.py`, con `15_descargar_sp_ingreso_imponible.py`)
+### Punto crítico del KPI 1.2 (`18_kpi_punto_critico.py`, con `19_descargar_sp_ingreso_imponible.py`)
 Pesos reales = pesos de 2025 (IPC promedio anual). «Cotizantes» e ingreso imponible son de diciembre; los ocupados, del trimestre octubre-diciembre (período de la ESI).
 - **`sp_ingreso_imponible_nacional.csv`** — `periodo, anio, mes, tipo, sexo, cotizantes, ingreso_promedio_nom`; mensual, oct-2002 a ago-2026.
 - **`sp_ingreso_imponible_region.csv`** — ingreso imponible promedio por región (diciembre 2010-2025; Ñuble desde 2018).

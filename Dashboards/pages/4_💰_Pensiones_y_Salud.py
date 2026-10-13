@@ -15,11 +15,11 @@ proy_reg = load_csv("kpi_proyeccion_regional.csv")
 demanda = load_csv("kpi_indice_demanda_salud_region.csv")
 
 nacional_soporte = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
-nacional_cobertura = 100 * pres["cotizantes"].sum() / pres["pob_15_64"].sum()
+nacional_cobertura = 100 * pres["cotizantes_2024"].sum() / pres["pob_15_64"].sum()
 
 kpi_card_row([
     ("Cotizantes por adulto mayor (país)", f"{nacional_soporte:.2f}", "Cotizantes AFP 2025 / población 65+ (Censo 2024)"),
-    ("Cobertura previsional (país)", f"{nacional_cobertura:.1f}%", "Cotizantes 2025 / población 15-64"),
+    ("Cobertura previsional (país)", f"{nacional_cobertura:.1f}%", "Cotizantes 2024 / población 15-64"),
     ("Región más presionada", pres.iloc[0]["region_nombre"], f"{pres.iloc[0]['razon_soporte_previsional']:.2f} cotizantes/adulto mayor"),
     ("Región menos presionada", pres.iloc[-1]["region_nombre"], f"{pres.iloc[-1]['razon_soporte_previsional']:.2f} cotizantes/adulto mayor"),
 ])
@@ -47,7 +47,7 @@ with col2:
     fig.update_layout(**PLOTLY_LAYOUT, title="Cobertura previsional por región")
     fig.update_yaxes(categoryorder="total ascending")
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
-    st.caption("Cotizantes 2025 sobre población en edad de trabajar (15-64, Censo 2024). El resto está fuera del sistema activo (informalidad, cesantía, inactividad).")
+    st.caption("Cotizantes 2024 sobre población en edad de trabajar (15-64, Censo 2024). El resto está fuera del sistema activo (informalidad, cesantía, inactividad).")
 
 st.divider()
 st.subheader("Proyección regional 2024 → 2035 → 2050 (método de reparto de tasas nacionales)")

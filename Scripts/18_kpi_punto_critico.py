@@ -3,7 +3,7 @@ Insumos del análisis "punto crítico" del KPI 1.2: ingreso por trabajador (lado
 histórico y con los parámetros de la reforma. Los pesos reales son pesos de 2025 (IPC promedio anual).
 
 Fuentes (Data raw/import_KPI1.2/, descargadas del sitio de la Superintendencia de Pensiones, del INE y del Banco Central):
-  - 04A*.xls (+ 04A_descargas/ del script 15)  Nº de cotizantes e ingreso imponible promedio por tipo y sexo, mensual 2002-10 a 2026-08.
+  - 04A*.xls (+ 04A_descargas/ del script 19)  Nº de cotizantes e ingreso imponible promedio por tipo y sexo, mensual 2002-10 a 2026-08.
   - 32C*.xls, estadisticas (n).xls            Ingreso imponible promedio por región y AFP, cada diciembre 2010-2025 (se usa la fila Total).
   - 19B*.xls, estadisticas (n).xls            Nº de cotizantes por tramo de ingreso imponible (miles de $) y AFP, cada diciembre 2010-2025.
   - CL01,DF_YMEDIANOOCU_SEXO / DF_YMEDIOOCU_SEXO / DF_OCU_SEXO  INE: ingreso mediano y medio de los ocupados (ESI, anual, nominal)
@@ -112,7 +112,7 @@ def sp_nacional():
     assert tot.periodo.nunique() == len(vistos), "faltan filas Total en algún 04A"
     meses = pd.period_range(tot.periodo.min(), tot.periodo.max(), freq="M").strftime("%Y-%m")
     faltan = sorted(set(meses) - set(tot.periodo))
-    assert not faltan, f"meses sin 04A: {faltan} (corre Scripts/15_descargar_sp_ingreso_imponible.py)"
+    assert not faltan, f"meses sin 04A: {faltan} (corre Scripts/19_descargar_sp_ingreso_imponible.py)"
     d.to_csv(OUT / "sp_ingreso_imponible_nacional.csv", index=False)
     return d
 

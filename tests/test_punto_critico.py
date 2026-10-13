@@ -37,10 +37,10 @@ def test_sp_04a_serie_mensual_completa_y_cifras_de_control():
     s = pd.read_csv(DP / "sp_ingreso_imponible_nacional.csv")
     tot = s[(s.tipo == "Total") & (s.sexo == "Ambos")].set_index("periodo")
     meses = pd.period_range("2002-10", "2026-08", freq="M").strftime("%Y-%m")
-    assert set(meses) <= set(tot.index), "faltan meses del cuadro 04A (correr Scripts/15)"
+    assert set(meses) <= set(tot.index), "faltan meses del cuadro 04A (correr Scripts/19)"
     assert tot.loc["2024-12", "cotizantes"] == 5_918_977 and tot.loc["2024-12", "ingreso_promedio_nom"] == 1_229_604
     assert tot.loc["2020-01", "ingreso_promedio_nom"] == 897_897  # primer mes que ya estaba descargado a mano
-    assert tot.loc["2019-12", "cotizantes"] == 5_618_954  # mes bajado por el script 15 (coincide con la serie anual de cotizantes)
+    assert tot.loc["2019-12", "cotizantes"] == 5_618_954  # mes bajado por el script 19 (coincide con la serie anual de cotizantes)
 
 
 def test_cotizantes_04a_coinciden_con_la_serie_de_cotizantes_por_region():
@@ -86,10 +86,10 @@ def test_mediana_de_los_cotizantes_es_menor_que_el_promedio(datos):
 
 
 def test_script_15_lee_la_fecha_del_titulo():
-    s15 = cargar_script("15_descargar_sp_ingreso_imponible")
+    s19 = cargar_script("19_descargar_sp_ingreso_imponible")
     t = "NÚMERO DE COTIZANTES E INGRESO IMPONIBLE PROMEDIO POR TIPO Y SEXO (1) (Al 31 de Diciembre de 2024)"
-    assert s15.fecha_del_titulo(t) == 202412
-    assert s15.fecha_del_titulo("OTRO CUADRO (Al 31 de Diciembre de 2024)") is None
+    assert s19.fecha_del_titulo(t) == 202412
+    assert s19.fecha_del_titulo("OTRO CUADRO (Al 31 de Diciembre de 2024)") is None
 
 
 def test_factor_pgu_250_sube_y_se_estabiliza(datos):

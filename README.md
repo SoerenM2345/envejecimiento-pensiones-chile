@@ -46,7 +46,7 @@ python3 ../Scripts/13_procesar_macro_gasto.py          # PIB (Banco Central) y g
 python3 ../Scripts/14_procesar_casen_pobreza.py        # pobreza 65+ por región, CASEN 2022 completa (KPI 2.3)
 python3 ../Scripts/17_procesar_series_superintendencia_extra.py  # cotizantes por tipo/sexo y por región x AFP, cotizaciones por AFP (modo dev)
 python3 ../Scripts/16_procesar_dipres_activos_bonos.py # pasivos/activos del Gobierno Central y Bonos de Reconocimiento (DIPRES)
-python3 ../Scripts/15_descargar_sp_ingreso_imponible.py # baja de spensiones.cl los meses que faltan del cuadro 04A (necesita internet; ya descargado)
+python3 ../Scripts/19_descargar_sp_ingreso_imponible.py # baja de spensiones.cl los meses que faltan del cuadro 04A (necesita internet; ya descargado)
 python3 ../Scripts/18_kpi_punto_critico.py            # ingreso por trabajador, costo por persona de 65+ y reforma (punto crítico del KPI 1.2)
 ```
 

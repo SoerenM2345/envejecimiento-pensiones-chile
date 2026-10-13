@@ -116,22 +116,22 @@ En todas: menú lateral → **🔍 Explorador de datos**. «Cifra de control» e
 
 Fórmula: `Cotizantes ÷ Población 15-64`.
 
-**Fuentes:** `Data raw/cotizantes_region.xls` (Superintendencia de Pensiones, cotizantes dic-2025) → `Scripts/03` → `cotizantes_por_region.csv`; Censo 2024 (`Data raw/personas_censo2024.csv`) → `Scripts/01` → `indicadores_region.csv`; ambas se unen en `Scripts/07` → **`kpi_presion_previsional_region.csv`** (16 regiones).
+**Fuentes:** `Data raw/cotizantes_region.xls` (Superintendencia de Pensiones, cotizantes diciembre de 2024 y 2025) → `Scripts/03` → `cotizantes_por_region.csv`; Censo 2024 (`Data raw/personas_censo2024.csv`) → `Scripts/01` → `indicadores_region.csv`; ambas se unen en `Scripts/07` → **`kpi_presion_previsional_region.csv`** (16 regiones).
 
 **Receta A, columna ya calculada**
 1. **Fuente principal** = `kpi_presion_previsional_region.csv`.
 2. **Agrupar por** = `region_nombre`; **Columna a agregar** = `cobertura_previsional_pct`; **Función** = `mean`.
-3. Cifra de control: **Ñuble 38,73**; Magallanes es la mayor y La Araucanía la menor.
+3. Cifra de control: **Ñuble 37,83**; Magallanes es la mayor y La Araucanía la menor.
 
 **Receta B, desde las columnas base**
 1. **Fuente principal** = `kpi_presion_previsional_region.csv`.
-2. Marca **Agregar columna calculada**: **A** = `cotizantes`, **Operador** = `÷ dividir`, **B es** `una columna`, **B** = `pob_15_64`, **Multiplicar por** = `100`, **Nombre** = `cobertura_manual`.
-3. **Agrupar por** = `region_nombre`; **Columna a agregar** = `cobertura_manual`; **Función** = `mean`. → Ñuble 38,73.
+2. Marca **Agregar columna calculada**: **A** = `cotizantes_2024`, **Operador** = `÷ dividir`, **B es** `una columna`, **B** = `pob_15_64`, **Multiplicar por** = `100`, **Nombre** = `cobertura_manual`.
+3. **Agrupar por** = `region_nombre`; **Columna a agregar** = `cobertura_manual`; **Función** = `mean`. → Ñuble 37,83.
 
 **Promedio país (la línea «País» del gráfico)**
-1. Misma fuente. **Agrupar por**: déjalo vacío. **Columna a agregar** = `cotizantes`; **Función** = `sum`. Anota la cifra.
+1. Misma fuente. **Agrupar por**: déjalo vacío. **Columna a agregar** = `cotizantes_2024`; **Función** = `sum`. Anota la cifra.
 2. Repite con **Columna a agregar** = `pob_15_64`.
-3. Divide y multiplica por 100 → **47,2 %**.
+3. Divide y multiplica por 100 → **46,5 %**.
 
 **Límite:** cotizantes de dic-2025 contra población del Censo 2024; 13.914 cotizantes no traen región y quedan fuera.
 
@@ -152,7 +152,7 @@ Fórmula: `Cotizantes ÷ Población 65+`.
 2. Marca **Mezclar con una segunda fuente**: **Segunda fuente** = `kpi_presion_previsional_region.csv`, **Cruzar por** = `region_id`, **Tipo de cruce** = `left`.
 3. **Columna calculada**: **A** = `cobertura_previsional_pct`, `÷ dividir`, **B** = `indice_dependencia_vejez_proy`, factor `1`, **Nombre** = `razon_2035`. (Equivale a cotizantes proyectados ÷ población 65+ proyectada, con cobertura constante.)
 4. **Columnas a filtrar** = `anio`; en el deslizador `anio` deja desde = hasta = `2035` (o `2050`).
-5. **Agrupar por** = `region_nombre`; **Columna a agregar** = `razon_2035`; `mean`. → Cifra de control: **Ñuble ≈ 1,07** en 2035.
+5. **Agrupar por** = `region_nombre`; **Columna a agregar** = `razon_2035`; `mean`. → Cifra de control: **Ñuble ≈ 1,05** en 2035.
 
 **Límite:** la población 65+ regional proyectada es un **reparto de las tasas nacionales** del INE, no una proyección oficial regional. 🔴 Mejora pendiente: si el INE publica proyecciones regionales base 2024, se reemplaza (sección 5, ítem D).
 
@@ -165,7 +165,7 @@ Bajo el gráfico del escenario, la misma tarjeta tiene un análisis que responde
 - **Territorio:** País (2010-2070, observado hasta 2025), una región (2024 → 2050; ◆ = 2024, 2035 y 2050, los años con población regional) y, tras elegir región, una **comuna** (aproximación: hereda de su región cobertura, ingreso y costo por persona de 65+; solo su estructura de edad del Censo 2024 es propia).
 - **Mismo año:** país 2025; región y comuna 2024 (Censo 2024 con cotizantes e ingreso imponible de diciembre 2024, ESI 2024 y gasto 2024).
 - **Supuestos que se pueden mover:** carga máxima tolerable (por defecto 10 %, la cotización obligatoria para pensión), crecimiento real del sueldo (1 % anual), cotizantes/población 15-64 en 2050 (solo cotizantes) y si se incluye la PGU de $250.000 (Ley 21.735, sube por edades: 82+ en sep-2025, 75+ en sep-2026, 65+ en sep-2027).
-- **Datos:** `kpi_pc_nacional.csv`, `kpi_pc_region.csv`, `kpi_pc_parametros_reforma.csv` (scripts 15 y 18); el cálculo está en `Dashboards/components/critical_point.py`.
+- **Datos:** `kpi_pc_nacional.csv`, `kpi_pc_region.csv`, `kpi_pc_parametros_reforma.csv` (scripts 18 y 19); el cálculo está en `Dashboards/components/critical_point.py`.
 
 **Receta, ingredientes del país en 2025**
 1. **Fuente principal** = `kpi_pc_nacional.csv`; **Columnas a filtrar** = `anio`, desde = hasta = `2025`.
@@ -241,8 +241,8 @@ Fórmula: `Personas 65+ bajo la línea de pobreza ÷ Población 65+`.
 
 | KPI | Cifra | Dónde |
 |---|---|---|
-| 1.1 | Ñuble 38,73 % · país 47,2 % | Objetivo 1 / Explorador |
-| 1.2 | Ñuble 1,54 · país 2,30 · Ñuble 2035 ≈ 1,07 | Objetivo 1 / Explorador |
+| 1.1 | Ñuble 37,83 % · país 46,5 % | Objetivo 1 / Explorador |
+| 1.2 | Ñuble 1,54 · país 2,30 · Ñuble 2035 ≈ 1,05 | Objetivo 1 / Explorador |
 | 1.2 punto crítico | País 2025: 2,06 cotizantes por 65+ · carga requerida 6,7 % del sueldo · punto crítico **2039** (promedio, cotizantes, carga máx. 10 %, sueldo +1 %) · 2,15 M$ por persona 65+ | Objetivo 1 / Explorador |
 | 2.1 | 5,13 millones por persona 65+ (2025) · costo +11 % vs PIB per cápita +9 % (2016-2025) | Objetivo 2 / Explorador |
 | 2.2 | 2,07 % del PIB (2025) · gasto en vejez 4,39 % | Objetivo 2 / Explorador |

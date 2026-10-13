@@ -47,10 +47,10 @@ kpis:
 
   - id: cobertura_previsional
     nombre: "Cobertura previsional (cotizantes / población 15-64)"
-    formula: "100 * cotizantes_2025 / pob_15_64_2024"
+    formula: "100 * cotizantes_2024 / pob_15_64_2024"
     interpretacion: "qué fracción de la población en edad de trabajar cotiza activamente; el resto está fuera del sistema (informalidad, inactividad, cesantía)"
     grano: [region, pais]
-    fuente: [Cotizantes Superintendencia de Pensiones 2025, Censo 2024]
+    fuente: [Cotizantes Superintendencia de Pensiones 2024, Censo 2024]
     archivo: [kpi_presion_previsional_region.csv]
     script: 07_kpis_pension_salud.py
     track: "Proyectar la presión sobre salud y pensiones"
@@ -194,7 +194,7 @@ kpis_presentacion:
     status: live
     archivo: [kpi_presion_previsional_region.csv]
     fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024]
-    caveat: "Cotizantes dic-2025 contra población Censo 2024; 13.914 cotizantes sin región informada."
+    caveat: "Cotizantes 2024 contra población Censo 2024 (mismo año); 56.094 cotizantes sin región informada quedan fuera del cálculo regional."
 
   - id: "1.2"
     nombre: "Razón de soporte"
@@ -208,13 +208,16 @@ kpis_presentacion:
     caveat: "Valor actual por región: real. Proyección 2035/2050: escenario (cobertura 2025 constante); la población 65+ regional es reparto de tasas nacionales, no proyección oficial INE. Punto crítico: usa datos del mismo año (país 2025, región 2024); el costo es PGU + APS/PBS de vejez, constante en términos reales más la PGU de $250.000 (Ley 21.735); la carga máxima tolerable es un supuesto (10 % = cotización obligatoria). Comuna: aproximación (no hay cotizantes, sueldos ni gasto por comuna); la mediana regional del ingreso imponible se estima con la nacional."
 
   - id: "1.3"
-    nombre: "Participación partes interesadas"
+    nombre: "Participación del flujo comisionable"
     objetivo: "Objetivo 1: Retener y ampliar la base activa"
-    descripcion: "Cuánto del costo se traslada de los trabajadores hacia otros pagadores"
-    formula: "(Aporte empleador + Aporte Estado) / Financiamiento total"
-    visualizacion: barras_apiladas
-    status: pending
-    datos_faltantes: ["Monto en pesos de las cotizaciones de los trabajadores 2024-2025 (Superintendencia de Pensiones: Cotizaciones y Cotizantes; Seguro Social Previsional - Montos de cotizaciones acreditadas). Los estados financieros del FAPP ya están en Data raw/_external/fapp/"]
+    descripcion: "Qué parte del dinero que entra al sistema previsional pasa por las cuentas individuales de las AFP (y por lo tanto genera comisión)"
+    formula: "Aportes a cuentas individuales / Flujo total al sistema ; cuentas individuales = trabajadores 10% + empleador a cuenta individual ; flujo total = cuentas individuales + Seguro Social (FAPP) + Estado (PGU + PBS + APS)"
+    visualizacion: barras_apiladas_y_lineas
+    status: live
+    archivo: [kpi_flujo_comisionable.csv, kpi_participacion_partes.csv, fichas_previsionales_mensual.csv]
+    fuente: ["Superintendencia de Pensiones, Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio)", "FAPP, estados financieros al 31-12-2025 (cuentas 40.110 y 40.187)", "Subsecretaría de Previsión Social (Pilar Solidario: PGU, PBS, APS)", "Subsecretaría de Previsión Social, Nota Técnica Reforma de Pensiones Ley N°21.735 (Tabla 1, gradualidad de la cotización del empleador)", "INE proyecciones 1992-2070"]
+    script: 15_kpi_participacion_partes.py
+    caveat: "Aporte trabajadores estimado (cotizantes × ingreso imponible promedio × 10%, con tope imponible). Aporte Estado = gasto en PGU/PBS/APS (flujo de beneficios, no cotización). División del aporte del empleador entre cuenta individual y Seguro Social según Ley 21.735 (Nota Técnica, Tabla 1: publica todos los años intermedios, sin supuestos de interpolación). Proyección = escenario, no pronóstico."
 
   - id: "2.1"
     nombre: "Costo real por adulto mayor"

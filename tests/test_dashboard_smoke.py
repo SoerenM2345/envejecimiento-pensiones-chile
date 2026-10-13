@@ -21,6 +21,8 @@ def run_page(rel: str) -> AppTest:
 
 @pytest.mark.parametrize("page", FINAL_PAGES + DEV_PAGES)
 def test_page_runs_without_exception(page):
+    # AppTest no reporta errores de sintaxis como excepción (la página queda vacía): compilar antes
+    compile((DASH / page).read_text(encoding="utf-8"), page, "exec")
     at = run_page(page)
     assert not at.exception, [e.value for e in at.exception]
 
@@ -44,7 +46,7 @@ def test_regression_national_support_ratio():
     import pandas as pd
     pres = pd.read_csv(DASH.parent / "Data processed" / "kpi_presion_previsional_region.csv")
     nuble = pres[pres.region_nombre == "Ñuble"].iloc[0]
-    assert round(nuble.cobertura_previsional_pct, 2) == 38.73
+    assert round(nuble.cobertura_previsional_pct, 2) == 37.83  # cotizantes 2024 (KPI 1.1)
     assert round(nuble.razon_soporte_previsional, 2) == 1.54
     assert len(pres) == 16
 
@@ -66,3 +68,24 @@ def test_kpi_2_tables():
     assert len(pob) == 17 and (pob.region_id == 0).sum() == 1
     assert pob.pct_pobreza_65.between(0, 40).all() and (pob.ic95_inf <= pob.pct_pobreza_65).all()
     assert pob[pob.region_id == 0].pct_pobreza_65.iloc[0] < pob[pob.region_id == 0].pct_pobreza_menores_65.iloc[0]
+
+
+def test_kpi_1_3_participacion():
+    """KPI 1.3: 12 meses por año, control de la ficha N° 157 y empleador solo desde 2025."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    fichas = pd.read_csv(dp / "fichas_previsionales_mensual.csv")
+    f157 = fichas[fichas.n_ficha == 157].iloc[0]
+    assert (f157.cotizantes, f157.ingreso_promedio) == (5795995, 1362207)
+    assert abs(f157.aporte_trabajadores_mes / 1e6 - 789_500) < 100
+    k = pd.read_csv(dp / "kpi_participacion_partes.csv").set_index("anio")
+    assert list(k.index) == [2024, 2025] and (k.n_meses == 12).all()
+    assert k.loc[2024, "aporte_empleador"] == 0 and k.loc[2025, "aporte_empleador"] == 283_048_436_000
+    f = pd.read_csv(dp / "kpi_flujo_comisionable.csv")
+    real = f[f.tipo == "real"].set_index("anio")
+    assert round(real.loc[2024, "kpi_1_3_pct"]) == 57 and 55 <= real.loc[2025, "kpi_1_3_pct"] <= 56
+    assert real.loc[2024, "empleador_ci"] == 0 and real.loc[2025, "seguro_social_fapp"] == 283_048_436_000
+    esc = f[f.tipo == "escenario"].set_index("anio")
+    assert list(esc.index) == list(range(2026, 2036))
+    assert esc.kpi_1_3_pct.max() < real.loc[2025, "kpi_1_3_pct"]  # el escenario nunca vuelve al nivel de 2025
+    assert (f.cuentas_individuales + f.seguro_social_fapp + f.estado == f.flujo_total).all()

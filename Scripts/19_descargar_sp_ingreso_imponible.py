@@ -15,7 +15,7 @@ Qué hace:
   3. Valida que el título del archivo bajado corresponda al mes pedido.
 
 Uso (desde la raíz del proyecto):
-  "Data raw/.venv/bin/python" -I Scripts/15_descargar_sp_ingreso_imponible.py [--desde 200210] [--hasta 202608] [--seco]
+  "Data raw/.venv/bin/python" -I Scripts/19_descargar_sp_ingreso_imponible.py [--desde 200210] [--hasta 202608] [--seco]
 
 Solo usa la biblioteca estándar.
 """

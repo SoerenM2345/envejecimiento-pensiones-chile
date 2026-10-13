@@ -128,7 +128,7 @@ Convenciones: «MM$» = millones de pesos; «M$» = miles de pesos; las cifras d
 
 | Archivos | Qué son | Cobertura |
 |---|---|---|
-| `04A*.xls` (60) + `04A_descargas/04A_AAAAMM.xls` (228, script 15) | Cuadro 04A de la SP: **nº de cotizantes e ingreso imponible promedio por tipo (dependientes, independientes, voluntarios) y sexo**. Son tablas HTML con extensión `.xls` (latin-1). El título trae la fecha («Al 31 de Diciembre de 2024») | Mensual, **octubre 2002 a agosto 2026** (287 meses, sin huecos). A mano estaban enero 2020 a diciembre 2024 |
+| `04A*.xls` (60) + `04A_descargas/04A_AAAAMM.xls` (228, script 19) | Cuadro 04A de la SP: **nº de cotizantes e ingreso imponible promedio por tipo (dependientes, independientes, voluntarios) y sexo**. Son tablas HTML con extensión `.xls` (latin-1). El título trae la fecha («Al 31 de Diciembre de 2024») | Mensual, **octubre 2002 a agosto 2026** (287 meses, sin huecos). A mano estaban enero 2020 a diciembre 2024 |
 | `32C*.xls`, `estadisticas (n).xls` | **Ingreso imponible promedio por región y AFP**; se usa la fila Total. Ñuble aparece desde 2018 (antes forma parte de Biobío) | Cada diciembre, 2010-2025 (16 años) |
 | `19B*.xls`, `estadisticas (n).xls` | **Cotizantes por tramo de ingreso imponible** (tramos de $20-50 mil, hasta $3,5 M) y AFP. De aquí sale la mediana de los cotizantes | Cada diciembre, 2010-2025 |
 | `CL01,DF_YMEDIANOOCU_SEXO,1.0+A....csv`, `CL01,DF_YMEDIOOCU_SEXO,1.0+A....csv` | INE, **Encuesta Suplementaria de Ingresos (ESI)**: ingreso mediano y medio **nominal** de los ocupados, por región (17 áreas con `_T` = país) y sexo, separador `;` | Anual 2010-2025. Mediana nacional 2024: $611.162; media: $897.019 |
@@ -138,7 +138,7 @@ Convenciones: «MM$» = millones de pesos; «M$» = miles de pesos; las cifras d
 
 - **Atención:** el ingreso imponible es **bruto y mensual** (SP) mientras la ESI mide ingreso **neto** del trabajo: las dos bases no son directamente comparables, por eso el dashboard las alterna con un interruptor en vez de mezclarlas. La SP no publica la mediana regional (los tramos vienen solo por AFP): la regional se estima con la nacional. El total de la SP por región (cuadro 32C, dic-2025: $1.308.020) difiere un 0,6 % del 04A (dic-2025: $1.299.840) por definiciones distintas.
 - **Atención 2:** el IPC viene con un decimal, así que el índice encadenado sirve para razones entre años (deflactar a pesos de 2025), no como nivel.
-- **Uso:** script 15 (descarga lo que falta del 04A) y script 18 → `sp_ingreso_imponible_nacional.csv`, `sp_ingreso_imponible_region.csv`, `sp_cotizantes_por_tramo.csv`, `ine_ingresos_ocupados.csv`, `ipc_anual.csv`, `kpi_pc_nacional.csv`, `kpi_pc_region.csv`, `kpi_pc_parametros_reforma.csv`.
+- **Uso:** script 19 (descarga lo que falta del 04A) y script 18 → `sp_ingreso_imponible_nacional.csv`, `sp_ingreso_imponible_region.csv`, `sp_cotizantes_por_tramo.csv`, `ine_ingresos_ocupados.csv`, `ipc_anual.csv`, `kpi_pc_nacional.csv`, `kpi_pc_region.csv`, `kpi_pc_parametros_reforma.csv`.
 
 ---
 
