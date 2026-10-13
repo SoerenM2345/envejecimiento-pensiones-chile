@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils import (BLUE, ORANGE, VIOLET, RED, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
+from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
                    CATEGORICAL, lighten)
 
 UMBRAL_VEJEZ = 65
@@ -185,20 +185,64 @@ def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return fig
 
 
-def stakeholder_financing_bars(df: pd.DataFrame) -> go.Figure:
-    """KPI 1.3: financiamiento por pagador y año, barras apiladas en billones de pesos (10^12).
-    df: anio, aporte_trabajadores, aporte_empleador, aporte_estado, financiamiento_total, kpi_1_3_pct."""
+
+# KPI 1.3: texto oscuro explícito, para que título, ejes y leyenda se lean sobre el fondo claro aunque el
+# dashboard esté en tema oscuro (llamar st.plotly_chart con theme=None para que Streamlit no lo reemplace)
+_TEXTO_CLARO = dict(title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY)
+_EJE_CLARO = dict(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
+_MARGEN = dict(margin=dict(l=70, r=20, t=60, b=10))
+
+
+def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
+    """KPI 1.3: flujo al sistema por destino, barras apiladas (billones de pesos) para los años reales.
+    df: anio, cuentas_individuales, seguro_social_fapp, estado, flujo_total. Segmentos < 2% se rotulan fuera de la barra."""
+    anios = df.anio.astype(int).astype(str)
     fig = go.Figure()
-    for col, nombre, color in [("aporte_trabajadores", "Trabajadores (10% obligatorio, estimado)", BLUE),
-                               ("aporte_empleador", "Empleador (cotización FAPP)", ORANGE),
-                               ("aporte_estado", "Estado (PGU + PBS + APS)", VIOLET)]:
-        fig.add_bar(x=df.anio.astype(str), y=df[col] / 1e12, name=nombre, marker_color=color,
-                    text=[f"{v / 1e12:.2f}" if v > 0 else "" for v in df[col]], textposition="inside",
-                    customdata=100 * df[col] / df.financiamiento_total,
-                    hovertemplate=nombre + ": %{y:.2f} billones (%{customdata:.1f}%)<extra></extra>")
-    fig.add_scatter(x=df.anio.astype(str), y=df.financiamiento_total / 1e12 * 1.04, mode="text", showlegend=False,
-                    text=[f"Empleador + Estado: {p:.1f}%" for p in df.kpi_1_3_pct], hoverinfo="skip")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Financiamiento previsional por pagador (billones de pesos)")
-    fig.update_xaxes(title="Año")
-    fig.update_yaxes(title="Billones de pesos (10^12)", rangemode="tozero")
+    base = pd.Series(0.0, index=df.index)
+    for col, nombre, color in [("cuentas_individuales", "Cuentas individuales AFP (comisionable)", BLUE),
+                               ("seguro_social_fapp", "Seguro Social (FAPP)", ORANGE),
+                               ("estado", "Estado (PGU + PBS + APS)", VIOLET)]:
+        val = df[col] / 1e12
+        pct = 100 * df[col] / df.flujo_total
+        fig.add_bar(x=anios, y=val, name=nombre, marker_color=color,
+                    text=[f"{v:.2f} ({p:.0f}%)" if p >= 2 else "" for v, p in zip(val, pct)],
+                    textposition="inside", insidetextanchor="middle", textfont_color="white",
+                    customdata=pct, hovertemplate=nombre + ": %{y:.2f} billones (%{customdata:.1f}%)<extra></extra>")
+        for i, (v, p, b) in enumerate(zip(val, pct, base)):
+            if 0 < p < 2:  # segmento muy delgado: rótulo al lado, con flecha
+                # x por posición: un año como texto ("2025") se leería como posición 2025 del eje de categorías
+                fig.add_annotation(x=i, y=b + v / 2, text=f"{v:.2f} ({p:.1f}%)", showarrow=True, arrowhead=0,
+                                   ax=150, ay=0, font=dict(color=INK_PRIMARY, size=12), arrowcolor=INK_MUTED)
+        base = base + val
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN, "legend": dict(orientation="h", y=-0.15, bgcolor="rgba(0,0,0,0)")},
+                      **_TEXTO_CLARO, barmode="stack", bargap=0.45,
+                      title="Flujo al sistema previsional por destino (billones de pesos)")
+    fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
+    fig.update_yaxes(title="Billones de pesos (10^12)", rangemode="tozero", **_EJE_CLARO)
+    return fig
+
+
+def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
+    """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados).
+    df: anio, tipo (real / escenario / escenario_crec_1_5), kpi_1_3_pct."""
+    real = df[df.tipo == "real"].sort_values("anio")
+    ancla = real.iloc[[-1]]  # los escenarios parten del último año real
+    fig = go.Figure()
+    fig.add_scatter(x=real.anio.astype(str), y=real.kpi_1_3_pct, mode="lines+markers+text", name="Real",
+                    line=dict(color=BLUE, width=3), text=[f"{v:.1f}%" for v in real.kpi_1_3_pct],
+                    textposition="top center", textfont_color=INK_PRIMARY)
+    for tipo, nombre, color, dash in [("escenario", "Escenario base (ingreso real constante)", RED, "dash"),
+                                      ("escenario_crec_1_5", "Escenario ingreso real +1,5% anual", INK_MUTED, "dot")]:
+        e = pd.concat([ancla, df[df.tipo == tipo]]).sort_values("anio")
+        if len(e) == 1:
+            continue
+        rotulos = ["" if a not in (2028, 2033, 2035) or tipo != "escenario" else f"{v:.1f}%"
+                   for a, v in zip(e.anio, e.kpi_1_3_pct)]
+        fig.add_scatter(x=e.anio.astype(str), y=e.kpi_1_3_pct, mode="lines+markers+text", name=nombre,
+                        line=dict(color=color, width=2.5, dash=dash), text=rotulos, textposition="bottom center",
+                        textfont_color=INK_PRIMARY)
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN, "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")},
+                      **_TEXTO_CLARO, title="Parte del flujo previsional que pasa por cuentas individuales AFP (%)")
+    fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
+    fig.update_yaxes(title="% del flujo total", range=[0, 70], **_EJE_CLARO)
     return fig

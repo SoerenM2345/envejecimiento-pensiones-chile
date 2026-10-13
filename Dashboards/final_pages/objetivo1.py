@@ -3,7 +3,8 @@ import pandas as pd
 import streamlit as st
 from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
-from components.charts import region_choropleth, region_bars, support_ratio_projection, stakeholder_financing_bars
+from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
+                               commissionable_share_line)
 
 st.title("Objetivo 1: retener y ampliar la base activa")
 st.markdown("Aumentar y retener la base de cotizantes activos por región, para sostener el ingreso por comisión pese al envejecimiento.")
@@ -63,15 +64,33 @@ def render_1_2():
 
 
 def render_1_3():
-    part = load_csv("kpi_participacion_partes.csv").sort_values("anio")
-    ult, ant = part.iloc[-1], part.iloc[0]
+    flujo = load_csv("kpi_flujo_comisionable.csv")
+    real = flujo[flujo.tipo == "real"].sort_values("anio")
+    esc = flujo[flujo.tipo == "escenario"].set_index("anio")
+    r25 = real.iloc[-1]
+    a_meta = 2033
+    e33 = esc.loc[a_meta]
+    minimo = esc.kpi_1_3_pct.idxmin()
     kpi_card_row([
-        (f"Empleador + Estado ({int(ult.anio)})", f"{ult.kpi_1_3_pct:.1f}%", "Del financiamiento total"),
-        (f"Empleador + Estado ({int(ant.anio)})", f"{ant.kpi_1_3_pct:.1f}%", "Antes de la cotización del empleador"),
-        (f"Variación {int(ant.anio)}-{int(ult.anio)}", f"{ult.kpi_1_3_pct - ant.kpi_1_3_pct:+.1f} pp",
-         f"Empleador {int(ult.anio)}: {100 * ult.aporte_empleador / ult.financiamiento_total:.1f}% del total"),
+        (f"Flujo comisionable {int(r25.anio)} (real)", f"{r25.kpi_1_3_pct:.1f}%", "Cuentas individuales / flujo total"),
+        (f"Flujo comisionable {a_meta} (escenario)", f"{e33.kpi_1_3_pct:.1f}%", "Cotización del empleador completa (8,5%)"),
+        (f"Variación {int(r25.anio)}-{a_meta}", f"{e33.kpi_1_3_pct - r25.kpi_1_3_pct:+.1f} pp",
+         f"Mínimo del escenario: {esc.kpi_1_3_pct.min():.1f}% en {minimo}"),
     ])
-    st.plotly_chart(stakeholder_financing_bars(part), use_container_width=True, config=PLOTLY_DL_CONFIG)
+    c1, c2 = st.columns([2, 3])
+    with c1:
+        st.plotly_chart(commissionable_flow_bars(real), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+    with c2:
+        st.plotly_chart(commissionable_share_line(flujo), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+    st.markdown(
+        f"El dinero previsional crece, pero una parte menor pasa por la base comisionable de las AFP: del "
+        f"**{r25.kpi_1_3_pct:.1f}%** en {int(r25.anio)} baja a **{esc.kpi_1_3_pct.min():.1f}%** en {minimo} "
+        f"(entra el Seguro Social) y solo se recupera en parte, a **{e33.kpi_1_3_pct:.1f}%** en {a_meta}, "
+        "cuando sube la parte del empleador que va a la cuenta individual."
+    )
+    st.caption("Escenario, no pronóstico: cobertura y beneficio real constantes, población INE. Tasas del empleador según la "
+               "Nota Técnica de la Ley 21.735 (Tabla 1). Desde agosto 2026 el 2,5% del Seguro Social incluye el SIS, que antes "
+               "el empleador pagaba aparte (1,88%) y no se contaba en el flujo.")
 
 
 kpi_card("1.1", render_1_1)

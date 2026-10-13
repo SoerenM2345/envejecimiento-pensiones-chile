@@ -21,6 +21,8 @@ def run_page(rel: str) -> AppTest:
 
 @pytest.mark.parametrize("page", FINAL_PAGES + DEV_PAGES)
 def test_page_runs_without_exception(page):
+    # AppTest no reporta errores de sintaxis como excepción (la página queda vacía): compilar antes
+    compile((DASH / page).read_text(encoding="utf-8"), page, "exec")
     at = run_page(page)
     assert not at.exception, [e.value for e in at.exception]
 
@@ -79,4 +81,11 @@ def test_kpi_1_3_participacion():
     k = pd.read_csv(dp / "kpi_participacion_partes.csv").set_index("anio")
     assert list(k.index) == [2024, 2025] and (k.n_meses == 12).all()
     assert k.loc[2024, "aporte_empleador"] == 0 and k.loc[2025, "aporte_empleador"] == 283_048_436_000
-    assert k.kpi_1_3_pct.between(40, 46).all()
+    f = pd.read_csv(dp / "kpi_flujo_comisionable.csv")
+    real = f[f.tipo == "real"].set_index("anio")
+    assert round(real.loc[2024, "kpi_1_3_pct"]) == 57 and 55 <= real.loc[2025, "kpi_1_3_pct"] <= 56
+    assert real.loc[2024, "empleador_ci"] == 0 and real.loc[2025, "seguro_social_fapp"] == 283_048_436_000
+    esc = f[f.tipo == "escenario"].set_index("anio")
+    assert list(esc.index) == list(range(2026, 2036))
+    assert esc.kpi_1_3_pct.max() < real.loc[2025, "kpi_1_3_pct"]  # el escenario nunca vuelve al nivel de 2025
+    assert (f.cuentas_individuales + f.seguro_social_fapp + f.estado == f.flujo_total).all()

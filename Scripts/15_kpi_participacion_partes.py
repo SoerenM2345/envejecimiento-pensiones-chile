@@ -1,8 +1,13 @@
 """
-KPI 1.3: participación de las partes interesadas en el financiamiento previsional, 2024 y 2025.
+KPI 1.3: participación del flujo comisionable, desde la mirada de una AFP. Real 2024-2025 y escenario 2026-2035.
 
-  KPI 1.3 = (Aporte empleador + Aporte Estado) / Financiamiento total
-  Financiamiento total = Aporte trabajadores + Aporte empleador + Aporte Estado
+  KPI 1.3 = Aportes a cuentas individuales / Flujo total al sistema
+  Aportes a cuentas individuales = trabajadores (10% obligatorio) + parte del empleador que va a la cuenta individual
+  Flujo total = cuentas individuales + Seguro Social (FAPP) + Estado (PGU + PBS + APS)
+
+La AFP solo cobra comisión sobre lo que entra a las cuentas individuales; lo que va al FAPP o paga el Estado no genera comisión.
+
+Base (secciones 1-3, sin cambios de método): flujos reales por pagador -> kpi_participacion_partes.csv.
 
 Fuentes:
   - Aporte trabajadores (estimado): Fichas Estadísticas Previsionales de la Superintendencia de Pensiones,
@@ -14,6 +19,9 @@ Fuentes:
   - Aporte empleador: Estado de Variación Patrimonial del FAPP al 31-12-2025 (Data raw/_external/fapp/),
     cuentas 40.110 "Cotizaciones" + 40.187 "Cotizaciones del Seguro Social por Identificar" (M$ = miles de pesos).
     2024 = 0: la cotización del empleador al FAPP (Ley 21.735) rige desde las remuneraciones de agosto de 2025.
+  - División de la cotización del empleador (cuenta individual / Seguro Social): Tabla 1 de la Nota Técnica
+    "Reforma de Pensiones, Ley N°21.735" (Subsecretaría de Previsión Social, ago-2025), en
+    Data raw/_external/ley_21735/. Publica todos los años intermedios: no se interpola nada.
   - Aporte Estado: PGU + PBS + APS (vejez e invalidez), monto nominal anual de
     Data processed/pgu_pbs_aps_nacional_anual.csv (script 12, misma base que el KPI 2.2).
 
@@ -28,11 +36,21 @@ Controles (al log):
   - Empleador: 1% × masa imponible estimada (cotizantes × ingreso) de los meses ago-dic 2025 vs. valor FAPP.
   - Estado: gasto promedio mensual últimos 12 meses PGU, PBS y APS de la ficha con cotizantes de diciembre × 12.
 
+Pago con desfase: la remuneración de agosto se paga en septiembre. Cada tasa nueva rige para las remuneraciones desde agosto,
+así que en un año calendario se pagan 8 meses con la tasa anterior (ene-ago) y 4 con la nueva (sep-dic). En 2025 el FAPP recauda 4 meses.
+
+Escenario 2026-2035 (no es pronóstico, pesos de 2025):
+  - Masa imponible = masa mensual promedio 2025 × (población 15-64 INE del año / 2025): cobertura e ingreso real constantes.
+    Variante 'escenario_crec_1_5': además, ingreso real +1,5% anual.
+  - Estado = gasto PGU/PBS/APS 2025 × (población 65+ INE del año / 2025): beneficio real constante.
+
 Salidas (Data processed/):
   - fichas_previsionales_mensual.csv  n_ficha, mes_publicacion, mes_ref_cotizantes, mes_ref_ingreso, cotizantes,
                                       ingreso_promedio, aporte_trabajadores_mes, gasto_pgu_pbs_aps_12m_mm
-  - kpi_participacion_partes.csv      anio, aporte_trabajadores, aporte_empleador, aporte_estado, financiamiento_total,
-                                      kpi_1_3_pct, n_meses, fuente (montos en pesos)
+  - kpi_participacion_partes.csv      base real por pagador: anio, aporte_trabajadores, aporte_empleador, aporte_estado,
+                                      financiamiento_total, n_meses, fuente (montos en pesos)
+  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_1_5), trabajadores, empleador_ci,
+                                      cuentas_individuales, seguro_social_fapp, estado, flujo_total, kpi_1_3_pct, supuestos
 """
 import logging
 import re
@@ -49,7 +67,24 @@ FAPP = ROOT / "Data raw" / "_external" / "fapp" / "FAPP_estados_financieros_2025
 OUT = ROOT / "Data processed"
 ANIOS = [2024, 2025]
 TASA_TRABAJADOR = 0.10
-TASA_EMPLEADOR = 0.01  # cotización del empleador al FAPP desde ago-2025 (solo para el control)
+ANIOS_ESCENARIO = range(2026, 2036)
+CRECIMIENTO_REAL = 0.015  # variante del escenario: ingreso real +1,5% anual
+
+# Ley 21.735, Nota Técnica Tabla 1: cotización del empleador desde la remuneración de agosto de cada año.
+# (cuenta individual, Seguro Social = cotización con rentabilidad protegida + SIS y compensación por expectativas de vida)
+# Desde ago-2026 el SIS (antes 1,88% aparte) queda dentro del 2,5% del Seguro Social. Desde 2045 la parte de rentabilidad
+# protegida baja y pasa a la cuenta individual; no afecta al escenario (hasta 2035).
+TASAS_EMPLEADOR = {
+    2025: (0.001, 0.009),
+    2026: (0.001, 0.009 + 0.025),
+    2027: (0.0025, 0.015 + 0.025),
+    2028: (0.010, 0.015 + 0.025),
+    2029: (0.017, 0.015 + 0.025),
+    2030: (0.024, 0.015 + 0.025),
+    2031: (0.031, 0.015 + 0.025),
+    2032: (0.038, 0.015 + 0.025),
+    2033: (0.045, 0.015 + 0.025),
+}
 
 MESES = {m: i for i, m in enumerate(
     ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
@@ -99,6 +134,22 @@ def leer_ficha(path):
     return fila
 
 
+def tasas_empleador(remuneracion):
+    """(tasa cuenta individual, tasa Seguro Social) para una remuneración (pd.Period mensual)."""
+    tramo = remuneracion.year if remuneracion.month >= 8 else remuneracion.year - 1
+    vigentes = [a for a in TASAS_EMPLEADOR if a <= tramo]
+    return TASAS_EMPLEADOR[max(vigentes)] if vigentes else (0.0, 0.0)
+
+
+def tasas_pagadas_en(anio):
+    """Suma de las tasas de los 12 meses pagados en `anio` (cada pago corresponde a la remuneración del mes anterior)."""
+    ci = ss = 0.0
+    for mes in range(1, 13):
+        t_ci, t_ss = tasas_empleador(pd.Period(year=anio, month=mes, freq="M") - 1)
+        ci, ss = ci + t_ci, ss + t_ss
+    return ci, ss
+
+
 def leer_fapp(path):
     """Cuentas 40.110 y 40.187 del Estado de Variación Patrimonial (M$), ejercicio actual."""
     texto = "\n".join(p.extract_text() for p in pypdf.PdfReader(path).pages)
@@ -141,16 +192,14 @@ fapp = leer_fapp(FAPP)
 empleador_2025 = (fapp["40.110"] + fapp["40.187"]) * 1000  # M$ -> pesos
 print(f"   FAPP 40.110 Cotizaciones: M$ {fapp['40.110']:,} ; 40.187 SSP por identificar: M$ {fapp['40.187']:,}")
 
-ref_2025 = fichas[fichas.mes_ref_cotizantes.dt.year == 2025]
-masa_ago_dic = (ref_2025.loc[ref_2025.mes_ref_cotizantes.dt.month >= 8, ["cotizantes", "ingreso_promedio"]]
-                .prod(axis=1).sum())
-print(f"   Control empleador: 1% × masa imponible ago-dic 2025 = {TASA_EMPLEADOR * masa_ago_dic / 1e9:,.1f} mil millones "
-      f"vs FAPP {empleador_2025 / 1e9:,.1f} mil millones ({empleador_2025 / (TASA_EMPLEADOR * masa_ago_dic) - 1:+.1%})")
-# la cotización rige desde las remuneraciones de agosto, que se pagan en septiembre: ventana de pago sep-dic
-masa_sep_dic = (ref_2025.loc[ref_2025.mes_ref_cotizantes.dt.month >= 9, ["cotizantes", "ingreso_promedio"]]
-                .prod(axis=1).sum())
-print(f"   Control empleador (pagos sep-dic, remuneraciones ago-nov): {TASA_EMPLEADOR * masa_sep_dic / 1e9:,.1f} mil millones "
-      f"({empleador_2025 / (TASA_EMPLEADOR * masa_sep_dic) - 1:+.1%})")
+# masa imponible de cada mes de pago = cotizantes del mes × ingreso promedio (remuneración del mes anterior)
+fichas["masa_imponible_mes"] = fichas.cotizantes * fichas.ingreso_promedio
+fichas["tasa_ci"], fichas["tasa_ss"] = zip(*[tasas_empleador(m - 1) for m in fichas.mes_ref_cotizantes])
+fichas["empleador_ci_mes"] = fichas.masa_imponible_mes * fichas.tasa_ci
+fichas["empleador_ss_mes"] = fichas.masa_imponible_mes * fichas.tasa_ss
+ss_estimado_2025 = fichas.loc[fichas.mes_ref_cotizantes.dt.year == 2025, "empleador_ss_mes"].sum()
+print(f"   Control empleador: 0,9% × masa imponible pagos sep-dic 2025 = {ss_estimado_2025 / 1e9:,.1f} mil millones "
+      f"vs FAPP {empleador_2025 / 1e9:,.1f} mil millones ({empleador_2025 / ss_estimado_2025 - 1:+.1%})")
 
 pilar = pd.read_csv(OUT / "pgu_pbs_aps_nacional_anual.csv")
 estado = pilar[pilar.tipo_beneficio == "Total"].set_index("anio")["monto_nominal_mm"] * 1e6  # MM$ -> pesos
@@ -158,7 +207,7 @@ estado = pilar[pilar.tipo_beneficio == "Total"].set_index("anio")["monto_nominal
 # =============================================================================
 # 3) KPI por año
 # =============================================================================
-print("\n3) kpi_participacion_partes.csv ...")
+print("\n3) kpi_participacion_partes.csv (base real por pagador) ...")
 filas = []
 for anio in ANIOS:
     meses = fichas[fichas.mes_ref_cotizantes.dt.year == anio]
@@ -183,10 +232,59 @@ for anio in ANIOS:
         print(f"   Control Estado {anio}: ficha N° {dic.n_ficha.iloc[0]} × 12 = {ficha_x12 / 1e9:,.0f} mil millones "
               f"vs Pilar Solidario {estado.loc[anio] / 1e9:,.0f} mil millones ({estado.loc[anio] / ficha_x12 - 1:+.1%})")
 
-kpi = pd.DataFrame(filas)
-kpi["financiamiento_total"] = kpi.aporte_trabajadores + kpi.aporte_empleador + kpi.aporte_estado
-kpi["kpi_1_3_pct"] = round(100 * (kpi.aporte_empleador + kpi.aporte_estado) / kpi.financiamiento_total, 2)
-kpi = kpi[["anio", "aporte_trabajadores", "aporte_empleador", "aporte_estado", "financiamiento_total", "kpi_1_3_pct",
-           "n_meses", "fuente"]]
-kpi.to_csv(OUT / "kpi_participacion_partes.csv", index=False)
-print(kpi.drop(columns="fuente").to_string(index=False))
+base = pd.DataFrame(filas)
+base["financiamiento_total"] = base.aporte_trabajadores + base.aporte_empleador + base.aporte_estado
+base = base[["anio", "aporte_trabajadores", "aporte_empleador", "aporte_estado", "financiamiento_total", "n_meses", "fuente"]]
+base.to_csv(OUT / "kpi_participacion_partes.csv", index=False)
+print(base.drop(columns="fuente").to_string(index=False))
+
+# =============================================================================
+# 4) KPI 1.3, real: flujo comisionable 2024-2025
+# =============================================================================
+print("\n4) kpi_flujo_comisionable.csv ...")
+filas = []
+for _, b in base.iterrows():
+    anio = int(b.anio)
+    # parte del empleador a la cuenta individual: estimada (0,1% de la masa; en 2024 no existe)
+    empleador_ci = round(fichas.loc[fichas.mes_ref_cotizantes.dt.year == anio, "empleador_ci_mes"].sum())
+    filas.append({
+        "anio": anio, "tipo": "real", "trabajadores": b.aporte_trabajadores, "empleador_ci": empleador_ci,
+        "seguro_social_fapp": b.aporte_empleador, "estado": b.aporte_estado,
+        "supuestos": ("Trabajadores estimado (cotizantes × ingreso promedio × 10%); empleador a cuenta individual estimado "
+                      "(0,1% de la masa imponible pagada sep-dic, Ley 21.735); Seguro Social = FAPP real; Estado = PGU+PBS+APS nominal"),
+    })
+
+# =============================================================================
+# 5) Escenario 2026-2035 (pesos de 2025)
+# =============================================================================
+proy = pd.read_csv(OUT / "proyeccion_envejecimiento_pais.csv").set_index("anio")
+masa_mensual_2025 = fichas.loc[fichas.mes_ref_cotizantes.dt.year == 2025, "masa_imponible_mes"].mean()
+for tipo, g in [("escenario", 0.0), ("escenario_crec_1_5", CRECIMIENTO_REAL)]:
+    for anio in ANIOS_ESCENARIO:
+        masa = (masa_mensual_2025 * proy.loc[anio, "pob_15_64"] / proy.loc[2025, "pob_15_64"]
+                * (1 + g) ** (anio - 2025))
+        suma_ci, suma_ss = tasas_pagadas_en(anio)
+        filas.append({
+            "anio": anio, "tipo": tipo,
+            "trabajadores": round(12 * masa * TASA_TRABAJADOR),
+            "empleador_ci": round(masa * suma_ci),
+            "seguro_social_fapp": round(masa * suma_ss),
+            "estado": round(estado.loc[2025] * proy.loc[anio, "pob_65_mas"] / proy.loc[2025, "pob_65_mas"]),
+            "supuestos": ("Escenario, pesos de 2025: cobertura constante (masa 2025 × población 15-64 INE), "
+                          + ("ingreso real constante" if g == 0 else f"ingreso real +{g:.1%} anual".replace(".", ","))
+                          + "; Estado = gasto 2025 × población 65+ INE (beneficio real constante); "
+                          "tasas del empleador según Nota Técnica Ley 21.735, Tabla 1"),
+        })
+
+flujo = pd.DataFrame(filas)
+flujo["cuentas_individuales"] = flujo.trabajadores + flujo.empleador_ci
+flujo["flujo_total"] = flujo.cuentas_individuales + flujo.seguro_social_fapp + flujo.estado
+flujo["kpi_1_3_pct"] = round(100 * flujo.cuentas_individuales / flujo.flujo_total, 2)
+flujo = flujo[["anio", "tipo", "trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp", "estado",
+               "flujo_total", "kpi_1_3_pct", "supuestos"]]
+flujo.to_csv(OUT / "kpi_flujo_comisionable.csv", index=False)
+print((flujo.drop(columns="supuestos").set_index(["tipo", "anio"])
+       .assign(**{c: lambda d, c=c: (d[c] / 1e12).round(2) for c in
+                  ["trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp", "estado", "flujo_total"]}))
+      .to_string())
+print("   (montos en billones de pesos)")
