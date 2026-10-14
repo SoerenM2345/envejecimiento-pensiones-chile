@@ -27,13 +27,13 @@ st.markdown(
 
 st.subheader("Limitaciones a tener presentes")
 st.markdown(
-    "- **Años de los cotizantes:** la cobertura (KPI 1.1) usa cotizantes 2024, mismo año que el Censo; la razón de soporte (KPI 1.2) usa cotizantes de diciembre de 2025.\n"
+    "- **Años de los cotizantes:** la cobertura (KPI 1.1) y la razón de soporte (KPI 1.2) usan cotizantes de diciembre de 2024, mismo año que el Censo 2024; los de 2025 (más recientes) quedan a 20 meses del Censo y no se mezclan con su población. El análisis del punto crítico usa 2025 para el país (con las proyecciones INE de ese año) y 2024 para regiones y comunas.\n"
     "- **Cotizantes sin región:** 56.094 cotizantes en 2024 y 13.914 en 2025 no tienen región informada y quedan fuera del cálculo regional.\n"
     "- **Proyección regional:** el INE aún no publica proyecciones regionales base 2024. La población 65+ por región "
     "en 2035 y 2050 usa un reparto de las tasas nacionales, no es oficial.\n"
-    "- **Escenario de razón de soporte:** supone que la cobertura previsional 2025 se mantiene constante; no es un pronóstico.\n"
+    "- **Escenario de razón de soporte:** supone que la cobertura previsional 2024 se mantiene constante; no es un pronóstico.\n"
     "- **Edad no informada:** ~151 mil personas del Censo tienen la edad enmascarada y no entran en las pirámides.\n"
     "- **Pensiones pagadas (Superintendencia):** los archivos disponibles cubren solo el sistema antiguo (IPS), por lo que no "
     "equivalen a todas las pensiones."
 )
-st.caption("Detalle metodológico completo: `Data processed/README.md` y `config/kpis.yaml`.")
+st.caption("Metodología completa de cada indicador: `Data processed/README.md` y `config/kpis.yaml`.")

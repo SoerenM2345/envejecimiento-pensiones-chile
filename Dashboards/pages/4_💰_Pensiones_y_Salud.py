@@ -14,11 +14,11 @@ edad_kpi = load_csv("kpi_presion_previsional_edad.csv")
 proy_reg = load_csv("kpi_proyeccion_regional.csv")
 demanda = load_csv("kpi_indice_demanda_salud_region.csv")
 
-nacional_soporte = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
+nacional_soporte = pres["cotizantes_2024"].sum() / pres["pob_65_mas"].sum()
 nacional_cobertura = 100 * pres["cotizantes_2024"].sum() / pres["pob_15_64"].sum()
 
 kpi_card_row([
-    ("Cotizantes por adulto mayor (país)", f"{nacional_soporte:.2f}", "Cotizantes AFP 2025 / población 65+ (Censo 2024)"),
+    ("Cotizantes por adulto mayor (país)", f"{nacional_soporte:.2f}", "Cotizantes AFP 2024 / población 65+ (Censo 2024)"),
     ("Cobertura previsional (país)", f"{nacional_cobertura:.1f}%", "Cotizantes 2024 / población 15-64"),
     ("Región más presionada", pres.iloc[0]["region_nombre"], f"{pres.iloc[0]['razon_soporte_previsional']:.2f} cotizantes/adulto mayor"),
     ("Región menos presionada", pres.iloc[-1]["region_nombre"], f"{pres.iloc[-1]['razon_soporte_previsional']:.2f} cotizantes/adulto mayor"),
@@ -35,7 +35,7 @@ with col1:
     fig.update_layout(**PLOTLY_LAYOUT, title="Razón de soporte previsional por región")
     fig.update_yaxes(categoryorder="total ascending")
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
-    st.caption("Cotizantes AFP 2025 por cada persona de 65+ (Censo 2024). A menor valor, mayor presión sobre el sistema en esa región.")
+    st.caption("Cotizantes AFP de diciembre de 2024 por cada persona de 65+ (Censo 2024). A menor valor, mayor presión sobre el sistema en esa región.")
 
 with col2:
     pres2 = pres.sort_values("cobertura_previsional_pct")
@@ -81,7 +81,7 @@ st.caption(
     "Pirámides), ya en franca aceleración. Puntos rojos: Valparaíso, con su valor real 2024 (Censo) y su "
     "proyección 2035/2050 por reparto de tasas nacionales (misma aproximación de la sección anterior; no es una "
     "proyección oficial INE por región). Valparaíso ya parte más envejecida que el país (98.6 vs 80.0 en 2024) y "
-    "la brecha se mantiene hacia 2035/2050 — mientras tanto, la región ya muestra solo 1.71 cotizantes por cada "
+    "la brecha se mantiene hacia 2035/2050 — mientras tanto, la región ya muestra solo 1.70 cotizantes por cada "
     "adulto mayor (gráfico de razón de soporte, arriba): menos personas activas sosteniendo a más adultos mayores."
 )
 

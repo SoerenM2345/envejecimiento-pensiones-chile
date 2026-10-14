@@ -36,7 +36,7 @@ def kpi_card(kpi_id: str, render: Optional[Callable[[], None]] = None):
                 st.info(f"**Pendiente.** {kpi['pendiente_motivo']}")
             else:
                 st.info("**Pendiente de datos.** Para calcular este KPI falta:\n\n"
-                        + "\n".join(f"- {d}" for d in kpi.get("datos_faltantes", ["(sin detalle)"])))
+                        + "\n".join(f"- {d}" for d in kpi.get("datos_faltantes", ["(sin información)"])))
         else:
             render()
         if kpi.get("caveat"):

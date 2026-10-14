@@ -13,13 +13,13 @@ pres = load_csv("kpi_presion_previsional_region.csv")
 
 national_pct = 100 * reg["pob_65_mas"].sum() / reg["pob_total"].sum()
 pct_2050 = proy.loc[proy.anio == 2050, "pct_65_mas"].iloc[0]
-soporte_nacional = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
+soporte_nacional = pres["cotizantes_2024"].sum() / pres["pob_65_mas"].sum()
 region_top = reg.sort_values("pct_65_mas", ascending=False).iloc[0]
 
 kpi_card_row([
     ("Población 65+ (Censo 2024)", f"{national_pct:.1f}%", "Sobre 18.480.432 personas censadas"),
     ("Proyección 65+ a 2050", f"{pct_2050:.0f}%", "INE, proyecciones base 2024 (nacional)"),
-    ("Cotizantes por adulto mayor", f"{soporte_nacional:.2f}", "Cotizantes AFP 2025 / población 65+ censada"),
+    ("Cotizantes por adulto mayor", f"{soporte_nacional:.2f}", "Cotizantes AFP 2024 / población 65+ censada"),
     ("Región más envejecida", region_top["region_nombre"], f"{region_top['pct_65_mas']:.1f}% de 65+"),
 ])
 
@@ -49,7 +49,7 @@ with col2:
 | CASEN 2022 | Ingresos, muestra n=202.231, 334/346 comunas |
 | chilemapas (geometría) | 345/346 comunas |
     """)
-    st.caption("Ver `Data processed/README.md` y `config/kpis.yaml` para el detalle metodológico completo de cada indicador.")
+    st.caption("Ver `Data processed/README.md` y `config/kpis.yaml` para la metodología completa de cada indicador.")
 
 st.divider()
 st.subheader("Ranking regional rápido")

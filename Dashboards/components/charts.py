@@ -131,6 +131,25 @@ def region_bars(df: pd.DataFrame, var: str, label: str, nacional: float, fmt: st
     return fig
 
 
+def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 1.2, vista en personas: mismo orden que la razón de soporte, con cotizantes y personas de 65+ en valores
+    absolutos (eje con marcas cada 500.000 y rejilla cada 100.000) y la razón escrita junto a cada región."""
+    d = df.sort_values("razon_soporte_previsional")
+    orden = list(d.region_nombre)
+    fig = go.Figure()
+    fig.add_bar(y=d.region_nombre, x=d.pob_65_mas, orientation="h", name="Personas de 65+", marker_color=ORANGE,
+                hovertemplate="%{y}<br>65+: %{x:,.0f}<extra></extra>")
+    fig.add_bar(y=d.region_nombre, x=d.cotizantes_2024, orientation="h", name="Cotizantes (dic-2024)", marker_color=BLUE,
+                text=[f"{r:.2f}" for r in d.razon_soporte_previsional], textposition="outside",
+                hovertemplate="%{y}<br>Cotizantes: %{x:,.0f}<extra></extra>")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.",
+                      title=f"Cotizantes y personas de 65+ por región (número = cotizantes por adulto mayor; país: {nacional:.2f})")
+    fig.update_yaxes(categoryorder="array", categoryarray=orden, title="")
+    fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=500_000, minor=dict(dtick=100_000, showgrid=True), rangemode="tozero")
+    fig.update_layout(height=760, legend=dict(orientation="h", y=1.05, x=0))
+    return fig
+
+
 def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str) -> go.Figure:
     """Línea 2024 -> 2035 -> 2050 de la razón de soporte (escenario). filas: anio, razon."""
     pts = pd.concat([pd.DataFrame([{"anio": ANIO_BASE, "razon": historico}]), filas]).sort_values("anio")

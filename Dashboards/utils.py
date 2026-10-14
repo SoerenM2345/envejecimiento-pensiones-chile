@@ -143,18 +143,23 @@ def page_config(**kwargs):
     st.set_page_config(layout="wide", **kwargs)
 
 
+def tooltip_con_detalle(help_text, detalle):
+    """Texto del tooltip de la "?": el nombre completo y, debajo, las viñetas de «Qué incluye»."""
+    partes = []
+    if help_text:
+        partes.append(help_text)
+    if detalle:
+        partes.append("**Qué incluye**\n" + "\n".join(f"- {b}" for b in detalle))
+    return "\n\n".join(partes) or None
+
+
 def kpi_card_row(cols_data):
     """cols_data: list of (label, value, help) o (label, value, help, detalle).
-    help = nombre completo (tooltip de la "?"). detalle = lista de viñetas cortas con lo que incluye la cifra;
-    si viene, se agrega un botón «Detalle» que abre una ventana con el nombre completo y las viñetas."""
+    help = nombre completo; detalle = lista de viñetas cortas con lo que incluye la cifra.
+    Ambos se muestran únicamente al pasar el cursor sobre la "?" de la cifra, en un mismo tooltip
+    (primero el nombre completo y luego «Qué incluye»). No hay botones ni ventanas aparte."""
     cols = st.columns(len(cols_data))
     for col, item in zip(cols, cols_data):
         label, value, help_text = item[:3]
         detalle = item[3] if len(item) > 3 else None
-        col.metric(label, value, help=help_text)
-        if detalle:
-            with col.popover("Detalle", help=f"Qué incluye: {label}"):
-                st.markdown(f"**{label}**")
-                if help_text:
-                    st.caption(help_text)
-                st.markdown("**Qué incluye**\n" + "\n".join(f"- {b}" for b in detalle))
+        col.metric(label, value, help=tooltip_con_detalle(help_text, detalle))

@@ -4,7 +4,7 @@ import streamlit as st
 from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
-                               commissionable_share_line, critical_point_chart)
+                               commissionable_share_line, critical_point_chart, region_support_people_bars)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -12,7 +12,7 @@ st.markdown("Aumentar y retener la base de cotizantes activos por región, para 
 
 pres = load_csv("kpi_presion_previsional_region.csv")
 nac_cobertura = 100 * pres["cotizantes_2024"].sum() / pres["pob_15_64"].sum()
-nac_soporte = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
+nac_soporte = pres["cotizantes_2024"].sum() / pres["pob_65_mas"].sum()
 
 
 def render_1_1():
@@ -150,17 +150,24 @@ def render_1_2_punto_critico():
 
 def render_1_2():
     kpi_card_row([
-        ("Cotizantes por adulto mayor (país)", f"{nac_soporte:.2f}", "Cotizantes 2025 / población 65+ (Censo 2024)",
+        ("Cotizantes por adulto mayor (país)", f"{nac_soporte:.2f}", "Cotizantes 2024 / población 65+ (Censo 2024)",
          ["Cotizantes de diciembre (Superintendencia de Pensiones)", "Población 65+: Censo 2024", "Más alto = más cotizantes por cada adulto mayor"]),
         ("Región más presionada", pres.sort_values("razon_soporte_previsional").iloc[0]["region_nombre"],
          f"{pres['razon_soporte_previsional'].min():.2f}", ["Menos cotizantes por adulto mayor entre las 16 regiones"]),
         ("Región menos presionada", pres.sort_values("razon_soporte_previsional").iloc[-1]["region_nombre"],
          f"{pres['razon_soporte_previsional'].max():.2f}", ["Más cotizantes por adulto mayor entre las 16 regiones"]),
     ])
-    st.plotly_chart(region_bars(pres, "razon_soporte_previsional", "Razón de soporte: cotizantes por adulto mayor",
-                                nac_soporte, ".2f", BLUE), use_container_width=True, config=PLOTLY_DL_CONFIG)
+    vista_reg = st.radio("Vista por región", ["Razón (relativa)", "Personas (mismo orden)"], horizontal=True, key="s12_vista_region",
+                         help="Razón: cotizantes por adulto mayor. Personas: mismo orden de regiones, con los cotizantes y las "
+                              "personas de 65+ en números absolutos y la razón escrita junto a cada región.")
+    if vista_reg == "Razón (relativa)":
+        fig_reg = region_bars(pres, "razon_soporte_previsional", "Razón de soporte: cotizantes por adulto mayor",
+                              nac_soporte, ".2f", BLUE)
+    else:
+        fig_reg = region_support_people_bars(pres, nac_soporte)
+    st.plotly_chart(fig_reg, use_container_width=True, config=PLOTLY_DL_CONFIG)
 
-    st.markdown("**Escenario 2035 / 2050 (cobertura previsional 2025 constante)**")
+    st.markdown("**Escenario 2035 / 2050 (cobertura previsional 2024 constante)**")
     proy_pais = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio")
     proy_reg = load_csv("kpi_proyeccion_regional.csv")
     opciones = ["País"] + sorted(pres["region_nombre"])
@@ -174,9 +181,8 @@ def render_1_2():
         fila = pres[pres.region_nombre == sel].iloc[0]
         r = proy_reg[proy_reg.region_nombre == sel]
         # razón = cobertura × pob15-64 / pob65+ = cobertura / índice de dependencia de vejez
-        # (cobertura con cotizantes 2025, igual que la razón actual; la columna cobertura_previsional_pct es 2024, KPI 1.1)
-        cobertura_2025 = 100 * fila.cotizantes / fila.pob_15_64
-        filas = pd.DataFrame({"anio": r.anio, "razon": cobertura_2025 / r.indice_dependencia_vejez_proy})
+        # (cobertura con cotizantes de diciembre de 2024, el mismo año del Censo y de la razón actual)
+        filas = pd.DataFrame({"anio": r.anio, "razon": fila.cobertura_previsional_pct / r.indice_dependencia_vejez_proy})
         fig = support_ratio_projection(fila.razon_soporte_previsional, filas, sel)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG)
     render_1_2_punto_critico()

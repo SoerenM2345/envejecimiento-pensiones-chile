@@ -23,29 +23,28 @@ DP = Path(__file__).resolve().parent.parent / "Data processed"
 print("1) kpi_presion_previsional_region.csv ...")
 ind_region = pd.read_csv(DP / "indicadores_region.csv")
 cot_region = pd.read_csv(DP / "cotizantes_por_region.csv")
-cot_2025 = cot_region[(cot_region.anio == 2025) & cot_region.region_id.notna()][
-    ["region_id", "cotizantes"]
-]
-# Cobertura (KPI 1.1) con cotizantes 2024, mismo año que el Censo; la razón de soporte (KPI 1.2) sigue con 2025
-cot_2024 = cot_region[(cot_region.anio == 2024) & cot_region.region_id.notna()][
-    ["region_id", "cotizantes"]
-].rename(columns={"cotizantes": "cotizantes_2024"})
+# Años: el Censo 2024 (abril de 2024) es el ancla de población, así que los cotizantes de referencia son los de diciembre
+# de 2024 (8 meses de diferencia; diciembre de 2025 estaría a 20 meses). Los de 2025 se conservan solo como dato más reciente.
+def cotizantes_dic(anio):
+    return cot_region[(cot_region.anio == anio) & cot_region.region_id.notna()][["region_id", "cotizantes"]].rename(
+        columns={"cotizantes": f"cotizantes_{anio}"})
+
 
 reg = (ind_region.rename(columns={"region": "region_id"})
-       .merge(cot_2025, on="region_id", how="left")
-       .merge(cot_2024, on="region_id", how="left"))
+       .merge(cotizantes_dic(2024), on="region_id", how="left")
+       .merge(cotizantes_dic(2025), on="region_id", how="left"))
 reg["cobertura_previsional_pct"] = round(100 * reg["cotizantes_2024"] / reg["pob_15_64"], 2)
-reg["razon_soporte_previsional"] = round(reg["cotizantes"] / reg["pob_65_mas"], 2)
-reg["adultos_mayores_por_cotizante"] = round(reg["pob_65_mas"] / reg["cotizantes"], 3)
+reg["razon_soporte_previsional"] = round(reg["cotizantes_2024"] / reg["pob_65_mas"], 2)
+reg["adultos_mayores_por_cotizante"] = round(reg["pob_65_mas"] / reg["cotizantes_2024"], 3)
 
 out1 = reg[[
-    "region_id", "region_nombre", "pob_total", "pob_15_64", "pob_65_mas", "cotizantes", "cotizantes_2024",
+    "region_id", "region_nombre", "pob_total", "pob_15_64", "pob_65_mas", "cotizantes_2024", "cotizantes_2025",
     "pct_65_mas", "cobertura_previsional_pct", "razon_soporte_previsional",
     "adultos_mayores_por_cotizante",
 ]].sort_values("razon_soporte_previsional")
 out1.to_csv(DP / "kpi_presion_previsional_region.csv", index=False)
 print(out1.to_string(index=False))
-print(f"   Nacional: {reg['cotizantes'].sum()/reg['pob_65_mas'].sum():.2f} cotizantes por c/adulto mayor")
+print(f"   Nacional: {reg['cotizantes_2024'].sum()/reg['pob_65_mas'].sum():.2f} cotizantes (dic-2024) por c/adulto mayor (Censo 2024)")
 
 # =============================================================================
 # 2) Sistema antiguo (pensionados IPS) vs sistema AFP (cotizantes), por edad
