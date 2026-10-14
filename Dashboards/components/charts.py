@@ -143,10 +143,9 @@ def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
                 text=[f"{r:.2f}" for r in d.razon_soporte_previsional], textposition="outside",
                 hovertemplate="%{y}<br>Cotizantes: %{x:,.0f}<extra></extra>")
     fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.",
-                      title=f"Cotizantes y personas de 65+ por región (número = cotizantes por adulto mayor; país: {nacional:.2f})")
+                      title=f"Cotizantes y personas de 65+ por región* (país: {nacional:.2f})")
     fig.update_yaxes(categoryorder="array", categoryarray=orden, title="")
     fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=500_000, minor=dict(dtick=100_000, showgrid=True), rangemode="tozero")
-    fig.update_layout(height=760, legend=dict(orientation="h", y=1.05, x=0))
     return fig
 
 
@@ -388,12 +387,14 @@ def _unidad_dinero(max_clp: float):
     return 1e6, "millones de $ de 2025"
 
 
-def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float) -> go.Figure:
+def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float,
+                         mostrar: tuple = (True, True)) -> go.Figure:
     """KPI 1.2, análisis del punto crítico. d = salida de critical_point.serie_pais / serie_territorio;
     pc = critical_point.punto_critico(d); view = 'dinero' | 'razon'.
     En 'dinero' se superponen el costo (costo por persona de 65+ x población de 65+) y la capacidad (carga máxima x ingreso por
     trabajador x trabajadores); en 'razon', la razón de soporte observada y la razón de equilibrio R*. El cruce de las dos
-    líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050)."""
+    líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050).
+    mostrar = (primera línea, segunda línea): oculta la que esté en False (la estrella sólo se dibuja con ambas)."""
     if view == "dinero":
         div, unidad = _unidad_dinero(max(d.costo_total.max(), d.capacidad.max()))
         series = [("Costo del Pilar Solidario de vejez", d.costo_total / div, RED),
@@ -410,7 +411,9 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     base = d[~d.proyectado].tail(1)
     proy_c = pd.concat([base, proy])  # el tramo punteado parte del último punto observado
     fig = go.Figure()
-    for nom, y, col in series:
+    for (nom, y, col), visible in zip(series, mostrar):
+        if not visible:
+            continue
         yo, yp = y.loc[obs.index], y.loc[proy_c.index]
         fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers" if len(obs) > 1 else "markers", name=nom, legendgroup=nom,
                         line=dict(color=col, width=3), marker=dict(size=6 if len(obs) > 1 else 10),
@@ -423,7 +426,7 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
             fig.add_scatter(x=a.anio, y=y.loc[a.index], mode="markers", legendgroup=nom, showlegend=False,
                             marker=dict(symbol="diamond", size=12, color=col, line=dict(color="white", width=1.5)),
                             hoverinfo="skip")
-    if pc["estado"] in ("cruza", "ya_superado"):
+    if all(mostrar) and pc["estado"] in ("cruza", "ya_superado"):
         xc = pc["anio_exacto"]
         yc = float(np.interp(xc, d.anio, series[0][1].values))
         fig.add_vline(x=xc, line_dash="dot", line_color=INK_MUTED)
@@ -433,6 +436,18 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     fig.update_layout(**PLOTLY_LAYOUT, title=titulo)
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title=ytitle, rangemode="tozero")
+    return fig
+
+
+def estilo_kpi(fig: go.Figure, alto: int = 560) -> go.Figure:
+    """Mismo estilo de texto que los gráficos del KPI 1.3: título, ejes, leyenda (abajo) y rótulos en negro sobre fondo claro.
+    Llamar st.plotly_chart con theme=None para que Streamlit no reemplace estos colores."""
+    fig.update_layout(title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY, margin=dict(l=70, r=20, t=60, b=10),
+                      legend=dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)", font_color=INK_PRIMARY), height=alto)
+    fig.update_xaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
+    fig.update_yaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
+    fig.update_traces(textfont_color=INK_PRIMARY)
+    fig.update_annotations(font_color=INK_PRIMARY)
     return fig
 
 # KPI 1.3: texto oscuro explícito, para que título, ejes y leyenda se lean sobre el fondo claro aunque el
