@@ -60,7 +60,7 @@ Con el modo activo, la sección «Modo desarrollador» muestra las 8 páginas de
 | 1.2 Razón de soporte | **Objetivo 1: base activa** | «1.2 · Razón de soporte» | 3 cifras, barras por región, y un escenario 2035/2050 por país o región (selector «Territorio») | 🟡 |
 | 1.3 Participación partes interesadas | **Objetivo 1: base activa** | «1.3 · Participación partes interesadas» | Tarjeta «Pendiente» con la fórmula | 🔴 |
 | 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras y 5 pestañas: evolución (con el salto de la PGU en 2022), componentes, por beneficiario, frente al ingreso (10 % de la mediana) y proyección 2050 | 🟢 |
-| 2.2 Financiamiento dedicado | **Objetivo 2: costo por cliente** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; el ratio 2 aparece como pendiente | 🟡 |
+| 2.2 Financiamiento dedicado | **Objetivo 2: costo por cliente** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; debajo, 5 pestañas (peso fiscal a 2050, quién lo financia, reservas, FAPP hoy, dónde) y «Qué se desprende para cada actor» | 🟡 |
 | 2.3 Pobreza en la vejez | **Objetivo 2: costo por cliente** | «2.3 · Pobreza en la vejez» | 4 cifras, mapa y barras con intervalo de confianza 95% | 🟢 |
 
 El análisis del problema (pirámides, Chile vs Alemania, 14% → 43%, pico de población activa) está en **Problema**; las cifras clave, en **Resumen**; de dónde sale cada dato, en **Fuentes y método**.
@@ -225,7 +225,30 @@ Fórmula: `(PGU + Pensión solidaria) ÷ PIB` y `(Activos + Reservas) ÷ VP del 
 4. **Agrupar por** = `anio`; **Columna a agregar** = `pct_pib`; `mean`. → Cifra de control: **2025 = 2,07 %**.
 5. Para comparar con el gasto total en vejez: `gasto_proteccion_social.csv`, filtro `categoria` = `Edad avanzada`, columna `pct_pib` (2025 = 4,39 %, coincide con lo publicado por DIPRES).
 
-**Ratio 2 🔴:** `(Activos + Reservas) ÷ VP del déficit`. Falta el **valor presente del déficit**. Hasta conseguirlo, la propuesta es `saldo del fondo (FAPP + FRP) ÷ gasto anual en PGU y APS` («años de cobertura»). Ver sección 5, ítems B y C.
+**Ratio 2 🟡:** `(Activos + Reservas) ÷ VP del déficit`. El **valor presente del déficit oficial** sigue sin estar publicado (sección 5, ítem B). En su lugar el dashboard calcula una alternativa con datos oficiales (módulo `Dashboards/components/financiamiento.py`, probado en `tests/test_financiamiento.py`; datos del script `Scripts/20_procesar_reservas_financiamiento.py`).
+
+**Profundización (5 pestañas bajo el ratio 1)**
+1. *Peso fiscal 2050:* ratio 1 observado 2009-2025 y escenario a 2050 (población 65+ INE, PGU de $250.000, invalidez constante real; el valor de 2025 es el del ratio 1). Se puede sumar el aporte del Estado al FAPP (Ley 21.735, Tabla 2: 2,2 millones de UTM en 2028-2029 hasta 15 millones desde 2037, a la UTM promedio de 2025 = $68.640).
+2. *Quién lo financia:* retiro del Fondo de Reserva de Pensiones (FRP, informe mensual DIPRES jul-2026, en US$ × dólar promedio del año del SII) frente al gasto del Pilar: **4,5 % en 2025** (4,4 a 5,2 % en 2022-2025); el resto sale del presupuesto general.
+3. *Reservas:* reserva al 31-dic-2025 = cartera propia del FRP (US$ 10.313 M del valor de mercado menos los US$ 222 M ya transferidos al FAPP) × dólar de cierre $911,18 = **$9,2 billones = 1,3 años del gasto del Pilar de 2025**; con una rentabilidad real de 2,5 % cubre el alza del gasto sobre el peso de 2025 hasta **2033** y el **19 %** de su valor presente. Opciones: sumar los activos del FAPP, cubrir todo el gasto (se agota en 2027) y la rentabilidad.
+4. *FAPP hoy:* estados al 30-jun-2026: cotizaciones $0,44 billones frente a beneficios $0,70 billones (63 %); patrimonio $0,026 billones (0,6 meses del déficit semestral); quedan hasta US$ 700 M autorizados del FRP.
+5. *Dónde:* 4.º trimestre de 2024 por región: % de los beneficiarios de la PGU sin pensión propia (28 % país; La Araucanía 42 %, Los Lagos 39 %, Ñuble 37 % frente a 23 % en Tarapacá y Magallanes), correlación −0,55 con los cotizantes por persona 65+. A esas 593 mil personas el Estado les paga $1,54 billones al año (0,50 % del PIB de 2024, 28,5 % de la PGU); con la tasa de cada región constante serían 889 mil en 2035 y 1,21 millones en 2050 (población 65+ regional del KPI 1.2, reparto de tasas nacionales).
+
+**Cifras de control (supuestos de partida: PIB +2 %, PGU de $250.000, aporte al FAPP, rentabilidad real 2,5 %)**
+| Cifra | Valor | Dónde |
+|---|---|---|
+| Pilar + PGU / PIB | 2,07 % (2025) · 2,46 % (2030) · 2,62 % (2040, máximo) · 2,55 % (2050) | pestaña 1 |
+| Con aporte al FAPP | 2,84 % (2037) | pestaña 1 |
+| Retiro del FRP / Pilar | 4,5 % (2025): US$ 332 M ≈ $0,32 billones de $7,04 billones | pestaña 2 |
+| Reserva / ratio / año | $9,2 billones · 19 % del VP · se agota en 2033 | pestaña 3 |
+| FAPP, jun-2026 | cotizaciones/beneficios 63 % · patrimonio $25.719 M | pestaña 4 |
+| Sin pensión propia | 28 % país (592.885 personas) · La Araucanía 42 % · PGU que reciben $1,54 billones (0,50 % del PIB) · 889 mil en 2035 | pestaña 5 |
+
+**Receta manual de la pestaña 3 (Explorador):** la reserva inicial es `frp_reserva_anual.csv`, `anio` = 2025, columna `cartera_propia_mm` (9.194.845 millones de pesos). Verifica el dólar de cierre contra DIPRES: `tc_cierre` de cada año coincide con (activos en dólares en % del PIB × PIB corriente) ÷ activos en dólares en MMUS$ de `dipres_pasivos_activos_gc.csv` (código 5).
+
+**Pares de sensibilidad (alineación de fechas, ver `docs/alineacion_kpi_2_2.csv`):** adelantar un año el primer aporte del Estado al FAPP (2027, como dice el texto de DIPRES, en lugar de 2028, como dice la tabla de la Subsecretaría) mueve el agotamiento de 2033 a 2032 y el ratio de 18,5 % a 18,4 %; usar el dólar promedio de 2025 ($951,25) en lugar del de cierre sube la reserva 4,4 % y el ratio a 19,3 %, sin cambiar el año.
+
+**Límites:** (1) el valor presente del déficit oficial sigue pendiente; el ratio de la pestaña 3 depende de lo que se decide que cubre la reserva y de la tasa. (2) El FRP está pensado para las pensiones garantizadas; los activos del FAPP son del Seguro Social, no del Pilar. (3) No se modelan las reglas de retiro ni de reposición del FRP. (4) Los retiros del FRP de 2020 y 2021 (US$ 1.576 y 2.960 millones) no se desglosan en el informe y no se usan. (5) Los estados del FAPP llegan a junio de 2026: faltan julio a septiembre para ver el efecto de la tasa de 3,4 %. (6) Los montos regionales usan solo la participación de cada región en el trimestre.
 
 **Límite:** el «Total» del Pilar incluye PBS/APS de invalidez, además de vejez. Hay una diferencia de −0,16 % en 2025 entre la suma mensual y el resumen anual publicado en el propio informe; 2022-2024 coinciden exactamente.
 
@@ -252,10 +275,10 @@ Fórmula: `Personas 65+ bajo la línea de pobreza ÷ Población 65+`.
 | 1.2 | Ñuble 1,51 · país 2,27 · Ñuble 2035 ≈ 1,05 | Objetivo 1 / Explorador |
 | 1.2 punto crítico | País 2024 (base Censo): 2,29 cotizantes por 65+ · carga requerida 6,5 % del sueldo · punto crítico **2039** (promedio, cotizantes, carga máx. 10 %, sueldo +1 %) · con el nivel INE sin ajustar: 2,13 y el mismo 2039 | Objetivo 1 |
 | 2.1 | 5,13 millones por persona 65+ (2025) · costo +11 % vs PIB per cápita +9 % (2016-2025) | Objetivo 2 / Explorador |
-| 2.2 | 2,07 % del PIB (2025) · gasto en vejez 4,39 % | Objetivo 2 / Explorador |
+| 2.2 | 2,07 % del PIB (2025) · gasto en vejez 4,39 % · FRP financia 4,5 % del Pilar · reserva $9,2 billones (agota el alza en 2033) | Objetivo 2 / Explorador |
 | 2.3 | Chile 14,9 % · La Araucanía 23,2 % · Magallanes 9,8 % | Objetivo 2 / Explorador |
 
-Para verificarlo todo de una vez: `"Data raw/.venv/bin/python" -I -m pytest tests -q` (49 pruebas).
+Para verificarlo todo de una vez: `"Data raw/.venv/bin/python" -I -m pytest tests -q` (69 pruebas).
 
 ---
 
@@ -273,13 +296,15 @@ Para verificarlo todo de una vez: `"Data raw/.venv/bin/python" -I -m pytest test
 
 ### B. Valor presente del déficit (KPI 2.2, ratio 2)
 
+- **Estado (2026-10-13):** el dashboard usa una alternativa calculada (reservas / VP del gasto que cubren, ver KPI 2.2). El valor oficial sigue sin aparecer.
 - **Qué falta:** el valor presente del déficit proyectado. La nota técnica de DIPRES sobre el FAPP (ya en `Data raw/_external/dipres/articles-397500_doc_pdf.pdf`) solo estima ingresos y egresos del fondo.
 - **Dónde:** el **Informe Financiero** del proyecto de la **Ley 21.735** (publicada el 26-mar-2025). Buscarlo en DIPRES (`https://www.dipres.gob.cl/598/w3-propertyvalue-15499.html`, enlace que usted indicó; **no pude abrirlo desde aquí**) y en la Biblioteca del Congreso Nacional (`https://www.bcn.cl/portal/leyfacil/recurso/reforma-de-pensiones-de-2025`, resumen de la ley; el informe financiero está en la «Historia de la Ley»).
 - **Decisión del equipo (no es un archivo):** si no aparece, reemplazar el ratio 2 por `saldo del fondo (FAPP + FRP) ÷ gasto anual en PGU y APS` y dejarlo escrito en la tarjeta.
 
 ### C. Saldo del Fondo de Reserva de Pensiones, FRP (KPI 2.2, «reservas»)
 
-- **Qué falta:** la serie del saldo. La publicación de DIPRES lo menciona (PDF `Data raw/_external/dipres/articles-416513_doc_pdf.pdf`, páginas 126 y 164) pero **no está verificado que traiga la serie**; la nota técnica indica que el FRP transfirió hasta US$900 millones al FAPP.
+- **Resuelto (2026-10-13):** el *Informe Ejecutivo Mensual del FRP* de DIPRES (julio 2026, `Data raw/_external/frp/`) trae el valor de mercado, aportes y retiros 2020-2025 en US$ (script 20). Falta, si se quiere más precisión, el informe de diciembre de 2025 (el de julio da el cierre de 2025 en su tabla anual).
+- **Antes:** la serie del saldo no estaba. La publicación de DIPRES lo menciona (PDF `Data raw/_external/dipres/articles-416513_doc_pdf.pdf`, páginas 126 y 164) pero **no está verificado que traiga la serie**; la nota técnica indica que el FRP transfirió hasta US$900 millones al FAPP.
 - **Dónde:** revisar esas páginas; si no está, los informes del FRP del Ministerio de Hacienda (sin enlace verificado).
 - **Guardar en:** `Data raw/_external/dipres/`.
 

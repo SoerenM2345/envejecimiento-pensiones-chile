@@ -271,6 +271,100 @@ def spending_pct_pib(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
+def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool) -> go.Figure:
+    """KPI 2.2, peso fiscal 2009-2050 (% del PIB). hist = financiamiento.peso_historico; p = financiamiento.proyeccion_carga.
+    Observado sólido, escenario punteado; la franja es el aporte del Estado al FAPP; la línea punteada gris es el peso de 2025."""
+    fig = go.Figure()
+    base = p.pilar_pct_pib.iloc[0]
+    fig.add_scatter(x=hist.anio, y=hist.pilar_pct_pib, mode="lines+markers", name="Observado: PGU + pensiones solidarias",
+                    line=dict(color=ORANGE, width=3), hovertemplate="%{x}: %{y:.2f}%<extra></extra>")
+    fig.add_scatter(x=p.index, y=p.pilar_pct_pib, mode="lines", name="Escenario: PGU + pensiones solidarias",
+                    line=dict(color=ORANGE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
+    if con_fapp:
+        fig.add_scatter(x=p.index, y=p.carga_pct_pib, mode="lines", name="Escenario: más aporte del Estado al FAPP",
+                        line=dict(color=VIOLET, width=3, dash="dash"), fill="tonexty", fillcolor="rgba(120,90,170,0.15)",
+                        hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
+    fig.add_hline(y=base, line_dash="dot", line_color=INK_MUTED, annotation_text=f"Peso de 2025: {base:.2f}%",
+                  annotation_position="bottom right")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Peso fiscal del Pilar Solidario y la PGU (% del PIB)")
+    fig.update_xaxes(title="Año")
+    fig.update_yaxes(title="% del PIB", rangemode="tozero")
+    return fig
+
+
+def financing_sources_chart(f: pd.DataFrame) -> go.Figure:
+    """KPI 2.2, quién paga el Pilar. f: anio, retiros_real (pesos de 2025 del retiro del FRP), pilar_real (gasto total del Pilar, pesos de 2025).
+    Barras apiladas en billones de pesos de 2025: lo que financió el fondo de reserva y el resto (impuestos generales)."""
+    resto = f.pilar_real - f.retiros_real
+    pct = 100 * f.retiros_real / f.pilar_real
+    fig = go.Figure()
+    fig.add_bar(x=f.anio, y=f.retiros_real / 1e12, name="Retiro del Fondo de Reserva de Pensiones", marker_color=BLUE,
+                text=[f"{v:.1f}%" for v in pct], textposition="outside", cliponaxis=False,
+                hovertemplate="%{x}: %{y:.2f} billones<extra>Retiro del FRP</extra>")
+    fig.add_bar(x=f.anio, y=resto / 1e12, name="Resto: presupuesto general (impuestos)", marker_color=lighten(ORANGE),
+                hovertemplate="%{x}: %{y:.2f} billones<extra>Presupuesto general</extra>")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Cómo se financia el Pilar Solidario y la PGU (billones de pesos de 2025)")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="Billones de pesos de 2025")
+    return fig
+
+
+def fapp_schedule_chart(p: pd.DataFrame) -> go.Figure:
+    """KPI 2.2, calendario del aporte del Estado al FAPP (Ley 21.735). p = financiamiento.proyeccion_carga (aporte_fapp, pib_real25)."""
+    d = p[p.aporte_fapp > 0]
+    fig = go.Figure(go.Bar(x=d.index, y=d.aporte_fapp / 1e12, marker_color=VIOLET, customdata=100 * d.aporte_fapp / d.pib_real25,
+                           hovertemplate="%{x}: %{y:.2f} billones (%{customdata:.2f}% del PIB)<extra></extra>"))
+    fig.update_layout(**PLOTLY_LAYOUT, title="Aporte del Estado al FAPP por ley (billones de pesos de 2025)", showlegend=False)
+    fig.update_xaxes(title="Año")
+    fig.update_yaxes(title="Billones de pesos de 2025", rangemode="tozero")
+    return fig
+
+
+def reserve_chart(d: pd.DataFrame, res: dict, cubre: str) -> go.Figure:
+    """KPI 2.2, reserva vs gasto. d = financiamiento.trayectoria_reserva (con gasto_cubierto y saldo); res = resumen.
+    Barras = gasto que cubre la reserva cada año; línea = saldo de la reserva; estrella = año en que se agota."""
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_bar(x=d.index, y=d.gasto_cubierto / 1e12, name="Gasto que cubre la reserva (eje derecho)", marker_color=lighten(ORANGE, 0.4),
+                hovertemplate="%{x}: %{y:.2f} billones<extra>Gasto cubierto</extra>", secondary_y=True)
+    fig.add_scatter(x=d.index, y=d.saldo.clip(lower=0) / 1e12, mode="lines", name="Saldo de la reserva (eje izquierdo)",
+                    line=dict(color=BLUE, width=3), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo</extra>", secondary_y=False)
+    if res["anio_agotamiento"]:
+        a = res["anio_agotamiento"]
+        fig.add_scatter(x=[a], y=[0], mode="markers+text", marker=dict(symbol="star", size=18, color=RED), text=[f"{a}"],
+                        textposition="top center", name=f"Se agota en {a}", secondary_y=False)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")},
+                      title="Reserva de pensiones frente al gasto que debe cubrir (billones de pesos de 2025)")
+    fig.update_xaxes(title="Año")
+    fig.update_yaxes(title_text="Saldo (billones)", rangemode="tozero", secondary_y=False)
+    fig.update_yaxes(title_text="Gasto cubierto (billones)", rangemode="tozero", secondary_y=True, showgrid=False)
+    return fig
+
+
+def fapp_flow_chart(b: pd.DataFrame) -> go.Figure:
+    """KPI 2.2, caja del FAPP en el primer semestre de 2026. b = fila de fapp_balance.csv (cierre 2026-06-30), montos en millones de pesos."""
+    r = b.iloc[0]
+    neto = r.cotizaciones_periodo_mm - r.beneficios_periodo_mm
+    fig = go.Figure(go.Bar(
+        x=["Cotizaciones recibidas", "Beneficios pagados", "Resultado del semestre"],
+        y=[r.cotizaciones_periodo_mm / 1e6, -r.beneficios_periodo_mm / 1e6, neto / 1e6],
+        marker_color=[BLUE, ORANGE, RED], text=[f"{v / 1e6:.2f}" for v in (r.cotizaciones_periodo_mm, -r.beneficios_periodo_mm, neto)],
+        textposition="outside", cliponaxis=False, hovertemplate="%{x}: %{y:.2f} billones<extra></extra>"))
+    fig.update_layout(**PLOTLY_LAYOUT, title="FAPP, enero-junio de 2026 (billones de pesos corrientes)", showlegend=False)
+    fig.update_yaxes(title="Billones de pesos")
+    return fig
+
+
+def dependence_regions_chart(reg: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 2.2, dónde. reg: region_nombre, pct_sin_pension (% de los beneficiarios de la PGU que no reciben otra pensión)."""
+    d = reg.sort_values("pct_sin_pension")
+    fig = go.Figure(go.Bar(y=d.region_nombre, x=d.pct_sin_pension, orientation="h", marker_color=ORANGE,
+                           hovertemplate="%{y}: %{x:.1f}%<extra></extra>"))
+    fig.add_vline(x=nacional, line_dash="dash", line_color=INK_MUTED, annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Beneficiarios de la PGU sin pensión propia, por región (4.º trimestre de 2024)")
+    fig.update_xaxes(title="% de los beneficiarios de la PGU")
+    return fig
+
+
 def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     """KPI 2.3: % de personas 65+ en pobreza por ingresos por región, con IC 95%. df: region_nombre, pct_pobreza_65, ic95_inf, ic95_sup."""
     d = df.sort_values("pct_pobreza_65")

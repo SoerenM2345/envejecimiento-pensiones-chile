@@ -48,6 +48,7 @@ python3 ../Scripts/17_procesar_series_superintendencia_extra.py  # cotizantes po
 python3 ../Scripts/16_procesar_dipres_activos_bonos.py # pasivos/activos del Gobierno Central y Bonos de Reconocimiento (DIPRES)
 python3 ../Scripts/19_descargar_sp_ingreso_imponible.py # baja de spensiones.cl los meses que faltan del cuadro 04A (necesita internet; ya descargado)
 python3 ../Scripts/18_kpi_punto_critico.py            # ingreso por trabajador, costo por persona de 65+ y reforma (punto crítico del KPI 1.2)
+python3 ../Scripts/20_procesar_reservas_financiamiento.py  # FRP, FAPP y aporte del Estado por ley (KPI 2.2, reservas); valida el dólar contra DIPRES
 ```
 
 Todo se regenera desde `Data raw/` — `Data processed/` se puede borrar y reconstruir corriendo lo anterior en orden.
