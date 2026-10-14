@@ -9,7 +9,10 @@ Prints what you need to know before changing a KPI view in a shared repo:
   - the KPI entry in config/kpis.yaml (text match, no YAML dependency) when --kpi is given
 
 Usage:
-  python preflight.py <project-root> [--kpi 1.2] [--fetch]
+  python preflight.py <project-root> [--kpi 1.2] [--fetch] [--files path ...]
+
+--files: files you expect to edit; reports uncommitted changes in them (another session's work in progress)
+and the last commits that touched them.
 """
 import argparse
 import re
@@ -26,6 +29,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("root")
     ap.add_argument("--kpi", help="KPI id as written in config/kpis.yaml, e.g. 1.2")
+    ap.add_argument("--files", nargs="*", default=[], help="files you plan to edit, relative to the root")
     ap.add_argument("--fetch", action="store_true", help="git fetch first (network)")
     a = ap.parse_args()
     root = Path(a.root).resolve()
@@ -37,6 +41,14 @@ def main():
     print("remote-only commits:", run(["git", "log", "--oneline", "HEAD..@{u}"], root) or "none")
     print("local-only commits :", run(["git", "log", "--oneline", "@{u}..HEAD"], root) or "none")
     print("Files you did not write may be someone else's work in progress: do not commit or overwrite them.")
+
+    if a.files:
+        print("\n== files you plan to edit ==")
+        for f in a.files:
+            dirty = run(["git", "status", "--porcelain", "--", f], root)
+            last = run(["git", "log", "-3", "--format=%h %s", "--", f], root)
+            print(f"{f}: " + ("UNCOMMITTED CHANGES (not yours: edit targeted blocks only, commit only your hunks)" if dirty else "clean"))
+            print("   last commits: " + last.replace("\n", "\n                 "))
 
     print("\n== scripts ==")
     nums = sorted(int(m.group(1)) for p in (root / "Scripts").glob("*.py") if (m := re.match(r"(\d+)_", p.name)))

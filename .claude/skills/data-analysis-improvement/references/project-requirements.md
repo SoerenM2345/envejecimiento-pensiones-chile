@@ -32,5 +32,12 @@ These are the project's conventions and the demands the team and user made while
 10. **The Census 2024 wins** when it conflicts with another source (population level, age structure, territory). The other source contributes only its dynamics, rescaled to the Census level, and every conflict goes into `docs/DISCUSION_FUENTES.md` with the sources, the decision and the effect on the results (compute both options). Reference year = 2024.
 11. Show commune figures where data allows (table of all communes of the selected region), labelled as inherited from the region when they are.
 
+## Presentation demands made after the KPI 1.2 deepening (apply to every KPI card; details in `ui-conventions.md`)
+12. Same text style as 1.1 and 1.3: every chart through `estilo_kpi` (black text, legend below), `st.plotly_chart(..., theme=None)`.
+13. The first two charts side by side, each with its own selector; the critical-point chart full width below.
+14. Formulas in a side panel next to the critical-point chart, one box per line with a checkbox and the base-year numbers; ★ only when both lines are visible.
+15. Less text: no intro paragraph, one-line "Lectura", `*` notes, "Método y fuentes" expander, short description/formula/caveat in `config/kpis.yaml`.
+16. Do not overwrite another session's work in shared files (`objetivo*.py`, `charts.py`, `kpis.yaml`); the running app caches the config until "Clear cache".
+
 ## Stakeholders already present in this project's data
 Pension-fund administrators (AFP — earn commission only on individual-account contributions), workers/contributors (by region, income, sex), employers (new contribution under Ley 21.735), the State/Treasury (PGU, PBS, APS), the Superintendencia de Pensiones (regulator and data source), pensioners (65+, poverty), regions/communes, and indirectly the health system (demand index in the dev pages) and the budget office/fiscal council.
