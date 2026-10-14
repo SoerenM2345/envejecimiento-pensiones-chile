@@ -209,7 +209,7 @@ Fórmula: `(Costo público total ÷ Población 65+) ÷ PIB per cápita` (indicad
 - *Proyección 2050:* escenario con la población INE, PIB real (deslizador), PGU de $250.000 y el «resto» constante o creciendo con la población 65+.
 - *Qué hacer:* tres lectores (Hacienda/DIPRES, Subsecretaría de Previsión Social, Superintendencia/AFP) con cifras calculadas.
 
-**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios; el «resto» (58 % del gasto) puede incluir pensiones a menores de 65. El 10 % es una escala de comparación: va a cuentas individuales y estos gastos se pagan con impuestos generales.
+**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios; el «resto» (58 % del gasto) incluye el sistema antiguo; solo el 3 % de lo que paga el IPS va a menores de 65, pero Capredena y Dipreca no se pueden ver. El 10 % es una escala de comparación: va a cuentas individuales y estos gastos se pagan con impuestos generales.
 
 ### KPI 2.2 · Financiamiento dedicado 🟡
 

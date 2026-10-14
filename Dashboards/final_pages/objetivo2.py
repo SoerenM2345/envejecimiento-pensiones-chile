@@ -38,10 +38,13 @@ def proyeccion_2_1(_h: pd.DataFrame, crec_pib: float, resto: str, pgu_250: bool,
 
 @st.cache_data
 def ips_sistema_antiguo() -> tuple:
-    """Pago anual (pesos) y número de pensionados de las ex cajas del IPS (mes de julio de 2026 x 12)."""
+    """Pago anual (pesos), número de pensionados de las ex cajas del IPS (julio de 2026 x 12) y % del pago a menores de 65."""
     c = load_csv("pensiones_pagadas_por_ex_caja.csv")
     c = c[c.ex_caja != "Total"]
-    return float(c.monto_miles_pesos.sum() * 1e3 * 12), int(c.numero_pensionados.sum())
+    e = load_csv("pensiones_pagadas_por_tramo_edad.csv")
+    e = e[~e.tramo_edad.isin(["Total", "Sin información"])]
+    menores = e[~e.tramo_edad.str.startswith(("+65", "+7", "+8", "+9", "+100"))]
+    return float(c.monto_miles_pesos.sum() * 1e3 * 12), int(c.numero_pensionados.sum()), 100 * menores.monto_miles_pesos.sum() / e.monto_miles_pesos.sum()
 
 
 def render_2_1():
@@ -118,7 +121,7 @@ def render_2_1():
         st.caption("\\* Escenario, no pronóstico: el costo del Pilar por persona 65+ se mantiene en términos reales salvo el alza de la PGU.")
     with t6:
         _recomendaciones_2_1(h)
-    ips, n_ips = ips_sistema_antiguo()
+    ips, n_ips, ips_men65 = ips_sistema_antiguo()
     with st.expander("Método y fuentes"):
         st.markdown(
             f"- **Fuentes:** gasto en 'Edad avanzada' (DIPRES, COFOG 7102, pesos de 2025); PGU, PBS y APS (Subsecretaría de Previsión Social); población INE base 2024; PIB (Banco Central); "
@@ -127,8 +130,9 @@ def render_2_1():
             f"el efecto en los ocupados por persona 65+ es menor a 2%). El ingreso se pasa a pesos de 2025 con el IPC anual.\n"
             f"- **Precios:** el costo real usa el IPC (las pensiones se reajustan por IPC), que subió {ipc:.0f}% en {a0}-{a1}; el PIB real usa el deflactor del PIB, que subió {defl_pib:.0f}%. "
             f"Por eso el indicador principal usa precios corrientes en ambos lados.\n"
-            f"- **Resto:** lo que queda de 'Edad avanzada' al restar PGU y PBS/APS; incluye el sistema antiguo y puede incluir pensiones a menores de 65. "
-            f"El IPS paga ≈ ${ips / 1e12:.1f} billones al año a {f'{n_ips:,}'.replace(',', '.')} pensionados (julio 2026): solo una parte.\n"
+            f"- **Resto:** lo que queda de 'Edad avanzada' al restar PGU y PBS/APS; incluye el sistema antiguo. "
+            f"El IPS paga ≈ ${ips / 1e12:.1f} billones al año a {f'{n_ips:,}'.replace(',', '.')} pensionados (julio 2026), solo una parte del resto, y solo {ips_men65:.0f}% de ese pago va a menores de 65; "
+            f"Capredena y Dipreca no se pueden ver con estos datos.\n"
             f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. La cobertura cuenta beneficios, no personas.\n"
             f"- **Proyección:** población INE; ocupados proporcionales a la población 15-64; el ingreso crece como el PIB per cápita; con la base «promedio» el pago por ocupado pesa menos porque el ingreso promedio es mayor que la mediana."
         )
