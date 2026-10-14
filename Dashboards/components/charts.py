@@ -168,6 +168,76 @@ def spending_vs_population_growth(d: pd.DataFrame) -> go.Figure:
     return fig
 
 
+def cost_components_chart(h: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: costo público por persona 65+ apilado por componente (millones de $ de 2025). h: salida de serie_historica."""
+    fig = go.Figure()
+    for col, nombre, color in (("pgu_65", "PGU (desde 2022)", BLUE), ("pbs_aps_65", "PBS y APS de vejez", VIOLET),
+                               ("resto_65", "Resto de 'Edad avanzada' (sistema antiguo y otros)", ORANGE)):
+        fig.add_bar(x=h.index, y=h[col] / 1e6, name=nombre, marker_color=color,
+                    hovertemplate="%{x}: $%{y:.2f} millones<extra>" + nombre + "</extra>")
+    fig.add_vline(x=2021.5, line_dash="dash", line_color=INK_MUTED, annotation_text="PGU", annotation_position="top")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Costo público por persona 65+, por componente (millones de $ de 2025)")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="Millones de $ de 2025 por persona 65+")
+    return fig
+
+
+def beneficiaries_chart(h: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: cuántos de cada 100 personas 65+ reciben un beneficio (PGU/PBS/APS) y cuánto paga el Estado por beneficio."""
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
+                        subplot_titles=("Beneficios de vejez por cada 100 personas 65+", "Pago anual por beneficio (millones de $ de 2025)"))
+    fig.add_scatter(x=h.index, y=100 * h.cobertura, mode="lines+markers", line=dict(color=BLUE, width=3), showlegend=False,
+                    hovertemplate="%{x}: %{y:.0f} por cada 100<extra></extra>", row=1, col=1)
+    fig.add_scatter(x=h.index, y=h.monto_por_beneficio / 1e6, mode="lines+markers", line=dict(color=RED, width=3), showlegend=False,
+                    hovertemplate="%{x}: $%{y:.2f} millones<extra></extra>", row=1, col=2)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10)})
+    fig.update_xaxes(title_text="Año", dtick=2)
+    fig.update_yaxes(title_text="Por cada 100 personas 65+", rangemode="tozero", col=1)
+    fig.update_yaxes(title_text="Millones de $ de 2025", rangemode="tozero", col=2)
+    return fig
+
+
+def income_comparison_chart(h: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: costo por persona 65+ como % del PIB per cápita, y trabajadores necesarios (con el 10 % de la mediana) vs. disponibles."""
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
+                        subplot_titles=("Costo por persona 65+ (% del PIB per cápita)",
+                                        "Ocupados por persona 65+: los que hay vs. los necesarios"))
+    fig.add_scatter(x=h.index, y=h.costo_pct_pib_pc, mode="lines+markers", line=dict(color=RED, width=3), showlegend=False,
+                    hovertemplate="%{x}: %{y:.1f}%<extra></extra>", row=1, col=1)
+    fig.add_scatter(x=h.index, y=h.ocupados_por_65, mode="lines+markers", name="Ocupados por persona 65+",
+                    line=dict(color=BLUE, width=3), row=1, col=2)
+    fig.add_scatter(x=h.index, y=h.razon_necesaria, mode="lines+markers", name="Necesarios (cada uno aporta el 10 % de la mediana)",
+                    line=dict(color=RED, width=3, dash="dash"), row=1, col=2)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10),
+                      "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
+    fig.update_xaxes(title_text="Año", dtick=2)
+    fig.update_yaxes(title_text="% del PIB per cápita", rangemode="tozero", col=1)
+    fig.update_yaxes(title_text="Ocupados por persona 65+", rangemode="tozero", col=2)
+    return fig
+
+
+def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame) -> go.Figure:
+    """KPI 2.1: escenario 2025-2050. Izquierda: gasto en edad avanzada (% del PIB). Derecha: carga requerida sobre el sueldo mediano vs. 10 %."""
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
+                        subplot_titles=("Gasto en edad avanzada (% del PIB)", "Carga requerida sobre el sueldo mediano de los ocupados"))
+    fig.add_scatter(x=h.index, y=h.pct_pib, mode="lines", line=dict(color=RED, width=3), showlegend=False,
+                    hovertemplate="%{x}: %{y:.2f}%<extra></extra>", row=1, col=1)
+    fig.add_scatter(x=p.index, y=p.pct_pib, mode="lines", line=dict(color=RED, width=3, dash="dash"), showlegend=False,
+                    hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>", row=1, col=1)
+    fig.add_scatter(x=h.index, y=100 * h.carga_requerida, mode="lines", line=dict(color=BLUE, width=3), name="Observado",
+                    hovertemplate="%{x}: %{y:.1f}%<extra></extra>", row=1, col=2)
+    fig.add_scatter(x=p.index, y=100 * p.carga_requerida, mode="lines", line=dict(color=BLUE, width=3, dash="dash"), name="Escenario",
+                    hovertemplate="%{x}: %{y:.1f}% (escenario)<extra></extra>", row=1, col=2)
+    fig.add_hline(y=10, line_dash="dot", line_color=INK_MUTED, annotation_text="10 % (cotización obligatoria)",
+                  annotation_position="bottom right", row=1, col=2)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10),
+                      "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
+    fig.update_xaxes(title_text="Año")
+    fig.update_yaxes(title_text="% del PIB", rangemode="tozero", col=1)
+    fig.update_yaxes(title_text="% del sueldo mediano", rangemode="tozero", col=2)
+    return fig
+
+
 def spending_pct_pib(df: pd.DataFrame) -> go.Figure:
     """KPI 2.2 (ratio 1): % del PIB. df: anio, pilar_pct_pib, edad_avanzada_pct_pib (esta última puede traer NaN)."""
     fig = go.Figure()

@@ -19,10 +19,10 @@ pct_65_de = 100 * alemania.loc[alemania.edad >= 65, "poblacion"].sum() / alemani
 
 st.markdown("### Chile envejece más rápido de lo que nace")
 kpi_card_row([
-    ("Población 65+ hoy (Censo 2024)", f"{shares['pct_65_mas']:.1f}%", "Era 6,6% en 1992"),
-    ("Población 65+ en 2070", f"{pct_2070:.0f}%", "Proyección INE base 2024"),
-    ("Pico de población en edad de trabajar", str(peak_year), "Desde ahí la población de 15-64 años decrece de forma permanente"),
-    ("Cotizantes por adulto mayor", f"{soporte:.2f}", "Cotizantes AFP 2025 / población 65+ (Censo 2024)"),
+    ("Población 65+ hoy (Censo 2024)", f"{shares['pct_65_mas']:.1f}%", "Era 6,6% en 1992", ["Personas de 65 años o más ÷ población total", "Censo 2024"]),
+    ("Población 65+ en 2070", f"{pct_2070:.0f}%", "Proyección INE base 2024", ["Estimaciones y proyecciones de población 1992-2070", "Proyección, no dato observado"]),
+    ("Pico de población en edad de trabajar", str(peak_year), "Desde ahí la población de 15-64 años decrece de forma permanente", ["Año con más personas de 15 a 64 años", "Proyección INE base 2024"]),
+    ("Cotizantes por adulto mayor", f"{soporte:.2f}", "Cotizantes AFP 2025 / población 65+ (Censo 2024)", ["Cotizantes de diciembre (Superintendencia de Pensiones)", "Población 65+: Censo 2024"]),
 ])
 st.caption(f"Alemania ya está en {pct_65_de:.1f}% de población 65+ (2024): es el espejo del Chile que viene.")
 

@@ -17,11 +17,15 @@ nac_soporte = pres["cotizantes"].sum() / pres["pob_65_mas"].sum()
 
 def render_1_1():
     kpi_card_row([
-        ("Cobertura nacional", f"{nac_cobertura:.1f}%", "Cotizantes 2024 / población 15-64 (Censo 2024)"),
+        ("Cobertura nacional", f"{nac_cobertura:.1f}%", "Cotizantes 2024 / población 15-64 (Censo 2024)",
+         ["Cotizantes: personas con cotización pagada en AFP, diciembre", "Población 15-64: Censo 2024",
+          "Cobertura = cotizantes ÷ población 15-64", "Quedan fuera los cotizantes sin región informada"]),
         ("Región con mayor cobertura", pres.sort_values("cobertura_previsional_pct").iloc[-1]["region_nombre"],
-         f"{pres['cobertura_previsional_pct'].max():.1f}%"),
+         f"{pres['cobertura_previsional_pct'].max():.1f}%",
+         ["Misma cobertura, calculada por región", "Se compara con el promedio del país"]),
         ("Región con menor cobertura", pres.sort_values("cobertura_previsional_pct").iloc[0]["region_nombre"],
-         f"{pres['cobertura_previsional_pct'].min():.1f}%"),
+         f"{pres['cobertura_previsional_pct'].min():.1f}%",
+         ["Misma cobertura, calculada por región", "Se compara con el promedio del país"]),
     ])
     c1, c2 = st.columns(2)
     with c1:
@@ -120,10 +124,16 @@ def render_1_2_punto_critico():
     else:
         pc_txt = f"no antes de {int(d.anio.max())}"
     kpi_card_row([
-        ("Punto crítico", pc_txt, f"Primer año desde el cual el costo supera la capacidad (carga máxima {carga:.0%})"),
-        (f"Carga requerida {a0}", f"{f0.carga_requerida:.1%}", "Costo del Pilar Solidario de vejez / masa de ingreso de los trabajadores"),
-        ("Carga requerida 2050", f"{f1.carga_requerida:.1%}", "Mismo cálculo en el escenario"),
-        (f"{trab.capitalize()} por 65+ ({a0})", f"{f0.razon_soporte:.2f}", f"Razón de equilibrio R*: {f0.razon_equilibrio:.2f}"),
+        ("Punto crítico", pc_txt, f"Primer año desde el cual el costo supera la capacidad (carga máxima {carga:.0%})",
+         ["Costo: PGU + PBS/APS de vejez, por persona 65+ × población 65+", "Capacidad: carga máxima × ingreso por trabajador × trabajadores",
+          "Punto crítico: primer año en que el costo supera la capacidad", "Pesos reales de 2025"]),
+        (f"Carga requerida {a0}", f"{f0.carga_requerida:.1%}", "Costo del Pilar Solidario de vejez / masa de ingreso de los trabajadores",
+         ["Costo: PGU + PBS/APS de vejez", "Masa de ingreso: trabajadores × ingreso anual", "Compara con la carga máxima tolerable (10% = cotización obligatoria)"]),
+        ("Carga requerida 2050", f"{f1.carga_requerida:.1%}", "Mismo cálculo en el escenario",
+         ["Población INE base 2024", "Ingreso real crece según el escenario elegido", "PGU de $250.000 si está marcada"]),
+        (f"{trab.capitalize()} por 65+ ({a0})", f"{f0.razon_soporte:.2f}", f"Razón de equilibrio R*: {f0.razon_equilibrio:.2f}",
+         ["Trabajadores ÷ población 65+", "R*: trabajadores por persona 65+ que cubren el costo con la carga máxima",
+          "Si el valor baja de R*, el costo supera la capacidad"]),
     ])
     st.plotly_chart(critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga),
                     use_container_width=True, config=PLOTLY_DL_CONFIG)
@@ -140,11 +150,12 @@ def render_1_2_punto_critico():
 
 def render_1_2():
     kpi_card_row([
-        ("Cotizantes por adulto mayor (país)", f"{nac_soporte:.2f}", "Cotizantes 2025 / población 65+ (Censo 2024)"),
+        ("Cotizantes por adulto mayor (país)", f"{nac_soporte:.2f}", "Cotizantes 2025 / población 65+ (Censo 2024)",
+         ["Cotizantes de diciembre (Superintendencia de Pensiones)", "Población 65+: Censo 2024", "Más alto = más cotizantes por cada adulto mayor"]),
         ("Región más presionada", pres.sort_values("razon_soporte_previsional").iloc[0]["region_nombre"],
-         f"{pres['razon_soporte_previsional'].min():.2f}"),
+         f"{pres['razon_soporte_previsional'].min():.2f}", ["Menos cotizantes por adulto mayor entre las 16 regiones"]),
         ("Región menos presionada", pres.sort_values("razon_soporte_previsional").iloc[-1]["region_nombre"],
-         f"{pres['razon_soporte_previsional'].max():.2f}"),
+         f"{pres['razon_soporte_previsional'].max():.2f}", ["Más cotizantes por adulto mayor entre las 16 regiones"]),
     ])
     st.plotly_chart(region_bars(pres, "razon_soporte_previsional", "Razón de soporte: cotizantes por adulto mayor",
                                 nac_soporte, ".2f", BLUE), use_container_width=True, config=PLOTLY_DL_CONFIG)
@@ -180,10 +191,14 @@ def render_1_3():
     e33 = esc.loc[a_meta]
     minimo = esc.kpi_1_3_pct.idxmin()
     kpi_card_row([
-        (f"Flujo comisionable {int(r25.anio)} (real)", f"{r25.kpi_1_3_pct:.1f}%", "Cuentas individuales / flujo total"),
-        (f"Flujo comisionable {a_meta} (escenario)", f"{e33.kpi_1_3_pct:.1f}%", "Cotización del empleador completa (8,5%)"),
+        (f"Flujo comisionable {int(r25.anio)} (real)", f"{r25.kpi_1_3_pct:.1f}%", "Cuentas individuales / flujo total",
+         ["Cuentas individuales: cotización del trabajador (10%) + empleador a cuenta individual", "Flujo total: cuentas individuales + Seguro Social (FAPP) + Estado (PGU, PBS, APS)",
+          "Aporte del trabajador estimado con ingreso imponible promedio"]),
+        (f"Flujo comisionable {a_meta} (escenario)", f"{e33.kpi_1_3_pct:.1f}%", "Cotización del empleador completa (8,5%)",
+         ["Escenario de la Ley 21.735 con la cotización del empleador completa", "División empleador: cuenta individual vs Seguro Social según la Nota Técnica", "Es escenario, no pronóstico"]),
         (f"Variación {int(r25.anio)}-{a_meta}", f"{e33.kpi_1_3_pct - r25.kpi_1_3_pct:+.1f} pp",
-         f"Mínimo del escenario: {esc.kpi_1_3_pct.min():.1f}% en {minimo}"),
+         f"Mínimo del escenario: {esc.kpi_1_3_pct.min():.1f}% en {minimo}",
+         ["pp = puntos porcentuales", "Diferencia entre el escenario y el dato real"]),
     ])
     c1, c2 = st.columns([2, 3])
     with c1:

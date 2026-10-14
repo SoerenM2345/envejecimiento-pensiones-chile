@@ -59,7 +59,7 @@ Con el modo activo, la sección «Modo desarrollador» muestra las 8 páginas de
 | 1.1 Cobertura regional | **Objetivo 1: base activa** | «1.1 · Cobertura regional» | 3 cifras, mapa por región y barras con la línea del país | 🟢 |
 | 1.2 Razón de soporte | **Objetivo 1: base activa** | «1.2 · Razón de soporte» | 3 cifras, barras por región, y un escenario 2035/2050 por país o región (selector «Territorio») | 🟡 |
 | 1.3 Participación partes interesadas | **Objetivo 1: base activa** | «1.3 · Participación partes interesadas» | Tarjeta «Pendiente» con la fórmula | 🔴 |
-| 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras, costo real por persona 65+ (millones de $ de 2025, con el salto de la PGU en 2022) y crecimiento anual del gasto vs. la población 65+ | 🟢 |
+| 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras y 5 pestañas: evolución (con el salto de la PGU en 2022), componentes, por beneficiario, frente al ingreso (10 % de la mediana) y proyección 2050 | 🟢 |
 | 2.2 Financiamiento dedicado | **Objetivo 2: costo por cliente** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; el ratio 2 aparece como pendiente | 🟡 |
 | 2.3 Pobreza en la vejez | **Objetivo 2: costo por cliente** | «2.3 · Pobreza en la vejez» | 4 cifras, mapa y barras con intervalo de confianza 95% | 🟢 |
 
@@ -200,9 +200,15 @@ Fórmula: `(Costo público total ÷ Población 65+)` comparado con el crecimient
 2. **Columna calculada**: **A** = `pib_real_mm_2018`, `÷ dividir`, **B** = `pob_total`, factor `1000000`, **Nombre** = `pib_pc_real`.
 3. **Agrupar por** = `anio`; **Columna a agregar** = `pib_pc_real`; `mean`.
 
-**Comparación:** divide el valor de 2025 entre el de 2016 en cada receta: el costo por persona 65+ sube **+11 %** y el PIB per cápita real **+9 %** (lo que muestran las tarjetas). El dashboard lo grafica como índice 2016 = 100; el Explorador no lo calcula.
+**Comparación:** divide el valor de 2025 entre el de 2016 en cada receta: el costo por persona 65+ sube **+11 %** y el PIB per cápita real **+9 %** (tarjetas del dashboard). Casi todo el alza es el salto de 2022 (PGU): desde entonces el costo por persona baja **−5 %**. El dashboard lo muestra en pesos reales de 2025, no como índice.
 
-**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios. El PIB real es volumen encadenado (referencia 2018) y el gasto está en pesos de 2025; por eso se comparan como índices y no por nivel.
+**Pestañas del dashboard (módulo `Dashboards/components/cost_analysis.py`, probado en `tests/test_costo_65.py`):**
+- *Qué lo explica:* costo por persona 65+ = PGU + PBS/APS de vejez (Subsecretaría de Previsión Social, `pgu_pbs_aps_nacional_anual.csv`, × deflactor de `kpi_pc_nacional.csv`) + **resto** (= Edad avanzada − los dos anteriores; DIPRES no lo abre). La PGU de 2022 es un residual: Total − (PBS + APS).
+- *Por beneficiario:* beneficios de vejez (PGU + PBS vejez + APS vejez, promedio del año) por cada 100 personas 65+ y pago anual por beneficio. Una persona puede tener más de un beneficio: la cobertura es un tope.
+- *Frente al ingreso:* costo por persona 65+ como % del PIB per cápita (corriente / corriente); 10 % × 12 × ingreso mediano real de los ocupados (INE, ESI, `kpi_pc_nacional.csv`) = aporte anual de un ocupado mediano; «necesarios» = costo por 65+ ÷ ese aporte; «carga requerida» = gasto ÷ (ocupados × 12 × mediana). Cifras 2025: 30 % del PIB per cápita, 6,3 necesarios vs 3,3 disponibles, 19 %.
+- *Proyección 2050:* escenario con la población INE, PIB real (deslizador), PGU de $250.000 (opcional) y el «resto» constante o creciendo con la población 65+.
+
+**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios. El PIB real es volumen encadenado (referencia 2018) y el gasto está en pesos de 2025; por eso el PIB per cápita real se compara como variación y no por nivel. El 10 % es una escala de comparación: va a cuentas individuales y estos gastos se pagan con impuestos generales.
 
 ### KPI 2.2 · Financiamiento dedicado 🟡
 
