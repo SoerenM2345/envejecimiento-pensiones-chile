@@ -10,7 +10,7 @@ Revisado dos veces: inventario con `find` y, de forma independiente, con `os.wal
 | 1.2 Razón de soporte | Ídem + proyecciones INE nacionales | Completo (proyección regional = reparto de tasas nacionales, no oficial) |
 | 1.3 Participación del flujo comisionable | Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio 2024-2025), estados financieros FAPP dic-2025, Pilar Solidario, Nota Técnica Ley 21.735 (Tabla 1), proyecciones INE | **Calculado** (script 15, dashboard): real 2024-2025 y escenario 2026-2035 |
 | 2.1 Costo real por adulto mayor | DIPRES gasto "7102 Edad avanzada" 2016-2025, PGU/PBS/APS mensual 2008-2025, PIB Banco Central 2013-2025, población 65+ INE | **Calculado** (script 13, dashboard) |
-| 2.2 Financiamiento dedicado | Ídem + nota FAPP, estados del FAPP, informe mensual del FRP (DIPRES, jul-2026), Ley 21.735 Tabla 2, SII (UTM, dólar) | **Ratio 1 calculado; ratio 2 con alternativa calculada (script 20); VP del déficit oficial pendiente** |
+| 2.2 Financiamiento dedicado | Ídem + nota FAPP, estados del FAPP, informe mensual del FRP (DIPRES, jul-2026), Ley 21.735 Tabla 2, SII (UTM, dólar) | **Ratio 1 calculado; ratio 2 con alternativa calculada (script 21); VP del déficit oficial pendiente** |
 | 2.3 Pobreza en la vejez | CASEN 2022 completa (`edad`, `region`, `pobreza`, `expr`, `varstrat`, `varunit`) | **Calculado** (script 14, dashboard) |
 
 ## Lo que sigue abierto

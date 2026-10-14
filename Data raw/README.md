@@ -13,10 +13,11 @@ Reorganizado el 2026-10-07. Cada archivo está en una de tres zonas.
 | `_external/pilar_solidario/` | Informes de cierre (OND) 2023, 2024 y 2025: PGU/PBS/APS. KPI 2.1 y 2.2 | 12 |
 | `_external/dipres/` | Estadísticas de las Finanzas Públicas 2016-2025 (PDF y Excel, gasto funcional "7102 Edad avanzada"), pasivos y activos, nota técnica FAPP. KPI 2.1, 2.2, 1.3 | 13 (gasto), 16 (pasivos/activos del Gobierno Central y Bonos de Reconocimiento) |
 | `_external/macro/CCNN2018_P0_V2.xlsx` | PIB anual a precios corrientes y encadenado 2013-2025 (Banco Central). KPI 2.1, 2.2 | 13 |
-| `_external/fapp/` | Estados financieros del FAPP al 31-dic-2025 y al 30-jun-2026. KPI 1.3 (aporte empleador), 2.2 | 15 (1.3); 2.2 por hacer |
-| `_external/ley_21735/` | Nota Técnica "Reforma de Pensiones, Ley N°21.735" (Subsecretaría de Previsión Social, ago-2025). Tabla 1: gradualidad y división de la cotización del empleador. KPI 1.3 | 15 |
+| `_external/fapp/` | Estados financieros del FAPP al 31-dic-2025 y al 30-jun-2026. KPI 1.3 (aporte empleador), 2.2 | 15 (1.3), 20 (2.2) |
+| `_external/ley_21735/` | Nota Técnica "Reforma de Pensiones, Ley N°21.735" (Subsecretaría de Previsión Social, julio 2025). Tabla 1: gradualidad y división de la cotización del empleador (KPI 1.3). Tabla 2: aporte fiscal al FAPP (KPI 2.2). Tabla 3: calendario de la PGU de $250.000 (KPI 1.2, punto crítico) | 15, 20, 18 |
+| `_external/frp/` | Informe Ejecutivo Mensual del Fondo de Reserva de Pensiones a julio de 2026 (DIPRES): valor de mercado, aportes y retiros 2020-2026. KPI 2.2 (ratio 2) | 20 |
 | `_external/fichas_previsionales/` | Fichas Estadísticas Previsionales N° 136-159 (Superintendencia de Pensiones, mar-2024 a feb-2026): cotizantes e ingreso promedio de los meses de referencia ene-2024 a dic-2025. KPI 1.3 | 15 |
-| `import_KPI1.2/` | Análisis «punto crítico» del KPI 1.2: cuadros 04A/32C/19B de la SP (ingreso imponible y cotizantes por tramo), ESI y ENE del INE (ingreso y ocupados), IPC del Banco Central. Los 04A faltantes se bajan con el script 19 | 18, 19 |
+| `import_KPI1.2/` | Análisis «punto crítico» del KPI 1.2: cuadros 04A/32C/19B de la SP (ingreso imponible y cotizantes por tramo), ESI y ENE del INE (ingreso y ocupados), IPC del Banco Central. Completo: 04A mensual oct-2002 a ago-2026 (287 meses; el script 19 sirve para sumar los meses nuevos), 32C y 19B cada diciembre 2010-2025. Contiene 11 archivos repetidos o reemplazados (ver `INVENTARIO_FUENTES.md` §6, punto 10) | 18, 19 |
 | `_external/casen2022/` | CASEN 2022 completa (`casen_2022.dta`, 501 MB, no versionado), libro de códigos, nota de uso y líneas de pobreza. KPI 2.3 | 14 |
 
 ## 2. `development sources/`: usados por el modo desarrollador, no por los 6 KPIs

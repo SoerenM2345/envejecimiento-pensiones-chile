@@ -225,7 +225,7 @@ Fórmula: `(PGU + Pensión solidaria) ÷ PIB` y `(Activos + Reservas) ÷ VP del 
 4. **Agrupar por** = `anio`; **Columna a agregar** = `pct_pib`; `mean`. → Cifra de control: **2025 = 2,07 %**.
 5. Para comparar con el gasto total en vejez: `gasto_proteccion_social.csv`, filtro `categoria` = `Edad avanzada`, columna `pct_pib` (2025 = 4,39 %, coincide con lo publicado por DIPRES).
 
-**Ratio 2 🟡:** `(Activos + Reservas) ÷ VP del déficit`. El **valor presente del déficit oficial** sigue sin estar publicado (sección 5, ítem B). En su lugar el dashboard calcula una alternativa con datos oficiales (módulo `Dashboards/components/financiamiento.py`, probado en `tests/test_financiamiento.py`; datos del script `Scripts/20_procesar_reservas_financiamiento.py`).
+**Ratio 2 🟡:** `(Activos + Reservas) ÷ VP del déficit`. El **valor presente del déficit oficial** sigue sin estar publicado (sección 5, ítem B). En su lugar el dashboard calcula una alternativa con datos oficiales (módulo `Dashboards/components/financiamiento.py`, probado en `tests/test_financiamiento.py`; datos del script `Scripts/21_procesar_reservas_financiamiento.py`).
 
 **Profundización (5 pestañas bajo el ratio 1)**
 1. *Peso fiscal 2050:* ratio 1 observado 2009-2025 y escenario a 2050 (población 65+ INE, PGU de $250.000, invalidez constante real; el valor de 2025 es el del ratio 1). Se puede sumar el aporte del Estado al FAPP (Ley 21.735, Tabla 2: 2,2 millones de UTM en 2028-2029 hasta 15 millones desde 2037, a la UTM promedio de 2025 = $68.640).
@@ -303,7 +303,7 @@ Para verificarlo todo de una vez: `"Data raw/.venv/bin/python" -I -m pytest test
 
 ### C. Saldo del Fondo de Reserva de Pensiones, FRP (KPI 2.2, «reservas»)
 
-- **Resuelto (2026-10-13):** el *Informe Ejecutivo Mensual del FRP* de DIPRES (julio 2026, `Data raw/_external/frp/`) trae el valor de mercado, aportes y retiros 2020-2025 en US$ (script 20). Falta, si se quiere más precisión, el informe de diciembre de 2025 (el de julio da el cierre de 2025 en su tabla anual).
+- **Resuelto (2026-10-13):** el *Informe Ejecutivo Mensual del FRP* de DIPRES (julio 2026, `Data raw/_external/frp/`) trae el valor de mercado, aportes y retiros 2020-2025 en US$ (script 21). Falta, si se quiere más precisión, el informe de diciembre de 2025 (el de julio da el cierre de 2025 en su tabla anual).
 - **Antes:** la serie del saldo no estaba. La publicación de DIPRES lo menciona (PDF `Data raw/_external/dipres/articles-416513_doc_pdf.pdf`, páginas 126 y 164) pero **no está verificado que traiga la serie**; la nota técnica indica que el FRP transfirió hasta US$900 millones al FAPP.
 - **Dónde:** revisar esas páginas; si no está, los informes del FRP del Ministerio de Hacienda (sin enlace verificado).
 - **Guardar en:** `Data raw/_external/dipres/`.

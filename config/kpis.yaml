@@ -245,7 +245,7 @@ kpis_presentacion:
     status: partial
     archivo: [pgu_pbs_aps_nacional_anual.csv, macro_pib_anual.csv, gasto_proteccion_social.csv, frp_reserva_anual.csv, fapp_balance.csv, fapp_aporte_fiscal.csv, pgu_pbs_aps_region_trimestral.csv]
     fuente: ["Subsecretaría de Previsión Social (Pilar Solidario, Ley 21.735)", "Banco Central", "DIPRES (gasto funcional, informe mensual del FRP, nota técnica del FAPP)", "FAPP (estados financieros)", "SII (UTM y dólar observado)", "INE proyecciones"]
-    script: "12_procesar_pilar_solidario.py, 13_procesar_macro_gasto.py, 20_procesar_reservas_financiamiento.py"
+    script: "12_procesar_pilar_solidario.py, 13_procesar_macro_gasto.py, 21_procesar_reservas_financiamiento.py"
     caveat: "Ratio 1 calculado (2,07 % del PIB en 2025; incluye PBS/APS de invalidez). Ratio 2 con el valor presente del déficit oficial: pendiente (no está publicado); en su lugar se calcula (FRP, opcionalmente + activos del FAPP) / valor presente 2026-2050 del gasto que cubre, con rentabilidad real 2,5 % (tasa del préstamo FRP-FAPP). Escenario 2050, no pronóstico. El aporte del Estado al FAPP empieza en 2028 según la Tabla 2 de la Subsecretaría (DIPRES lo ubica en 2027: adelantarlo un año mueve el agotamiento de 2033 a 2032). Reservas al 31-dic-2025; la pestaña «FAPP hoy» usa junio de 2026. Regional: 4.º trimestre de 2024 con el Censo 2024."
   - id: "2.3"
     nombre: "Pobreza en la vejez"

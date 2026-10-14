@@ -27,7 +27,7 @@ Cómo se aplica:
 | 10 | **Comunas** | Población 65+ y 15-64 del Censo 2024 (propia) | No hay cotizantes, ingresos ni gasto por comuna | La comuna **hereda** de su región cobertura, ingreso y costo por 65+ | La razón de soporte comunal mide la estructura de edad, no cotizantes reales. Las comunas suman exactamente su región. |
 | 11 | **Ñuble antes de 2018** | Ñuble existe como región desde 2018 | Antes forma parte de Biobío | Su ingreso imponible 2010-2017 se aproxima con el de Biobío (columna `ingreso_imponible_aprox_biobio`) | Solo afecta a series históricas regionales de Ñuble; el análisis usa 2024. |
 | 12 | **IPC** | Variación mensual con un decimal | — | Se encadena desde diciembre de 2008 y se promedia por año | Sirve para razones entre años, no como nivel; error acumulado del orden de 1 % (estimación, no verificada). |
-| 13 | **PGU de $250.000** | Calendario por edad (82+ sep-2025, 75+ sep-2026, 65+ sep-2027) tomado de prensa y sitios oficiales | Texto de la Ley 21.735 | Se usa el calendario; **pendiente de contrastar con el texto de la ley** | El supuesto pesa: con el aumento a $250.000 el punto crítico es **2039**; sin él, **2045** (por eso es una casilla del dashboard). Un desfase de un año en el calendario movería el resultado menos que eso (no se calculó). |
+| 13 | **PGU de $250.000** | Calendario por edad (82+ sep-2025, 75+ sep-2026, 65+ sep-2027) tomado de prensa y sitios oficiales | Texto de la Ley 21.735 | Se usa el calendario; contrastado el 2026-10-13 con la Tabla 3 de la Nota Técnica de la Subsecretaría de Previsión Social (`Data raw/_external/ley_21735/`, pág. 28: 82+ el 1-sep-2025, 75+ el 1-sep-2026, 65+ el 1-sep-2027, $ 250.000 más reajustes): coincide. Es un resumen oficial «en base a la Ley», no el texto legal | El supuesto pesa: con el aumento a $250.000 el punto crítico es **2039**; sin él, **2045** (por eso es una casilla del dashboard). Un desfase de un año en el calendario movería el resultado menos que eso (no se calculó). |
 | 14 | **Edad enmascarada en el Censo** | 151.199 personas (0,8 %) de 51 comunas pequeñas sin edad exacta | — | Se usa `edad_quinquenal`, completa | Sin efecto sobre 65+ por grupos quinquenales. |
 | 15 | **Mediana ESI 2025** | Archivo importado: $680.000 | Publicación del INE del 14-jul-2026: $680.000 | Confirmada | — |
 
@@ -46,4 +46,4 @@ Cómo se aplica:
 ## Para la próxima conversación
 
 - Cuando haya que elegir entre el Censo y otra fuente: **gana el Censo**, la otra se reescala a su nivel y el conflicto se agrega a la tabla de arriba con su efecto.
-- Pendientes: contrastar el calendario de la PGU con el texto de la Ley 21.735 (punto 13); decidir si el país en la tarjeta base debe incluir los cotizantes sin región (punto 3); ampliar la lista cuando otro KPI traiga un conflicto nuevo.
+- Pendientes: decidir si el país en la tarjeta base debe incluir los cotizantes sin región (punto 3); ampliar la lista cuando otro KPI traiga un conflicto nuevo.
