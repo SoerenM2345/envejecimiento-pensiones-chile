@@ -466,7 +466,8 @@ def estilo_kpi(fig: go.Figure, alto: int = 560) -> go.Figure:
                       legend=dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)", font_color=INK_PRIMARY), height=alto)
     fig.update_xaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
     fig.update_yaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
-    fig.update_traces(textfont_color=INK_PRIMARY)
+    fig.for_each_trace(lambda tr: tr.update(textfont_color=INK_PRIMARY) if hasattr(tr, "textfont") else None)   # mapas y otras trazas no tienen textfont
+    fig.update_coloraxes(colorbar_tickfont_color=INK_PRIMARY, colorbar_title_font_color=INK_PRIMARY)
     fig.update_annotations(font_color=INK_PRIMARY)
     return fig
 

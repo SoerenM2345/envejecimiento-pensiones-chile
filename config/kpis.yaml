@@ -250,14 +250,14 @@ kpis_presentacion:
   - id: "2.3"
     nombre: "Pobreza en la vejez"
     objetivo: "Objetivo 2: Controlar el costo por cliente"
-    descripcion: "Que la contención de costos no aumente la pobreza en adultos mayores"
+    descripcion: "Cuántas personas 65+ viven en pobreza y dónde, para que el ahorro en pensiones no la aumente."
     formula: "Personas 65+ bajo línea de pobreza / Población 65+"
     visualizacion: mapa
     status: live
     archivo: [pobreza_65_region.csv]
     fuente: ["CASEN 2022 completa (Ministerio de Desarrollo Social)"]
     script: 14_procesar_casen_pobreza.py
-    caveat: "CASEN 2022 con la metodología de pobreza 2024 (20,5% en total ese año; con la metodología anterior eran 6,5%). Encuesta muestral: en regiones pequeñas los intervalos de confianza son amplios."
+    caveat: "CASEN 2022 con la metodología de pobreza 2024. Encuesta: en regiones pequeñas los intervalos son amplios. Detalle en «Método y fuentes»."
 # Datos que el enunciado pide pero NO están disponibles en ninguna fuente
 # entregada (ver Data processed/README.md para el detalle y alternativas):
 pendientes:

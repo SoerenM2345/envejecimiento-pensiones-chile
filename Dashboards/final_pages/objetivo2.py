@@ -413,10 +413,14 @@ def render_2_3():
     p = load_csv("pobreza_65_region.csv")
     nac = p[p.region_id == 0].iloc[0]
     reg = p[p.region_id != 0].copy()
+    reg["n_pobres"] = reg.pob_65_expandida * reg.pct_pobreza_65 / 100
     mayor, menor = reg.sort_values("pct_pobreza_65").iloc[-1], reg.sort_values("pct_pobreza_65").iloc[0]
+    n_pobres, n_extremos = nac.pob_65_expandida * nac.pct_pobreza_65 / 100, nac.pob_65_expandida * nac.pct_pobreza_extrema_65 / 100
     kpi_card_row([
         ("Pobreza en personas 65+ (país)", f"{nac.pct_pobreza_65:.1f}%", f"IC 95%: {nac.ic95_inf:.1f}% a {nac.ic95_sup:.1f}%",
          ["Personas 65+ bajo la línea de pobreza por ingresos", "CASEN 2022, metodología 2024 del Ministerio", "IC 95%: rango probable por ser una encuesta"]),
+        ("Personas 65+ en pobreza", f"{n_pobres / 1000:,.0f} mil", f"{n_extremos / 1000:,.0f} mil en pobreza extrema ({nac.pct_pobreza_extrema_65:.1f}%)",
+         ["Porcentaje de pobreza × población 65+ expandida de la CASEN 2022", f"Población 65+ de la encuesta: {nac.pob_65_expandida / 1e6:.2f} millones", "Pobreza extrema = ingreso bajo la línea de pobreza extrema"]),
         ("Pobreza en menores de 65 (país)", f"{nac.pct_pobreza_menores_65:.1f}%", "Para comparar: la vejez no es hoy el grupo más pobre",
          ["Mismo indicador para menores de 65", "CASEN 2022"]),
         ("Región con más pobreza 65+", mayor.region_nombre, f"{mayor.pct_pobreza_65:.1f}%",
@@ -426,11 +430,33 @@ def render_2_3():
     ])
     c1, c2 = st.columns(2)
     with c1:
-        st.plotly_chart(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65",
-                                          "% de personas 65+ en pobreza", "Oranges"), use_container_width=True, config=PLOTLY_DL_CONFIG)
+        _grafico(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65", "% de personas 65+ en pobreza", "Oranges"), 520)
     with c2:
-        st.plotly_chart(poverty_bars(reg, nac.pct_pobreza_65), use_container_width=True, config=PLOTLY_DL_CONFIG)
-    st.caption("Las regiones pequeñas (Aysén, Magallanes, Tarapacá) tienen intervalos amplios: lea los rangos, no solo el orden.")
+        _grafico(poverty_bars(reg, nac.pct_pobreza_65), 520)
+    sobre = reg[reg.ic95_inf > nac.ic95_sup]            # regiones cuyo intervalo queda por encima del intervalo del país
+    mas_gente = reg.sort_values("n_pobres").iloc[-1]
+    st.markdown(f"**Lectura:** {n_pobres / 1000:,.0f} mil personas 65+ viven en pobreza ({nac.pct_pobreza_65:.1f}%, menos que el {nac.pct_pobreza_menores_65:.1f}% de los menores de 65). "
+                f"{mayor.region_nombre} tiene la tasa más alta ({mayor.pct_pobreza_65:.1f}%), pero {mas_gente.region_nombre} reúne más personas ({mas_gente.n_pobres / 1000:,.0f} mil, {100 * mas_gente.n_pobres / n_pobres:.0f}% del total).")
+    st.caption("\\* Aysén, Magallanes y Tarapacá tienen intervalos amplios: lea los rangos, no solo el orden.")
+    with st.expander("Qué se desprende para cada actor"):
+        a, b = sobre.sort_values("pct_pobreza_65", ascending=False), reg.sort_values("n_pobres", ascending=False).head(3)
+        st.markdown(
+            f"**1. Hacienda y la Dipres (costo de las pensiones garantizadas).** Con las pensiones actuales, la pobreza en la vejez ({nac.pct_pobreza_65:.1f}%) queda por debajo de la de los menores de 65 ({nac.pct_pobreza_menores_65:.1f}%), "
+            f"pero {n_extremos / 1000:,.0f} mil personas 65+ siguen en pobreza extrema. *Acción:* medir cualquier ahorro en el Pilar (reajuste, focalización) por su efecto sobre esas personas antes de aplicarlo; "
+            "este indicador es el contrapeso de los KPIs 2.1 y 2.2.\n\n"
+            f"**2. Subsecretaría de Previsión Social y municipios (focalización).** Hay dos criterios distintos: la tasa y el número. Por tasa, {len(a)} regiones superan con claridad al país "
+            f"({', '.join(f'{r.region_nombre} {r.pct_pobreza_65:.0f}%' for r in a.itertuples())}: juntas {a.n_pobres.sum() / 1000:,.0f} mil personas); por número, "
+            f"{', '.join(f'{r.region_nombre} ({r.n_pobres / 1000:,.0f} mil)' for r in b.itertuples())} suman {b.n_pobres.sum() / 1000:,.0f} mil. "
+            "*Acción:* las campañas de acceso a la PGU y al APS por tasa van a las primeras; la atención por volumen a las segundas. Distinto de la acción 1: aquí no se mueve el gasto total, se elige dónde llegar.")
+    with st.expander("Método y fuentes"):
+        st.caption("**Cifra.** Proporción ponderada de personas 65+ con ingreso bajo la línea de pobreza (extrema o no) en la CASEN 2022 completa; intervalo del 95% con el diseño de la encuesta "
+                   "(estratos y conglomerados). «Personas» = porcentaje × población 65+ expandida de la propia encuesta.")
+        st.caption("**Fechas.** Todo sale de la misma encuesta (terreno 2022): numerador y denominador comparten período. No se mezcla con el Censo 2024 ni con otros años; "
+                   "por eso las personas en pobreza no calzan con la población 65+ del Censo (KPI 1.2).")
+        st.caption("**Metodología.** La base ya trae la pobreza con la metodología 2024 del Ministerio: 20,5% en total (6,5% con la anterior) y 14,9% en personas 65+ (2,2% con la anterior). "
+                   "No se compara con cifras publicadas en 2023.")
+        st.caption("**Falta.** Una serie en el tiempo con la misma metodología (CASEN 2017 y 2020 recalculadas) para ver si la pobreza en la vejez sube o baja; hoy el KPI solo muestra 2022. "
+                   "Fuente: CASEN 2022, Ministerio de Desarrollo Social.")
 
 
 kpi_card("2.1", render_2_1)
