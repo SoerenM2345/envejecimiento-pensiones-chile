@@ -47,7 +47,7 @@ def test_regression_national_support_ratio():
     pres = pd.read_csv(DASH.parent / "Data processed" / "kpi_presion_previsional_region.csv")
     nuble = pres[pres.region_nombre == "Ñuble"].iloc[0]
     assert round(nuble.cobertura_previsional_pct, 2) == 37.83  # cotizantes 2024 (KPI 1.1)
-    assert round(nuble.razon_soporte_previsional, 2) == 1.54
+    assert round(nuble.razon_soporte_previsional, 2) == 1.51  # cotizantes dic-2024 / Censo 2024
     assert len(pres) == 16
 
 

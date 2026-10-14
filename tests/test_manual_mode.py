@@ -77,9 +77,9 @@ def test_1_1_cobertura_precalculada_y_manual():
 
 
 def test_1_2_razon_de_soporte_actual_y_escenario():
-    man = receta(PRES, calc=("cotizantes", "÷ dividir", "pob_65_mas", 1.0, "razon_manual"),
+    man = receta(PRES, calc=("cotizantes_2024", "÷ dividir", "pob_65_mas", 1.0, "razon_manual"),
                  agrupar=["region_nombre"], columna="razon_manual")
-    assert round(valor(man, "region_nombre", "Ñuble", "razon_manual"), 2) == 1.54
+    assert round(valor(man, "region_nombre", "Ñuble", "razon_manual"), 2) == 1.51
     esc = receta("kpi_proyeccion_regional.csv", mezclar=(PRES, "region_id", "left"),
                  calc=("cobertura_previsional_pct", "÷ dividir", "indice_dependencia_vejez_proy", 1.0, "razon_2035"),
                  filtros={"anio": (2035, 2035)}, agrupar=["region_nombre"], columna="razon_2035")

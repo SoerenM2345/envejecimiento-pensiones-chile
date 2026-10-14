@@ -143,11 +143,11 @@ Fórmula: `Cotizantes ÷ Población 65+`.
 
 **Receta, valor actual**
 1. **Fuente principal** = `kpi_presion_previsional_region.csv`.
-2. **Columna calculada**: **A** = `cotizantes`, `÷ dividir`, **B** = `pob_65_mas`, factor `1`, **Nombre** = `razon_manual`.
-3. **Agrupar por** = `region_nombre`; **Columna a agregar** = `razon_manual`; `mean`. → Cifra de control: **Ñuble 1,54** (la más presionada); país: 2,30.
+2. **Columna calculada**: **A** = `cotizantes_2024`, `÷ dividir`, **B** = `pob_65_mas`, factor `1`, **Nombre** = `razon_manual`.
+3. **Agrupar por** = `region_nombre`; **Columna a agregar** = `razon_manual`; `mean`. → Cifra de control: **Ñuble 1,51** (la más presionada); país: 2,27 (cotizantes de diciembre de 2024 sobre el Censo 2024; con los de 2025 daba 2,30, pero eran 20 meses posteriores al Censo).
    (La columna ya calculada se llama `razon_soporte_previsional`.)
 
-**Receta, escenario 2035 / 2050** (supone que la cobertura de 2025 se mantiene)
+**Receta, escenario 2035 / 2050** (supone que la cobertura de 2024 se mantiene)
 1. **Fuente principal** = `kpi_proyeccion_regional.csv`.
 2. Marca **Mezclar con una segunda fuente**: **Segunda fuente** = `kpi_presion_previsional_region.csv`, **Cruzar por** = `region_id`, **Tipo de cruce** = `left`.
 3. **Columna calculada**: **A** = `cobertura_previsional_pct`, `÷ dividir`, **B** = `indice_dependencia_vejez_proy`, factor `1`, **Nombre** = `razon_2035`. (Equivale a cotizantes proyectados ÷ población 65+ proyectada, con cobertura constante.)
@@ -169,7 +169,7 @@ Bajo el gráfico del escenario, la misma tarjeta tiene un análisis que responde
 
 **Receta, ingredientes del país en 2025**
 1. **Fuente principal** = `kpi_pc_nacional.csv`; **Columnas a filtrar** = `anio`, desde = hasta = `2025`.
-2. **Columna calculada**: **A** = `cotizantes_dic`, `÷ dividir`, **B** = `pob_65_mas_ine`, factor `1`, **Nombre** = `razon_manual`. **Agrupar por** = `anio`; **Columna a agregar** = `razon_manual`. → Cifra de control: **2,06 cotizantes por persona de 65+** (con la población INE de 2025; el 2,30 de arriba usa el Censo 2024 y es otro denominador).
+2. **Columna calculada**: **A** = `cotizantes_dic`, `÷ dividir`, **B** = `pob_65_mas_ine`, factor `1`, **Nombre** = `razon_manual`. **Agrupar por** = `anio`; **Columna a agregar** = `razon_manual`. → Cifra de control: **2,06 cotizantes por persona de 65+** (con la población INE de 2025). Otras formas de calcular la razón, para no confundirlas: 2,27 = cotizantes regionales de dic-2024 sobre el Censo 2024 (2,59 M de 65+, el de arriba); 2,13 = todos los cotizantes de dic-2024 sobre la proyección INE de 2024 (2,78 M: el INE corrige el subconteo del censo); 2,06 = 2025 con la proyección INE.
 3. Mismo filtro, **Columna a agregar** = `costo_vejez_por_65_real25` → **2,15 millones de pesos al año** por persona de 65+ (pesos de 2025).
 
 **Límites:** (1) la carga máxima tolerable es un supuesto, no un dato; (2) el costo por persona de 65+ queda constante en términos reales (la PGU se reajusta por IPC) salvo el aumento a $250.000; (3) el ingreso imponible es bruto y la ESI mide ingreso neto, y las dos bases no se mezclan; (4) la mediana regional del ingreso imponible se estima con la nacional; (5) en la comuna no hay cotizantes, sueldos ni gasto propios; (6) las poblaciones 65+ regionales de 2035 y 2050 siguen siendo el reparto de tasas nacionales de arriba.
@@ -248,7 +248,7 @@ Fórmula: `Personas 65+ bajo la línea de pobreza ÷ Población 65+`.
 | KPI | Cifra | Dónde |
 |---|---|---|
 | 1.1 | Ñuble 37,83 % · país 46,5 % | Objetivo 1 / Explorador |
-| 1.2 | Ñuble 1,54 · país 2,30 · Ñuble 2035 ≈ 1,05 | Objetivo 1 / Explorador |
+| 1.2 | Ñuble 1,51 · país 2,27 · Ñuble 2035 ≈ 1,05 | Objetivo 1 / Explorador |
 | 1.2 punto crítico | País 2025: 2,06 cotizantes por 65+ · carga requerida 6,7 % del sueldo · punto crítico **2039** (promedio, cotizantes, carga máx. 10 %, sueldo +1 %) · 2,15 M$ por persona 65+ | Objetivo 1 / Explorador |
 | 2.1 | 5,13 millones por persona 65+ (2025) · costo +11 % vs PIB per cápita +9 % (2016-2025) | Objetivo 2 / Explorador |
 | 2.2 | 2,07 % del PIB (2025) · gasto en vejez 4,39 % | Objetivo 2 / Explorador |

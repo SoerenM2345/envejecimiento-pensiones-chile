@@ -138,10 +138,16 @@ def render_1_2_punto_critico():
     st.plotly_chart(critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga),
                     use_container_width=True, config=PLOTLY_DL_CONFIG)
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
+    # La razón de arriba usa el Censo 2024; aquí el país usa las proyecciones INE (corrigen el subconteo del censo)
+    ine = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio")
+    cot24 = load_csv("kpi_pc_nacional.csv").set_index("anio").loc[2024, "cotizantes_dic"]
+    conciliacion_pais = (f"La razón de arriba ({nac_soporte:.2f}) usa el Censo 2024 ({pres.pob_65_mas.sum() / 1e6:.2f} M de personas de 65+); "
+                         f"las proyecciones INE corrigen el subconteo del censo ({ine.loc[2024, 'pob_65_mas'] / 1e6:.2f} M en 2024), por eso "
+                         f"con ellas la razón de diciembre de 2024 es {cot24 / ine.loc[2024, 'pob_65_mas']:.2f}. ")
     st.caption(
         "Línea sólida = datos observados, punteada = escenario; ◆ = 2024, 2035 y 2050, los años con población regional "
         "(Censo 2024 y escenarios regionales); ★ = punto crítico. Se usan datos del mismo año: " + ("país 2025 (cotizantes de diciembre, ingreso imponible de diciembre, ocupados octubre-diciembre, "
-                                           "gasto del año y población 65+ y 15-64 de las proyecciones INE). " if sel == "País" else
+                                           "gasto del año y población 65+ y 15-64 de las proyecciones INE). " + conciliacion_pais if sel == "País" else
                                            "región 2024 (Censo 2024, cotizantes e ingreso imponible de diciembre 2024, ESI 2024 y gasto 2024) "
                                            "y escenarios regionales 2035 y 2050 (rombos); los años intermedios se interpolan. ")
         + "El costo por persona de 65+ es PGU + APS/PBS de vejez, constante en términos reales (la PGU se reajusta por IPC). "
