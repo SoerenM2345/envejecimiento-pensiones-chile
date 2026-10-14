@@ -99,11 +99,16 @@ def test_factor_pgu_250_sube_y_se_estabiliza(datos):
 
 
 # ───────────── motor ─────────────
-def test_pais_2025_razon_de_soporte_con_datos_del_mismo_anio(datos):
-    d = cp.serie_pais(datos["nac"], datos["proy"], datos["par"], cp.Escenario())
-    f = cp.fila_anio(d, 2025)
-    assert round(f.razon_soporte, 2) == 2.06  # 5.974.428 cotizantes / 2.906.461 personas de 65+ (INE 2025)
-    assert round(f.carga_requerida, 3) == 0.067
+def test_pais_razon_de_soporte_con_el_censo_como_base(datos):
+    args = (datos["nac"], datos["proy"], datos["par"])
+    d = cp.serie_pais(*args, cp.Escenario())  # el Censo manda: población INE llevada al nivel del Censo 2024
+    f = cp.fila_anio(d, 2024)
+    assert round(f.razon_soporte, 2) == 2.29  # 5.918.977 cotizantes (dic-2024) / 2.587.238 personas de 65+ (Censo 2024)
+    assert round(f.pob_65) == 2_587_238 and round(f.carga_requerida, 3) == 0.065
+    ine = cp.fila_anio(cp.serie_pais(*args, cp.Escenario(poblacion="ine")), 2025)
+    assert round(ine.razon_soporte, 2) == 2.06  # nivel INE sin ajustar: 5.974.428 / 2.906.461
+    # el nivel de la población 65+ cambia la razón de soporte pero no el costo total ni el año crítico
+    assert cp.punto_critico(d)["anio"] == cp.punto_critico(cp.serie_pais(*args, cp.Escenario(poblacion="ine")))["anio"] == 2039
 
 
 def test_pais_punto_critico_por_defecto_y_orden_de_las_bases(datos):
@@ -180,4 +185,12 @@ def test_pagina_pais_muestra_el_punto_critico_2039():
     at = correr([])
     metricas = {m.label: m.value for m in at.metric}
     assert metricas["Punto crítico"] == "2039"
-    assert metricas["Cotizantes por 65+ (2025)"] == "2.06"
+    assert metricas["Cotizantes por 65+ (2024)"] == "2.29"
+
+
+def test_tabla_de_comunas_de_una_region():
+    at = correr([("selectbox", "pc_territorio", "Valparaíso")])
+    assert not at.exception, [e.value for e in at.exception]
+    tabla = at.dataframe[-1].value
+    assert len(tabla) == 38 and tabla["Razón de soporte 2024"].is_monotonic_increasing  # 38 comunas, de mayor a menor presión
+    assert tabla["Personas 65+ (Censo 2024)"].sum() == 314_343  # las comunas suman la región (Censo 2024)

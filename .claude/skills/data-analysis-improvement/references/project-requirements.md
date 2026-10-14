@@ -29,6 +29,8 @@ These are the project's conventions and the demands the team and user made while
 7. Data: use what exists, research what is missing, give links; where only part could be downloaded automatically, write a script for the rest and use what was already delivered.
 8. Commits: few, with correct titles; pushing only when asked; sync with the teammate's remote work (merge, resolve conflicts keeping both sides, renumber colliding scripts, update control values that the teammate's change altered).
 9. Do not touch or commit other sessions' uncommitted work.
+10. **The Census 2024 wins** when it conflicts with another source (population level, age structure, territory). The other source contributes only its dynamics, rescaled to the Census level, and every conflict goes into `docs/DISCUSION_FUENTES.md` with the sources, the decision and the effect on the results (compute both options). Reference year = 2024.
+11. Show commune figures where data allows (table of all communes of the selected region), labelled as inherited from the region when they are.
 
 ## Stakeholders already present in this project's data
 Pension-fund administrators (AFP — earn commission only on individual-account contributions), workers/contributors (by region, income, sex), employers (new contribution under Ley 21.735), the State/Treasury (PGU, PBS, APS), the Superintendencia de Pensiones (regulator and data source), pensioners (65+, poverty), regions/communes, and indirectly the health system (demand index in the dev pages) and the budget office/fiscal council.

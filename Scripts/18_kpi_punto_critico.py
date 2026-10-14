@@ -18,7 +18,8 @@ Salidas (Data processed/):
   - sp_cotizantes_por_tramo.csv         anio, tramo_desde_miles, tramo_hasta_miles, cotizantes   (diciembre)
   - ine_ingresos_ocupados.csv           anio, region_id (0 = país), sexo, mediana_nom, media_nom, ocupados (octubre-diciembre)
   - ipc_anual.csv                       anio, ipc_prom, deflactor_2025
-  - kpi_pc_nacional.csv                 una fila por año 2010-2025: el lado ingreso y el lado costo en pesos nominales y reales (2025)
+  - kpi_pc_nacional.csv                 una fila por año 2010-2025: el lado ingreso y el lado costo en pesos nominales y reales (2025),
+                                        con población INE y los factores `factor_censo_*` que la llevan al nivel del Censo 2024
   - kpi_pc_region.csv                   año x región 2010-2025: cotizantes, ingreso imponible, ocupados e ingreso de los ocupados,
                                         más la cuota regional del gasto de vejez del Pilar Solidario
   - kpi_pc_parametros_reforma.csv       calendario de la PGU de $250.000 (Ley 21.735) como factor de costo, 2025-2070
@@ -302,6 +303,14 @@ def main():
     for c in ["ingreso_imponible_prom", "ingreso_imponible_mediano", "ing_ocupados_mediano", "ing_ocupados_medio"]:
         d[c + "_real25"] = d[c + "_nom"] * d.deflactor_2025
     d["costo_vejez_por_65_real25"] = d.costo_vejez_mm_real25 * 1e6 / d.pob_65_mas_ine
+    # Factores para llevar la población INE al nivel del Censo 2024 (el Censo manda; ver docs/DISCUSION_FUENTES.md):
+    # factor = población del Censo 2024 / población que el INE estima para 2024. El INE corrige el subconteo del censo,
+    # así que su nivel es mayor (65+: 2,78 M contra 2,59 M). Se aplica el mismo factor a todos los años: conserva la
+    # dinámica del INE y fija el nivel en el Censo.
+    ind = pd.read_csv(OUT / "indicadores_region.csv")
+    ine24 = pais[pais.anio == 2024].iloc[0]
+    d["factor_censo_65"] = ind.pob_65_mas.sum() / ine24.pob_65_mas
+    d["factor_censo_15_64"] = ind.pob_15_64.sum() / ine24.pob_15_64
     d.to_csv(OUT / "kpi_pc_nacional.csv", index=False)
 
     # --- regional ---

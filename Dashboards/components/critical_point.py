@@ -11,7 +11,9 @@ Dos bases de ingreso (se alternan con un interruptor):
   B "ocupados":   ingreso de los ocupados (INE, ESI) x ocupados: la base si todos los que trabajan cotizaran.
 Cada base admite promedio o mediana.
 
-Proyección: población del INE (país) o del escenario regional ya existente (región); trabajadores = cobertura x población 15-64;
+Población: el Censo 2024 manda (ver docs/DISCUSION_FUENTES.md). Para el país se usa la dinámica de las proyecciones INE llevada
+al nivel del Censo (población INE x Censo 2024 / INE 2024); con `poblacion="ine"` se usa el nivel INE sin ajustar.
+Proyección: población del INE reescalada (país) o del escenario regional ya existente (región); trabajadores = cobertura x población 15-64;
 ingreso real crece a `crec_salarial`; el costo por persona de 65+ crece a `crec_costo` (la PGU se reajusta por IPC: 0 % real),
 más la PGU de $250.000 de la Ley 21.735 si `pgu_250`.
 """
@@ -37,6 +39,7 @@ class Escenario:
     carga_max: float = 0.10         # carga máxima tolerable: fracción del sueldo (10 % = la cotización obligatoria para pensión)
     cobertura_2050: float = 1.0     # trabajadores / población 15-64 en 2050 relativo a hoy (solo base A); 1 = constante
     pgu_250: bool = True            # incluir el aumento de la PGU a $250.000 (Ley 21.735)
+    poblacion: str = "censo"        # "censo": población INE llevada al nivel del Censo 2024 (el Censo manda) | "ine": nivel INE
 
 
 COLS_INGRESO = {  # (base, estadístico) -> columna de kpi_pc_nacional.csv / kpi_pc_region.csv (pesos de 2025, mensual)
@@ -84,15 +87,17 @@ def serie_pais(nac: pd.DataFrame, proy: pd.DataFrame, params: pd.DataFrame, esc:
     pr = proy.set_index("anio")
     anios = np.arange(int(n.index.min()), ANIO_FIN_PAIS + 1)
     d = pd.DataFrame({"anio": anios}).set_index("anio")
-    d["pob_65"], d["pob_15_64"] = pr.pob_65_mas.reindex(anios), pr.pob_15_64.reindex(anios)
+    f65, f1564 = (n.loc[ANIO_BASE_PAIS, "factor_censo_65"], n.loc[ANIO_BASE_PAIS, "factor_censo_15_64"]) if esc.poblacion == "censo" else (1.0, 1.0)
+    d["pob_65"], d["pob_15_64"] = pr.pob_65_mas.reindex(anios) * f65, pr.pob_15_64.reindex(anios) * f1564
     t0 = ANIO_BASE_PAIS
     dt = anios - t0
     hist = anios <= t0
     d["trabajadores"] = np.where(hist, n[trab_col].reindex(anios),
                                  n.loc[t0, trab_col] * d.pob_15_64 / d.loc[t0, "pob_15_64"] * _factor_cobertura(anios, esc, t0))
     d["ingreso_trab"] = np.where(hist, n[ing_col].reindex(anios), n.loc[t0, ing_col] * (1 + esc.crec_salarial) ** dt)
-    base_costo = n.loc[t0, "costo_vejez_por_65_real25"]
-    d["costo_65"] = np.where(hist, n["costo_vejez_por_65_real25"].reindex(anios),
+    costo_hist = n["costo_vejez_por_65_real25"] / f65  # el gasto es el mismo; con menos población 65+ cada persona cuesta más
+    base_costo = costo_hist.loc[t0]
+    d["costo_65"] = np.where(hist, costo_hist.reindex(anios),
                              base_costo * (1 + esc.crec_costo) ** dt * _factor_pgu(anios, esc, params))
     d["proyectado"] = ~hist
     d["ancla"] = d.index.isin(ANIOS_REGION)  # mismos años destacados que en la vista regional
