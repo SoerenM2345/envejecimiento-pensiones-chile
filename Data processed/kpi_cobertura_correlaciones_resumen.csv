@@ -1,0 +1,5 @@
+variable,n,pearson_r,pearson_p,spearman_rho,spearman_p
+ingreso,16,0.77,0.0005,0.609,0.0122
+pobreza_65,16,-0.676,0.004,-0.574,0.0201
+urbano,16,0.589,0.0163,0.596,0.0148
+pct_65_mas,16,-0.423,0.1029,-0.464,0.0705
