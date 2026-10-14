@@ -89,3 +89,18 @@ def test_kpi_1_3_participacion():
     assert list(esc.index) == list(range(2026, 2036))
     assert esc.kpi_1_3_pct.max() < real.loc[2025, "kpi_1_3_pct"]  # el escenario nunca vuelve al nivel de 2025
     assert (f.cuentas_individuales + f.seguro_social_fapp + f.estado == f.flujo_total).all()
+
+
+def test_kpi_1_1_correlaciones():
+    """KPI 1.1 diagnóstico: 16 regiones sin vacíos, misma cobertura que la tarjeta y signos esperados."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    reg = pd.read_csv(dp / "kpi_cobertura_correlaciones_region.csv")
+    assert len(reg) == 16 and not reg.isna().any().any()
+    pres = pd.read_csv(dp / "kpi_presion_previsional_region.csv").set_index("region_id")
+    assert (reg.set_index("region_id").cobertura_previsional_pct == pres.cobertura_previsional_pct.reindex(reg.region_id)).all()
+    assert abs(reg.share_cotizantes_pct.sum() - 100) < 0.1
+    res = pd.read_csv(dp / "kpi_cobertura_correlaciones_resumen.csv").set_index("variable")
+    assert (res.n == 16).all()
+    assert res.loc["ingreso", "pearson_r"] > 0.6 and res.loc["pobreza_65", "pearson_r"] < -0.5
+    assert res.loc["urbano", "pearson_r"] > 0.4 and res.loc["pct_65_mas", "pearson_r"] < 0

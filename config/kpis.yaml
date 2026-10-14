@@ -195,6 +195,12 @@ kpis_presentacion:
     archivo: [kpi_presion_previsional_region.csv]
     fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024]
     caveat: "Cotizantes 2024 contra población Censo 2024 (mismo año); 56.094 cotizantes sin región informada quedan fuera del cálculo regional."
+    analisis:
+      - nombre: "¿Por qué cotizan más en unas regiones? (correlaciones) y matriz de riesgo cobertura × envejecimiento"
+        archivo: [kpi_cobertura_correlaciones_region.csv, kpi_cobertura_correlaciones_resumen.csv]
+        script: 20_correlaciones_cobertura.py
+        fuente: ["INE Censo 2024 (% 65+, % urbano)", "CASEN 2022 (ingreso per cápita, pobreza 65+)"]
+        caveat: "Correlación no implica causalidad; n = 16 regiones. Ingreso de CASEN 2022 (encuesta muestral). Cotizantes 2024 vs. Censo 2024."
 
   - id: "1.2"
     nombre: "Razón de soporte"

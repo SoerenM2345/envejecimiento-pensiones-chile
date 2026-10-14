@@ -401,3 +401,142 @@ def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
     fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
     fig.update_yaxes(title="% del flujo total", range=[0, 70], **_EJE_CLARO)
     return fig
+
+
+# KPI 1.1 (diagnóstico): dispersión de cobertura y matriz de riesgo
+_TAM_MAX_PX = 55  # diámetro de la burbuja más grande (Metropolitana)
+_AREA_PX = (900, 400)  # área de trazado aproximada en el dashboard (ancho, alto), para ubicar los rótulos
+_POSICIONES = [  # (dirección x, dirección y) alrededor de la burbuja, en el orden en que se prueban
+    (0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1),
+]
+
+
+def _rango(serie: pd.Series, margen: float) -> tuple:
+    d = serie.max() - serie.min()
+    return serie.min() - margen * d, serie.max() + margen * d
+
+
+def _ubicar_rotulos(x, y, textos, radios_px, rango_x, rango_y):
+    """Elige para cada rótulo un desplazamiento (en píxeles) alrededor de su burbuja que no se cruce con rótulos ya
+    puestos ni con otras burbujas; si no hay lugar libre cerca, lo aleja más (y se dibuja con línea guía).
+    Heurística voraz sobre el área de trazado aproximada _AREA_PX. Devuelve [(dx, dy, con_linea)] por punto."""
+    ancho, alto = _AREA_PX
+    px_x = (np.asarray(x, float) - rango_x[0]) / (rango_x[1] - rango_x[0]) * ancho
+    px_y = (np.asarray(y, float) - rango_y[0]) / (rango_y[1] - rango_y[0]) * alto
+    cajas, salida = [], [None] * len(px_x)
+
+    def libre(caja, i):
+        if caja[0] < 0 or caja[2] > ancho or caja[1] < 0 or caja[3] > alto:
+            return False
+        if any(not (caja[2] < c[0] or caja[0] > c[2] or caja[3] < c[1] or caja[1] > c[3]) for c in cajas):
+            return False
+        return not any((max(caja[0], min(px_x[j], caja[2])) - px_x[j]) ** 2
+                       + (max(caja[1], min(px_y[j], caja[3])) - px_y[j]) ** 2 < (radios_px[j] + 2) ** 2
+                       for j in range(len(px_x)))
+
+    for i in np.argsort(-np.asarray(radios_px)):  # primero las burbujas grandes
+        w, h = 6.5 * len(textos[i]) + 6, 15
+        for distancia in (0, 18, 36, 54):  # 0 = pegado a la burbuja; más lejos = con línea guía
+            for ux, uy in _POSICIONES:
+                norma = np.hypot(ux, uy)
+                dx = ux / norma * (radios_px[i] + distancia) + ux * w / 2
+                dy = uy / norma * (radios_px[i] + distancia) + uy * h / 2
+                caja = (px_x[i] + dx - w / 2, px_y[i] + dy - h / 2, px_x[i] + dx + w / 2, px_y[i] + dy + h / 2)
+                if libre(caja, i):
+                    salida[i] = (dx, dy, distancia > 0)
+                    cajas.append(caja)
+                    break
+            if salida[i]:
+                break
+        if salida[i] is None:  # sin lugar: arriba de la burbuja (el hover lo identifica igual)
+            salida[i] = (0, radios_px[i] + h / 2, False)
+    return salida
+
+
+def _burbujas(fig, df, x, y, hover, color, rango_x, rango_y):
+    """Burbujas por región con tamaño = cotizantes; rótulos como anotaciones sin solaparse."""
+    sizeref = df.cotizantes.max() / _TAM_MAX_PX ** 2
+    radios = list(np.sqrt(df.cotizantes / sizeref) / 2)
+    fig.add_scatter(x=df[x], y=df[y], mode="markers", text=df.region_nombre, showlegend=False,
+                    marker=dict(size=df.cotizantes, sizemode="area", sizeref=sizeref, sizemin=4, color=color,
+                                opacity=0.75, line=dict(color="white", width=1)),
+                    customdata=np.stack([df.cotizantes, df.share_cotizantes_pct], axis=1),
+                    hovertemplate="<b>%{text}</b><br>" + hover
+                    + "<br>Cotizantes: %{customdata[0]:,.0f} (%{customdata[1]:.1f}% del total)<extra></extra>")
+    for (dx, dy, linea), xi, yi, nombre in zip(_ubicar_rotulos(df[x], df[y], list(df.region_nombre), radios,
+                                                               rango_x, rango_y), df[x], df[y], df.region_nombre):
+        fig.add_annotation(x=xi, y=yi, text=nombre, showarrow=linea, arrowhead=0, arrowwidth=1, arrowcolor=INK_MUTED,
+                           ax=dx, ay=-dy, xshift=0 if linea else dx, yshift=0 if linea else dy,
+                           font=dict(color=INK_PRIMARY, size=11))
+
+
+def num_cl(v: float, dec: int = 2) -> str:
+    """Número con coma decimal (formato chileno) para textos y anotaciones."""
+    return f"{v:.{dec}f}".replace(".", ",")
+
+
+def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unidad: str, corr: pd.Series) -> go.Figure:
+    """KPI 1.1: cobertura previsional (%) vs. una variable regional, burbuja = cotizantes, recta MCO.
+    df: kpi_cobertura_correlaciones_region.csv; corr: fila del resumen (pearson_r, spearman_rho, n)."""
+    fig = go.Figure()
+    pendiente, intercepto = np.polyfit(df[var], df.cobertura_previsional_pct, 1)
+    xs = np.linspace(df[var].min(), df[var].max(), 50)
+    fig.add_scatter(x=xs, y=intercepto + pendiente * xs, mode="lines", name="Recta MCO",
+                    line=dict(color=RED, width=2, dash="dash"), hoverinfo="skip")
+    formato_x = ":$,.0f" if var == "ingreso_per_capita_prom" else ":.1f"
+    rx, ry = _rango(df[var], 0.08), _rango(df.cobertura_previsional_pct, 0.12)
+    _burbujas(fig, df, var, "cobertura_previsional_pct",
+              f"{etiqueta}: %{{x{formato_x}}}<br>Cobertura: %{{y:.1f}}%", BLUE, rx, ry)
+    fig.add_annotation(xref="paper", yref="paper", x=0.01, y=0.99, xanchor="left", yanchor="top", showarrow=False,
+                       text=f"r = {num_cl(corr.pearson_r)}, ρ = {num_cl(corr.spearman_rho)}, n = {int(corr.n)}",
+                       font=dict(color=INK_PRIMARY, size=13), bgcolor="rgba(255,255,255,0.8)")
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=520, showlegend=False,
+                      title=f"Cobertura previsional vs. {etiqueta.lower()} (burbuja = cotizantes)")
+    fig.update_xaxes(title=f"{etiqueta} ({unidad})", tickformat="$,.0f" if var == "ingreso_per_capita_prom" else None,
+                     range=list(rx), **_EJE_CLARO)
+    fig.update_yaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
+    return fig
+
+
+CUADRANTES = {  # (cobertura alta, envejecimiento alto) -> (nombre, color de fondo)
+    (False, True): ("Riesgo doble", RED),
+    (False, False): ("Potencial de captación", ORANGE),
+    (True, True): ("Base que envejece", VIOLET),
+    (True, False): ("Núcleo a retener", BLUE),
+}
+
+
+def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> go.Figure:
+    """KPI 1.1: matriz de riesgo cobertura × % 65+, cuadrantes cortados en los valores nacionales.
+    df: kpi_cobertura_correlaciones_region.csv."""
+    x0, x1 = _rango(df.cobertura_previsional_pct, 0.12)
+    y0, y1 = _rango(df.pct_65_mas, 0.12)
+    fig = go.Figure()
+    for (alta_cob, alto_env), (nombre, color) in CUADRANTES.items():
+        qx0, qx1 = (nac_cobertura, x1) if alta_cob else (x0, nac_cobertura)
+        qy0, qy1 = (nac_65, y1) if alto_env else (y0, nac_65)
+        fig.add_shape(type="rect", x0=qx0, x1=qx1, y0=qy0, y1=qy1, fillcolor=color, opacity=0.07, line_width=0,
+                      layer="below")
+        fig.add_annotation(x=qx1 if alta_cob else qx0, y=qy1 if alto_env else qy0, text=f"<b>{nombre}</b>",
+                           xanchor="right" if alta_cob else "left", yanchor="top" if alto_env else "bottom",
+                           showarrow=False, font=dict(color=color, size=13), xshift=-6 if alta_cob else 6,
+                           yshift=-4 if alto_env else 4)
+    fig.add_vline(x=nac_cobertura, line_dash="dash", line_color=INK_MUTED,
+                  annotation_text=f"Cobertura país {num_cl(nac_cobertura, 1)}%", annotation_position="bottom right",
+                  annotation_font_color=INK_PRIMARY)
+    fig.add_hline(y=nac_65, line_dash="dash", line_color=INK_MUTED,
+                  annotation_text=f"65+ país {num_cl(nac_65, 1)}%", annotation_position="top left",
+                  annotation_font_color=INK_PRIMARY)
+    _burbujas(fig, df, "cobertura_previsional_pct", "pct_65_mas", "Cobertura: %{x:.1f}%<br>65+: %{y:.1f}%", INK_MUTED,
+              (x0, x1), (y0, y1))
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=560, showlegend=False,
+                      title="Matriz de riesgo: cobertura previsional × envejecimiento (burbuja = cotizantes)")
+    fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=[x0, x1], **_EJE_CLARO)
+    fig.update_yaxes(title="Población de 65 años y más (% del total)", ticksuffix="%", range=[y0, y1], **_EJE_CLARO)
+    return fig
+
+
+def risk_quadrant(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> pd.Series:
+    """Nombre del cuadrante de cada región (mismo corte que coverage_risk_matrix)."""
+    return pd.Series([CUADRANTES[(c >= nac_cobertura, e > nac_65)][0]
+                      for c, e in zip(df.cobertura_previsional_pct, df.pct_65_mas)], index=df.index)
