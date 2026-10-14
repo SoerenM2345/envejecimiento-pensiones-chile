@@ -6,7 +6,7 @@ from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
 from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, region_choropleth
-from components.charts import fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
+from components.charts import estilo_kpi, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
 st.title("Objetivo 2: controlar el costo por cliente")
 st.markdown("Optimizar la estructura de costos para absorber el crecimiento de cuentas inactivas y pensionadas sin perder rentabilidad.")
@@ -179,6 +179,32 @@ def proyeccion_2_2(_h: pd.DataFrame, crec_pib: float, pgu_250: bool, con_fapp: b
                             load_csv("fapp_aporte_fiscal.csv"), crec_pib, pgu_250, con_fapp)
 
 
+def _texto(t):
+    """st.markdown que no confunde los pares de «$» con fórmulas."""
+    st.markdown(t.replace("$", "\\$"))
+
+
+def _nota(t):
+    st.caption(t.replace("$", "\\$"))
+
+
+def _caja(clave, titulo, formula, numeros, defecto=True):
+    """Caja del panel de fórmulas: casilla para mostrar u ocultar la línea, fórmula en símbolos y las cifras del año base."""
+    with st.container(border=True):
+        ver = st.checkbox(titulo, value=defecto, key=clave)
+        st.markdown(f"`{formula}`")
+        _nota(numeros)
+    return ver
+
+
+def _grafico(fig, alto=460, leyenda_y=None):
+    """Mismo estilo de texto que los KPIs 1.2 y 1.3 (texto negro, leyenda abajo)."""
+    estilo_kpi(fig, alto)
+    if leyenda_y is not None:
+        fig.update_layout(legend_y=leyenda_y)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+
+
 def render_2_2():
     pil = load_csv("pgu_pbs_aps_nacional_anual.csv")
     pil = pil[(pil.tipo_beneficio == "Total")].set_index("anio")
@@ -196,11 +222,9 @@ def render_2_2():
         (f"Gasto en edad avanzada / PIB ({int(ult.anio)})", f"{ult.edad_avanzada_pct_pib:.2f}%" if pd.notna(ult.edad_avanzada_pct_pib) else "n/d", "DIPRES, clasificación funcional del Gobierno Central",
          ["Gasto del Gobierno Central, código 7102 «Edad avanzada»", "Incluye PGU, PBS/APS y sistema antiguo", "Dividido por el PIB a precios corrientes"]),
     ])
-    st.plotly_chart(spending_pct_pib(d), use_container_width=True, config=PLOTLY_DL_CONFIG)
-    st.markdown("**Ratio 2 con el valor presente del déficit oficial: sigue pendiente.** Falta ese valor presente (ver `docs/DATOS_ABIERTOS.md`). "
-                "Mientras tanto, abajo se calcula una alternativa con datos oficiales: cuánto del gasto que sube cubren las reservas (FRP y FAPP).")
-    st.divider()
-    st.markdown("#### Profundización: ¿quién financia el Pilar y cuánto aguantan las reservas?")
+    _grafico(spending_pct_pib(d), 420)
+    _nota("\\* Ratio 2 con el valor presente del déficit oficial: pendiente (no está publicado). Abajo, una alternativa con las reservas.")
+    _texto("#### ¿Quién financia el Pilar y cuánto aguantan las reservas?")
     _profundizacion_2_2()
 
 
@@ -212,7 +236,7 @@ def _profundizacion_2_2():
     crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 2.0, 0.5, format="%.1f%%", key="k22_pib",
                      help="Mismo supuesto de partida que el KPI 2.1. Un PIB que crece más reduce el peso del Pilar en el PIB.") / 100
     pgu250 = c2.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=True, key="k22_pgu")
-    con_fapp = c3.checkbox("Sumar el aporte del Estado al FAPP (Ley 21.735)", value=True, key="k22_fapp",
+    con_fapp = c3.checkbox("Sumar el aporte al FAPP (Ley 21.735)", value=True, key="k22_fapp",
                            help="Desde 2028 la ley obliga al Estado a aportar al Fondo Autónomo de Protección Previsional (Seguro Social): "
                                 "2,2 millones de UTM al año, hasta 15 millones desde 2037.")
     p = proyeccion_2_2(h, crec, pgu250, con_fapp)
@@ -220,45 +244,41 @@ def _profundizacion_2_2():
 
     with t1:
         hist = peso_historico(load_csv("pgu_pbs_aps_nacional_anual.csv"), load_csv("macro_pib_anual.csv"), load_csv("gasto_proteccion_social.csv"))
-        st.plotly_chart(fiscal_weight_chart(hist, p, con_fapp), use_container_width=True, config=PLOTLY_DL_CONFIG)
         b, a37, f = p.loc[2025], p.loc[2037], p.loc[2050]
+        utm = ap.utm_pesos_2025.iloc[0]
+        cg, cp = st.columns([3, 1])
+        with cp:
+            v_obs = _caja("k22_v_obs", "Observado", "Pilar / PIB = (PGU + PBS/APS) / PIB",
+                          f"2025: ${b.pilar / 1e12:.2f} ÷ ${b.pib_real25 / 1e12:.1f} billones → {b.pilar_pct_pib:.2f}%")
+            v_esc = _caja("k22_v_esc", "Escenario del Pilar", "c₆₅ × f(PGU) × P₆₅₊ / PIB",
+                          f"2037: ${a37.pilar / 1e12:.2f} ÷ ${a37.pib_real25 / 1e12:.0f} billones → {a37.pilar_pct_pib:.2f}%")
+            v_fapp = _caja("k22_v_fapp", "Con aporte al FAPP", "(Pilar + UTM × valor UTM) / PIB",
+                           f"2037: ${a37.pilar / 1e12:.2f} + {ap.millones_utm.max():.0f} M UTM × ${utm:,.0f} → ${a37.carga / 1e12:.2f} billones = {a37.carga_pct_pib:.2f}%") if con_fapp else False
+        with cg:
+            _grafico(fiscal_weight_chart(hist, p, con_fapp, (v_obs, v_esc, v_fapp)), 560)
         pico = p.pilar_pct_pib.idxmax()
         kpi_card_row([
-            ("Pilar + PGU, 2025", f"{b.pilar_pct_pib:.2f}% del PIB", "Ratio 1 del KPI: el mismo valor del gráfico de arriba"),
-            (f"Pilar + PGU, {pico}", f"{p.loc[pico].pilar_pct_pib:.2f}% del PIB", f"Año de mayor peso del Pilar en el escenario; +{p.loc[pico].pilar_pct_pib - b.pilar_pct_pib:.2f} puntos del PIB sobre 2025"),
-            ("Con aporte al FAPP, 2037", f"{a37.carga_pct_pib:.2f}% del PIB", "Pilar + aporte del Estado al FAPP; 15 millones de UTM al año desde 2037"),
-            ("Carga 2050", f"{f.carga_pct_pib:.2f}% del PIB", f"Equivale a ${f.carga / 1e12:.1f} billones al año, en pesos de 2025 (2025: ${b.carga / 1e12:.1f} billones)"),
+            ("Pilar + PGU, 2025 (% del PIB)", f"{b.pilar_pct_pib:.2f}%", "Ratio 1 del KPI: el mismo valor del gráfico de arriba"),
+            (f"Pilar + PGU, {pico} (% del PIB)", f"{p.loc[pico].pilar_pct_pib:.2f}%", f"Año de mayor peso del Pilar en el escenario; +{p.loc[pico].pilar_pct_pib - b.pilar_pct_pib:.2f} puntos del PIB sobre 2025"),
+            ("Con FAPP, 2037 (% del PIB)", f"{a37.carga_pct_pib:.2f}%", "Pilar + aporte del Estado al FAPP; 15 millones de UTM al año desde 2037"),
+            ("Carga 2050 (% del PIB)", f"{f.carga_pct_pib:.2f}%", f"Equivale a ${f.carga / 1e12:.1f} billones al año, en pesos de 2025 (2025: ${b.carga / 1e12:.1f} billones)"),
         ])
-        st.markdown(
-            f"**Lectura:** el Pilar Solidario y la PGU pesan {b.pilar_pct_pib:.2f}% del PIB en 2025 y llegan a {p.loc[pico].pilar_pct_pib:.2f}% en {pico}: "
-            f"entre 2025 y 2030 sube {p.loc[2030].pilar_pct_pib - b.pilar_pct_pib:+.2f} puntos del PIB (el alza de la PGU a $250.000 y el envejecimiento) y entre 2030 y 2050 {f.pilar_pct_pib - p.loc[2030].pilar_pct_pib:+.2f} puntos. "
-            + (f"El aporte del Estado al FAPP suma {100 * (a37.carga - a37.pilar) / a37.pib_real25:.2f}% del PIB desde 2037 "
-               f"(${(a37.carga - a37.pilar) / 1e12:.2f} billones al año), de modo que la carga total de la reforma llega a {a37.carga_pct_pib:.2f}% del PIB en 2037. "
-               if con_fapp else "")
-            + f"La carga en 2050 es {f.carga_pct_pib:.2f}% del PIB."
-        )
-        st.caption("Observado 2009-2025 (sólido): monto nominal pagado del Pilar (incluye invalidez) / PIB corriente, del mismo año. Escenario (punteado): "
-                   "población 65+ INE base 2024; el costo por persona 65+ se mantiene en términos reales salvo el alza de la PGU; invalidez constante en términos reales; "
-                   "el aporte al FAPP está en UTM (ley) y se pasa a pesos de 2025 con la UTM promedio de 2025. No incluye el sistema antiguo ni el resto de la reforma.")
+        _texto(f"**Lectura:** el Pilar pasa de {b.pilar_pct_pib:.2f}% del PIB en 2025 a {p.loc[pico].pilar_pct_pib:.2f}% en {pico}"
+                    + (f"; con el aporte al FAPP, la carga llega a {a37.carga_pct_pib:.2f}% en 2037." if con_fapp else "."))
+        _nota("\\* Sólido: observado. Punteado: escenario. Franja: aporte del Estado al FAPP.")
 
     with t2:
         fu = fuentes_pilar(frp, nac)
         g1, g2 = st.columns(2)
         with g1:
-            st.plotly_chart(financing_sources_chart(fu), use_container_width=True, config=PLOTLY_DL_CONFIG)
+            _grafico(financing_sources_chart(fu), 420)
         with g2:
-            st.plotly_chart(fapp_schedule_chart(proyeccion_2_2(h, crec, pgu250, True)), use_container_width=True, config=PLOTLY_DL_CONFIG)
+            _grafico(fapp_schedule_chart(proyeccion_2_2(h, crec, pgu250, True)), 420)
         u = fu.iloc[-1]
         f1 = frp.set_index("anio").loc[2025]
-        st.markdown(
-            f"**Lectura:** en {int(u.anio)} el retiro del Fondo de Reserva de Pensiones (US${f1.retiros_musd:,.0f} millones, ${u.retiros_real / 1e12:.2f} billones) "
-            f"financió solo el **{u.pct_frp:.1f}%** del Pilar Solidario y la PGU (${u.pilar_real / 1e12:.2f} billones; {f1.retiros_pct_pib:.2f}% del PIB): "
-            f"el {100 - u.pct_frp:.1f}% restante sale del presupuesto general. Esa proporción se mueve poco: entre {fu.pct_frp.min():.1f}% y {fu.pct_frp.max():.1f}% en {int(fu.anio.min())}-{int(fu.anio.max())}. "
-            f"El único financiamiento dedicado nuevo es el aporte del Estado al FAPP, que por ley parte en 2028 con ${ap.aporte_mm_2025.iloc[0] / 1e6:.2f} billones "
-            f"y llega a ${ap.aporte_mm_2025.max() / 1e6:.2f} billones al año desde 2037, y va al Seguro Social, no al Pilar."
-        )
-        st.caption("Retiros del FRP: informe mensual de DIPRES (julio 2026), en US$, pasados a pesos con el dólar observado promedio de cada año (SII) y a pesos de 2025 con el IPC. "
-                   "Los retiros de 2020-2021 (US$ 1.576 y 2.960 millones) se omiten por no ser comparables. Gasto del Pilar: nominal del año, incluye invalidez.")
+        _texto(f"**Lectura:** en {int(u.anio)} el retiro del FRP (US${f1.retiros_musd:,.0f} millones) financió el **{u.pct_frp:.1f}%** del Pilar (${u.pilar_real / 1e12:.2f} billones); "
+                    f"el {100 - u.pct_frp:.1f}% sale del presupuesto general. El aporte del Estado al FAPP llega a ${ap.aporte_mm_2025.max() / 1e6:.2f} billones al año desde 2037 y va al Seguro Social, no al Pilar.")
+        _nota("\\* Bajo cada año: parte del Pilar que financió el FRP. Pesos de 2025.")
 
     with t3:
         k1, k2, k3 = st.columns(3)
@@ -274,7 +294,17 @@ def _profundizacion_2_2():
             reserva0 += fb[fb.cierre == "2025-12-31"].activos_mm.iloc[0] * 1e6
         cubre = "incremento" if cubre_in.startswith("Solo") else "total"
         dr, res = trayectoria_reserva(p, reserva0, r_real, cubre)
-        st.plotly_chart(reserve_chart(dr, res, cubre), use_container_width=True, config=PLOTLY_DL_CONFIG)
+        a37r = dr.loc[2037]
+        base_pct = dr.pilar_pct_pib.iloc[0]
+        cg, cp = st.columns([3, 1])
+        with cp:
+            v_gas = _caja("k22_v_gas", "Gasto cubierto", "G = max(0, C − p₂₅ × PIB)" if cubre == "incremento" else "G = C (todo el gasto)",
+                          (f"2037: ${a37r.carga / 1e12:.2f} − {base_pct:.2f}% × ${a37r.pib_real25 / 1e12:.0f} → ${a37r.gasto_cubierto / 1e12:.2f} billones"
+                           if cubre == "incremento" else f"2037: C = ${a37r.carga / 1e12:.2f} billones"))
+            v_sal = _caja("k22_v_sal", "Saldo de la reserva", "S = S₋₁ × (1 + r) − G",
+                          f"2026: ${reserva0 / 1e12:.1f} × {1 + r_real:.3f} − ${dr.loc[2026].gasto_cubierto / 1e12:.2f} → ${dr.loc[2026].saldo / 1e12:.1f} billones")
+        with cg:
+            _grafico(reserve_chart(dr, res, cubre, (v_gas, v_sal)), 480, leyenda_y=-0.3)
         agot = res["anio_agotamiento"]
         kpi_card_row([
             ("Reserva al 31-dic-2025", f"${reserva0 / 1e12:.1f} billones", "FRP: US$10.091 millones × dólar de cierre $911,18" + (" + activos del FAPP" if res_in.startswith("FRP +") else ""),
@@ -283,43 +313,25 @@ def _profundizacion_2_2():
              ["100% o más: la reserva alcanza hasta 2050", "Ratio alternativo al VP del déficit oficial, que no está publicado"]),
             ("Año en que se agota", str(agot) if agot else "No antes de 2051", "Primer año con saldo negativo"),
         ])
-        st.markdown(
-            f"**Lectura:** la reserva de ${reserva0 / 1e12:.1f} billones equivale a {res['anios_gasto_2025']:.1f} años del gasto del Pilar de 2025. "
-            + (f"Si solo cubre el alza del gasto sobre el peso de 2025 (hasta ${dr.gasto_cubierto.max() / 1e12:.1f} billones al año), alcanza hasta **{agot}** y cubre el {100 * res['ratio_cobertura']:.0f}% del valor presente de ese gasto. "
-               if cubre == "incremento" and agot else "")
-            + (f"Si tuviera que financiar todo el gasto del Pilar se agotaría en **{agot}**: es un amortiguador, no un financiamiento. " if cubre == "total" and agot else "")
-            + ("La reserva alcanza hasta 2050 con estos supuestos. " if not agot else "")
-            + "Más allá de ese año, el alza tiene que financiarse con impuestos."
-        )
-        st.caption("Stock al 31-dic-2025 (FRP en US$ × dólar del último día hábil, validado contra DIPRES) frente al gasto de 2025 y su proyección: todo en pesos de 2025. "
-                   "Es un ejercicio de cobertura, no un plan de retiros: los retiros reales del FRP los fija la ley y Hacienda, y no se modelan las reglas de reposición.")
+        _texto(f"**Lectura:** la reserva equivale a {res['anios_gasto_2025']:.1f} años del gasto del Pilar de 2025; "
+                    + (f"cubre {'el alza' if cubre == 'incremento' else 'todo el gasto'} hasta **{agot}** ({100 * res['ratio_cobertura']:.0f}% de su valor presente)." if agot else "alcanza hasta 2050 con estos supuestos."))
+        _nota("\\* Estrella: año en que el saldo pasa a negativo. Es un ejercicio de cobertura, no un plan de retiros.")
 
     with t4:
         b6 = fb[fb.cierre == "2026-06-30"].reset_index(drop=True)
         b5 = fb[fb.cierre == "2025-12-31"].iloc[0]
         r6 = b6.iloc[0]
-        meses = 6
-        quema = (r6.beneficios_periodo_mm - r6.cotizaciones_periodo_mm) / meses
-        tope_musd = 700
-        tc = frp.set_index("anio").loc[2025, "tc_cierre"]
+        quema = (r6.beneficios_periodo_mm - r6.cotizaciones_periodo_mm) / 6
         g1, g2 = st.columns([3, 2])
         with g1:
-            st.plotly_chart(fapp_flow_chart(b6), use_container_width=True, config=PLOTLY_DL_CONFIG)
+            _grafico(fapp_flow_chart(b6), 420)
         with g2:
             st.metric("Patrimonio del FAPP, 31-dic-2025", f"${b5.patrimonio_mm / 1e6:.2f} billones")
-            st.metric("Patrimonio del FAPP, 30-jun-2026", f"${r6.patrimonio_mm / 1e6:.3f} billones",
-                      help="Activos menos lo que el FAPP debe al FRP")
+            st.metric("Patrimonio del FAPP, 30-jun-2026", f"${r6.patrimonio_mm / 1e6:.3f} billones", help="Activos menos lo que el FAPP debe al FRP")
             st.metric("Cotizaciones / beneficios, ene-jun 2026", f"{100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}%")
-        st.markdown(
-            f"**Lectura:** en el primer semestre de 2026 el FAPP pagó ${r6.beneficios_periodo_mm / 1e6:.2f} billones en beneficios y recibió ${r6.cotizaciones_periodo_mm / 1e6:.2f} billones en cotizaciones "
-            f"({100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}%). Su patrimonio bajó de ${b5.patrimonio_mm / 1e6:.2f} a ${r6.patrimonio_mm / 1e6:.3f} billones: "
-            f"los activos (${r6.activos_mm / 1e6:.2f} billones) casi son todos el préstamo del FRP (${r6.deuda_frp_mm / 1e6:.2f} billones). Al ritmo del semestre el FAPP gasta ${quema / 1e3:.0f} mil millones al mes "
-            f"más de lo que recibe, así que el patrimonio equivale a {r6.patrimonio_mm / quema:.1f} meses de ese déficit y los activos a {r6.activos_mm / quema:.1f}. "
-            f"Quedan hasta US${tope_musd} millones autorizados del FRP (≈ ${tope_musd * tc / 1e6:.2f} billones, {tope_musd * tc / quema:.0f} meses a ese ritmo). "
-            "La brecha es transitoria por diseño: según el calendario de DIPRES la cotización al Seguro Social sube de 0,9% a 3,4% de la masa imponible en septiembre de 2026 y llega a 4,0% en septiembre de 2027."
-        )
-        st.caption("Estados financieros del FAPP al 31-dic-2025 (5 meses de operación) y al 30-jun-2026 (interinos). Esta pestaña usa el último dato disponible (junio de 2026), seis meses después del resto del KPI. "
-                   "Faltan los estados de julio a septiembre de 2026 para ver si el déficit se cerró con la nueva tasa. Tasas de cotización y límite del FRP: nota técnica DIPRES 2025/47.")
+        _texto(f"**Lectura:** en ene-jun 2026 las cotizaciones cubrieron {100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}% de los beneficios y el patrimonio quedó en "
+                    f"{r6.patrimonio_mm / quema:.1f} meses de ese déficit; quedan hasta US$700 millones autorizados del FRP.")
+        _nota("\\* Último dato disponible: 30-jun-2026, seis meses después del resto del KPI. Detalle de la brecha en «Método y fuentes».")
 
     with t5:
         reg = dependencia_regional(load_csv("pgu_pbs_aps_region_trimestral.csv"), load_csv("pgu_pbs_aps_nacional_anual.csv"),
@@ -331,33 +343,38 @@ def _profundizacion_2_2():
         proy_reg = load_csv("kpi_proyeccion_regional.csv")
         n35, n50 = (proyeccion_sin_pension(reg, proy_reg, a).n_anio.sum() for a in (2035, 2050))
         kpi_card_row([
-            ("Sin pensión propia, 2024", f"{nacr.n_sin_pension / 1000:,.0f} mil personas", "Beneficiarios de la PGU no contributiva, promedio mensual del 4.º trimestre de 2024"),
-            ("PGU que les paga el Estado", f"${nacr.costo_sin_pension / 1e12:.2f} billones al año", f"Equivale a {100 * nacr.costo_sin_pension / pib24:.2f}% del PIB de 2024, en pesos de 2025",
+            ("Sin pensión propia, 2024", f"{nacr.n_sin_pension / 1000:,.0f} mil", "Beneficiarios de la PGU no contributiva, promedio mensual del 4.º trimestre de 2024"),
+            ("PGU: billones de $ al año", f"{nacr.costo_sin_pension / 1e12:.2f}", f"Equivale a {100 * nacr.costo_sin_pension / pib24:.2f}% del PIB de 2024, en pesos de 2025",
              ["Cuota del 4.º trimestre de 2024 de la PGU no contributiva aplicada a la PGU de 2024", "Con la PGU de $250.000 el monto por persona sube"]),
-            ("Escenario 2035", f"{n35 / 1000:,.0f} mil personas", f"Con la tasa de cada región de 2024 constante; {n35 / nacr.n_sin_pension:.1f} veces las de 2024"),
-            ("Escenario 2050", f"{n50 / 1000:,.0f} mil personas", f"{n50 / nacr.n_sin_pension:.1f} veces las de 2024"),
+            ("Sin pensión propia, 2035", f"{n35 / 1000:,.0f} mil", f"Con la tasa de cada región de 2024 constante; {n35 / nacr.n_sin_pension:.1f} veces las de 2024"),
+            ("Sin pensión propia, 2050", f"{n50 / 1000:,.0f} mil", f"{n50 / nacr.n_sin_pension:.1f} veces las de 2024"),
         ])
-        g1, g2 = st.columns([3, 2])
+        g1, g2 = st.columns([5, 4])
         with g1:
-            st.plotly_chart(dependence_regions_chart(rr, nacr.pct_sin_pension), use_container_width=True, config=PLOTLY_DL_CONFIG)
+            _grafico(dependence_regions_chart(rr, nacr.pct_sin_pension), 520)
         with g2:
             tabla = rr.sort_values("pct_sin_pension", ascending=False)[["region_nombre", "pct_sin_pension", "beneficios_por_100", "peso_mes_por_65", "razon_soporte"]].rename(columns={
-                "region_nombre": "Región", "pct_sin_pension": "% sin pensión propia", "beneficios_por_100": "Beneficios por 100 de 65+",
-                "peso_mes_por_65": "$ al mes por persona 65+", "razon_soporte": "Cotizantes por 65+"})
-            st.dataframe(tabla, hide_index=True, use_container_width=True,
-                         column_config={"% sin pensión propia": st.column_config.NumberColumn(format="%.1f"), "Beneficios por 100 de 65+": st.column_config.NumberColumn(format="%.0f"),
-                                        "$ al mes por persona 65+": st.column_config.NumberColumn(format="$%,.0f"), "Cotizantes por 65+": st.column_config.NumberColumn(format="%.2f")})
-        st.markdown(
-            f"**Lectura:** {nacr.pct_sin_pension:.0f}% de los beneficiarios de la PGU no recibe otra pensión ({nacr.n_sin_pension / 1000:,.0f} mil personas, ${nacr.costo_sin_pension / 1e12:.2f} billones al año); en {alta.region_nombre} son {alta.pct_sin_pension:.0f}% y en {baja.region_nombre} {baja.pct_sin_pension:.0f}%. "
-            f"Las regiones con más cotizantes por persona 65+ dependen menos del Estado (correlación {corr:.2f} entre el % sin pensión propia y los cotizantes por 65+, 16 regiones): "
-            f"donde el sistema contributivo llegó menos, el Pilar paga más de la pensión. El pago mensual por persona 65+ varía poco entre regiones (${rr.peso_mes_por_65.min():,.0f} a ${rr.peso_mes_por_65.max():,.0f}); "
-            "lo que cambia es de quién depende la pensión. Si cada región mantiene su tasa, serían "
-            f"{n35 / 1000:,.0f} mil personas en 2035 y {n50 / 1000:,.0f} mil en 2050."
-        )
-        st.caption("Cuarto trimestre de 2024 (informe del Pilar Solidario, promedio mensual) frente a la población 65+ del Censo 2024 y a los cotizantes de diciembre de 2024. "
-                   "«Sin pensión propia» = beneficiarios de la PGU no contributiva / toda la PGU. Los montos regionales usan la participación de cada región en el trimestre aplicada al total anual de 2024. "
-                   "Escenario 2035 y 2050: tasa regional de 2024 constante sobre la población 65+ regional del KPI 1.2 (reparto de tasas nacionales, no proyección oficial); no modela la reforma.")
+                "region_nombre": "Región", "pct_sin_pension": "% sin pensión", "beneficios_por_100": "Benef. por 100",
+                "peso_mes_por_65": "$ mensual", "razon_soporte": "Cotiz. por 65+"})
+            st.dataframe(tabla, hide_index=True, use_container_width=True, height=520,
+                         column_config={"% sin pensión": st.column_config.NumberColumn(format="%.1f"), "Benef. por 100": st.column_config.NumberColumn(format="%.0f"),
+                                        "$ mensual": st.column_config.NumberColumn(format="$%,.0f"), "Cotiz. por 65+": st.column_config.NumberColumn(format="%.2f")})
+        _texto(f"**Lectura:** {nacr.pct_sin_pension:.0f}% de los beneficiarios de la PGU no tiene otra pensión; en {alta.region_nombre} son {alta.pct_sin_pension:.0f}% y en {baja.region_nombre} {baja.pct_sin_pension:.0f}% "
+                    f"(correlación {corr:.2f} con los cotizantes por persona 65+).")
+        _nota("\\* 4.º trimestre de 2024 con el Censo 2024. Tabla: beneficios (PGU + APS vejez) por 100 personas 65+; $ mensual por persona 65+ (pesos de 2025). Escenario 2035 y 2050: tasa regional de 2024 constante.")
 
+    with st.expander("Método y fuentes"):
+        _nota("**Fechas.** Todo se ancla en 2025: Pilar y PIB son flujos de 2025; las reservas son saldos al 31-dic-2025; el retiro del FRP usa el dólar promedio del año y los saldos el dólar del último día hábil "
+                   "(30-dic-2025, SII; coincide con el que implica la tabla de activos en dólares de DIPRES). La pestaña «FAPP hoy» usa junio de 2026. Lo regional va con el Censo 2024 (4.º trimestre de 2024).")
+        _nota("**Observado y escenario.** 2009-2025: monto nominal pagado del Pilar (incluye invalidez) / PIB corriente del mismo año. Escenario: población 65+ INE base 2024; costo por persona 65+ constante en términos reales "
+                   "salvo la PGU de $250.000; invalidez constante en términos reales; el aporte al FAPP está en UTM y se pasa a pesos de 2025 con la UTM promedio de 2025 ($68.640). No incluye el sistema antiguo.")
+        _nota("**FAPP, brecha del primer semestre de 2026.** Es transitoria por diseño: según el calendario de DIPRES la cotización al Seguro Social sube de 0,9% a 3,4% de la masa imponible en septiembre de 2026 y llega a 4,0% en septiembre de 2027; el patrimonio es los activos menos lo que el FAPP debe al FRP.")
+        _nota("**Reservas.** Cartera propia del FRP (US$ 10.313 M de valor de mercado menos US$ 222 M ya transferidos al FAPP) a la rentabilidad real elegida; cubre el gasto elegido desde 2026. "
+                   "Ratio 2 = reserva / valor presente de ese gasto a la misma tasa. El FRP es para pensiones garantizadas; los activos del FAPP son del Seguro Social. No se modelan las reglas de retiro ni de reposición.")
+        _nota("**Sensibilidad.** El primer aporte al FAPP es 2028 en la tabla de la Subsecretaría y 2027 en el texto de DIPRES: adelantarlo mueve el agotamiento de 2033 a 2032. "
+                   "Usar el dólar promedio en vez del de cierre sube la reserva 4,4% y no cambia el año.")
+        _nota("**Fuentes.** FRP: informe mensual de DIPRES (julio 2026). FAPP: estados financieros al 31-dic-2025 y 30-jun-2026. Aporte por ley: Tabla 2 de la Ley 21.735 (Subsecretaría de Previsión Social). "
+                   "UTM y dólar: SII. Pilar: informes del Pilar Solidario. Los retiros del FRP de 2020 y 2021 no se desglosan y no se usan. Montos regionales: solo la participación de cada región en el trimestre, aplicada al total anual de 2024.")
     with st.expander("Qué se desprende para cada actor"):
         _recomendaciones_2_2(h, frp, fb, nac)
 
@@ -376,7 +393,7 @@ def _recomendaciones_2_2(h, frp, fb, nac):
     top = rr.head(3)
     pgu_nc = int(round(reg[reg.region_id == 0].iloc[0].n_sin_pension, -3))
     n35 = proyeccion_sin_pension(reg, load_csv("kpi_proyeccion_regional.csv"), 2035).n_anio.sum()
-    st.markdown(
+    _texto(
         "Cifras con los supuestos de partida (PIB +2%, PGU de $250.000, aporte al FAPP, reserva = FRP, rentabilidad real 2,5%).\n\n"
         f"**1. Hacienda / DIPRES (planificación fiscal).** El Pilar pasa de {base.pilar_pct_pib.iloc[0]:.2f}% del PIB en 2025 a {base.loc[pico].pilar_pct_pib:.2f}% en {pico}; con el aporte al FAPP la carga llega a {base.loc[2037].carga_pct_pib:.2f}% en 2037. "
         f"El FRP financia solo el {u.pct_frp:.1f}% del gasto del Pilar y, usado para cubrir el alza sobre el peso de 2025, se agota en {res['anio_agotamiento']} (cubre {100 * res['ratio_cobertura']:.0f}% del valor presente de ese alza). "

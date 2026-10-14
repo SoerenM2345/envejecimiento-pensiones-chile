@@ -287,18 +287,21 @@ def spending_pct_pib(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool) -> go.Figure:
+def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool, mostrar=(True, True, True)) -> go.Figure:
     """KPI 2.2, peso fiscal 2009-2050 (% del PIB). hist = financiamiento.peso_historico; p = financiamiento.proyeccion_carga.
-    Observado sólido, escenario punteado; la franja es el aporte del Estado al FAPP; la línea punteada gris es el peso de 2025."""
+    mostrar = (observado, escenario del Pilar, escenario con aporte al FAPP). Observado sólido, escenario punteado; la franja es el aporte
+    del Estado al FAPP; la línea punteada gris es el peso de 2025."""
     fig = go.Figure()
     base = p.pilar_pct_pib.iloc[0]
-    fig.add_scatter(x=hist.anio, y=hist.pilar_pct_pib, mode="lines+markers", name="Observado: PGU + pensiones solidarias",
-                    line=dict(color=ORANGE, width=3), hovertemplate="%{x}: %{y:.2f}%<extra></extra>")
-    fig.add_scatter(x=p.index, y=p.pilar_pct_pib, mode="lines", name="Escenario: PGU + pensiones solidarias",
-                    line=dict(color=ORANGE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
-    if con_fapp:
+    if mostrar[0]:
+        fig.add_scatter(x=hist.anio, y=hist.pilar_pct_pib, mode="lines+markers", name="Observado: PGU + pensiones solidarias",
+                        line=dict(color=ORANGE, width=3), hovertemplate="%{x}: %{y:.2f}%<extra></extra>")
+    if mostrar[1]:
+        fig.add_scatter(x=p.index, y=p.pilar_pct_pib, mode="lines", name="Escenario: PGU + pensiones solidarias",
+                        line=dict(color=ORANGE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
+    if con_fapp and mostrar[2]:
         fig.add_scatter(x=p.index, y=p.carga_pct_pib, mode="lines", name="Escenario: más aporte del Estado al FAPP",
-                        line=dict(color=VIOLET, width=3, dash="dash"), fill="tonexty", fillcolor="rgba(120,90,170,0.15)",
+                        line=dict(color=VIOLET, width=3, dash="dash"), fill="tonexty" if mostrar[1] else None, fillcolor="rgba(120,90,170,0.15)",
                         hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
     fig.add_hline(y=base, line_dash="dot", line_color=INK_MUTED, annotation_text=f"Peso de 2025: {base:.2f}%",
                   annotation_position="bottom right")
@@ -310,17 +313,17 @@ def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool) -> 
 
 def financing_sources_chart(f: pd.DataFrame) -> go.Figure:
     """KPI 2.2, quién paga el Pilar. f: anio, retiros_real (pesos de 2025 del retiro del FRP), pilar_real (gasto total del Pilar, pesos de 2025).
-    Barras apiladas en billones de pesos de 2025: lo que financió el fondo de reserva y el resto (impuestos generales)."""
+    Barras apiladas en billones de pesos de 2025: lo que financió el fondo de reserva y el resto (presupuesto general).
+    Bajo cada año va la parte que financió el FRP."""
     resto = f.pilar_real - f.retiros_real
     pct = 100 * f.retiros_real / f.pilar_real
+    anios = [f"{int(a)}<br>FRP: {v:.1f}%" for a, v in zip(f.anio, pct)]
     fig = go.Figure()
-    fig.add_bar(x=f.anio, y=f.retiros_real / 1e12, name="Retiro del Fondo de Reserva de Pensiones", marker_color=BLUE,
-                text=[f"{v:.1f}%" for v in pct], textposition="outside", cliponaxis=False,
-                hovertemplate="%{x}: %{y:.2f} billones<extra>Retiro del FRP</extra>")
-    fig.add_bar(x=f.anio, y=resto / 1e12, name="Resto: presupuesto general (impuestos)", marker_color=lighten(ORANGE),
-                hovertemplate="%{x}: %{y:.2f} billones<extra>Presupuesto general</extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Cómo se financia el Pilar Solidario y la PGU (billones de pesos de 2025)")
-    fig.update_xaxes(title="Año", dtick=1)
+    fig.add_bar(x=anios, y=f.retiros_real / 1e12, name="Retiro del Fondo de Reserva de Pensiones", marker_color=BLUE,
+                hovertemplate="%{y:.2f} billones<extra>Retiro del FRP</extra>")
+    fig.add_bar(x=anios, y=resto / 1e12, name="Resto: presupuesto general", marker_color=lighten(ORANGE),
+                hovertemplate="%{y:.2f} billones<extra>Presupuesto general</extra>")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Quién paga el Pilar (billones de $ de 2025)")
     fig.update_yaxes(title="Billones de pesos de 2025")
     return fig
 
@@ -330,29 +333,29 @@ def fapp_schedule_chart(p: pd.DataFrame) -> go.Figure:
     d = p[p.aporte_fapp > 0]
     fig = go.Figure(go.Bar(x=d.index, y=d.aporte_fapp / 1e12, marker_color=VIOLET, customdata=100 * d.aporte_fapp / d.pib_real25,
                            hovertemplate="%{x}: %{y:.2f} billones (%{customdata:.2f}% del PIB)<extra></extra>"))
-    fig.update_layout(**PLOTLY_LAYOUT, title="Aporte del Estado al FAPP por ley (billones de pesos de 2025)", showlegend=False)
+    fig.update_layout(**PLOTLY_LAYOUT, title="Aporte del Estado al FAPP (billones de $ de 2025)", showlegend=False)
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title="Billones de pesos de 2025", rangemode="tozero")
     return fig
 
 
-def reserve_chart(d: pd.DataFrame, res: dict, cubre: str) -> go.Figure:
+def reserve_chart(d: pd.DataFrame, res: dict, cubre: str, mostrar=(True, True)) -> go.Figure:
     """KPI 2.2, reserva vs gasto. d = financiamiento.trayectoria_reserva (con gasto_cubierto y saldo); res = resumen.
-    Barras = gasto que cubre la reserva cada año; línea = saldo de la reserva; estrella = año en que se agota."""
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_bar(x=d.index, y=d.gasto_cubierto / 1e12, name="Gasto que cubre la reserva (eje derecho)", marker_color=lighten(ORANGE, 0.4),
-                hovertemplate="%{x}: %{y:.2f} billones<extra>Gasto cubierto</extra>", secondary_y=True)
-    fig.add_scatter(x=d.index, y=d.saldo.clip(lower=0) / 1e12, mode="lines", name="Saldo de la reserva (eje izquierdo)",
-                    line=dict(color=BLUE, width=3), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo</extra>", secondary_y=False)
-    if res["anio_agotamiento"]:
-        a = res["anio_agotamiento"]
-        fig.add_scatter(x=[a], y=[0], mode="markers+text", marker=dict(symbol="star", size=18, color=RED), text=[f"{a}"],
-                        textposition="top center", name=f"Se agota en {a}", secondary_y=False)
-    fig.update_layout(**{**PLOTLY_LAYOUT, "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")},
-                      title="Reserva de pensiones frente al gasto que debe cubrir (billones de pesos de 2025)")
+    mostrar = (gasto cubierto, saldo). Barras = gasto que cubre la reserva cada año; línea = saldo (mismo eje, billones);
+    la estrella (año en que se agota) aparece solo mientras se ve el saldo."""
+    fig = go.Figure()
+    if mostrar[0]:
+        fig.add_bar(x=d.index, y=d.gasto_cubierto / 1e12, name="Gasto que cubre la reserva", marker_color=lighten(ORANGE, 0.4),
+                    hovertemplate="%{x}: %{y:.2f} billones<extra>Gasto cubierto</extra>")
+    if mostrar[1]:
+        fig.add_scatter(x=d.index, y=d.saldo.clip(lower=0) / 1e12, mode="lines", name="Saldo de la reserva",
+                        line=dict(color=BLUE, width=3), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo</extra>")
+        if res["anio_agotamiento"]:
+            a = res["anio_agotamiento"]
+            fig.add_scatter(x=[a], y=[0], mode="markers", marker=dict(symbol="star", size=18, color=RED), name=f"Se agota en {a}")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Reserva frente al gasto que cubre (billones de $ de 2025)")
     fig.update_xaxes(title="Año")
-    fig.update_yaxes(title_text="Saldo (billones)", rangemode="tozero", secondary_y=False)
-    fig.update_yaxes(title_text="Gasto cubierto (billones)", rangemode="tozero", secondary_y=True, showgrid=False)
+    fig.update_yaxes(title="Billones de pesos de 2025", rangemode="tozero")
     return fig
 
 
@@ -376,7 +379,7 @@ def dependence_regions_chart(reg: pd.DataFrame, nacional: float) -> go.Figure:
     fig = go.Figure(go.Bar(y=d.region_nombre, x=d.pct_sin_pension, orientation="h", marker_color=ORANGE,
                            hovertemplate="%{y}: %{x:.1f}%<extra></extra>"))
     fig.add_vline(x=nacional, line_dash="dash", line_color=INK_MUTED, annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Beneficiarios de la PGU sin pensión propia, por región (4.º trimestre de 2024)")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Sin pensión propia por región (% de la PGU)")
     fig.update_xaxes(title="% de los beneficiarios de la PGU")
     return fig
 

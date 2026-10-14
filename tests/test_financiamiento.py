@@ -191,6 +191,14 @@ def test_pagina_con_todos_los_caminos_de_los_controles():
     for key in ("k22_pgu", "k22_fapp"):
         at.checkbox(key=key).set_value(False).run()
         assert not at.exception, (key, [e.value for e in at.exception])
+    # casillas del panel de fórmulas (mostrar u ocultar cada línea): una por una y todas apagadas
+    claves = ("k22_v_obs", "k22_v_esc", "k22_v_gas", "k22_v_sal")
+    at.checkbox(key="k22_pgu").set_value(True).run()
+    at.checkbox(key="k22_fapp").set_value(True).run()
+    for key in claves + ("k22_v_fapp",):
+        at.checkbox(key=key).set_value(False).run()
+        assert not at.exception, (key, [e.value for e in at.exception])
+    assert all(not at.checkbox(key=k).value for k in claves)
 
 
 def test_el_kpi_original_se_conserva():
