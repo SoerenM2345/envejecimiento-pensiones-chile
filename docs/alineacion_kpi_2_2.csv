@@ -1,0 +1,12 @@
+name,role,type,start,end
+Pilar Solidario + PGU pagado (Subsecretaría de Previsión Social),numerator (ratio 1),flow,2025-01-01,2025-12-31
+PIB corriente (Banco Central),denominator (ratio 1),flow,2025-01-01,2025-12-31
+Retiro del FRP 2025 (DIPRES),numerator (quién paga),flow,2025-01-01,2025-12-31
+Dólar observado promedio 2025 (SII) para pasar el retiro a pesos,price,average,2025-01-01,2025-12-31
+Cartera propia del FRP al 31-dic-2025 (DIPRES),reserve,stock,2025-12-31,2025-12-31
+Dólar observado de cierre (30-dic-2025; el 31 no está publicado),price,stock,2025-12-30,2025-12-30
+Activos del FAPP al 31-dic-2025 (estados financieros),reserve,stock,2025-12-31,2025-12-31
+Población 65+ INE (estimación a mitad de 2025 = población media del año),denominator (proyección),average,2025-01-01,2025-12-31
+UTM promedio 2025 (SII) para pasar el aporte por ley a pesos de 2025,price,average,2025-01-01,2025-12-31
+IPC promedio 2025 (deflactor a pesos de 2025),price,average,2025-01-01,2025-12-31
+Estados del FAPP al 30-jun-2026 (solo pestaña «FAPP hoy»),status,stock,2026-06-30,2026-06-30

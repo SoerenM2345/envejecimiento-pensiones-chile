@@ -59,6 +59,11 @@ Dos fuentes **distintas y no comparables directamente**:
 - **`dipres_pasivos_activos_gc.csv`** — pasivos y activos financieros del Gobierno Central al 31-dic, 2016-2025, en MM$, MMUS$ y % PIB (`unidad`). La línea de activos en dólares `5.3 Otros` mezcla FEES, FRP, FEPP y otras inversiones: el FRP no se puede aislar con este archivo. No sumar filas de distinta `unidad`.
 - **`bonos_reconocimiento.csv`** — bonos liquidados por año y stock actualizado de bonos de reconocimiento 1982-2025 (MM$ y % PIB). Cae de 8.217.112 MM$ (2002) a 49.441 MM$ (2025).
 
+### Reservas y financiamiento dedicado — FRP, FAPP, Ley 21.735 (script 20, KPI 2.2)
+- **`frp_reserva_anual.csv`** — Fondo de Reserva de Pensiones, 2020-2025: valor inicial/final, aportes y retiros en millones de US$ (informe mensual de DIPRES, julio 2026), cartera propia (total menos lo transferido al FAPP), dólar promedio (`tc_prom`, para flujos) y de cierre (`tc_cierre`, para saldos) del SII, y retiros y cartera en millones de pesos corrientes (solo 2022-2025). `retiros_pct_pilar` y `retiros_pct_pib`: retiro del año sobre el gasto del Pilar y sobre el PIB (2025: 4,5 % y 0,09 %).
+- **`fapp_balance.csv`** — Fondo Autónomo de Protección Previsional al 31-dic-2025 y 30-jun-2026, millones de pesos corrientes: activos, deuda con el FRP, patrimonio y flujos del período (cotizaciones, beneficios, rentabilidad neta). El período de 2025 es de 5 meses (desde el 1-ago).
+- **`fapp_aporte_fiscal.csv`** — aporte anual del Estado al FAPP por ley, 2028-2050: millones de UTM (Tabla 2 de la Ley 21.735; 15 desde 2037) y su valor en millones de pesos de 2025 (UTM promedio 2025 = $68.640).
+
 ### Mapas (`geo/`)
 - `geo/comunas_chile.geojson` (345/346 comunas, Antártica sin geometría publicada) y `geo/regiones_chile.geojson` (16/16), geometría simplificada (tolerancia 0.001°) desde `pachadotdev/chilemapas`, ya con todos los indicadores de `indicadores_comuna.csv`/`indicadores_region.csv` embebidos como propiedades. Generados por `06_construir_mapas.py`.
 
