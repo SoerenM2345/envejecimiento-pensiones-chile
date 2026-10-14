@@ -59,9 +59,9 @@ Con el modo activo, la sección «Modo desarrollador» muestra las 8 páginas de
 | 1.1 Cobertura regional | **Objetivo 1: base activa** | «1.1 · Cobertura regional» | 3 cifras, mapa por región y barras con la línea del país | 🟢 |
 | 1.2 Razón de soporte | **Objetivo 1: base activa** | «1.2 · Razón de soporte» | 3 cifras, barras por región, y un escenario 2035/2050 por país o región (selector «Territorio») | 🟡 |
 | 1.3 Participación partes interesadas | **Objetivo 1: base activa** | «1.3 · Participación partes interesadas» | Tarjeta «Pendiente» con la fórmula | 🔴 |
-| 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras y 5 pestañas: evolución (con el salto de la PGU en 2022), componentes, por beneficiario, frente al ingreso (10 % de la mediana) y proyección 2050 | 🟢 |
+| 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras y 6 pestañas: evolución, componentes, por beneficiario, frente al ingreso (10 % de la mediana), proyección 2050 y qué hacer | 🟢 |
 | 2.2 Financiamiento dedicado | **Objetivo 2: costo por cliente** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; debajo, 5 pestañas (peso fiscal a 2050, quién lo financia, reservas, FAPP hoy, dónde) y «Qué se desprende para cada actor» | 🟡 |
-| 2.3 Pobreza en la vejez | **Objetivo 2: costo por cliente** | «2.3 · Pobreza en la vejez» | 4 cifras, mapa y barras con intervalo de confianza 95% | 🟢 |
+| 2.3 Pobreza en la vejez | **Objetivo 2: costo por cliente** | «2.3 · Pobreza en la vejez» | 5 cifras (incluye personas 65+ en pobreza), mapa y barras con intervalo de confianza 95%, lectura y «Qué se desprende para cada actor» | 🟢 |
 
 El análisis del problema (pirámides, Chile vs Alemania, 14% → 43%, pico de población activa) está en **Problema**; las cifras clave, en **Resumen**; de dónde sale cada dato, en **Fuentes y método**.
 
@@ -185,31 +185,31 @@ Receta prevista, **sin probar** hasta que exista el dato: tras crear `Scripts/15
 
 ### KPI 2.1 · Costo real por adulto mayor 🟢
 
-Fórmula: `(Costo público total ÷ Población 65+)` comparado con el crecimiento del PIB per cápita.
+Fórmula: `(Costo público total ÷ Población 65+) ÷ PIB per cápita` (indicador principal) y, como apoyo, el costo real por persona 65+ en pesos de 2025.
 
 **Fuentes:** DIPRES, *Estadísticas de las Finanzas Públicas 2016-2025* (`Data raw/_external/dipres/articles-416514_doc_xls.xlsx`, hoja `CFEGCT$25`, línea «7102 Edad avanzada», pesos de 2025) y Banco Central, PIB (`Data raw/_external/macro/CCNN2018_P0_V2.xlsx`) → `Scripts/13` → `gasto_proteccion_social.csv` y `macro_pib_anual.csv`; población: `proyeccion_envejecimiento_pais.csv`.
 
 **Receta, costo público por persona 65+**
-1. **Fuente principal** = `gasto_proteccion_social.csv`.
-2. **Mezclar con una segunda fuente**: `proyeccion_envejecimiento_pais.csv`, **Cruzar por** = `anio`, `left`.
-3. **Columna calculada**: **A** = `gasto_mm_2025`, `÷ dividir`, **B** = `pob_65_mas`, **Multiplicar por** = `1000000`, **Nombre** = `costo_65`. (El gasto está en millones de pesos de 2025.)
-4. **Columnas a filtrar** = `categoria` → deja solo `Edad avanzada`.
-5. **Agrupar por** = `anio`; **Columna a agregar** = `costo_65`; `mean`. → Cifra de control: **2025 ≈ 5,13 millones de pesos por persona 65+**.
+1. **Fuente principal** = `gasto_proteccion_social.csv`; **Mezclar con una segunda fuente**: `proyeccion_envejecimiento_pais.csv`, **Cruzar por** = `anio`, `left`.
+2. **Columna calculada**: **A** = `gasto_mm_2025`, `÷ dividir`, **B** = `pob_65_mas`, **Multiplicar por** = `1000000`, **Nombre** = `costo_65`.
+3. **Columnas a filtrar** = `categoria` → `Edad avanzada`. **Agrupar por** = `anio`; `costo_65`; `mean`. → **2025 ≈ 5,13 millones** por persona 65+.
 
-**Receta, PIB per cápita real**
-1. **Fuente principal** = `macro_pib_anual.csv`; **segunda fuente** = `proyeccion_envejecimiento_pais.csv`, por `anio`, `inner`.
-2. **Columna calculada**: **A** = `pib_real_mm_2018`, `÷ dividir`, **B** = `pob_total`, factor `1000000`, **Nombre** = `pib_pc_real`.
-3. **Agrupar por** = `anio`; **Columna a agregar** = `pib_pc_real`; `mean`.
+**Receta, indicador principal (% del PIB per cápita, precios corrientes)**
+1. Misma fuente y cruce; **Columna calculada** A = `gasto_corriente_mm`, `÷ dividir`, B = `pob_65_mas`, nombre `gasto_pc65` (se puede dejar en millones).
+2. Divide por el PIB per cápita corriente = `pib_corriente_mm` ÷ `pob_total` de `macro_pib_anual.csv` (cruce por `anio`).
+3. Cifras de control: **2016 = 33,2 %**, máximo **34,7 % en 2023**, **2025 = 30,2 %** (equivale a `pct_pib` × población total ÷ población 65+).
 
-**Comparación:** divide el valor de 2025 entre el de 2016 en cada receta: el costo por persona 65+ sube **+11 %** y el PIB per cápita real **+9 %** (tarjetas del dashboard). Casi todo el alza es el salto de 2022 (PGU): desde entonces el costo por persona baja **−5 %**. El dashboard lo muestra en pesos reales de 2025, no como índice.
+**Por qué no se compara el costo real con el PIB per cápita real:** el costo real usa el IPC (las pensiones se reajustan por IPC), que subió 51 % en 2016-2025; el PIB real encadenado usa el deflactor del PIB, que subió 68 %. Con esos dos reales el costo parece subir más que la economía (+11 % vs +9 %); en precios corrientes el costo por persona 65+ pierde peso frente al PIB per cápita (33,2 % → 30,2 %).
 
 **Pestañas del dashboard (módulo `Dashboards/components/cost_analysis.py`, probado en `tests/test_costo_65.py`):**
-- *Qué lo explica:* costo por persona 65+ = PGU + PBS/APS de vejez (Subsecretaría de Previsión Social, `pgu_pbs_aps_nacional_anual.csv`, × deflactor de `kpi_pc_nacional.csv`) + **resto** (= Edad avanzada − los dos anteriores; DIPRES no lo abre). La PGU de 2022 es un residual: Total − (PBS + APS).
-- *Por beneficiario:* beneficios de vejez (PGU + PBS vejez + APS vejez, promedio del año) por cada 100 personas 65+ y pago anual por beneficio. Una persona puede tener más de un beneficio: la cobertura es un tope.
-- *Frente al ingreso:* costo por persona 65+ como % del PIB per cápita (corriente / corriente); 10 % × 12 × ingreso mediano real de los ocupados (INE, ESI, `kpi_pc_nacional.csv`) = aporte anual de un ocupado mediano; «necesarios» = costo por 65+ ÷ ese aporte; «carga requerida» = gasto ÷ (ocupados × 12 × mediana). Cifras 2025: 30 % del PIB per cápita, 6,3 necesarios vs 3,3 disponibles, 19 %.
-- *Proyección 2050:* escenario con la población INE, PIB real (deslizador), PGU de $250.000 (opcional) y el «resto» constante o creciendo con la población 65+.
+- *Evolución:* costo real por persona 65+ (salto de la PGU en 2022; −5 % desde entonces) y el indicador principal.
+- *Qué lo explica:* costo por persona = PGU + PBS/APS de vejez (Subsecretaría de Previsión Social, `pgu_pbs_aps_nacional_anual.csv` × deflactor de `kpi_pc_nacional.csv`) + **resto** (Edad avanzada − los dos anteriores; DIPRES no lo abre; el IPS paga ≈ 2,0 billones al año, `pensiones_pagadas_por_ex_caja.csv` de julio 2026 × 12). La PGU de 2022 es un residual: Total − (PBS + APS).
+- *Por beneficiario:* PGU + PBS vejez + APS vejez (promedio del año) por cada 100 personas 65+ y pago anual por beneficio. Una persona puede tener más de un beneficio: la cobertura es un tope.
+- *Frente al ingreso:* pago plano = gasto ÷ ocupados ÷ 12 frente al 10 % del ingreso mediano o promedio de los ocupados (INE, ESI, `kpi_pc_nacional.csv`); «necesarios» = costo por 65+ ÷ (10 % × 12 × ingreso). Cifras 2025: **131.153 al mes = 19 % de la mediana (14 % del promedio)**, 6,3 necesarios vs 3,3 ocupados por persona 65+.
+- *Proyección 2050:* escenario con la población INE, PIB real (deslizador), PGU de $250.000 y el «resto» constante o creciendo con la población 65+.
+- *Qué hacer:* tres lectores (Hacienda/DIPRES, Subsecretaría de Previsión Social, Superintendencia/AFP) con cifras calculadas.
 
-**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios. El PIB real es volumen encadenado (referencia 2018) y el gasto está en pesos de 2025; por eso el PIB per cápita real se compara como variación y no por nivel. El 10 % es una escala de comparación: va a cuentas individuales y estos gastos se pagan con impuestos generales.
+**Límites:** «Edad avanzada» es el gasto del Gobierno Central e incluye el sistema antiguo, la PGU y los aportes solidarios; el «resto» (58 % del gasto) puede incluir pensiones a menores de 65. El 10 % es una escala de comparación: va a cuentas individuales y estos gastos se pagan con impuestos generales.
 
 ### KPI 2.2 · Financiamiento dedicado 🟡
 
@@ -274,7 +274,7 @@ Fórmula: `Personas 65+ bajo la línea de pobreza ÷ Población 65+`.
 | 1.1 | Ñuble 37,83 % · país 46,5 % | Objetivo 1 / Explorador |
 | 1.2 | Ñuble 1,51 · país 2,27 · Ñuble 2035 ≈ 1,05 | Objetivo 1 / Explorador |
 | 1.2 punto crítico | País 2024 (base Censo): 2,29 cotizantes por 65+ · carga requerida 6,5 % del sueldo · punto crítico **2039** (promedio, cotizantes, carga máx. 10 %, sueldo +1 %) · con el nivel INE sin ajustar: 2,13 y el mismo 2039 | Objetivo 1 |
-| 2.1 | 5,13 millones por persona 65+ (2025) · costo +11 % vs PIB per cápita +9 % (2016-2025) | Objetivo 2 / Explorador |
+| 2.1 | 5,13 millones por persona 65+ (2025) · 30,2 % del PIB per cápita (33,2 % en 2016; máx. 34,7 % en 2023) · −5 % real desde 2022 | Objetivo 2 / Explorador |
 | 2.2 | 2,07 % del PIB (2025) · gasto en vejez 4,39 % · FRP financia 4,5 % del Pilar · reserva $9,2 billones (agota el alza en 2033) | Objetivo 2 / Explorador |
 | 2.3 | Chile 14,9 % · La Araucanía 23,2 % · Magallanes 9,8 % | Objetivo 2 / Explorador |
 

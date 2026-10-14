@@ -5,58 +5,55 @@ from utils import load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
-from components.charts import cost_components_chart, beneficiaries_chart, income_comparison_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, region_choropleth
+from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, region_choropleth
 from components.charts import fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
 st.title("Objetivo 2: controlar el costo por cliente")
 st.markdown("Optimizar la estructura de costos para absorber el crecimiento de cuentas inactivas y pensionadas sin perder rentabilidad.")
 
 
+from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart
+
 ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
 ANIO_FIN_2_1 = 2050
 
 
+def _g21(fig, alto=430):
+    st.plotly_chart(_estilo_2_1(fig, alto), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+
+
 @st.cache_data
-def serie_2_1() -> pd.DataFrame:
-    """Serie histórica 2016-2025 del KPI 2.1 con componentes, beneficiarios y comparación con el ingreso."""
+def serie_2_1(base: str = "mediana") -> pd.DataFrame:
+    """Serie histórica 2016-2025 del KPI 2.1 con componentes, beneficiarios y comparación con el ingreso (base: mediana | promedio)."""
     return serie_historica(load_csv("gasto_proteccion_social.csv"), load_csv("macro_pib_anual.csv"),
                            load_csv("proyeccion_envejecimiento_pais.csv"), load_csv("kpi_pc_nacional.csv"),
-                           load_csv("pgu_pbs_aps_nacional_anual.csv"))
+                           load_csv("pgu_pbs_aps_nacional_anual.csv"), base)
 
 
 @st.cache_data
-def proyeccion_2_1(_h: pd.DataFrame, crec_pib: float, resto: str, pgu_250: bool) -> pd.DataFrame:
+def proyeccion_2_1(_h: pd.DataFrame, crec_pib: float, resto: str, pgu_250: bool, base: str = "mediana") -> pd.DataFrame:
     return proyeccion(_h, load_csv("proyeccion_envejecimiento_pais.csv"), load_csv("kpi_pc_parametros_reforma.csv"),
                       crec_pib, resto, pgu_250)
 
 
 @st.cache_data
-def serie_costo_vs_economia() -> pd.DataFrame:
-    """Costo público real por persona 65+ (DIPRES 'Edad avanzada', pesos de 2025) y PIB per cápita real (Banco Central)."""
-    gasto = load_csv("gasto_proteccion_social.csv")
-    gasto = gasto[gasto.categoria == "Edad avanzada"].set_index("anio")
-    pib = load_csv("macro_pib_anual.csv").set_index("anio")
-    pob = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio")
-    anios = [a for a in gasto.index if a in pib.index and a in pob.index]
-    d = pd.DataFrame(index=anios)
-    d["gasto"] = gasto.loc[anios, "gasto_mm_2025"] * 1e6
-    d["pob_65"] = pob.loc[anios, "pob_65_mas"]
-    d["costo_65"] = d.gasto / d.pob_65
-    d["pib_pc_real"] = pib.loc[anios, "pib_real_mm_2018"] * 1e6 / pob.loc[anios, "pob_total"]
-    d.index.name = "anio"
-    return d.reset_index()
+def ips_sistema_antiguo() -> tuple:
+    """Pago anual (pesos) y número de pensionados de las ex cajas del IPS (mes de julio de 2026 x 12)."""
+    c = load_csv("pensiones_pagadas_por_ex_caja.csv")
+    c = c[c.ex_caja != "Total"]
+    return float(c.monto_miles_pesos.sum() * 1e3 * 12), int(c.numero_pensionados.sum())
 
 
 def render_2_1():
-    d = serie_costo_vs_economia()
-    pri, ult = d.iloc[0], d.iloc[-1]
-    a0, a1 = int(pri.anio), int(ult.anio)
-    hito = d[d.anio == ANIO_PGU].iloc[0]
-    n = a1 - ANIO_PGU
-    cagr = lambda col: 100 * ((ult[col] / hito[col]) ** (1 / n) - 1)
+    h = serie_2_1()
+    pri, ult, hito = h.iloc[0], h.iloc[-1], h.loc[ANIO_PGU]
+    a0, a1 = int(h.index[0]), int(h.index[-1])
+    cagr = lambda col: 100 * ((ult[col] / hito[col]) ** (1 / (a1 - ANIO_PGU)) - 1)
     var_total = 100 * (ult.costo_65 / pri.costo_65 - 1)
-    var_pib = 100 * (ult.pib_pc_real / pri.pib_pc_real - 1)
     desde_hito = 100 * (ult.costo_65 / hito.costo_65 - 1)
+    pico = int(h.costo_pct_pib_pc.idxmax())
+    ipc = 100 * (h.defl_ipc.iloc[0] / h.defl_ipc.iloc[-1] - 1)
+    defl_pib = 100 * (h.defl_pib.iloc[-1] / h.defl_pib.iloc[0] - 1)
     kpi_card_row([
         (f"Costo público por persona 65+ ({a1})", f"${ult.costo_65 / 1e6:.2f} millones",
          "Gasto del Gobierno Central en 'Edad avanzada' (pesos de 2025) dividido por la población de 65 años o más (INE)",
@@ -64,80 +61,111 @@ def render_2_1():
           "Pensiones básicas y aportes solidarios (PBS/APS)", "Clasificación funcional de DIPRES, código 7102",
           "En pesos de 2025; se divide por todas las personas 65+, reciban o no pensión del Estado",
           "No incluye las pensiones pagadas por las AFP"]),
-        (f"Variación real {a0}-{a1}", f"{var_total:+.0f}%",
-         f"Costo real por persona 65+ en {a1} frente a {a0}. PIB per cápita real en el mismo período: {var_pib:+.0f}%",
-         [f"{a0}: ${pri.costo_65 / 1e6:.2f} millones; {a1}: ${ult.costo_65 / 1e6:.2f} millones",
-          f"El PIB per cápita real subió {var_pib:+.0f}% (Banco Central, volumen encadenado / población INE)",
-          f"Casi todo el aumento ocurre en {ANIO_PGU}, con la PGU"]),
+        (f"Costo por persona 65+ / PIB per cápita ({a1})", f"{ult.costo_pct_pib_pc:.1f}%",
+         f"Era {pri.costo_pct_pib_pc:.1f}% en {a0}; máximo {h.costo_pct_pib_pc.max():.1f}% en {pico}",
+         ["Gasto en 'Edad avanzada' ÷ población 65+", "PIB ÷ población total, ambos a precios corrientes",
+          "Esfuerzo fiscal por adulto mayor frente al ingreso medio del país", "Si baja, el gasto por persona crece más lento que la economía"]),
         (f"Desde {ANIO_PGU} (año de la PGU)", f"{desde_hito:+.0f}%",
          f"Variación real del costo por persona 65+ entre {ANIO_PGU} y {a1}",
          [f"Gasto real: {cagr('gasto'):+.1f}% al año", f"Población 65+: {cagr('pob_65'):+.1f}% al año",
           "Cada año hay más personas 65+ entre las que repartir el gasto"]),
     ])
-    h = serie_2_1()
-    t1, t2, t3, t4, t5 = st.tabs(["Evolución", "Qué lo explica", "Por beneficiario", "Frente al ingreso", "Proyección 2050"])
+    t1, t2, t3, t4, t5, t6 = st.tabs(["Evolución", "Qué lo explica", "Por beneficiario", "Frente al ingreso", "Proyección 2050", "Qué hacer"])
     with t1:
         c1, c2 = st.columns(2)
         with c1:
-            st.plotly_chart(cost_per_person_chart(d, ANIO_PGU, "PGU"), use_container_width=True, config=PLOTLY_DL_CONFIG)
+            _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "PGU"))
         with c2:
-            st.plotly_chart(spending_vs_population_growth(d), use_container_width=True, config=PLOTLY_DL_CONFIG)
-        st.markdown(
-            f"**Lectura:** entre {a0} y {a1} el costo real por adulto mayor subió {var_total:.0f}%, algo más que el PIB per cápita "
-            f"({var_pib:.0f}%), pero no es una tendencia: es un **salto único en {ANIO_PGU}** (la PGU) sobre una base plana. "
-            f"Desde entonces el costo por persona **baja** ({desde_hito:+.0f}%): la población 65+ crece {cagr('pob_65'):.1f}% al año "
-            f"y el gasto real solo {cagr('gasto'):.1f}%. El Estado gasta cada vez más en total, pero menos por persona."
-        )
+            _g21(cost_pct_pibpc_chart(h))
+        st.markdown(f"**Lectura:** en pesos reales el costo por adulto mayor sube {var_total:.0f}% ({a0}-{a1}) por un salto único en {ANIO_PGU} (PGU) y desde entonces baja {-desde_hito:.0f}%; "
+                    f"frente al PIB per cápita pasa de {pri.costo_pct_pib_pc:.1f}% a {ult.costo_pct_pib_pc:.1f}% (máximo {h.costo_pct_pib_pc.max():.1f}% en {pico}).")
+        st.caption("\\* Derecha: precios corrientes a ambos lados, porque el costo real (IPC) y el PIB real (deflactor del PIB) no son comparables; detalle en «Método y fuentes».")
     with t2:
-        st.plotly_chart(cost_components_chart(h), use_container_width=True, config=PLOTLY_DL_CONFIG)
-        u, i = h.iloc[-1], h.loc[ANIO_PGU]
-        d0 = h.iloc[0]
-        st.markdown(
-            f"**Lectura:** entre {a0} y {a1} el Pilar Solidario y la PGU suben de ${d0.pilar_65 / 1e6:.2f} a ${u.pilar_65 / 1e6:.2f} millones por persona 65+ "
-            f"(+${(u.pilar_65 - d0.pilar_65) / 1e6:.2f}), pero el resto de 'Edad avanzada' ({100 * u.resto / u.gasto:.0f}% del gasto de {a1}) baja "
-            f"${(d0.resto_65 - u.resto_65) / 1e6:.2f} millones: su gasto total casi no crece mientras la población 65+ sí. El neto es el +${(u.costo_65 - d0.costo_65) / 1e6:.2f} millones de "
-            f"{var_total:+.0f}%. Desde {ANIO_PGU} el resto cae de ${i.resto_65 / 1e6:.2f} a ${u.resto_65 / 1e6:.2f} millones por persona y eso empuja a la baja el costo total por persona."
-        )
-        st.caption("DIPRES no abre 'Edad avanzada' en la tabla usada: el resto se calcula restando PGU y PBS/APS de vejez (Subsecretaría de Previsión Social). "
-                   "La PGU de 2022 es un residual del total del Pilar y parte en febrero, por eso es parcial ese año.")
+        c1, c2 = st.columns(2)
+        with c1:
+            _g21(cost_components_chart(h))
+        with c2:
+            _g21(spending_vs_population_growth(h.reset_index()))
+        st.markdown(f"**Lectura:** el Pilar y la PGU suben de ${pri.pilar_65 / 1e6:.2f} a ${ult.pilar_65 / 1e6:.2f} millones por persona 65+, pero el resto de 'Edad avanzada' "
+                    f"({100 * ult.resto / ult.gasto:.0f}% del gasto) baja ${(pri.resto_65 - ult.resto_65) / 1e6:.2f} millones: su gasto total casi no crece y la población 65+ sí.")
+        st.caption("\\* Resto = Edad avanzada − PGU − PBS/APS de vejez; DIPRES no lo abre, así que no se sabe si su caída es cierre del sistema antiguo o recorte.")
     with t3:
-        st.plotly_chart(beneficiaries_chart(h), use_container_width=True, config=PLOTLY_DL_CONFIG)
-        u, p0 = h.iloc[-1], h.iloc[0]
-        st.markdown(
-            f"**Lectura:** la cobertura sube de {100 * p0.cobertura:.0f} a {100 * u.cobertura:.0f} beneficios por cada 100 personas 65+ y el pago anual por "
-            f"beneficio pasa de ${p0.monto_por_beneficio / 1e6:.2f} a ${u.monto_por_beneficio / 1e6:.2f} millones (≈ ${u.monto_por_beneficio / 12:,.0f} al mes). "
-            f"Hasta {ANIO_PGU} subieron las dos cosas (la PGU reemplaza a la PBS/APS de vejez con un monto mayor); desde {ANIO_PGU + 1} el monto por beneficio "
-            "está casi quieto y lo que sube es **cuántos reciben**."
-        )
-        st.caption("Solo cuenta lo que paga el Pilar Solidario y la PGU (vejez); no incluye el resto de 'Edad avanzada'. "
-                   "Una persona puede tener más de un beneficio, así que la cobertura es un tope superior.")
+        _g21(beneficiaries_chart(h))
+        p0 = h.iloc[0]
+        st.markdown(f"**Lectura:** la cobertura sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
+                    f"a ${ult.monto_por_beneficio / 1e6:.2f} millones (≈ ${ult.monto_por_beneficio / 12:,.0f} al mes), casi quieto desde {ANIO_PGU + 1}.")
+        st.caption("\\* Solo Pilar Solidario y PGU de vejez; una persona puede tener más de un beneficio, así que la cobertura es un tope.")
     with t4:
-        st.plotly_chart(income_comparison_chart(h), use_container_width=True, config=PLOTLY_DL_CONFIG)
-        u = h.iloc[-1]
-        st.markdown(
-            f"**Lectura:** en {a1} cada persona 65+ cuesta {u.costo_pct_pib_pc:.0f}% del PIB per cápita. El 10% (la cotización obligatoria) del ingreso mediano "
-            f"de un ocupado (${u.mediana_mensual:,.0f} al mes) son ${u.aporte_10 / 1e6:.2f} millones al año: harían falta **{u.razon_necesaria:.1f} ocupados** "
-            f"con ese aporte por cada persona 65+, y hay **{u.ocupados_por_65:.1f}**. Para cubrir el gasto con los ocupados actuales haría falta "
-            f"**{100 * u.carga_requerida:.0f}% del sueldo mediano**, casi el doble del 10%."
-        )
-        st.caption("Es una escala de comparación, no un financiamiento real: el 10% va a las cuentas individuales de pensión y estos gastos se pagan con impuestos generales. "
-                   "Ingreso mediano de los ocupados: INE, Encuesta Suplementaria de Ingresos, en pesos de 2025. El análisis de punto crítico (KPI 1.2) usa el mismo cálculo solo para PGU y pensiones solidarias.")
+        base = st.radio("Ingreso típico de los ocupados", ["mediana", "promedio"], horizontal=True,
+                        help="Mediana: la mitad de los ocupados gana menos. Promedio: total de ingresos ÷ ocupados (más alto por los ingresos muy altos).")
+        hb = serie_2_1(base)
+        _g21(burden_chart(hb, base))
+        u, p0 = hb.iloc[-1], hb.iloc[0]
+        st.markdown(f"**Lectura:** repartido por igual, el gasto sería ${u.pago_plano:,.0f} al mes por ocupado: **{100 * u.carga_requerida:.0f}% del ingreso ({base})** frente al 10% de la cotización "
+                    f"({100 * p0.carga_requerida:.0f}% en {a0}); harían falta {u.razon_necesaria:.1f} ocupados por persona 65+ y hay {u.ocupados_por_65:.1f}.")
+        st.caption("\\* Escala de comparación, no un financiamiento real: el 10% va a cuentas individuales y estos gastos se pagan con impuestos generales.")
     with t5:
         c1, c2 = st.columns([2, 1])
         crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 2.0, 0.5, format="%.1f%%") / 100
         resto = c2.radio("Resto de 'Edad avanzada'", ["Total constante", "Crece con la población 65+"],
                          help="Total constante: el sistema antiguo no crece. Crece: mismo gasto por persona 65+ que hoy.")
         pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=True)
-        pr = proyeccion_2_1(h, crec, "constante" if resto.startswith("Total") else "crece", pgu250)
-        st.plotly_chart(cost_projection_chart(h, pr), use_container_width=True, config=PLOTLY_DL_CONFIG)
+        pr = proyeccion_2_1(hb, crec, "constante" if resto.startswith("Total") else "crece", pgu250, base)
+        _g21(cost_projection_chart(hb, pr, base))
         f = pr.loc[ANIO_FIN_2_1]
+        st.markdown(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
+                    f"y un pago por ocupado de **{100 * f.carga_requerida:.0f}% del ingreso ({base})** (hoy {100 * hb.iloc[-1].carga_requerida:.0f}%).")
+        st.caption("\\* Escenario, no pronóstico: el costo del Pilar por persona 65+ se mantiene en términos reales salvo el alza de la PGU.")
+    with t6:
+        _recomendaciones_2_1(h)
+    ips, n_ips = ips_sistema_antiguo()
+    with st.expander("Método y fuentes"):
         st.markdown(
-            f"**Escenario {ANIO_FIN_2_1}:** el gasto en edad avanzada sería {f.pct_pib:.1f}% del PIB (hoy {h.pct_pib.iloc[-1]:.1f}%), el costo por persona 65+ "
-            f"${f.costo_65 / 1e6:.2f} millones (hoy ${h.costo_65.iloc[-1] / 1e6:.2f}) y habría {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {h.ocupados_por_65.iloc[-1]:.1f}). "
-            f"Cubrirlo con los ocupados exigiría **{100 * f.carga_requerida:.0f}% del sueldo mediano** (hoy {100 * h.carga_requerida.iloc[-1]:.0f}%)."
+            f"- **Fuentes:** gasto en 'Edad avanzada' (DIPRES, COFOG 7102, pesos de 2025); PGU, PBS y APS (Subsecretaría de Previsión Social); población INE base 2024; PIB (Banco Central); "
+            f"ocupados (ENE) e ingreso de los ocupados (ESI) del INE.\n"
+            f"- **Períodos:** gasto y PIB son flujos del año; la población 65+ y total, de mitad de año; ocupados e ingreso, de octubre-diciembre (desfase de unos 4 meses; "
+            f"el efecto en los ocupados por persona 65+ es menor a 2%). El ingreso se pasa a pesos de 2025 con el IPC anual.\n"
+            f"- **Precios:** el costo real usa el IPC (las pensiones se reajustan por IPC), que subió {ipc:.0f}% en {a0}-{a1}; el PIB real usa el deflactor del PIB, que subió {defl_pib:.0f}%. "
+            f"Por eso el indicador principal usa precios corrientes en ambos lados.\n"
+            f"- **Resto:** lo que queda de 'Edad avanzada' al restar PGU y PBS/APS; incluye el sistema antiguo y puede incluir pensiones a menores de 65. "
+            f"El IPS paga ≈ ${ips / 1e12:.1f} billones al año a {f'{n_ips:,}'.replace(',', '.')} pensionados (julio 2026): solo una parte.\n"
+            f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. La cobertura cuenta beneficios, no personas.\n"
+            f"- **Proyección:** población INE; ocupados proporcionales a la población 15-64; el ingreso crece como el PIB per cápita; con la base «promedio» el pago por ocupado pesa menos porque el ingreso promedio es mayor que la mediana."
         )
-        st.caption("Escenario, no pronóstico: población INE base 2024; el costo del Pilar por persona 65+ se mantiene en términos reales "
-                   "(la PGU se reajusta por IPC) salvo el alza de la PGU; ocupados proporcionales a la población 15-64; ingreso mediano crece como el PIB per cápita.")
+
+
+def _recomendaciones_2_1(h):
+    """Tres lectores del KPI 2.1 con los supuestos de partida (PIB +2%, PGU de $250.000, ingreso mediano)."""
+    pc = proyeccion_2_1(h, 0.02, "constante", True, "mediana")
+    pg = proyeccion_2_1(h, 0.02, "crece", True, "mediana")
+    u, a1 = h.iloc[-1], int(h.index[-1])
+    nac = load_csv("kpi_pc_nacional.csv").set_index("anio").loc[a1]
+    par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
+    pib50 = pc.loc[ANIO_FIN_2_1, "gasto"] / (pc.loc[ANIO_FIN_2_1, "pct_pib"] / 100)
+    dif = pg.loc[ANIO_FIN_2_1, "gasto"] - pc.loc[ANIO_FIN_2_1, "gasto"]
+    anio28 = int(par.index[par.factor_costo_pgu >= par.factor_costo_pgu.max() - 1e-9][0])
+    sube_pgu = u.pilar_65 * (par.loc[anio28, "factor_costo_pgu"] - 1) * pc.loc[anio28, "pob_65"]
+    pgu_hoy, pgu_nueva = par.loc[a1, "pgu_monto_feb2025"], par.loc[a1, "pgu_monto_nuevo"]
+    sin_cot = u.ocupados - nac.cotizantes_dic
+    suma_cot = sin_cot * u.aporte_10
+    bajo2 = pc.index[pc.ocupados_por_65 < 2]
+    cobertura_10 = u.ocupados_por_65 / u.razon_necesaria
+    st.markdown(
+        "Cifras con los supuestos de partida (PIB +2%, PGU de $250.000, ingreso mediano de los ocupados).\n\n"
+        f"**1. Hacienda / DIPRES (planificación fiscal).** El gasto en 'Edad avanzada' es {u.pct_pib:.1f}% del PIB en {a1}; en {ANIO_FIN_2_1} sería {pc.loc[ANIO_FIN_2_1].pct_pib:.1f}% si el resto "
+        f"(sistema antiguo y otros, {100 * u.resto / u.gasto:.0f}% del gasto) se mantiene constante y {pg.loc[ANIO_FIN_2_1].pct_pib:.1f}% si crece con la población 65+: una diferencia de ${dif / 1e12:.1f} billones al año "
+        f"({100 * dif / pib50:.1f} puntos del PIB). *Acción:* pedir a DIPRES que publique y proyecte 'Edad avanzada' por institución (IPS, Capredena, Dipreca, Pilar y PGU) antes de que la PGU llegue a $250.000 en {anio28}, "
+        "porque el resto, que hoy no se puede abrir, decide si el gasto de 2050 sube o baja.\n\n"
+        f"**2. Subsecretaría de Previsión Social (suficiencia de la PGU).** El pago por beneficio está casi quieto desde {ANIO_PGU + 1} (≈ ${u.monto_por_beneficio / 12:,.0f} al mes) y la cobertura llegó a {100 * u.cobertura:.0f} por cada 100 personas 65+. "
+        f"La PGU de ${pgu_hoy:,.0f} equivale al {100 * pgu_hoy / u.mediana_mensual:.0f}% del ingreso mediano de los ocupados (${u.mediana_mensual:,.0f}); con $250.000 sería {100 * pgu_nueva / u.mediana_mensual:.0f}%, "
+        f"y el Pilar cuesta ${sube_pgu / 1e12:.1f} billones más al año en {anio28}. *Acción:* fijar la meta de la PGU como porcentaje del ingreso mediano (hoy {100 * pgu_hoy / u.mediana_mensual:.0f}%) y revisarla cada año con la ESI, "
+        "no solo con el IPC; mirar primero las regiones con más pobreza 65+ (KPI 2.3).\n\n"
+        f"**3. Superintendencia de Pensiones y AFP (base cotizante).** Si todos los ocupados aportaran el 10% del ingreso mediano financiarían solo el {100 * cobertura_10:.0f}% del costo por persona 65+ ({u.ocupados_por_65:.1f} ocupados por persona 65+ frente a {u.razon_necesaria:.1f} necesarios), "
+        f"y en {int(bajo2[0]) if len(bajo2) else 'más allá de ' + str(ANIO_FIN_2_1)} habría menos de 2. Hoy {sin_cot / 1e6:.1f} millones de ocupados no cotizan (cotizantes de diciembre: {nac.cotizantes_dic / 1e6:.1f} millones de {u.ocupados / 1e6:.1f} millones de ocupados); "
+        f"si cotizaran el 10% de la mediana sumarían ${suma_cot / 1e12:.1f} billones al año a las cuentas individuales (equivale al {100 * suma_cot / u.gasto:.0f}% del gasto de {a1}). "
+        "*Acción:* medir la afiliación de independientes y trabajadores informales con este mismo indicador (ocupados que cotizan / ocupados) y fijar una meta anual; es una palanca que no depende de impuestos. "
+        "Distinto de 1 y 2: aquí no se mueve plata del Estado, se amplía la base que ahorra para su propia pensión."
+    )
 
 
 @st.cache_data

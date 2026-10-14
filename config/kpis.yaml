@@ -228,14 +228,14 @@ kpis_presentacion:
   - id: "2.1"
     nombre: "Costo real por adulto mayor"
     objetivo: "Objetivo 2: Controlar el costo por cliente"
-    descripcion: "Si el costo por persona crece más rápido que la economía"
-    formula: "(Costo público total / Población 65+) vs Δ% PIB per cápita"
-    visualizacion: lineas_indexadas
+    descripcion: "Cuánto cuesta cada adulto mayor al Estado frente al ingreso del país, y qué explica que cambie."
+    formula: "(Gasto en Edad avanzada / Población 65+) / PIB per cápita"
+    visualizacion: lineas_y_pestanas
     status: live
-    archivo: [gasto_proteccion_social.csv, macro_pib_anual.csv, proyeccion_envejecimiento_pais.csv]
-    fuente: ["DIPRES, Estadísticas de las Finanzas Públicas 2016-2025 (clasificación funcional, Edad avanzada)", "Banco Central (PIB, referencia 2018)", "INE proyecciones"]
-    script: 13_procesar_macro_gasto.py
-    caveat: "Costo público = gasto del Gobierno Central en 'Edad avanzada' (incluye sistema antiguo, PGU y aportes solidarios), en pesos de 2025. El PIB per cápita real usa el volumen encadenado del Banco Central; ambos se comparan como índice base 2016 = 100."
+    archivo: [gasto_proteccion_social.csv, macro_pib_anual.csv, proyeccion_envejecimiento_pais.csv, pgu_pbs_aps_nacional_anual.csv, kpi_pc_nacional.csv, kpi_pc_parametros_reforma.csv, pensiones_pagadas_por_ex_caja.csv]
+    fuente: ["DIPRES, Estadísticas de las Finanzas Públicas 2016-2025 (clasificación funcional, Edad avanzada)", "Banco Central (PIB)", "INE (proyecciones, ENE y ESI)", "Subsecretaría de Previsión Social (Pilar Solidario)"]
+    script: "13_procesar_macro_gasto.py, 12_procesar_pilar_solidario.py"
+    caveat: "Gasto del Gobierno Central en 'Edad avanzada' (sistema antiguo, PGU y aportes solidarios), pesos de 2025. Indicador principal en precios corrientes. Detalle en «Método y fuentes»."
   - id: "2.2"
     nombre: "Financiamiento dedicado"
     objetivo: "Objetivo 2: Controlar el costo por cliente"

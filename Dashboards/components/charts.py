@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from components.cost_analysis import CARGA_MAX
 from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
                    CATEGORICAL, lighten)
 
@@ -215,29 +216,45 @@ def beneficiaries_chart(h: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def income_comparison_chart(h: pd.DataFrame) -> go.Figure:
-    """KPI 2.1: costo por persona 65+ como % del PIB per cápita, y trabajadores necesarios (con el 10 % de la mediana) vs. disponibles."""
+def cost_pct_pibpc_chart(h: pd.DataFrame) -> go.Figure:
+    """KPI 2.1 (indicador principal): costo por persona 65+ como % del PIB per cápita, con el máximo marcado. h: serie_historica."""
+    pico = h.costo_pct_pib_pc.idxmax()
+    fig = go.Figure()
+    fig.add_scatter(x=h.index, y=h.costo_pct_pib_pc, mode="lines+markers+text", line=dict(color=RED, width=3), showlegend=False,
+                    text=[f"{v:.1f}" if a in (h.index[0], pico, h.index[-1]) else "" for a, v in h.costo_pct_pib_pc.items()],
+                    textposition="top center", hovertemplate="%{x}: %{y:.1f}% del PIB per cápita<extra></extra>")
+    fig.update_layout(**PLOTLY_LAYOUT, title="Costo por persona 65+ como % del PIB per cápita")
+    fig.update_xaxes(title="Año", dtick=1)
+    fig.update_yaxes(title="% del PIB per cápita", rangemode="tozero")
+    return fig
+
+
+def burden_chart(h: pd.DataFrame, base: str = "mediana") -> go.Figure:
+    """KPI 2.1: izquierda, pago plano mensual por ocupado frente al 10 % del ingreso típico (mediana o promedio);
+    derecha, ocupados por persona 65+: los que hay vs. los necesarios si cada uno aportara ese 10 %."""
     fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
-                        subplot_titles=("Costo por persona 65+ (% del PIB per cápita)",
+                        subplot_titles=(f"Pago por ocupado vs. 10 % del ingreso ({base}), $ de 2025 al mes",
                                         "Ocupados por persona 65+: los que hay vs. los necesarios"))
-    fig.add_scatter(x=h.index, y=h.costo_pct_pib_pc, mode="lines+markers", line=dict(color=RED, width=3), showlegend=False,
-                    hovertemplate="%{x}: %{y:.1f}%<extra></extra>", row=1, col=1)
-    fig.add_scatter(x=h.index, y=h.ocupados_por_65, mode="lines+markers", name="Ocupados por persona 65+",
+    fig.add_scatter(x=h.index, y=h.pago_plano, mode="lines+markers", name="Pago por ocupado si se repartiera el gasto",
+                    line=dict(color=RED, width=3), row=1, col=1, hovertemplate="%{x}: $%{y:,.0f} al mes<extra></extra>")
+    fig.add_scatter(x=h.index, y=CARGA_MAX * h.ingreso_mensual, mode="lines+markers", name=f"10 % del ingreso ({base})",
+                    line=dict(color=INK_MUTED, width=3, dash="dot"), row=1, col=1, hovertemplate="%{x}: $%{y:,.0f} al mes<extra></extra>")
+    fig.add_scatter(x=h.index, y=h.ocupados_por_65, mode="lines+markers", name="Ocupados por persona 65+ (los que hay)",
                     line=dict(color=BLUE, width=3), row=1, col=2)
-    fig.add_scatter(x=h.index, y=h.razon_necesaria, mode="lines+markers", name="Necesarios (cada uno aporta el 10 % de la mediana)",
+    fig.add_scatter(x=h.index, y=h.razon_necesaria, mode="lines+markers", name="Ocupados necesarios aportando el 10 %",
                     line=dict(color=RED, width=3, dash="dash"), row=1, col=2)
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10),
-                      "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
+                         "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
     fig.update_xaxes(title_text="Año", dtick=2)
-    fig.update_yaxes(title_text="% del PIB per cápita", rangemode="tozero", col=1)
+    fig.update_yaxes(title_text="$ de 2025 al mes", rangemode="tozero", col=1)
     fig.update_yaxes(title_text="Ocupados por persona 65+", rangemode="tozero", col=2)
     return fig
 
 
-def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame) -> go.Figure:
+def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame, base: str = "mediana") -> go.Figure:
     """KPI 2.1: escenario 2025-2050. Izquierda: gasto en edad avanzada (% del PIB). Derecha: carga requerida sobre el sueldo mediano vs. 10 %."""
     fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
-                        subplot_titles=("Gasto en edad avanzada (% del PIB)", "Carga requerida sobre el sueldo mediano de los ocupados"))
+                        subplot_titles=("Gasto en edad avanzada (% del PIB)", f"Pago plano por ocupado como % del ingreso ({base})"))
     fig.add_scatter(x=h.index, y=h.pct_pib, mode="lines", line=dict(color=RED, width=3), showlegend=False,
                     hovertemplate="%{x}: %{y:.2f}%<extra></extra>", row=1, col=1)
     fig.add_scatter(x=p.index, y=p.pct_pib, mode="lines", line=dict(color=RED, width=3, dash="dash"), showlegend=False,
@@ -252,7 +269,7 @@ def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame) -> go.Figure:
                       "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
     fig.update_xaxes(title_text="Año")
     fig.update_yaxes(title_text="% del PIB", rangemode="tozero", col=1)
-    fig.update_yaxes(title_text="% del sueldo mediano", rangemode="tozero", col=2)
+    fig.update_yaxes(title_text=f"% del ingreso ({base})", rangemode="tozero", col=2)
     return fig
 
 

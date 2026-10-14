@@ -7,7 +7,11 @@ Serie histórica (pesos reales de 2025, país):
       Resto          = Edad avanzada - PGU - PBS/APS (DIPRES no lo desglosa en la tabla usada: sistema antiguo y otros).
   - Beneficios de vejez = PGU + PBS vejez + APS vejez (promedio del año). Una persona podría tener más de uno: la
     cobertura es un tope superior.
-  - Comparación con el ingreso: 10 % (cotización obligatoria para pensión) del ingreso mediano de los ocupados (INE, ESI).
+  - Indicador principal: costo por persona 65+ como % del PIB per cápita (corriente / corriente: no depende del deflactor).
+    El costo "real" usa el IPC (las pensiones se reajustan por IPC); el PIB real encadenado usa el deflactor del PIB, que subió
+    mucho más (2016-2025: +68 % vs +51 % del IPC), por eso un índice "costo real vs PIB per cápita real" no es comparable.
+  - Comparación con el ingreso: pago plano por ocupado (gasto / ocupados) frente al 10 % (cotización obligatoria para pensión) del
+    ingreso mediano o promedio de los ocupados (INE, ESI); la base se elige con `base`.
 La PGU de 2022 no viene abierta en el cierre del Pilar Solidario: se obtiene como Total - (PBS + APS) y, antes de 2022, vale 0.
 
 Proyección 2025-2050: población INE; el costo del Pilar por persona de 65+ se mantiene en términos reales salvo el alza de
@@ -32,9 +36,11 @@ def _pilar_por_tipo(pilar: pd.DataFrame, col: str) -> pd.DataFrame:
     return t
 
 
-def serie_historica(gasto: pd.DataFrame, pib: pd.DataFrame, pop: pd.DataFrame, nac: pd.DataFrame, pilar: pd.DataFrame) -> pd.DataFrame:
+def serie_historica(gasto: pd.DataFrame, pib: pd.DataFrame, pop: pd.DataFrame, nac: pd.DataFrame, pilar: pd.DataFrame,
+                    base: str = "mediana") -> pd.DataFrame:
     """Una fila por año (pesos de 2025). gasto = gasto_proteccion_social.csv; pib = macro_pib_anual.csv;
-    pop = proyeccion_envejecimiento_pais.csv; nac = kpi_pc_nacional.csv; pilar = pgu_pbs_aps_nacional_anual.csv."""
+    pop = proyeccion_envejecimiento_pais.csv; nac = kpi_pc_nacional.csv; pilar = pgu_pbs_aps_nacional_anual.csv.
+    base = 'mediana' | 'promedio': ingreso de los ocupados usado en la comparación."""
     ea = gasto[gasto.categoria == "Edad avanzada"].set_index("anio")
     pib, pop, nac = pib.set_index("anio"), pop.set_index("anio"), nac.set_index("anio")
     nom, nb = _pilar_por_tipo(pilar, "monto_nominal_mm"), _pilar_por_tipo(pilar, "n_promedio_beneficios")
@@ -57,16 +63,22 @@ def serie_historica(gasto: pd.DataFrame, pib: pd.DataFrame, pop: pd.DataFrame, n
     d["pib_pc_real"] = pib.loc[anios, "pib_real_mm_2018"] * 1e6 / d.pob_total
     d["costo_pct_pib_pc"] = 100 * (ea.loc[anios, "gasto_corriente_mm"] * 1e6 / d.pob_65) / (pib.loc[anios, "pib_corriente_mm"] * 1e6 / d.pob_total)
     d["mediana_mensual"] = nac.loc[anios, "ing_ocupados_mediano_real25"]
+    d["media_mensual"] = nac.loc[anios, "ing_ocupados_medio_real25"]
+    d["ingreso_mensual"] = d["mediana_mensual" if base == "mediana" else "media_mensual"]
     d["ocupados"] = nac.loc[anios, "ocupados_ond"]
+    d["defl_ipc"] = nac.loc[anios, "deflactor_2025"]                       # pesos de t -> pesos de 2025
+    d["defl_pib"] = pib.loc[anios, "pib_corriente_mm"] / pib.loc[anios, "pib_real_mm_2018"]
     return _derivados(d)
 
 
 def _derivados(d: pd.DataFrame) -> pd.DataFrame:
-    """Comparación con el ingreso: aporte anual del 10 % de un ocupado mediano, trabajadores necesarios y carga requerida."""
-    d["aporte_10"] = CARGA_MAX * MESES * d.mediana_mensual
-    d["razon_necesaria"] = d.costo_65 / d.aporte_10              # ocupados medianos al 10 % que cubrirían a una persona 65+
+    """Comparación con el ingreso (columna `ingreso_mensual`, mediana o promedio de los ocupados): aporte anual del 10 % de un
+    ocupado típico, ocupados necesarios, pago plano por ocupado y carga requerida (pago plano / ingreso)."""
+    d["aporte_10"] = CARGA_MAX * MESES * d.ingreso_mensual
+    d["razon_necesaria"] = d.costo_65 / d.aporte_10              # ocupados típicos al 10 % que cubrirían a una persona 65+
     d["ocupados_por_65"] = d.ocupados / d.pob_65
-    d["carga_requerida"] = d.gasto / (d.ocupados * MESES * d.mediana_mensual)   # fracción del sueldo mediano
+    d["pago_plano"] = d.gasto / d.ocupados / MESES                # pesos al mes que pagaría cada ocupado si el gasto se repartiera por igual
+    d["carga_requerida"] = d.pago_plano / d.ingreso_mensual       # ... como fracción del ingreso típico
     return d
 
 
@@ -86,6 +98,7 @@ def proyeccion(h: pd.DataFrame, pop: pd.DataFrame, params: pd.DataFrame, crec_pi
     d["costo_65"] = d.gasto / d.pob_65
     d["pct_pib"] = b.pct_pib * (d.gasto / b.gasto) / (1 + crec_pib) ** dt
     pc = ((1 + crec_pib) ** dt) * (b.pob_total / d.pob_total)      # PIB per cápita real relativo a 2025
-    d["mediana_mensual"] = b.mediana_mensual * pc
+    d["ingreso_mensual"] = b.ingreso_mensual * pc
+    d["costo_pct_pib_pc"] = d.pct_pib * d.pob_total / d.pob_65   # costo por persona 65+ como % del PIB per cápita
     d["ocupados"] = b.ocupados * d.pob_15_64 / b.pob_15_64
     return _derivados(d)
