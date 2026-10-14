@@ -8,7 +8,7 @@ from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_
 from components.kpi_card import kpi_card
 from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, risk_quadrant, num_cl, CUADRANTES, estilo_kpi)
+                               coverage_correlation_scatter, coverage_risk_matrix, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -49,7 +49,6 @@ VARS_COBERTURA = {
     "ingreso_per_capita_prom": ("Ingreso per cápita", "CASEN 2022, $ mensuales", "ingreso"),
     "pct_pobreza_65": ("Pobreza 65+", "% de personas 65+, CASEN 2022", "pobreza_65"),
     "pct_urbano": ("Población urbana", "% del total, Censo 2024", "urbano"),
-    "pct_65_mas": ("Población 65+", "% del total, Censo 2024", "pct_65_mas"),
 }
 
 
@@ -79,14 +78,6 @@ def render_1_1_correlaciones():
         f"Más por sobre lo esperado está {arriba.region_nombre} ({num_cl(residuo.max(), 1)} pp); "
         f"más por debajo, {abajo.region_nombre} ({num_cl(residuo.min(), 1)} pp)."
     )
-    tabla = pd.DataFrame([{
-        "Variable": VARS_COBERTURA[v][0],
-        "r de Pearson": num_cl(res.loc[VARS_COBERTURA[v][2], "pearson_r"]),
-        "p (Pearson)": num_cl(res.loc[VARS_COBERTURA[v][2], "pearson_p"], 3),
-        "ρ de Spearman": num_cl(res.loc[VARS_COBERTURA[v][2], "spearman_rho"]),
-        "p (Spearman)": num_cl(res.loc[VARS_COBERTURA[v][2], "spearman_p"], 3),
-    } for v in VARS_COBERTURA])
-    st.dataframe(tabla, hide_index=True, use_container_width=True)
 
 
 def render_1_1_matriz():
@@ -94,22 +85,18 @@ def render_1_1_matriz():
     reg = load_csv("kpi_cobertura_correlaciones_region.csv")
     ind = load_csv("indicadores_region.csv")
     nac_65 = 100 * ind.pob_65_mas.sum() / ind.pob_total.sum()
-    st.plotly_chart(coverage_risk_matrix(reg, nac_cobertura, nac_65), use_container_width=True,
-                    config=PLOTLY_DL_CONFIG, theme=None)
+    reg = reg.merge(ind[["region", "pob_total"]], left_on="region_id", right_on="region")
     reg = reg.assign(cuadrante=risk_quadrant(reg, nac_cobertura, nac_65))
-    cols = st.columns(4)
-    for col, (nombre, _) in zip(cols, CUADRANTES.values()):
-        regiones = reg[reg.cuadrante == nombre].sort_values("cotizantes", ascending=False)
-        with col:
-            st.markdown(f"**{nombre}** ({len(regiones)})")
-            st.markdown("\n".join(f"- {r.region_nombre} ({num_cl(r.cobertura_previsional_pct, 1)}% / "
-                                  f"{num_cl(r.pct_65_mas, 1)}%)" for r in regiones.itertuples()) or "—")
+    # % de la población (Censo 2024) que vive en las regiones de cada bloque
+    pct_pob = (100 * reg.groupby("cuadrante").pob_total.sum() / reg.pob_total.sum()).to_dict()
+    st.plotly_chart(coverage_risk_matrix(reg, nac_cobertura, nac_65, pct_pob), use_container_width=True,
+                    config=PLOTLY_DL_CONFIG, theme=None)
     doble = reg[reg.cuadrante == "Riesgo doble"]
-    share_doble = doble.share_cotizantes_pct.sum()
     st.markdown(
         f"Cortes en los valores del país (cobertura {num_cl(nac_cobertura, 1)}%, 65+ {num_cl(nac_65, 1)}%). "
-        f"**{len(doble)} regiones** combinan baja cobertura y alto envejecimiento; juntas reúnen el "
-        f"{num_cl(share_doble, 1)}% de los cotizantes. Entre paréntesis: cobertura / % 65+."
+        f"**{len(doble)} regiones** combinan baja cobertura y alto envejecimiento: reúnen el "
+        f"{num_cl(pct_pob.get('Riesgo doble', 0), 1)}% de la población (Censo 2024) y el "
+        f"{num_cl(doble.share_cotizantes_pct.sum(), 1)}% de los cotizantes."
     )
 
 

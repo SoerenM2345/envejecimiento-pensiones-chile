@@ -664,28 +664,28 @@ def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unid
     return fig
 
 
-CUADRANTES = {  # (cobertura alta, envejecimiento alto) -> (nombre, color de fondo)
-    (False, True): ("Riesgo doble", RED),
-    (False, False): ("Potencial de captación", ORANGE),
-    (True, True): ("Base que envejece", VIOLET),
-    (True, False): ("Núcleo a retener", BLUE),
+CUADRANTES = {  # (cobertura alta, envejecimiento alto) -> (nombre, color de fondo, color del rótulo); tonos apagados
+    (False, True): ("Riesgo doble", "#d9695f", "#9c2f27"),
+    (False, False): ("Potencial de captación", "#e0a44a", "#8a5a0c"),
+    (True, True): ("Base que envejece", "#9a85c4", "#5b448f"),
+    (True, False): ("Núcleo a retener", "#5fa3b8", "#1f6179"),
 }
 
 
-def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> go.Figure:
+def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, pct_pob: dict) -> go.Figure:
     """KPI 1.1: matriz de riesgo cobertura × % 65+, cuadrantes cortados en los valores nacionales.
-    df: kpi_cobertura_correlaciones_region.csv."""
+    df: kpi_cobertura_correlaciones_region.csv; pct_pob: nombre del cuadrante -> % de la población (Censo 2024)."""
     x0, x1 = _rango(df.cobertura_previsional_pct, 0.12)
     y0, y1 = _rango(df.pct_65_mas, 0.12)
     fig = go.Figure()
-    for (alta_cob, alto_env), (nombre, color) in CUADRANTES.items():
+    for (alta_cob, alto_env), (nombre, color, color_texto) in CUADRANTES.items():
         qx0, qx1 = (nac_cobertura, x1) if alta_cob else (x0, nac_cobertura)
         qy0, qy1 = (nac_65, y1) if alto_env else (y0, nac_65)
-        fig.add_shape(type="rect", x0=qx0, x1=qx1, y0=qy0, y1=qy1, fillcolor=color, opacity=0.07, line_width=0,
+        fig.add_shape(type="rect", x0=qx0, x1=qx1, y0=qy0, y1=qy1, fillcolor=color, opacity=0.2, line_width=0,
                       layer="below")
-        fig.add_annotation(x=qx1 if alta_cob else qx0, y=qy1 if alto_env else qy0, text=f"<b>{nombre}</b>",
+        fig.add_annotation(x=qx1 if alta_cob else qx0, y=qy1 if alto_env else qy0, text=f"<b>{nombre}</b><br>{num_cl(pct_pob.get(nombre, 0), 1)}% de la población",
                            xanchor="right" if alta_cob else "left", yanchor="top" if alto_env else "bottom",
-                           showarrow=False, font=dict(color=color, size=13), xshift=-6 if alta_cob else 6,
+                           align="right" if alta_cob else "left", showarrow=False, font=dict(color=color_texto, size=13), xshift=-6 if alta_cob else 6,
                            yshift=-4 if alto_env else 4)
     fig.add_vline(x=nac_cobertura, line_dash="dash", line_color=INK_MUTED,
                   annotation_text=f"Cobertura país {num_cl(nac_cobertura, 1)}%", annotation_position="bottom right",
@@ -693,7 +693,7 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float) 
     fig.add_hline(y=nac_65, line_dash="dash", line_color=INK_MUTED,
                   annotation_text=f"65+ país {num_cl(nac_65, 1)}%", annotation_position="top left",
                   annotation_font_color=INK_PRIMARY)
-    _burbujas(fig, df, "cobertura_previsional_pct", "pct_65_mas", "Cobertura: %{x:.1f}%<br>65+: %{y:.1f}%", INK_MUTED,
+    _burbujas(fig, df, "cobertura_previsional_pct", "pct_65_mas", "Cobertura: %{x:.1f}%<br>65+: %{y:.1f}%", INK_SECONDARY,
               (x0, x1), (y0, y1))
     fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=560, showlegend=False,
                       title="Matriz de riesgo: cobertura previsional × envejecimiento (burbuja = cotizantes)")
