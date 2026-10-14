@@ -161,31 +161,37 @@ def _num(v: float) -> str:
 
 
 def panel_lineas(f0: pd.Series, a0: int, esc: cp.Escenario, trab: str, vista: str) -> tuple:
-    """Panel lateral del gráfico del punto crítico: cada línea con su casilla (mostrar / ocultar), su fórmula y sus cifras del año
-    base. Devuelve (mostrar_primera, mostrar_segunda)."""
-    t = rf"\tau={esc.carga_max:.0%}"
+    """Panel lateral del gráfico del punto crítico: cada línea con su casilla (mostrar / ocultar), su fórmula, qué significa cada
+    símbolo y sus cifras del año base. Devuelve (mostrar_primera, mostrar_segunda)."""
     if vista == "Dinero":
         lineas = [
             (":red[■] Costo", r"\text{Costo}=c_{65}\times P_{65+}",
-             f"c₆₅ = PGU + PBS/APS por persona de 65+: \\${f0.costo_65 / 1e6:.2f} M al año · P₆₅₊ = {_num(f0.pob_65)} personas "
-             f"→ **\\${_num(f0.costo_total)}** en {a0}"),
+             [f"**P₆₅₊** = todas las personas de 65 años o más (Censo 2024; después, proyección INE al nivel del Censo), "
+              f"no solo las que reciben la PGU: {_num(f0.pob_65)}",
+              f"**c₆₅** = gasto anual de PGU + APS/PBS de vejez ÷ P₆₅₊, en pesos de 2025: \\${f0.costo_65 / 1e6:.2f} M por persona",
+              f"→ **\\${_num(f0.costo_total)}** al año en {a0}"]),
             (":blue[■] Capacidad", r"\text{Capacidad}=\tau\times y\times T",
-             f"τ = {esc.carga_max:.0%} del sueldo · y = ingreso anual por trabajador (\\${f0.ingreso_anual_trab / 1e6:.1f} M) · "
-             f"T = {_num(f0.trabajadores)} {trab} → **\\${_num(f0.capacidad)}** en {a0}"),
+             [f"**τ** = tope de carga: parte del sueldo que se acepta destinar al Pilar (supuesto, no dato): {esc.carga_max:.0%}",
+              f"**y** = ingreso anual por trabajador (12 × ingreso mensual {esc.estadistico}): \\${f0.ingreso_anual_trab / 1e6:.1f} M",
+              f"**T** = {trab} (diciembre): {_num(f0.trabajadores)}",
+              f"→ **\\${_num(f0.capacidad)}** al año en {a0}"]),
         ]
     else:
         lineas = [
             (":blue[■] Razón observada", r"R=\dfrac{T}{P_{65+}}",
-             f"T = {trab} ({_num(f0.trabajadores)}) · P₆₅₊ = personas de 65+ ({_num(f0.pob_65)}) → **{f0.razon_soporte:.2f}** en {a0}"),
+             [f"**T** = {trab}: {_num(f0.trabajadores)} · **P₆₅₊** = personas de 65+: {_num(f0.pob_65)}",
+              f"Es la cobertura (T ÷ población 15-64) por el cociente demográfico (15-64 ÷ 65+)",
+              f"→ **{f0.razon_soporte:.2f}** {trab} por persona de 65+ en {a0}"]),
             (":orange[■] Razón de equilibrio R*", r"R^{*}=\dfrac{c_{65}}{\tau\times y}",
-             f"c₆₅ = \\${f0.costo_65 / 1e6:.2f} M · τ = {esc.carga_max:.0%} · y = \\${f0.ingreso_anual_trab / 1e6:.1f} M → **{f0.razon_equilibrio:.2f}** en {a0}"),
+             [f"Número de {trab} por persona de 65+ con el que el costo iguala a la capacidad (c₆₅, τ e y como en la vista Dinero)",
+              f"→ **{f0.razon_equilibrio:.2f}** en {a0}; el costo supera la capacidad cuando R baja de R*"]),
         ]
     out = []
     for i, (rotulo, formula, detalle) in enumerate(lineas):
         with st.container(border=True):
             out.append(st.checkbox(rotulo, value=True, key=f"pc_mostrar_{vista}_{i}"))
             st.latex(formula)
-            st.caption(_coma(detalle))
+            st.caption(_coma("\n\n".join(detalle)))
     return tuple(out)
 
 
@@ -274,11 +280,12 @@ def render_1_2_punto_critico():
     with col_panel:
         mostrar = panel_lineas(f0, a0, esc, trab, vista)
     with col_graf:
-        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, mostrar)
+        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, mostrar, pais=sel == "País")
         st.plotly_chart(estilo_kpi(fig, 520), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
-    st.caption("\\* Línea sólida: observado · punteada: escenario · ◆ 2024, 2035, 2050 (años con población regional) · ★ punto crítico. "
-               "Pesos reales de 2025.")
+    st.caption("\\* Solo los años con marca (punto o rombo) son datos; el resto es interpolación o escenario. ★ = punto crítico. Pesos reales de 2025.  \n"
+               "\\*\\* El tope τ es un criterio, no un dato: la PGU se paga con impuestos generales, no con cotizaciones. "
+               "El punto crítico mide cuándo el Pilar pesaría más de τ sobre el sueldo de los trabajadores, no cuándo falta financiamiento.")
     nac_pc = load_csv("kpi_pc_nacional.csv").set_index("anio")
     ajuste_pais = (f"País: población con la dinámica de las proyecciones INE llevada al nivel del Censo 2024 (65+ × {nac_pc.loc[2024, 'factor_censo_65']:.3f}, "
                    f"15-64 × {nac_pc.loc[2024, 'factor_censo_15_64']:.3f}; el INE corrige el subconteo del censo, ver docs/DISCUSION_FUENTES.md). "
@@ -292,7 +299,11 @@ def render_1_2_punto_critico():
             + "El costo por persona de 65+ es PGU + APS/PBS de vejez, constante en términos reales (la PGU se reajusta por IPC). "
               "La mediana de los cotizantes sale de los tramos de ingreso imponible; la regional se estima con la nacional. "
               "Comuna: aproximación, hereda de su región cobertura, ingreso y costo por persona de 65+. "
-              "Población 65+ regional: reparto de tasas nacionales, no proyección oficial INE. El tope de carga es un supuesto.")
+              "Población 65+ regional: reparto de tasas nacionales, no proyección oficial INE. "
+              "Límites: el costo por persona de 65+ se mantiene constante en términos reales (cobertura de la PGU y mezcla PGU/APS sin cambio; "
+              "una focalización mayor lo bajaría, un reajuste real de la PGU lo subiría); el costo no incluye pensiones del sistema antiguo, "
+              "salud ni sobrevivencia; con la mediana el ingreso total de los trabajadores queda subestimado (la media es mayor); "
+              "el ingreso imponible tiene tope y excluye el trabajo informal (la base «ocupados» lo incluye).")
     if sel != "País":
         with st.expander(f"Cifras de todas las comunas de {sel} (aproximación, con los supuestos de arriba)"):
             tabla = pc_tabla_comunas(reg_ids[sel], esc)
@@ -327,8 +338,8 @@ def render_1_2():
         if sel == "País":
             base = proy_pais.loc[2024, "pob_15_64"] / proy_pais.loc[2024, "pob_65_mas"]
             filas = pd.DataFrame([{"anio": a, "razon": nac_soporte * (proy_pais.loc[a, "pob_15_64"] / proy_pais.loc[a, "pob_65_mas"]) / base}
-                                  for a in (2030, 2035, 2040, 2050, 2060, 2070)])
-            fig = support_ratio_projection(nac_soporte, filas, "Chile")
+                                  for a in range(2025, 2071)])
+            fig = support_ratio_projection(nac_soporte, filas, "Chile", todos_los_anios=True)
         else:
             fila = pres[pres.region_nombre == sel].iloc[0]
             r = proy_reg[proy_reg.region_nombre == sel]

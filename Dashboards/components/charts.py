@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from components.cost_analysis import CARGA_MAX
-from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
+from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
                    CATEGORICAL, lighten)
 
 UMBRAL_VEJEZ = 65
@@ -150,14 +150,30 @@ def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return fig
 
 
-def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str) -> go.Figure:
-    """Línea 2024 -> 2035 -> 2050 de la razón de soporte (escenario). filas: anio, razon."""
-    pts = pd.concat([pd.DataFrame([{"anio": ANIO_BASE, "razon": historico}]), filas]).sort_values("anio")
+def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str, todos_los_anios: bool = False) -> go.Figure:
+    """Razón de soporte 2024 -> 2035 -> 2050 (escenario con cobertura constante). filas: anio, razon.
+    todos_los_anios=True (país): el INE publica población de cada año, así que se marca cada año con un punto pequeño y se
+    rotulan solo los años clave. False (región): solo 2024 (Censo) y 2035 / 2050 (escenario regional) son datos; se marcan con
+    rombos (lleno = 2024, vacío = escenarios) y la recta entre ellos es interpolación."""
+    pts = pd.concat([pd.DataFrame([{"anio": ANIO_BASE, "razon": historico}]), filas]).sort_values("anio").reset_index(drop=True)
     fig = go.Figure()
-    fig.add_scatter(x=pts.anio, y=pts.razon, mode="lines+markers+text", text=[f"{v:.2f}" for v in pts.razon],
-                    textposition="top center", line=dict(color=RED, width=3), name=nombre)
+    if todos_los_anios:
+        clave = pts.anio.isin([2024, 2030, 2035, 2040, 2050, 2060, 2070])
+        fig.add_scatter(x=pts.anio, y=pts.razon, mode="lines+markers", line=dict(color=RED, width=3), marker=dict(size=5), name=nombre,
+                        showlegend=False, hovertemplate="%{x}: %{y:.2f}<extra></extra>")
+        fig.add_scatter(x=pts.anio[clave], y=pts.razon[clave], mode="text", text=[f"{v:.2f}" for v in pts.razon[clave]],
+                        textposition="top center", showlegend=False, hoverinfo="skip")
+        fig.add_scatter(x=[None], y=[None], mode="markers", name="Un punto por año (población INE de cada año)",
+                        marker=dict(symbol="circle", size=8, color=INK_SECONDARY))
+    else:
+        fig.add_scatter(x=pts.anio, y=pts.razon, mode="lines", line=dict(color=RED, width=3, dash="dot"), showlegend=False, hoverinfo="skip")
+        fig.add_scatter(x=pts.anio[:1], y=pts.razon[:1], mode="markers+text", text=[f"{v:.2f}" for v in pts.razon[:1]], textposition="top center",
+                        marker=dict(symbol="diamond", size=13, color=RED, line=dict(color="white", width=1.5)), name="Año observado (Censo 2024)")
+        fig.add_scatter(x=pts.anio[1:], y=pts.razon[1:], mode="markers+text", text=[f"{v:.2f}" for v in pts.razon[1:]], textposition="top center",
+                        marker=dict(symbol="diamond", size=13, color="white", line=dict(color=RED, width=2.5)),
+                        name="Población del escenario regional")
     fig.update_layout(**PLOTLY_LAYOUT, title=f"Escenario: cotizantes por adulto mayor, {nombre}")
-    fig.update_xaxes(title="Año", tickvals=list(pts.anio))
+    fig.update_xaxes(title="Año", **({} if todos_los_anios else dict(tickvals=list(pts.anio))))
     fig.update_yaxes(title="Cotizantes por persona de 65+", rangemode="tozero")
     return fig
 
@@ -408,13 +424,16 @@ def _unidad_dinero(max_clp: float):
 
 
 def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float,
-                         mostrar: tuple = (True, True)) -> go.Figure:
+                         mostrar: tuple = (True, True), pais: bool = True) -> go.Figure:
     """KPI 1.2, análisis del punto crítico. d = salida de critical_point.serie_pais / serie_territorio;
     pc = critical_point.punto_critico(d); view = 'dinero' | 'razon'.
     En 'dinero' se superponen el costo (costo por persona de 65+ x población de 65+) y la capacidad (carga máxima x ingreso por
     trabajador x trabajadores); en 'razon', la razón de soporte observada y la razón de equilibrio R*. El cruce de las dos
     líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050).
-    mostrar = (primera línea, segunda línea): oculta la que esté en False (la estrella sólo se dibuja con ambas)."""
+    mostrar = (primera línea, segunda línea): oculta la que esté en False (la estrella sólo se dibuja con ambas).
+    Marcas de datos: país = un punto por cada año observado (2010-2025, todos los insumos existen); región = rombo lleno en 2024
+    (único año con todos los insumos observados) y rombos vacíos en 2035 y 2050 (población del escenario regional; ingreso y
+    costo son supuestos). Los años sin marca son interpolación o escenario, no datos."""
     if view == "dinero":
         div, unidad = _unidad_dinero(max(d.costo_total.max(), d.capacidad.max()))
         series = [("Costo del Pilar Solidario de vejez", d.costo_total / div, RED),
@@ -435,17 +454,34 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
         if not visible:
             continue
         yo, yp = y.loc[obs.index], y.loc[proy_c.index]
-        fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers" if len(obs) > 1 else "markers", name=nom, legendgroup=nom,
-                        line=dict(color=col, width=3), marker=dict(size=6 if len(obs) > 1 else 10),
-                        hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
+        if pais:  # un punto por año observado
+            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom,
+                            line=dict(color=col, width=3), marker=dict(size=6),
+                            hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
+        else:     # región: un solo año observado, rombo lleno
+            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom,
+                            line=dict(color=col, width=3), marker=dict(symbol="diamond", size=13, color=col, line=dict(color="white", width=1.5)),
+                            hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
         fig.add_scatter(x=proy_c.anio, y=yp, mode="lines", name=nom + " (escenario)", legendgroup=nom, showlegend=False,
                         line=dict(color=col, width=3, dash="dash"),
                         hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + " (escenario)</extra>")
-        if "ancla" in d and d.ancla.any():
-            a = d[d.ancla]
+        if not pais and "ancla" in d and d.ancla.any():  # 2035 y 2050: población del escenario regional, rombo vacío
+            a = d[d.ancla & d.proyectado]
             fig.add_scatter(x=a.anio, y=y.loc[a.index], mode="markers", legendgroup=nom, showlegend=False,
-                            marker=dict(symbol="diamond", size=12, color=col, line=dict(color="white", width=1.5)),
-                            hoverinfo="skip")
+                            marker=dict(symbol="diamond", size=13, color="white", line=dict(color=col, width=2.5)),
+                            hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + " (población del escenario)</extra>")
+    # claves de lectura de las marcas (leyenda)
+    gris = INK_SECONDARY
+    if pais:
+        claves = [("circle", gris, "solid", "Año observado (cotizantes, ingreso y gasto)"), (None, gris, "dash", "Escenario (supuestos)")]
+    else:
+        claves = [("diamond", gris, "solid", "Año observado (todos los insumos)"), ("diamond-open", gris, "solid", "Población del escenario regional"),
+                  (None, gris, "dash", "Escenario (supuestos)")]
+    for simbolo, c, dash, txt in claves:
+        if simbolo:
+            fig.add_scatter(x=[None], y=[None], mode="markers", name=txt, marker=dict(symbol=simbolo, size=10, color=c, line=dict(color=c, width=2)))
+        else:
+            fig.add_scatter(x=[None], y=[None], mode="lines", name=txt, line=dict(color=c, width=2, dash=dash))
     if all(mostrar) and pc["estado"] in ("cruza", "ya_superado"):
         xc = pc["anio_exacto"]
         yc = float(np.interp(xc, d.anio, series[0][1].values))
