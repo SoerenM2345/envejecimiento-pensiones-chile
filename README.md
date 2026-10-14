@@ -88,6 +88,14 @@ Páginas del modo desarrollador:
 
 El **Panorama general** también responde *Identificar regiones y comunas con mayor envejecimiento* (ranking) y sirve de *Dashboard territorial* general.
 
+## Skill del proyecto: «Data analysis improvement»
+
+Revisa la vista de un KPI contra los requisitos del proyecto y la profundiza (quién, dónde, cuándo, cuánto) hasta poder derivar recomendaciones para al menos dos partes interesadas, cuidando que todos los datos del cálculo sean del mismo período.
+
+- **Claude Code (esta carpeta):** viene en `.claude/skills/data-analysis-improvement/`; se invoca con `/data-analysis-improvement` (por ejemplo `/data-analysis-improvement KPI 2.1`) o pidiendo «mejora/profundiza el KPI X».
+- **Claude Desktop / claude.ai:** sube `Outputs/data-analysis-improvement.skill` en Configuración → Capacidades → Skills.
+- Contenido: `SKILL.md` (flujo en bucle), `references/` (ejemplos KPI 1.2 y 1.3, test de partes interesadas, alineación temporal, requisitos del proyecto) y `scripts/` (`preflight.py`, `alignment_check.py`).
+
 ## Estado por track del enunciado
 
 | Track | Estado |
