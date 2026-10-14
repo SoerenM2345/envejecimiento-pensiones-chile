@@ -8,7 +8,7 @@ from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_
 from components.kpi_card import kpi_card
 from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, risk_quadrant, num_cl, estilo_kpi)
+                               coverage_correlation_scatter, coverage_risk_matrix, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -31,13 +31,19 @@ def render_1_1():
          f"{pres['cobertura_previsional_pct'].min():.1f}%",
          ["Misma cobertura, calculada por región", "Se compara con el promedio del país"]),
     ])
+    vista_reg = st.radio("Vista de las barras por región", ["Cobertura (relativa)", "Personas (mismo orden)"], horizontal=True,
+                         key="s11_vista_region")
     c1, c2 = st.columns(2)
     with c1:
         st.plotly_chart(region_choropleth(pres, load_geojson("regiones_chile.geojson"), "cobertura_previsional_pct",
                                           "Cobertura previsional (%)"), use_container_width=True, config=PLOTLY_DL_CONFIG)
     with c2:
-        st.plotly_chart(region_bars(pres, "cobertura_previsional_pct", "Cobertura previsional (% de 15-64 que cotiza)",
-                                    nac_cobertura, ".1f", ORANGE), use_container_width=True, config=PLOTLY_DL_CONFIG)
+        if vista_reg == "Cobertura (relativa)":
+            fig_reg = region_bars(pres, "cobertura_previsional_pct", "Cobertura previsional (% de 15-64 que cotiza)",
+                                  nac_cobertura, ".1f", ORANGE)
+        else:
+            fig_reg = region_coverage_people_bars(pres, nac_cobertura)
+        st.plotly_chart(fig_reg, use_container_width=True, config=PLOTLY_DL_CONFIG)
     render_1_1_correlaciones()
     render_1_1_matriz()
     st.caption("Correlación no implica causalidad; n = 16 regiones. Ingreso de CASEN 2022 (encuesta muestral). "

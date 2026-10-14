@@ -132,22 +132,48 @@ def region_bars(df: pd.DataFrame, var: str, label: str, nacional: float, fmt: st
     return fig
 
 
-def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
-    """KPI 1.2, vista en personas: mismo orden que la razón de soporte, con cotizantes y personas de 65+ en valores
-    absolutos (eje con marcas cada 500.000 y rejilla cada 100.000) y la razón escrita junto a cada región."""
-    d = df.sort_values("razon_soporte_previsional")
-    orden = list(d.region_nombre)
+def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list, titulo: str) -> go.Figure:
+    """Barras en personas por región, en el orden de d (el mismo de la vista relativa): total = (columna, nombre, color) y
+    parte = (columna, nombre, color) con la tasa escrita junto a la barra. Eje con marcas cada 500.000 y rejilla cada 100.000."""
     fig = go.Figure()
-    fig.add_bar(y=d.region_nombre, x=d.pob_65_mas, orientation="h", name="Personas de 65+", marker_color=ORANGE,
-                hovertemplate="%{y}<br>65+: %{x:,.0f}<extra></extra>")
-    fig.add_bar(y=d.region_nombre, x=d.cotizantes_2024, orientation="h", name="Cotizantes (dic-2024)", marker_color=BLUE,
-                text=[f"{r:.2f}" for r in d.razon_soporte_previsional], textposition="outside",
-                hovertemplate="%{y}<br>Cotizantes: %{x:,.0f}<extra></extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.",
-                      title=f"Cotizantes y personas de 65+ por región* (país: {nacional:.2f})")
-    fig.update_yaxes(categoryorder="array", categoryarray=orden, title="")
+    fig.add_bar(y=d.region_nombre, x=d[total[0]], orientation="h", name=total[1], marker_color=total[2],
+                hovertemplate="%{y}<br>" + total[1] + ": %{x:,.0f}<extra></extra>")
+    fig.add_bar(y=d.region_nombre, x=d[parte[0]], orientation="h", name=parte[1], marker_color=parte[2],
+                text=texto, textposition="outside", hovertemplate="%{y}<br>" + parte[1] + ": %{x:,.0f}<extra></extra>")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.", title=titulo)
+    fig.update_yaxes(categoryorder="array", categoryarray=list(d.region_nombre), title="")
     fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=500_000, minor=dict(dtick=100_000, showgrid=True), rangemode="tozero")
     return fig
+
+
+def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 1.2, vista en personas: mismo orden que la razón de soporte, con cotizantes y personas de 65+ en valores
+    absolutos y la razón escrita junto a cada región."""
+    d = df.sort_values("razon_soporte_previsional")
+    return _region_people_bars(d, ("pob_65_mas", "Personas de 65+", ORANGE), ("cotizantes_2024", "Cotizantes (dic-2024)", BLUE),
+                               [f"{r:.2f}" for r in d.razon_soporte_previsional],
+                               f"Cotizantes y personas de 65+ por región* (país: {nacional:.2f})")
+
+
+def region_coverage_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 1.1, vista en personas: mismo orden que la cobertura, con la población de 15-64 (Censo 2024) y los cotizantes en
+    valores absolutos y la cobertura escrita junto a cada región."""
+    d = df.sort_values("cobertura_previsional_pct")
+    return _region_people_bars(d, ("pob_15_64", "Población 15-64 (Censo 2024)", lighten(ORANGE)),
+                               ("cotizantes_2024", "Cotizantes (dic-2024)", ORANGE),
+                               [f"{c:.1f}%".replace(".", ",") for c in d.cobertura_previsional_pct],
+                               f"Cotizantes y población de 15-64 por región (cobertura país: {nacional:.1f}%)".replace(".", ","))
+
+
+def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
+    """KPI 2.3, vista en personas: mismo orden que el % de pobreza, con las personas 65+ de la CASEN 2022 y las que están
+    en pobreza (porcentaje × población expandida), y el porcentaje escrito junto a cada región. df: region_nombre,
+    pob_65_expandida, n_pobres, pct_pobreza_65."""
+    d = df.sort_values("pct_pobreza_65")
+    return _region_people_bars(d, ("pob_65_expandida", "Personas 65+ (CASEN 2022)", lighten(ORANGE)),
+                               ("n_pobres", "Personas 65+ en pobreza", ORANGE),
+                               [f"{p:.1f}%".replace(".", ",") for p in d.pct_pobreza_65],
+                               f"Personas de 65+ y en pobreza por región (país: {nacional:.1f}%)".replace(".", ","))
 
 
 def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str, todos_los_anios: bool = False) -> go.Figure:

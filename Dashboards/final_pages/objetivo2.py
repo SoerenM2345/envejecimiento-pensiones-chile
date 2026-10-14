@@ -5,7 +5,7 @@ from utils import load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
-from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, region_choropleth
+from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
 from components.charts import estilo_kpi, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
 st.title("Objetivo 2: controlar el costo por cliente")
@@ -428,11 +428,12 @@ def render_2_3():
         ("Región con menos", menor.region_nombre, f"{menor.pct_pobreza_65:.1f}%",
          ["Pobreza 65+ por región", "Regiones pequeñas tienen intervalos amplios"]),
     ])
+    vista_reg = st.radio("Vista de las barras por región", ["Porcentaje (relativo)", "Personas (mismo orden)"], horizontal=True, key="s23_vista_region")
     c1, c2 = st.columns(2)
     with c1:
         _grafico(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65", "% de personas 65+ en pobreza", "Oranges"), 520)
     with c2:
-        _grafico(poverty_bars(reg, nac.pct_pobreza_65), 520)
+        _grafico(poverty_bars(reg, nac.pct_pobreza_65) if vista_reg == "Porcentaje (relativo)" else poverty_people_bars(reg, nac.pct_pobreza_65), 520)
     sobre = reg[reg.ic95_inf > nac.ic95_sup]            # regiones cuyo intervalo queda por encima del intervalo del país
     mas_gente = reg.sort_values("n_pobres").iloc[-1]
     st.markdown(f"**Lectura:** {n_pobres / 1000:,.0f} mil personas 65+ viven en pobreza ({nac.pct_pobreza_65:.1f}%, menos que el {nac.pct_pobreza_menores_65:.1f}% de los menores de 65). "
