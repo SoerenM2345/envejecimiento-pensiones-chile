@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
-from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
+from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, region_support_people_bars,
                                coverage_correlation_scatter, coverage_risk_matrix, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
@@ -35,15 +35,14 @@ def render_1_1():
                          key="s11_vista_region")
     c1, c2 = st.columns(2)
     with c1:
-        st.plotly_chart(region_choropleth(pres, load_geojson("regiones_chile.geojson"), "cobertura_previsional_pct",
-                                          "Cobertura previsional (%)"), use_container_width=True, config=PLOTLY_DL_CONFIG)
+        mostrar(region_choropleth(pres, load_geojson("regiones_chile.geojson"), "cobertura_previsional_pct", "Cobertura previsional (%)"))
     with c2:
         if vista_reg == "Cobertura (relativa)":
             fig_reg = region_bars(pres, "cobertura_previsional_pct", "Cobertura previsional (% de 15-64 que cotiza)",
                                   nac_cobertura, ".1f", ORANGE)
         else:
             fig_reg = region_coverage_people_bars(pres, nac_cobertura)
-        st.plotly_chart(fig_reg, use_container_width=True, config=PLOTLY_DL_CONFIG)
+        mostrar(fig_reg)
     render_1_1_correlaciones()
     render_1_1_matriz()
     st.caption("Correlación no implica causalidad; n = 16 regiones. Ingreso de CASEN 2022 (encuesta muestral). "
@@ -70,8 +69,7 @@ def render_1_1_correlaciones():
                    format_func=lambda v: VARS_COBERTURA[v][0])
     etiqueta, unidad, clave = VARS_COBERTURA[var]
     corr = res.loc[clave]
-    st.plotly_chart(coverage_correlation_scatter(reg, var, etiqueta, unidad, corr), use_container_width=True,
-                    config=PLOTLY_DL_CONFIG, theme=None)
+    mostrar(coverage_correlation_scatter(reg, var, etiqueta, unidad, corr))
 
     # interpretación generada de los datos: dirección, fuerza, significancia y la región más lejos de la recta
     pendiente, intercepto = np.polyfit(reg[var], reg.cobertura_previsional_pct, 1)
@@ -95,8 +93,7 @@ def render_1_1_matriz():
     reg = reg.assign(cuadrante=risk_quadrant(reg, nac_cobertura, nac_65))
     # % de la población (Censo 2024) que vive en las regiones de cada bloque
     pct_pob = (100 * reg.groupby("cuadrante").pob_total.sum() / reg.pob_total.sum()).to_dict()
-    st.plotly_chart(coverage_risk_matrix(reg, nac_cobertura, nac_65, pct_pob), use_container_width=True,
-                    config=PLOTLY_DL_CONFIG, theme=None)
+    mostrar(coverage_risk_matrix(reg, nac_cobertura, nac_65, pct_pob))
     doble = reg[reg.cuadrante == "Riesgo doble"]
     st.markdown(
         f"Cortes en los valores del país (cobertura {num_cl(nac_cobertura, 1)}%, 65+ {num_cl(nac_65, 1)}%). "
@@ -278,11 +275,11 @@ def render_1_2_punto_critico():
     ])
     col_graf, col_panel = st.columns([3, 1.4])
     with col_panel:
-        mostrar = panel_lineas(f0, a0, esc, trab, vista)
+        visibles = panel_lineas(f0, a0, esc, trab, vista)
     with col_graf:
-        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, mostrar, pais=sel == "País",
+        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, visibles, pais=sel == "País",
                                    es_base=es_base)
-        st.plotly_chart(estilo_kpi(fig, 520), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        mostrar(estilo_kpi(fig, 520))
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
     if pc["estado"] in ("cruza", "ya_superado"):
         desde = f"desde {pc['anio']}" if pc["estado"] == "cruza" else f"ya desde {pc['anio']}"
@@ -360,7 +357,7 @@ def render_1_2():
                                   nac_soporte, ".2f", BLUE)
         else:
             fig_reg = region_support_people_bars(pres, nac_soporte)
-        st.plotly_chart(estilo_kpi(fig_reg), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        mostrar(estilo_kpi(fig_reg))
     with der:
         sel = st.selectbox("Escenario 2035 / 2050 para", ["País"] + sorted(pres["region_nombre"]), key="s12_proy_territorio")
         if sel == "País":
@@ -379,7 +376,7 @@ def render_1_2():
             # (cobertura con cotizantes de diciembre de 2024, el mismo año del Censo y de la razón actual)
             filas = pd.DataFrame({"anio": r.anio, "razon": fila.cobertura_previsional_pct / r.indice_dependencia_vejez_proy})
             fig = support_ratio_projection(fila.razon_soporte_previsional, filas, sel)
-        st.plotly_chart(estilo_kpi(fig), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        mostrar(estilo_kpi(fig))
         if sel != "País":
             st.caption("Población 65+ regional = reparto de tasas nacionales (INE no publica proyección regional base 2024).")
     st.caption("\\* Número junto a las barras azules = cotizantes por adulto mayor. Línea continua = datos reales; punteada sobre fondo gris = "
@@ -415,10 +412,9 @@ def render_1_3():
     ])
     c1, c2 = st.columns([2, 3])
     with c1:
-        st.plotly_chart(commissionable_flow_bars(real), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        mostrar(commissionable_flow_bars(real))
     with c2:
-        st.plotly_chart(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"]),
-                        use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        mostrar(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"]))
     # caída y recuperación: si la recuperación hasta 2033 cubre al menos 90% de la caída, no se dice «solo en parte»
     caida, recuperacion = r25.kpi_1_3_pct - v_min, e33.kpi_1_3_pct - v_min
     parte = recuperacion / caida if caida > 0 else 1.0

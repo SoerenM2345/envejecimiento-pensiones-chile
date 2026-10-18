@@ -22,7 +22,7 @@ CATEGORICAL = [BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GREEN, VIOLET, RED]
 
 SEQ_BLUE = ["#cde2fb", "#9ec5f4", "#5598e7", "#2a78d6", "#184f95", "#0d366b"]
 
-INK_PRIMARY = "#0b0b0b"
+INK_PRIMARY = "#0B2A40"  # navy oscuro: texto de todos los gráficos (legible sobre el fondo claro también en tema oscuro)
 INK_SECONDARY = "#52514e"
 INK_MUTED = "#898781"
 GRIDLINE = "#e1e0d9"

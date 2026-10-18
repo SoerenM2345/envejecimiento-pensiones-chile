@@ -804,3 +804,30 @@ def poverty_coverage_scatter(df: pd.DataFrame, r: float, rho: float, n: int) -> 
     fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza, 2024)", ticksuffix="%", range=list(rx), **_EJE_CLARO)
     fig.update_yaxes(title="Personas 65+ en pobreza (%, CASEN 2022)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
     return con_coma(fig)
+
+
+def colores_legibles(fig: go.Figure) -> go.Figure:
+    """Texto oscuro explícito en TODO el gráfico (título, ejes, ticks, barra de color, leyenda, rótulos y anotaciones), fondo claro,
+    coma decimal y barra de herramientas vertical. Sin esto, el tema oscuro de Streamlit pinta el texto gris claro sobre fondo blanco."""
+    fig.update_layout(font_color=INK_PRIMARY, title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY,
+                      legend_title_font_color=INK_PRIMARY, paper_bgcolor=SURFACE, plot_bgcolor=SURFACE,
+                      separators=",.", modebar=dict(orientation="v"))
+    # automargin: los nombres de región y los ticks no se cortan (el margen fijo de 10 px era muy chico)
+    fig.update_xaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, automargin=True)
+    fig.update_yaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, automargin=True)
+    if any(getattr(tr, "coloraxis", None) for tr in fig.data):  # solo si hay escala de color (mapas): si no, aparece una barra vacía
+        fig.update_coloraxes(colorbar_tickfont_color=INK_PRIMARY, colorbar_title_font_color=INK_PRIMARY)
+    for tr in fig.data:
+        if hasattr(tr, "textfont") and tr.textfont.color is None:   # respeta rótulos con color propio (p. ej. blanco dentro de barras)
+            tr.textfont.color = INK_PRIMARY
+    for an in fig.layout.annotations:
+        if an.font.color is None:
+            an.font.color = INK_PRIMARY
+    return con_coma(fig)
+
+
+def mostrar(fig: go.Figure, config: dict = None, **kwargs):
+    """Única forma de dibujar un gráfico en el dashboard: colores legibles y theme=None (Streamlit no reemplaza los colores)."""
+    import streamlit as st
+    from utils import PLOTLY_DL_CONFIG
+    st.plotly_chart(colores_legibles(fig), use_container_width=True, config=config or PLOTLY_DL_CONFIG, theme=None, **kwargs)

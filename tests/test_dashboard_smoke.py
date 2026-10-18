@@ -206,3 +206,9 @@ def test_formato_es_cl():
     assert es_cl("55.5%") == "55,5%" and es_cl("1,209 mil") == "1.209 mil" and es_cl("$1,281,744") == "$1.281.744"
     assert es_cl("p = 0,004") == "p = 0,004" and es_cl("$0,026 billones") == "$0,026 billones"
     assert es_cl("Ley 21.735") == "Ley 21.735" and es_cl("KPI 1.2 y KPI 1.3") == "KPI 1.2 y KPI 1.3" and es_cl("2038") == "2038"
+
+
+def test_graficos_finales_pasan_por_mostrar():
+    """En el modo final todos los gráficos se dibujan con charts.mostrar (texto oscuro y theme=None): ningún st.plotly_chart directo."""
+    for f in (DASH / "final_pages").glob("*.py"):
+        assert "st.plotly_chart(" not in f.read_text(encoding="utf-8"), f"{f.name} dibuja un gráfico sin charts.mostrar"

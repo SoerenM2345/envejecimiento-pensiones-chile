@@ -1,7 +1,7 @@
 """Definición del problema (diapositivas 6-11): pirámides, Chile vs. Alemania, envejecimiento, pico de la población activa."""
 import streamlit as st
 from utils import load_csv, kpi_card_row, PLOTLY_DL_CONFIG
-from components.charts import (pyramid_chile, pyramid_chile_vs_alemania, age_group_shares,
+from components.charts import (mostrar, pyramid_chile, pyramid_chile_vs_alemania, age_group_shares,
                                aging_share_series, working_age_peak)
 
 st.title("Definición del problema")
@@ -17,7 +17,7 @@ s24 = age_group_shares(reg)
 p92 = proy[proy.anio == 1992].iloc[0]
 col_fig, col_txt = st.columns([3, 2])
 with col_fig:
-    st.plotly_chart(pyramid_chile(censo), use_container_width=True, config=PLOTLY_DL_CONFIG)
+    mostrar(pyramid_chile(censo))
 with col_txt:
     st.markdown("**Chile 2024 (Censo)**")
     kpi_card_row([("0-14", f"{s24['pct_0_14']:.1f}%", None), ("15-64", f"{s24['pct_15_64']:.1f}%", None),
@@ -30,7 +30,7 @@ with col_txt:
 
 # --- 2. Chile vs Alemania -------------------------------------------------------
 st.header("2. Alemania es el espejo del Chile que viene")
-st.plotly_chart(pyramid_chile_vs_alemania(censo, alemania), use_container_width=True, config=PLOTLY_DL_CONFIG)
+mostrar(pyramid_chile_vs_alemania(censo, alemania))
 st.markdown(
     "- Alemania muestra el punto de llegada; Chile sigue la misma trayectoria.\n"
     "- Menos población activa por cada adulto mayor implica menos soporte para el sistema previsional.\n"
@@ -41,12 +41,12 @@ st.caption("Chile: Censo 2024 (la pirámide excluye ~151 mil personas con edad n
 
 # --- 3. Envejecimiento sostenido -------------------------------------------------
 st.header("3. El envejecimiento se acelera de forma sostenida: de 14% a 43% hacia 2070")
-st.plotly_chart(aging_share_series(proy), use_container_width=True, config=PLOTLY_DL_CONFIG)
+mostrar(aging_share_series(proy))
 st.caption("Fuente: INE, estimaciones y proyecciones de población 1992-2070 (base 2024). Punto rojo = Censo 2024.")
 
 # --- 4. Pico de población en edad de trabajar -------------------------------------
 st.header("4. En poco más de una década, la población en edad de trabajar comenzará a reducirse")
-st.plotly_chart(working_age_peak(proy), use_container_width=True, config=PLOTLY_DL_CONFIG)
+mostrar(working_age_peak(proy))
 st.caption("Fuente: INE, proyecciones base 2024. Consecuencia: caída proyectada de los ingresos del sistema previsional.")
 
 # --- 5. Por qué le importa a las AFP ----------------------------------------------

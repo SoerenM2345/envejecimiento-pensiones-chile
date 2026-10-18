@@ -5,7 +5,7 @@ from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
-from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
+from components.charts import mostrar, cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
 from components.charts import num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
 TITULO_OBJETIVO_2 = "Objetivo 2: anticipar la presión fiscal del envejecimiento"  # igual que config/kpis.yaml e Inicio.py
@@ -21,7 +21,7 @@ ANIO_FIN_2_1 = 2050
 
 
 def _g21(fig, alto=430):
-    st.plotly_chart(_estilo_2_1(fig, alto), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+    mostrar(_estilo_2_1(fig, alto))
 
 
 @st.cache_data
@@ -222,7 +222,7 @@ def _grafico(fig, alto=460, leyenda_y=None):
     estilo_kpi(fig, alto)
     if leyenda_y is not None:
         fig.update_layout(legend_y=leyenda_y)
-    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+    mostrar(fig)
 
 
 def render_2_2():
