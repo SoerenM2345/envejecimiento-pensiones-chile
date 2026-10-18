@@ -15,3 +15,11 @@ tope_carga:                        # KPI 1.2: parte del sueldo que se acepta des
   variantes: [0.08, 0.12]          # columnas de la tabla de sensibilidad del punto crítico
 
 crecimiento_pib_real: 0.02         # KPI 2.1 y 2.2: crecimiento real anual del PIB (valor inicial del control deslizante)
+
+# KPI 2.2: reservas y peso fiscal
+rentabilidad_real_reservas:        # rentabilidad real anual de la reserva y tasa de descuento del valor presente (ratio 2)
+  base: 0.025                      # 2,53% real: tasa del préstamo del FRP al FAPP (DIPRES, Resolución Exenta 646 de 2025)
+  variantes: [0.015, 0.035]        # tabla de sensibilidad (Scripts/23)
+aporte_fapp: true                  # sumar el aporte del Estado al FAPP por ley (Ley 21.735, desde 2028)
+horizonte_proyeccion: 2050         # último año de las proyecciones de los KPI 2.1 y 2.2
+# Población 65+: proyecciones INE base 2024 (no es un supuesto de este archivo). La invalidez se mantiene constante en términos reales.

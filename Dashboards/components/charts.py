@@ -348,6 +348,7 @@ def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool, mos
     mostrar = (observado, escenario del Pilar, escenario con aporte al FAPP). Observado sólido, escenario punteado; la franja es el aporte
     del Estado al FAPP; la línea punteada gris es el peso de 2025."""
     fig = go.Figure()
+    zona_escenario(fig, float(p.index.min()) + 0.5, float(p.index.max()) + 0.5)
     base = p.pilar_pct_pib.iloc[0]
     if mostrar[0]:
         fig.add_scatter(x=hist.anio, y=hist.pilar_pct_pib, mode="lines+markers", name="Observado: PGU + pensiones solidarias",
@@ -400,12 +401,16 @@ def reserve_chart(d: pd.DataFrame, res: dict, cubre: str, mostrar=(True, True)) 
     mostrar = (gasto cubierto, saldo). Barras = gasto que cubre la reserva cada año; línea = saldo (mismo eje, billones);
     la estrella (año en que se agota) aparece solo mientras se ve el saldo."""
     fig = go.Figure()
+    zona_escenario(fig, float(d.index.min()) + 0.5, float(d.index.max()) + 0.5)
     if mostrar[0]:
-        fig.add_bar(x=d.index, y=d.gasto_cubierto / 1e12, name="Gasto que cubre la reserva", marker_color=lighten(ORANGE, 0.4),
+        fig.add_bar(x=d.index, y=d.gasto_cubierto / 1e12, name="Gasto que cubre la reserva (escenario)", marker_color=lighten(ORANGE, 0.4),
                     hovertemplate="%{x}: %{y:.2f} billones<extra>Gasto cubierto</extra>")
     if mostrar[1]:
-        fig.add_scatter(x=d.index, y=d.saldo.clip(lower=0) / 1e12, mode="lines", name="Saldo de la reserva",
-                        line=dict(color=BLUE, width=3), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo</extra>")
+        # 31-dic-2025 es dato (punto lleno); desde 2026 el saldo es escenario (punteado)
+        fig.add_scatter(x=d.index[:1], y=d.saldo.iloc[:1] / 1e12, mode="markers", name="Reserva al 31-dic-2025 (dato)",
+                        marker=dict(color=BLUE, size=10), hovertemplate="%{x}: %{y:.2f} billones<extra>dato</extra>")
+        fig.add_scatter(x=d.index, y=d.saldo.clip(lower=0) / 1e12, mode="lines", name="Saldo de la reserva (escenario)",
+                        line=dict(color=BLUE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo (escenario)</extra>")
         if res["anio_agotamiento"]:
             a = res["anio_agotamiento"]
             fig.add_scatter(x=[a], y=[0], mode="markers", marker=dict(symbol="star", size=18, color=RED), name=f"Se agota en {a}")

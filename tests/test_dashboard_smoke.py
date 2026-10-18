@@ -152,3 +152,26 @@ def test_kpis_1_2_1_3_2_2_leen_la_misma_config_de_escenarios():
     f = pd.read_csv(raiz / "Data processed" / "kpi_flujo_comisionable.csv")
     # KPI 1.3: el escenario base y las variantes salen de la config
     assert set(f.tipo) == {"real", "escenario", "escenario_crec_0", "escenario_crec_1_5"}
+
+
+def test_kpi_2_2_sensibilidad_y_gasto_2025():
+    """KPI 2.2: tabla de sensibilidad de 3 filas y gasto 2025 del motor = fila 'Total' del Pilar Solidario."""
+    import pandas as pd
+    import yaml
+    from components.cost_analysis import serie_historica
+    from components.financiamiento import proyeccion_carga
+    dp = DASH.parent / "Data processed"
+    cfg = yaml.safe_load((DASH.parent / "config" / "escenarios.yaml").read_text(encoding="utf-8"))
+    sens = pd.read_csv(dp / "kpi_2_2_sensibilidad.csv")
+    assert len(sens) == 3 and sens.es_base.sum() == 1
+    assert sorted(sens.rentabilidad_real) == sorted([cfg["rentabilidad_real_reservas"]["base"]] + cfg["rentabilidad_real_reservas"]["variantes"])
+    assert sens.cobertura_pct.is_monotonic_increasing  # más rentabilidad -> menos VP del gasto -> más cobertura
+    leer = lambda f: pd.read_csv(dp / f)  # noqa: E731
+    pil = leer("pgu_pbs_aps_nacional_anual.csv")
+    h = serie_historica(leer("gasto_proteccion_social.csv"), leer("macro_pib_anual.csv"), leer("proyeccion_envejecimiento_pais.csv"),
+                        leer("kpi_pc_nacional.csv"), pil, "mediana")
+    p = proyeccion_carga(h, pil, leer("macro_pib_anual.csv"), leer("proyeccion_envejecimiento_pais.csv"), leer("kpi_pc_parametros_reforma.csv"),
+                         leer("fapp_aporte_fiscal.csv"), cfg["crecimiento_pib_real"], cfg["pgu_250"], cfg["aporte_fapp"], cfg["horizonte_proyeccion"])
+    total25 = pil[(pil.anio == 2025) & (pil.tipo_beneficio == "Total")].monto_nominal_mm.iloc[0] * 1e6
+    assert abs(p.loc[2025, "pilar"] - total25) < 1e6 and round(total25 / 1e12, 2) == 7.04
+    assert p.index.max() == cfg["horizonte_proyeccion"]

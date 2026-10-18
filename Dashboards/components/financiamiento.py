@@ -13,8 +13,10 @@ Reservas (stock al 31-dic-2025): cartera propia del FRP (sin los US$ 200 M ya tr
 y, opcional, los activos del FAPP. Se supone que la reserva rinde `r_real` y cubre un gasto elegido:
   - 'incremento': solo el alza del gasto sobre el peso que el Pilar tenía en 2025 (el PIB en pesos × 2,07 %);
   - 'total': todo el gasto del Pilar.
-Saldo_t = Saldo_(t-1) × (1 + r) − gasto cubierto_t, desde 2026. Ratio 2 = reserva inicial / VP del gasto cubierto 2026-2050
-descontado a la misma tasa r: si es ≥ 1, la reserva alcanza hasta 2050; el año en que el saldo pasa a negativo es el punto crítico.
+Saldo_t = Saldo_(t-1) × (1 + r) − gasto cubierto_t, desde 2026.
+Ratio 2 «cobertura de reservas» = reserva al 31-dic-2025 / valor presente 2026-2050 del gasto cubierto, descontado a la misma tasa r
+(alternativa al valor presente oficial del déficit, que no está publicado). Si es >= 1, la reserva alcanza hasta 2050; el año en
+que el saldo pasa a negativo es el año de agotamiento. Supuestos (r, PIB, horizonte, aporte al FAPP): config/escenarios.yaml.
 """
 import numpy as np
 import pandas as pd
@@ -37,8 +39,9 @@ def peso_historico(pilar: pd.DataFrame, pib: pd.DataFrame, gasto: pd.DataFrame) 
 
 
 def proyeccion_carga(h: pd.DataFrame, pilar: pd.DataFrame, pib: pd.DataFrame, pop: pd.DataFrame, params: pd.DataFrame,
-                     aporte_fapp: pd.DataFrame, crec_pib: float = 0.02, pgu_250: bool = True, con_fapp: bool = True) -> pd.DataFrame:
-    """2025-2050. h = cost_analysis.serie_historica; pilar = pgu_pbs_aps_nacional_anual; pib = macro_pib_anual;
+                     aporte_fapp: pd.DataFrame, crec_pib: float = 0.02, pgu_250: bool = True, con_fapp: bool = True,
+                     anio_fin: int = ANIO_FIN) -> pd.DataFrame:
+    """2025-anio_fin (config/escenarios.yaml: horizonte_proyeccion). h = cost_analysis.serie_historica; pilar = pgu_pbs_aps_nacional_anual; pib = macro_pib_anual;
     pop = proyeccion_envejecimiento_pais; params = kpi_pc_parametros_reforma; aporte_fapp = fapp_aporte_fiscal.
     Montos en pesos reales de 2025 (pesos, no millones). Columnas: pilar_vejez, pilar_invalidez, aporte_fapp, carga,
     pib_real25, pilar_pct_pib, carga_pct_pib, incremento (carga que excede el peso del Pilar de 2025)."""
@@ -48,7 +51,7 @@ def proyeccion_carga(h: pd.DataFrame, pilar: pd.DataFrame, pib: pd.DataFrame, po
     # deflactor 2025 = 1: el monto nominal de 2025 ya está en pesos de 2025
     invalidez = (nom["Total"] - nom.get("PGU", 0.0) - nom.get("PBS vejez", 0.0) - nom.get("APS vejez", 0.0)) * 1e6
     pib25 = pib.set_index("anio").loc[ANIO_BASE, "pib_corriente_mm"] * 1e6
-    anios = np.arange(ANIO_BASE, ANIO_FIN + 1)
+    anios = np.arange(ANIO_BASE, anio_fin + 1)
     dt = anios - ANIO_BASE
     d = pd.DataFrame(index=pd.Index(anios, name="anio"))
     d["pob_65"] = pop.loc[anios, "pob_65_mas"].values

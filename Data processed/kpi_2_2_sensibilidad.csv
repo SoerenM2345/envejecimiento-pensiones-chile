@@ -1,0 +1,4 @@
+rentabilidad_real,reserva_billones,vp_gasto_billones,cobertura_pct,anio_agotamiento,es_base
+0.015,9.195,57.25,16.1,2033,False
+0.025,9.195,49.67,18.5,2033,True
+0.035,9.195,43.31,21.2,2033,False

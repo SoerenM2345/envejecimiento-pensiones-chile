@@ -213,7 +213,7 @@ Fórmula: `(Costo público total ÷ Población 65+) ÷ PIB per cápita` (indicad
 
 ### KPI 2.2 · Financiamiento dedicado 🟡
 
-Fórmula: `(PGU + Pensión solidaria) ÷ PIB` y `(Activos + Reservas) ÷ VP del déficit`.
+Fórmula: `(PGU + Pensión solidaria) ÷ PIB` y, como ratio 2, la **cobertura de reservas** `cartera propia del FRP al 31-dic-2025 ÷ VP 2026-2050 del alza de la carga (Pilar + aporte del Estado al FAPP) sobre el peso del Pilar en el PIB de 2025`.
 
 **Ratio 1 🟢**
 
@@ -225,7 +225,7 @@ Fórmula: `(PGU + Pensión solidaria) ÷ PIB` y `(Activos + Reservas) ÷ VP del 
 4. **Agrupar por** = `anio`; **Columna a agregar** = `pct_pib`; `mean`. → Cifra de control: **2025 = 2,07 %**.
 5. Para comparar con el gasto total en vejez: `gasto_proteccion_social.csv`, filtro `categoria` = `Edad avanzada`, columna `pct_pib` (2025 = 4,39 %, coincide con lo publicado por DIPRES).
 
-**Ratio 2 🟡:** `(Activos + Reservas) ÷ VP del déficit`. El **valor presente del déficit oficial** sigue sin estar publicado (sección 5, ítem B). En su lugar el dashboard calcula una alternativa con datos oficiales (módulo `Dashboards/components/financiamiento.py`, probado en `tests/test_financiamiento.py`; datos del script `Scripts/21_procesar_reservas_financiamiento.py`).
+**Ratio 2 🟢 (cobertura de reservas):** `cartera propia del FRP al 31-dic-2025 ÷ VP 2026-2050 del alza de la carga (Pilar + aporte del Estado al FAPP) sobre el peso del Pilar en el PIB de 2025`. Es la definición final: el **valor presente oficial del déficit** no está publicado (sección 5, ítem B). Supuestos en `config/escenarios.yaml` (rentabilidad real 2,5 %, sensibilidad 1,5 % / 3,5 % en `kpi_2_2_sensibilidad.csv`, script 23). Se calcula con datos oficiales (módulo `Dashboards/components/financiamiento.py`, probado en `tests/test_financiamiento.py`; datos del script `Scripts/21_procesar_reservas_financiamiento.py`).
 
 **Profundización (5 pestañas bajo el ratio 1)**
 1. *Peso fiscal 2050:* ratio 1 observado 2009-2025 y escenario a 2050 (población 65+ INE, PGU de $250.000, invalidez constante real; el valor de 2025 es el del ratio 1). Se puede sumar el aporte del Estado al FAPP (Ley 21.735, Tabla 2: 2,2 millones de UTM en 2028-2029 hasta 15 millones desde 2037, a la UTM promedio de 2025 = $68.640).
@@ -296,10 +296,10 @@ Para verificarlo todo de una vez: `"Data raw/.venv/bin/python" -I -m pytest test
 
 ### B. Valor presente del déficit (KPI 2.2, ratio 2)
 
-- **Estado (2026-10-13):** el dashboard usa una alternativa calculada (reservas / VP del gasto que cubren, ver KPI 2.2). El valor oficial sigue sin aparecer.
+- **Estado (2026-10-18):** cerrado. El ratio 2 queda definido como cobertura de reservas (ver KPI 2.2); si DIPRES publica el valor presente oficial, se puede comparar.
 - **Qué falta:** el valor presente del déficit proyectado. La nota técnica de DIPRES sobre el FAPP (ya en `Data raw/_external/dipres/articles-397500_doc_pdf.pdf`) solo estima ingresos y egresos del fondo.
 - **Dónde:** el **Informe Financiero** del proyecto de la **Ley 21.735** (publicada el 26-mar-2025). Buscarlo en DIPRES (`https://www.dipres.gob.cl/598/w3-propertyvalue-15499.html`, enlace que usted indicó; **no pude abrirlo desde aquí**) y en la Biblioteca del Congreso Nacional (`https://www.bcn.cl/portal/leyfacil/recurso/reforma-de-pensiones-de-2025`, resumen de la ley; el informe financiero está en la «Historia de la Ley»).
-- **Decisión del equipo (no es un archivo):** si no aparece, reemplazar el ratio 2 por `saldo del fondo (FAPP + FRP) ÷ gasto anual en PGU y APS` y dejarlo escrito en la tarjeta.
+- **Decisión del equipo (2026-10-18):** ratio 2 = cobertura de reservas (reserva ÷ VP del alza del gasto), no «años de cobertura»; está escrito en la tarjeta y en `config/kpis.yaml`.
 
 ### C. Saldo del Fondo de Reserva de Pensiones, FRP (KPI 2.2, «reservas»)
 
