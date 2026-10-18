@@ -15,6 +15,8 @@ Salidas (Data processed/):
         cobertura_previsional_pct, share_cotizantes_pct (% del total de cotizantes con región), ingreso_per_capita_prom,
         pct_65_mas, pct_urbano, pct_pobreza_65
   - kpi_cobertura_correlaciones_resumen.csv  una fila por variable: variable, n, pearson_r, pearson_p, spearman_rho, spearman_p
+  - kpi_pobreza_cobertura_region.csv         KPI 2.3 diagnóstico (16 filas): region_id, region_nombre, cobertura_previsional_pct,
+        pct_pobreza_65, ic95_inf, ic95_sup, n_pobres_65 (pob. 65+ expandida CASEN × %), share_pobres_pct
 
 Notas: n = 16 regiones, correlación no implica causalidad. Los cotizantes sin región informada quedan fuera.
 """
@@ -93,3 +95,16 @@ for col, nombre in VARIABLES:
 res = pd.DataFrame(filas)
 res.to_csv(DP / "kpi_cobertura_correlaciones_resumen.csv", index=False)
 print(res.to_string(index=False))
+
+# =============================================================================
+# 3) KPI 2.3: pobreza 65+ frente a cobertura (misma correlación que 'pobreza_65' del resumen)
+# =============================================================================
+print("\n3) kpi_pobreza_cobertura_region.csv ...")
+pc = reg[["region_id", "region_nombre", "cobertura_previsional_pct", "pct_pobreza_65"]].merge(
+    pob[["region_id", "ic95_inf", "ic95_sup", "pob_65_expandida"]], on="region_id")
+pc["n_pobres_65"] = (pc.pob_65_expandida * pc.pct_pobreza_65 / 100).round(0)
+pc["share_pobres_pct"] = round(100 * pc.n_pobres_65 / pc.n_pobres_65.sum(), 2)
+pc = pc.drop(columns="pob_65_expandida")
+assert len(pc) == 16 and not pc.isna().any().any()
+pc.to_csv(DP / "kpi_pobreza_cobertura_region.csv", index=False)
+print(pc.sort_values("pct_pobreza_65", ascending=False).round(2).to_string(index=False))

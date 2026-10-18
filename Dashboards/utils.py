@@ -1,6 +1,7 @@
 """Utilidades compartidas por todas las páginas del dashboard: rutas, carga
 cacheada de datos, y la paleta de color de referencia (dataviz skill)."""
 from pathlib import Path
+import re
 import pandas as pd
 import streamlit as st
 
@@ -49,6 +50,8 @@ REGION_ORDER = [
 PLOTLY_DL_CONFIG = {"toImageButtonOptions": {"format": "png", "scale": 4}}
 
 PLOTLY_LAYOUT = dict(
+    separators=",.",                    # es-CL: coma decimal y punto de miles en ejes, hover y formatos d3
+    modebar=dict(orientation="v"),      # barra de herramientas vertical, a la derecha: no tapa el título
     font=dict(family="system-ui, -apple-system, Segoe UI, sans-serif", color=INK_PRIMARY, size=13),
     paper_bgcolor=SURFACE,
     plot_bgcolor=SURFACE,
@@ -173,8 +176,27 @@ def tooltip_con_detalle(help_text, detalle):
     return "\n\n".join(partes) or None
 
 
+_KPI_ID = re.compile(r"\bKPIs? \d\.\d(?: y \d\.\d)?")
+# miles con coma al estilo Python: nunca empiezan con 0 (así '0,026', ya con coma decimal, no se toca)
+_NUMERO = re.compile(r"(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+(?:\.\d{1,2})?|\d+\.\d{1,2})(?![\d])")
+
+
+def es_cl(texto):
+    """Números con formato chileno en un texto ya formateado con Python: '1,234.5' -> '1.234,5' y '55.5' -> '55,5'.
+    Solo toca decimales de 1-2 cifras y miles con coma (así no cambia '21.735' de una ley ni los años); respeta 'KPI 1.2'."""
+    if not isinstance(texto, str):
+        return texto
+    ids = _KPI_ID.findall(texto)
+    marcado = _KPI_ID.sub("\x00", texto)
+    marcado = _NUMERO.sub(lambda m: m.group(0).translate(str.maketrans(",.", ".,")), marcado)
+    for i in ids:
+        marcado = marcado.replace("\x00", i, 1)
+    return marcado
+
+
 def kpi_card_row(cols_data):
-    """cols_data: list of (label, value, help) o (label, value, help, detalle).
+    """cols_data: list of (label, value, help), (label, value, help, detalle) o (label, value, help, detalle, delta).
+    delta (opcional) = texto bajo la cifra con flecha (st.metric), p. ej. "−5,5 pp vs. 2025".
     help = nombre completo; detalle = lista de viñetas cortas con lo que incluye la cifra.
     Ambos se muestran únicamente al pasar el cursor sobre la "?" de la cifra, en un mismo tooltip
     (primero el nombre completo y luego «Qué incluye»). No hay botones ni ventanas aparte."""
@@ -182,4 +204,6 @@ def kpi_card_row(cols_data):
     for col, item in zip(cols, cols_data):
         label, value, help_text = item[:3]
         detalle = item[3] if len(item) > 3 else None
-        col.metric(label, value, help=tooltip_con_detalle(help_text, detalle))
+        delta = item[4] if len(item) > 4 else None
+        detalle = [es_cl(x) for x in detalle] if detalle else detalle
+        col.metric(label, es_cl(value), delta=es_cl(delta), help=tooltip_con_detalle(es_cl(help_text), detalle))

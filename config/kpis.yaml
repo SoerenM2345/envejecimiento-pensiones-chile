@@ -205,7 +205,7 @@ kpis_presentacion:
   - id: "1.2"
     nombre: "Razón de soporte"
     objetivo: "Objetivo 1: Retener y ampliar la base activa"
-    descripcion: "Cuántos cotizantes sostienen a cada persona de 65+ y desde qué año el costo del Pilar Solidario supera la capacidad de pago."
+    descripcion: "Cuántos cotizantes sostienen a cada persona de 65+ y desde qué año el costo del Pilar Solidario supera la capacidad de pago. Ese año es un indicador de riesgo regulatorio para la AFP: cuanto más pesa el Pilar sobre el sueldo, más presión hay por desviar cotizaciones de las cuentas individuales hacia fondos estatales."
     formula: "Cotizantes / Población 65+  ·  Punto crítico: costo = capacidad"
     visualizacion: barras_y_proyeccion
     status: live
@@ -232,7 +232,7 @@ kpis_presentacion:
 
   - id: "2.1"
     nombre: "Costo real por adulto mayor"
-    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    objetivo: "Objetivo 2: anticipar la presión fiscal del envejecimiento"
     descripcion: "Cuánto cuesta cada adulto mayor al Estado frente al ingreso del país, y qué explica que cambie."
     formula: "(Gasto en Edad avanzada / Población 65+) / PIB per cápita"
     visualizacion: lineas_y_pestanas
@@ -243,7 +243,7 @@ kpis_presentacion:
     caveat: "Gasto del Gobierno Central en 'Edad avanzada' (sistema antiguo, PGU y aportes solidarios), pesos de 2025. Indicador principal en precios corrientes. Detalle en «Método y fuentes»."
   - id: "2.2"
     nombre: "Financiamiento dedicado"
-    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    objetivo: "Objetivo 2: anticipar la presión fiscal del envejecimiento"
     descripcion: "Cuánto pesan la PGU y las pensiones solidarias en el PIB, quién las financia y cuánto del alza futura del gasto cubren las reservas."
     formula: "Ratio 1 = (PGU + PBS/APS, vejez e invalidez) / PIB ; Ratio 2 (cobertura de reservas) = cartera propia del FRP al 31-dic-2025 / VP 2026-2050 del alza de la carga (Pilar + aporte del Estado al FAPP) sobre el peso del Pilar en el PIB de 2025"
     visualizacion: lineas
@@ -256,7 +256,7 @@ kpis_presentacion:
     caveat: "Ratio 2 = cobertura de reservas (alternativa al VP oficial del déficit, no publicado). Proyección = escenario según config/escenarios.yaml; sensibilidad a la rentabilidad real en el panel. «Pilar» = vejez + invalidez (igual que el aporte del Estado en el KPI 1.3; el punto crítico del KPI 1.2 usa solo vejez)."
   - id: "2.3"
     nombre: "Pobreza en la vejez"
-    objetivo: "Objetivo 2: Controlar el costo por cliente"
+    objetivo: "Objetivo 2: anticipar la presión fiscal del envejecimiento"
     descripcion: "Cuántas personas 65+ viven en pobreza y dónde, para que el ahorro en pensiones no la aumente."
     formula: "Personas 65+ bajo línea de pobreza / Población 65+"
     visualizacion: mapa

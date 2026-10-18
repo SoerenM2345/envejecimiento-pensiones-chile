@@ -31,7 +31,8 @@ def kpi_card(kpi_id: str, render: Optional[Callable[[], None]] = None):
             status_text += " · proyecciones = escenario (config/escenarios.yaml)"
         st.caption(f"{icon} {status_text} · {kpi['objetivo']}")
         st.markdown(kpi["descripcion"])
-        st.code(kpi["formula"], language=None)
+        # una línea por parte de la fórmula (« ; ») y con salto de línea: no se corta en la tarjeta
+        st.code(kpi["formula"].replace(" ; ", "\n"), language=None, wrap_lines=True)
 
         if kpi["status"] == "pending" or render is None:
             if kpi.get("pendiente_motivo"):

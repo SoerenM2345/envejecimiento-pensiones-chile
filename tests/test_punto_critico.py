@@ -187,7 +187,7 @@ def test_pagina_pais_muestra_el_punto_critico_2038():
     at = correr([])
     metricas = {m.label: m.value for m in at.metric}
     assert metricas["Punto crítico (escenario)"] == "2038"
-    assert metricas["Cotizantes por 65+ (2024)"] == "2.27"
+    assert metricas["Cotizantes por 65+ (2024)"] == "2,27"
 
 
 def test_tabla_de_comunas_de_una_region():

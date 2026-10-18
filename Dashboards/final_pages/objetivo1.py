@@ -263,7 +263,9 @@ def render_1_2_punto_critico():
     else:
         pc_txt = f"no antes de {int(d.anio.max())}"
     kpi_card_row([
-        ("Punto crítico (escenario)", pc_txt, f"Primer año en que el costo supera la capacidad (tope {carga:.0%})",
+        ("Punto crítico (escenario)", pc_txt, f"Primer año en que el costo supera la capacidad (tope {carga:.0%}). "
+         "Año en que el costo del Pilar supera el tope sobre el sueldo de los cotizantes; indicador de riesgo regulatorio "
+         "para la base comisionable.",
          ["Costo: PGU + PBS/APS de vejez, por persona 65+ × población 65+",
           "Capacidad: tope × masa imponible anual (12 meses)", "Pesos reales de 2025"] + sup),
         (f"Carga requerida {a0}", f"{f0.carga_requerida:.1%}", "Costo / masa de ingreso de los trabajadores",
@@ -282,6 +284,15 @@ def render_1_2_punto_critico():
                                    es_base=es_base)
         st.plotly_chart(estilo_kpi(fig, 520), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
+    if pc["estado"] in ("cruza", "ya_superado"):
+        desde = f"desde {pc['anio']}" if pc["estado"] == "cruza" else f"ya desde {pc['anio']}"
+        st.markdown(f"**Por qué importa a la AFP:** si el Pilar pesa más que el tope sobre el sueldo de los {trab} ({desde}), "
+                    "crece la presión política por desviar cotizaciones de las cuentas individuales hacia fondos estatales, como "
+                    "ya hizo la Reforma 2025 con el Seguro Social. Ese riesgo se mide en el KPI 1.3.")
+    else:
+        st.markdown(f"**Por qué importa a la AFP:** con estos supuestos el Pilar no supera el tope sobre el sueldo de los {trab} "
+                    f"antes de {int(d.anio.max())}, así que la presión por desviar cotizaciones hacia fondos estatales es menor. "
+                    "Ese riesgo se mide en el KPI 1.3.")
     if sel != "País":
         st.caption("Población 65+ regional = reparto de tasas nacionales (INE no publica proyección regional base 2024).")
     with st.expander("Sensibilidad del punto crítico (país, cotizantes, promedio)"):
@@ -302,8 +313,8 @@ def render_1_2_punto_critico():
                "\\*\\* El tope τ es un criterio, no un dato: la PGU se paga con impuestos generales, no con cotizaciones. "
                "El punto crítico mide cuándo el Pilar pesaría más de τ sobre el sueldo de los trabajadores, no cuándo falta financiamiento.")
     nac_pc = load_csv("kpi_pc_nacional.csv").set_index("anio")
-    ajuste_pais = (f"País: población con la dinámica de las proyecciones INE llevada al nivel del Censo 2024 (65+ × {nac_pc.loc[2024, 'factor_censo_65']:.3f}, "
-                   f"15-64 × {nac_pc.loc[2024, 'factor_censo_15_64']:.3f}; el INE corrige el subconteo del censo, ver docs/DISCUSION_FUENTES.md). "
+    ajuste_pais = (f"País: población con la dinámica de las proyecciones INE llevada al nivel del Censo 2024 (65+ × {num_cl(nac_pc.loc[2024, 'factor_censo_65'], 3)}, "
+                   f"15-64 × {num_cl(nac_pc.loc[2024, 'factor_censo_15_64'], 3)}; el INE corrige el subconteo del censo, ver docs/DISCUSION_FUENTES.md). "
                    "Cotizantes: diciembre, con región (razón 2024 = 2,27, igual que arriba); masa imponible: suma de los 12 meses "
                    "de todos los cotizantes (Superintendencia, 04A), la misma del KPI 1.3. ")
     with st.expander("Método y fuentes"):
@@ -387,17 +398,20 @@ def render_1_3():
     a_meta = 2033
     e33 = esc.loc[a_meta]
     minimo = esc.kpi_1_3_pct.idxmin()
+    v_min = esc.kpi_1_3_pct.min()
     kpi_card_row([
         (f"Flujo comisionable {int(r25.anio)} (real)", f"{r25.kpi_1_3_pct:.1f}%", "Cuentas individuales / flujo total",
          ["Cuentas individuales: cotización del trabajador (10%) + empleador a cuenta individual",
           "Flujo total: cuentas individuales + Seguro Social (FAPP, sin SIS) + Estado (PGU, PBS, APS)",
           "Aporte del trabajador estimado con ingreso imponible promedio"]),
+        ("Mínimo del escenario", f"{v_min:.1f}% en {minimo}", "Año en que el flujo comisionable toca fondo en el escenario",
+         ["Crece el Seguro Social (FAPP) antes de que suba la parte del empleador a la cuenta individual",
+          "pp = puntos porcentuales", "Es escenario, no pronóstico"],
+         _coma(f"{v_min - r25.kpi_1_3_pct:+.1f} pp vs. {int(r25.anio)}")),
         (f"Flujo comisionable {a_meta} (escenario)", f"{e33.kpi_1_3_pct:.1f}%", "Cotización del empleador completa (8,5%)",
          ["Escenario de la Ley 21.735 con la cotización del empleador completa",
-          "División empleador: cuenta individual vs Seguro Social según la Nota Técnica", "Es escenario, no pronóstico"]),
-        (f"Variación {int(r25.anio)}-{a_meta}", f"{e33.kpi_1_3_pct - r25.kpi_1_3_pct:+.1f} pp",
-         f"Mínimo del escenario: {esc.kpi_1_3_pct.min():.1f}% en {minimo}",
-         ["pp = puntos porcentuales", "Diferencia entre el escenario y el dato real"]),
+          "División empleador: cuenta individual vs Seguro Social según la Nota Técnica", "Es escenario, no pronóstico"],
+         _coma(f"{e33.kpi_1_3_pct - v_min:+.1f} pp desde el mínimo")),
     ])
     c1, c2 = st.columns([2, 3])
     with c1:
@@ -405,14 +419,20 @@ def render_1_3():
     with c2:
         st.plotly_chart(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"]),
                         use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
-    recupera = ("solo se recupera en parte, a" if e33.kpi_1_3_pct < r25.kpi_1_3_pct else "vuelve a subir, a")
-    st.markdown(
-        f"El dinero previsional crece, pero una parte menor pasa por la base comisionable de las AFP: del "
-        f"**{r25.kpi_1_3_pct:.1f}%** en {int(r25.anio)} baja a **{esc.kpi_1_3_pct.min():.1f}%** en {minimo} "
-        f"(crece el Seguro Social) y {recupera} **{e33.kpi_1_3_pct:.1f}%** en {a_meta}, cuando sube la parte del "
-        f"empleador que va a la cuenta individual. Incluyendo el SIS en todos los años el nivel es menor "
-        f"({con_sis.loc[a_meta, 'kpi_1_3_pct']:.1f}% en {a_meta}), pero la tendencia es la misma."
-    )
+    # caída y recuperación: si la recuperación hasta 2033 cubre al menos 90% de la caída, no se dice «solo en parte»
+    caida, recuperacion = r25.kpi_1_3_pct - v_min, e33.kpi_1_3_pct - v_min
+    parte = recuperacion / caida if caida > 0 else 1.0
+    recupera = ("se recupera por completo, a" if parte >= 1 else "se recupera casi por completo, a" if parte >= 0.9
+                else "se recupera solo en parte, a")
+    st.markdown(_coma(
+        f"El dinero previsional crece, pero por unos años una parte menor pasa por la base comisionable de las AFP: del "
+        f"**{r25.kpi_1_3_pct:.1f}%** en {int(r25.anio)} baja a **{v_min:.1f}%** en {minimo} (crece el Seguro Social) y "
+        f"{recupera} **{e33.kpi_1_3_pct:.1f}%** en {a_meta}, cuando sube la parte del empleador que va a la cuenta individual. "
+        f"Incluyendo el SIS en todos los años el nivel es menor ({con_sis.loc[a_meta, 'kpi_1_3_pct']:.1f}% en {a_meta}), "
+        "pero la forma de la curva es la misma."
+    ))
+    st.markdown(f"**Para la AFP:** {int(r25.anio) + 1}–{minimo + 2} es la ventana crítica: menos ingreso comisionable mientras "
+                "crece el Seguro Social; después pesa de nuevo la demografía (KPI 1.2).")
     faltan = real[real.n_meses < 12]
     if len(faltan):
         st.warning("Años reales con fichas incompletas (proyectados a 12 meses): "

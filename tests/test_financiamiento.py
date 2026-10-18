@@ -205,5 +205,5 @@ def test_el_kpi_original_se_conserva():
     """Lo que ya citaba la presentación (2,07 % y 4,39 % en 2025) sigue en la tarjeta."""
     at = _run()
     metricas = {m.label: m.value for m in at.metric}
-    assert metricas["(PGU + pensión solidaria) / PIB (2025)"] == "2.07%"
-    assert metricas["Gasto en edad avanzada / PIB (2025)"] == "4.39%"
+    assert metricas["(PGU + pensión solidaria) / PIB (2025)"] == "2,07%"
+    assert metricas["Gasto en edad avanzada / PIB (2025)"] == "4,39%"

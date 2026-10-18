@@ -1,15 +1,17 @@
-"""Objetivo 2: controlar el costo por cliente. KPIs 2.1, 2.2 y 2.3."""
+"""Objetivo 2: anticipar la presión fiscal del envejecimiento. KPIs 2.1, 2.2 y 2.3."""
 import pandas as pd
 import streamlit as st
-from utils import cargar_escenarios, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
 from components.charts import cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
-from components.charts import estilo_kpi, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
+from components.charts import num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
-st.title("Objetivo 2: controlar el costo por cliente")
-st.markdown("Optimizar la estructura de costos para absorber el crecimiento de cuentas inactivas y pensionadas sin perder rentabilidad.")
+TITULO_OBJETIVO_2 = "Objetivo 2: anticipar la presión fiscal del envejecimiento"  # igual que config/kpis.yaml e Inicio.py
+st.title(TITULO_OBJETIVO_2)
+st.markdown("La carga del envejecimiento sobre el Estado crece y sus reservas son mínimas: eso genera presión para desviar cotizaciones "
+            "de las cuentas individuales (KPI 1.3). Medimos cuánto cuesta, quién lo financia y dónde está el límite social.")
 
 
 from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart
@@ -80,8 +82,18 @@ def render_2_1():
             _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "PGU"))
         with c2:
             _g21(cost_pct_pibpc_chart(h))
-        st.markdown(f"**Lectura:** en pesos reales el costo por adulto mayor sube {var_total:.0f}% ({a0}-{a1}) por un salto único en {ANIO_PGU} (PGU) y desde entonces baja {-desde_hito:.0f}%; "
-                    f"frente al PIB per cápita pasa de {pri.costo_pct_pib_pc:.1f}% a {ult.costo_pct_pib_pc:.1f}% (máximo {h.costo_pct_pib_pc.max():.1f}% en {pico}).")
+        pob = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio").pob_65_mas
+        crece_65 = 100 * (pob.loc[a1] / pob.loc[ANIO_PGU] - 1)
+        if desde_hito < 0 and ult.costo_pct_pib_pc < pri.costo_pct_pib_pc:
+            _texto(f"**Lectura:** el costo por persona 65+ está controlado ({desde_hito:.0f}% desde {ANIO_PGU}; {ult.costo_pct_pib_pc:.1f}% del PIB per cápita "
+                   f"vs. {pri.costo_pct_pib_pc:.1f}% en {a0}). La presión no viene del costo por persona sino del número de personas 65+, "
+                   f"que crece {crece_65:.0f}% en el mismo período.")
+            if ult.resto / ult.gasto < hito.resto / hito.gasto:  # el sistema antiguo pesa cada vez menos en el gasto
+                _texto("Parte de la baja se explica por el sistema antiguo (IPS), cuyos pensionados disminuyen; no es solo eficiencia "
+                       f"(su parte del gasto baja de {100 * hito.resto / hito.gasto:.0f}% en {ANIO_PGU} a {100 * ult.resto / ult.gasto:.0f}% en {a1}).")
+        else:
+            _texto(f"**Lectura:** en pesos reales el costo por adulto mayor cambia {var_total:+.0f}% ({a0}-{a1}) y {desde_hito:+.0f}% desde {ANIO_PGU} (PGU); "
+                   f"frente al PIB per cápita pasa de {pri.costo_pct_pib_pc:.1f}% a {ult.costo_pct_pib_pc:.1f}%; las personas 65+ crecen {crece_65:.0f}% desde {ANIO_PGU}.")
         st.caption("\\* Derecha: precios corrientes a ambos lados, porque el costo real (IPC) y el PIB real (deflactor del PIB) no son comparables; detalle en «Método y fuentes».")
     with t2:
         c1, c2 = st.columns(2)
@@ -89,13 +101,13 @@ def render_2_1():
             _g21(cost_components_chart(h))
         with c2:
             _g21(spending_vs_population_growth(h.reset_index()))
-        st.markdown(f"**Lectura:** el Pilar y la PGU suben de ${pri.pilar_65 / 1e6:.2f} a ${ult.pilar_65 / 1e6:.2f} millones por persona 65+, pero el resto de 'Edad avanzada' "
+        _texto(f"**Lectura:** el Pilar y la PGU suben de ${pri.pilar_65 / 1e6:.2f} a ${ult.pilar_65 / 1e6:.2f} millones por persona 65+, pero el resto de 'Edad avanzada' "
                     f"({100 * ult.resto / ult.gasto:.0f}% del gasto) baja ${(pri.resto_65 - ult.resto_65) / 1e6:.2f} millones: su gasto total casi no crece y la población 65+ sí.")
         st.caption("\\* Resto = Edad avanzada − PGU − PBS/APS de vejez; DIPRES no lo abre, así que no se sabe si su caída es cierre del sistema antiguo o recorte.")
     with t3:
         _g21(beneficiaries_chart(h))
         p0 = h.iloc[0]
-        st.markdown(f"**Lectura:** la cobertura sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
+        _texto(f"**Lectura:** la cobertura sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
                     f"a ${ult.monto_por_beneficio / 1e6:.2f} millones (≈ ${ult.monto_por_beneficio / 12:,.0f} al mes), casi quieto desde {ANIO_PGU + 1}.")
         st.caption("\\* Solo Pilar Solidario y PGU de vejez; una persona puede tener más de un beneficio, así que la cobertura es un tope.")
     with t4:
@@ -104,7 +116,7 @@ def render_2_1():
         hb = serie_2_1(base)
         _g21(burden_chart(hb, base))
         u, p0 = hb.iloc[-1], hb.iloc[0]
-        st.markdown(f"**Lectura:** repartido por igual, el gasto sería ${u.pago_plano:,.0f} al mes por ocupado: **{100 * u.carga_requerida:.0f}% del ingreso ({base})** frente al 10% de la cotización "
+        _texto(f"**Lectura:** repartido por igual, el gasto sería ${u.pago_plano:,.0f} al mes por ocupado: **{100 * u.carga_requerida:.0f}% del ingreso ({base})** frente al 10% de la cotización "
                     f"({100 * p0.carga_requerida:.0f}% en {a0}); harían falta {u.razon_necesaria:.1f} ocupados por persona 65+ y hay {u.ocupados_por_65:.1f}.")
         st.caption("\\* Escala de comparación, no un financiamiento real: el 10% va a cuentas individuales y estos gastos se pagan con impuestos generales.")
     with t5:
@@ -113,11 +125,11 @@ def render_2_1():
                          format="%.1f%%") / 100
         resto = c2.radio("Resto de 'Edad avanzada'", ["Total constante", "Crece con la población 65+"],
                          help="Total constante: el sistema antiguo no crece. Crece: mismo gasto por persona 65+ que hoy.")
-        pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=True)
+        pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=cargar_escenarios()["pgu_250"])
         pr = proyeccion_2_1(hb, crec, "constante" if resto.startswith("Total") else "crece", pgu250, base)
         _g21(cost_projection_chart(hb, pr, base))
         f = pr.loc[ANIO_FIN_2_1]
-        st.markdown(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
+        _texto(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
                     f"y un pago por ocupado de **{100 * f.carga_requerida:.0f}% del ingreso ({base})** (hoy {100 * hb.iloc[-1].carga_requerida:.0f}%).")
         st.caption("\\* Escenario, no pronóstico: el costo del Pilar por persona 65+ se mantiene en términos reales salvo el alza de la PGU.")
     with t6:
@@ -140,9 +152,10 @@ def render_2_1():
 
 
 def _recomendaciones_2_1(h):
-    """Tres lectores del KPI 2.1 con los supuestos de partida (PIB +2%, PGU de $250.000, ingreso mediano)."""
-    pc = proyeccion_2_1(h, 0.02, "constante", True, "mediana")
-    pg = proyeccion_2_1(h, cargar_escenarios()["crecimiento_pib_real"], "crece", cargar_escenarios()["pgu_250"], "mediana")
+    """Lectores del KPI 2.1 con los supuestos de partida de config/escenarios.yaml; la AFP primero."""
+    cfg = cargar_escenarios()
+    pc = proyeccion_2_1(h, cfg["crecimiento_pib_real"], "constante", cfg["pgu_250"], "mediana")
+    pg = proyeccion_2_1(h, cfg["crecimiento_pib_real"], "crece", cfg["pgu_250"], "mediana")
     u, a1 = h.iloc[-1], int(h.index[-1])
     nac = load_csv("kpi_pc_nacional.csv").set_index("anio").loc[a1]
     par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
@@ -155,21 +168,26 @@ def _recomendaciones_2_1(h):
     suma_cot = sin_cot * u.aporte_10
     bajo2 = pc.index[pc.ocupados_por_65 < 2]
     cobertura_10 = u.ocupados_por_65 / u.razon_necesaria
-    st.markdown(
-        "Cifras con los supuestos de partida (PIB +2%, PGU de $250.000, ingreso mediano de los ocupados).\n\n"
-        f"**1. Hacienda / DIPRES (planificación fiscal).** El gasto en 'Edad avanzada' es {u.pct_pib:.1f}% del PIB en {a1}; en {ANIO_FIN_2_1} sería {pc.loc[ANIO_FIN_2_1].pct_pib:.1f}% si el resto "
+    cob = load_csv("kpi_cobertura_correlaciones_region.csv").sort_values("cobertura_previsional_pct").head(3)
+    _texto(
+        f"Cifras con los supuestos de partida de config/escenarios.yaml (PIB +{cfg['crecimiento_pib_real']:.0%}, PGU de $250.000, ingreso mediano de los ocupados).\n\n"
+        f"**1. AFP (base cotizante).** Hoy {sin_cot / 1e6:.1f} millones de ocupados no cotizan (cotizantes de diciembre: {nac.cotizantes_dic / 1e6:.1f} millones de "
+        f"{u.ocupados / 1e6:.1f} millones de ocupados). Si cotizaran el 10% del ingreso mediano sumarían ${suma_cot / 1e12:.1f} billones al año a las cuentas "
+        f"individuales (equivale al {100 * suma_cot / u.gasto:.0f}% del gasto de {a1}): es la base comisionable que se puede ganar. Las regiones con menor cobertura son "
+        + ", ".join(f"{r.region_nombre} ({r.cobertura_previsional_pct:.1f}%)" for r in cob.itertuples())
+        + ". *Acción:* fijar una meta anual de afiliación de independientes e informales, empezando por esas regiones, y medirla con el "
+        "mismo indicador (ocupados que cotizan / ocupados). No depende de impuestos: amplía la base que ahorra para su propia pensión y le baja presión "
+        "al Pilar.\n\n"
+        "**Contexto: Estado**\n\n"
+        f"**2. Hacienda / DIPRES (planificación fiscal).** El gasto en 'Edad avanzada' es {u.pct_pib:.1f}% del PIB en {a1}; en {ANIO_FIN_2_1} sería {pc.loc[ANIO_FIN_2_1].pct_pib:.1f}% si el resto "
         f"(sistema antiguo y otros, {100 * u.resto / u.gasto:.0f}% del gasto) se mantiene constante y {pg.loc[ANIO_FIN_2_1].pct_pib:.1f}% si crece con la población 65+: una diferencia de ${dif / 1e12:.1f} billones al año "
-        f"({100 * dif / pib50:.1f} puntos del PIB). *Acción:* pedir a DIPRES que publique y proyecte 'Edad avanzada' por institución (IPS, Capredena, Dipreca, Pilar y PGU) antes de que la PGU llegue a $250.000 en {anio28}, "
-        "porque el resto, que hoy no se puede abrir, decide si el gasto de 2050 sube o baja.\n\n"
-        f"**2. Subsecretaría de Previsión Social (suficiencia de la PGU).** El pago por beneficio está casi quieto desde {ANIO_PGU + 1} (≈ ${u.monto_por_beneficio / 12:,.0f} al mes) y la cobertura llegó a {100 * u.cobertura:.0f} por cada 100 personas 65+. "
+        f"({100 * dif / pib50:.1f} puntos del PIB). Si todos los ocupados aportaran el 10% del ingreso mediano financiarían solo el {100 * cobertura_10:.0f}% del costo por persona 65+ "
+        f"({u.ocupados_por_65:.1f} ocupados por persona 65+ frente a {u.razon_necesaria:.1f} necesarios), y en {int(bajo2[0]) if len(bajo2) else 'más allá de ' + str(ANIO_FIN_2_1)} habría menos de 2. "
+        f"*Acción:* pedir a DIPRES que publique y proyecte 'Edad avanzada' por institución (IPS, Capredena, Dipreca, Pilar y PGU) antes de que la PGU llegue a $250.000 en {anio28}.\n\n"
+        f"**3. Subsecretaría de Previsión Social (suficiencia de la PGU).** El pago por beneficio está casi quieto desde {ANIO_PGU + 1} (≈ ${u.monto_por_beneficio / 12:,.0f} al mes) y la cobertura llegó a {100 * u.cobertura:.0f} por cada 100 personas 65+. "
         f"La PGU de ${pgu_hoy:,.0f} equivale al {100 * pgu_hoy / u.mediana_mensual:.0f}% del ingreso mediano de los ocupados (${u.mediana_mensual:,.0f}); con $250.000 sería {100 * pgu_nueva / u.mediana_mensual:.0f}%, "
-        f"y el Pilar cuesta ${sube_pgu / 1e12:.1f} billones más al año en {anio28}. *Acción:* fijar la meta de la PGU como porcentaje del ingreso mediano (hoy {100 * pgu_hoy / u.mediana_mensual:.0f}%) y revisarla cada año con la ESI, "
-        "no solo con el IPC; mirar primero las regiones con más pobreza 65+ (KPI 2.3).\n\n"
-        f"**3. Superintendencia de Pensiones y AFP (base cotizante).** Si todos los ocupados aportaran el 10% del ingreso mediano financiarían solo el {100 * cobertura_10:.0f}% del costo por persona 65+ ({u.ocupados_por_65:.1f} ocupados por persona 65+ frente a {u.razon_necesaria:.1f} necesarios), "
-        f"y en {int(bajo2[0]) if len(bajo2) else 'más allá de ' + str(ANIO_FIN_2_1)} habría menos de 2. Hoy {sin_cot / 1e6:.1f} millones de ocupados no cotizan (cotizantes de diciembre: {nac.cotizantes_dic / 1e6:.1f} millones de {u.ocupados / 1e6:.1f} millones de ocupados); "
-        f"si cotizaran el 10% de la mediana sumarían ${suma_cot / 1e12:.1f} billones al año a las cuentas individuales (equivale al {100 * suma_cot / u.gasto:.0f}% del gasto de {a1}). "
-        "*Acción:* medir la afiliación de independientes y trabajadores informales con este mismo indicador (ocupados que cotizan / ocupados) y fijar una meta anual; es una palanca que no depende de impuestos. "
-        "Distinto de 1 y 2: aquí no se mueve plata del Estado, se amplía la base que ahorra para su propia pensión."
+        f"y el Pilar cuesta ${sube_pgu / 1e12:.1f} billones más al año en {anio28}. *Acción:* fijar la meta de la PGU como porcentaje del ingreso mediano y revisarla cada año con la ESI; "
+        "mirar primero las regiones con más pobreza 65+ (KPI 2.3)."
     )
 
 
@@ -182,12 +200,12 @@ def proyeccion_2_2(_h: pd.DataFrame, crec_pib: float, pgu_250: bool, con_fapp: b
 
 
 def _texto(t):
-    """st.markdown que no confunde los pares de «$» con fórmulas."""
-    st.markdown(t.replace("$", "\\$"))
+    """st.markdown con coma decimal (es-CL) y sin confundir los pares de «$» con fórmulas."""
+    st.markdown(es_cl(t).replace("$", "\\$"))
 
 
 def _nota(t):
-    st.caption(t.replace("$", "\\$"))
+    st.caption(es_cl(t).replace("$", "\\$"))
 
 
 def _caja(clave, titulo, formula, numeros, defecto=True):
@@ -225,6 +243,16 @@ def render_2_2():
          ["Gasto del Gobierno Central, código 7102 «Edad avanzada»", "Incluye PGU, PBS/APS y sistema antiguo", "Dividido por el PIB a precios corrientes"]),
     ])
     _grafico(spending_pct_pib(d), 420)
+    cfg = cargar_escenarios()
+    base = proyeccion_2_2(serie_2_1(), cfg["crecimiento_pib_real"], cfg["pgu_250"], cfg["aporte_fapp"])
+    frp0 = load_csv("frp_reserva_anual.csv").set_index("anio").loc[2025, "cartera_propia_mm"] * 1e6
+    _, res0 = trayectoria_reserva(base, frp0, cfg["rentabilidad_real_reservas"]["base"], "incremento")
+    pico0 = base.pilar_pct_pib.idxmax()
+    agota = f"se agotan en {res0['anio_agotamiento']}" if res0["anio_agotamiento"] else f"alcanzan hasta {base.index.max()}"
+    _texto(f"**Lectura:** la carga sube de {base.pilar_pct_pib.iloc[0]:.2f}% a {base.loc[pico0].pilar_pct_pib:.2f}% del PIB hasta {pico0} "
+           f"(+{base.loc[pico0].pilar_pct_pib - base.pilar_pct_pib.iloc[0]:.2f} pp; incluye invalidez, el punto crítico del KPI 1.2 usa solo vejez): "
+           f"es moderada, pero se financia con impuestos generales y las reservas (FRP) cubren solo {100 * res0['ratio_cobertura']:.0f}% del valor "
+           f"presente del alza y {agota}.")
     _nota("\\* Ratio 2 = cobertura de reservas (pestaña «Reservas»): el valor presente oficial del déficit no está publicado, así que se "
           "compara la reserva con el valor presente del alza del gasto sobre el peso de 2025.")
     _texto("#### ¿Quién financia el Pilar y cuánto aguantan las reservas?")
@@ -262,14 +290,18 @@ def _profundizacion_2_2():
         with cg:
             _grafico(fiscal_weight_chart(hist, p, con_fapp, (v_obs, v_esc, v_fapp)), 560)
         pico = p.pilar_pct_pib.idxmax()
+        fin = int(p.index.max())
         kpi_card_row([
-            ("Pilar + PGU, 2025 (% del PIB)", f"{b.pilar_pct_pib:.2f}%", "Ratio 1 del KPI: el mismo valor del gráfico de arriba"),
-            (f"Pilar + PGU, {pico} (% del PIB)", f"{p.loc[pico].pilar_pct_pib:.2f}%", f"Año de mayor peso del Pilar en el escenario; +{p.loc[pico].pilar_pct_pib - b.pilar_pct_pib:.2f} puntos del PIB sobre 2025"),
-            ("Con FAPP, 2037 (% del PIB)", f"{a37.carga_pct_pib:.2f}%", "Pilar + aporte del Estado al FAPP; 15 millones de UTM al año desde 2037"),
-            ("Carga 2050 (% del PIB)", f"{f.carga_pct_pib:.2f}%", f"Equivale a ${f.carga / 1e12:.1f} billones al año, en pesos de 2025 (2025: ${b.carga / 1e12:.1f} billones)"),
+            ("Pilar + PGU, 2025 (real)", f"{b.pilar_pct_pib:.2f}%", "% del PIB. Ratio 1 del KPI: el mismo valor del gráfico de arriba"),
+            (f"Pilar + PGU, {pico} (escenario)", f"{p.loc[pico].pilar_pct_pib:.2f}%",
+             f"% del PIB en el año de mayor peso del Pilar; +{p.loc[pico].pilar_pct_pib - b.pilar_pct_pib:.2f} puntos del PIB sobre 2025"),
+            (f"Pilar + PGU, {fin} (escenario)", f"{p.loc[fin].pilar_pct_pib:.2f}%",
+             f"% del PIB; equivale a ${p.loc[fin].pilar / 1e12:.1f} billones al año en pesos de 2025 (2025: ${b.pilar / 1e12:.1f} billones)"),
+            (f"Con aporte FAPP, {pico} (escenario)", f"{p.loc[pico].carga_pct_pib:.2f}%" if con_fapp else "sin aporte",
+             "% del PIB: Pilar + aporte del Estado al FAPP (Ley 21.735)" if con_fapp else "Casilla del aporte al FAPP desmarcada"),
         ])
         _texto(f"**Lectura:** el Pilar pasa de {b.pilar_pct_pib:.2f}% del PIB en 2025 a {p.loc[pico].pilar_pct_pib:.2f}% en {pico}"
-                    + (f"; con el aporte al FAPP, la carga llega a {a37.carga_pct_pib:.2f}% en 2037." if con_fapp else "."))
+                    + (f"; con el aporte al FAPP, la carga llega a {p.loc[pico].carga_pct_pib:.2f}% ese año." if con_fapp else "."))
         _nota("\\* Sólido: observado. Punteado: escenario. Franja: aporte del Estado al FAPP.")
 
     with t2:
@@ -308,7 +340,7 @@ def _profundizacion_2_2():
                           (f"2037: ${a37r.carga / 1e12:.2f} − {base_pct:.2f}% × ${a37r.pib_real25 / 1e12:.0f} → ${a37r.gasto_cubierto / 1e12:.2f} billones"
                            if cubre == "incremento" else f"2037: C = ${a37r.carga / 1e12:.2f} billones"))
             v_sal = _caja("k22_v_sal", "Saldo de la reserva", "S = S₋₁ × (1 + r) − G",
-                          f"2026: ${reserva0 / 1e12:.1f} × {1 + r_real:.3f} − ${dr.loc[2026].gasto_cubierto / 1e12:.2f} → ${dr.loc[2026].saldo / 1e12:.1f} billones")
+                          f"2026: ${reserva0 / 1e12:.1f} × {num_cl(1 + r_real, 3)} − ${dr.loc[2026].gasto_cubierto / 1e12:.2f} → ${dr.loc[2026].saldo / 1e12:.1f} billones")
         with cg:
             _grafico(reserve_chart(dr, res, cubre, (v_gas, v_sal)), 480, leyenda_y=-0.3)
         agot = res["anio_agotamiento"]
@@ -344,9 +376,9 @@ def _profundizacion_2_2():
         with g1:
             _grafico(fapp_flow_chart(b6), 420)
         with g2:
-            st.metric("Patrimonio del FAPP, 31-dic-2025", f"${b5.patrimonio_mm / 1e6:.2f} billones")
-            st.metric("Patrimonio del FAPP, 30-jun-2026", f"${r6.patrimonio_mm / 1e6:.3f} billones", help="Activos menos lo que el FAPP debe al FRP")
-            st.metric("Cotizaciones / beneficios, ene-jun 2026", f"{100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}%")
+            st.metric("Patrimonio del FAPP, 31-dic-2025", es_cl(f"${b5.patrimonio_mm / 1e6:.2f} billones"))
+            st.metric("Patrimonio del FAPP, 30-jun-2026", es_cl(f"${num_cl(r6.patrimonio_mm / 1e6, 3)} billones"), help="Activos menos lo que el FAPP debe al FRP")
+            st.metric("Cotizaciones / beneficios, ene-jun 2026", es_cl(f"{100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}%"))
         _texto(f"**Lectura:** en ene-jun 2026 las cotizaciones cubrieron {100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}% de los beneficios y el patrimonio quedó en "
                     f"{r6.patrimonio_mm / quema:.1f} meses de ese déficit; quedan hasta US$700 millones autorizados del FRP.")
         _nota("\\* Último dato disponible: 30-jun-2026, seis meses después del resto del KPI. Detalle de la brecha en «Método y fuentes».")
@@ -419,18 +451,22 @@ def _recomendaciones_2_2(h, frp, fb, nac):
     _texto(
         f"Cifras con los supuestos de partida de config/escenarios.yaml (PIB +{cfg['crecimiento_pib_real']:.0%}, PGU de $250.000, aporte al FAPP, "
         f"reserva = FRP, rentabilidad real {str(round(100 * r_base, 1)).replace('.', ',')}%).\n\n"
-        f"**1. Hacienda / DIPRES (planificación fiscal).** El Pilar pasa de {base.pilar_pct_pib.iloc[0]:.2f}% del PIB en 2025 a {base.loc[pico].pilar_pct_pib:.2f}% en {pico}; con el aporte al FAPP la carga llega a {base.loc[2037].carga_pct_pib:.2f}% en 2037. "
-        f"El FRP financia solo el {u.pct_frp:.1f}% del gasto del Pilar y, usado para cubrir el alza sobre el peso de 2025, se agota en {res['anio_agotamiento']} (cubre {100 * res['ratio_cobertura']:.0f}% del valor presente de ese alza). "
-        f"*Acción:* tener definida antes de {res['anio_agotamiento'] - 3} la fuente permanente (impuestos) para un alza de hasta {(base.carga_pct_pib.max() - base.pilar_pct_pib.iloc[0]):.1f} puntos del PIB (${(base.carga - base.pilar_pct_pib.iloc[0] / 100 * base.pib_real25).max() / 1e12:.1f} billones al año), y no contar el FRP como fuente de régimen.\n\n"
-        f"**2. Consejo Directivo del FAPP y Hacienda (administración del FRP).** En enero-junio de 2026 las cotizaciones cubrieron {100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}% de los beneficios; el patrimonio quedó en ${r6.patrimonio_mm / 1e6:.3f} billones, {r6.patrimonio_mm / quema:.1f} meses del déficit semestral. "
-        "*Acción:* programar los tramos del FRP (hasta US$ 700 millones, de US$ 100 millones cada uno) según el patrimonio mensual, y revisar los estados de julio a septiembre de 2026 (aún no están en este análisis) para confirmar que el déficit se cerró con la tasa de 3,4% (septiembre de 2026); "
-        "si el patrimonio vuelve a bajar de 3 meses de déficit antes de septiembre de 2027 (cuando la tasa llega a 4,0%), pedir el siguiente tramo.\n\n"
-        f"**3. AFP y Superintendencia de Pensiones (cobertura contributiva).** {pgu_nc:,} personas ({reg[reg.region_id == 0].iloc[0].pct_sin_pension:.0f}% de los beneficiarios de la PGU) no tienen pensión propia y el Estado les paga ${reg[reg.region_id == 0].iloc[0].costo_sin_pension / 1e12:.2f} billones al año; "
+        f"**1. AFP (base cotizante).** {pgu_nc:,} personas ({reg[reg.region_id == 0].iloc[0].pct_sin_pension:.0f}% de los beneficiarios de la PGU) no tienen pensión propia y el Estado les paga ${reg[reg.region_id == 0].iloc[0].costo_sin_pension / 1e12:.2f} billones al año; "
         f"en {top.iloc[0].region_nombre} ({top.iloc[0].pct_sin_pension:.0f}%), {top.iloc[1].region_nombre} ({top.iloc[1].pct_sin_pension:.0f}%) y {top.iloc[2].region_nombre} ({top.iloc[2].pct_sin_pension:.0f}%) superan por mucho el {rr.iloc[-1].pct_sin_pension:.0f}% de {rr.iloc[-2].region_nombre} o {rr.iloc[-1].region_nombre}. "
         f"En el escenario con las tasas de hoy serían {n35 / 1000:,.0f} mil personas en 2035 ({n35 / reg[reg.region_id == 0].iloc[0].n_sin_pension:.1f} veces las de 2024). "
-        f"*Acción:* concentrar las campañas de afiliación de independientes y de ahorro voluntario en esas tres regiones (juntas: {top.n_sin_pension.sum() / 1000:,.0f} mil personas hoy), con la meta de llevar su tasa a la mediana de las regiones ({rr.pct_sin_pension.median():.0f}%) antes de 2035; medirlo cada informe trimestral con este mismo indicador. "
-        "Distinto de las acciones 1 y 2: aquí no se mueve plata del Estado, se busca que menos personas lleguen a los 65 años sin pensión."
+        f"*Acción:* campaña de la AFP para independientes y de ahorro previsional voluntario (APV) en esas tres regiones (juntas: {top.n_sin_pension.sum() / 1000:,.0f} mil personas hoy), con la meta de llevar su tasa a la mediana de las regiones ({rr.pct_sin_pension.median():.0f}%) antes de 2035; medirlo cada informe trimestral con este mismo indicador. "
+        "Para la AFP es base nueva: más cotizantes hoy y menos personas que llegan a los 65 años sin pensión.\n\n"
+        "**Contexto: Estado**\n\n"
+        f"**2. Hacienda / DIPRES (planificación fiscal).** El Pilar pasa de {base.pilar_pct_pib.iloc[0]:.2f}% del PIB en 2025 a {base.loc[pico].pilar_pct_pib:.2f}% en {pico}; con el aporte al FAPP la carga llega a {base.loc[2037].carga_pct_pib:.2f}% en 2037. "
+        f"El FRP financia solo el {u.pct_frp:.1f}% del gasto del Pilar y, usado para cubrir el alza sobre el peso de 2025, se agota en {res['anio_agotamiento']} (cubre {100 * res['ratio_cobertura']:.0f}% del valor presente de ese alza). "
+        f"*Acción:* tener definida antes de {res['anio_agotamiento'] - 3} la fuente permanente (impuestos) para un alza de hasta {(base.carga_pct_pib.max() - base.pilar_pct_pib.iloc[0]):.1f} puntos del PIB (${(base.carga - base.pilar_pct_pib.iloc[0] / 100 * base.pib_real25).max() / 1e12:.1f} billones al año), y no contar el FRP como fuente de régimen.\n\n"
+        f"**3. Consejo Directivo del FAPP y Hacienda (administración del FRP).** En enero-junio de 2026 las cotizaciones cubrieron {100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}% de los beneficios; el patrimonio quedó en ${num_cl(r6.patrimonio_mm / 1e6, 3)} billones, {r6.patrimonio_mm / quema:.1f} meses del déficit semestral. "
+        "*Acción:* programar los tramos del FRP (hasta US$ 700 millones, de US$ 100 millones cada uno) según el patrimonio mensual, y revisar los estados de julio a septiembre de 2026 (aún no están en este análisis) para confirmar que el déficit se cerró con la tasa de 3,4% (septiembre de 2026); "
+        "si el patrimonio vuelve a bajar de 3 meses de déficit antes de septiembre de 2027 (cuando la tasa llega a 4,0%), pedir el siguiente tramo."
     )
+
+
+UMBRAL_IC_PP = 2.5  # media amplitud del IC 95% (puntos porcentuales) desde la que se avisa que el intervalo es amplio
 
 
 def render_2_3():
@@ -460,19 +496,49 @@ def render_2_3():
         _grafico(poverty_bars(reg, nac.pct_pobreza_65) if vista_reg == "Porcentaje (relativo)" else poverty_people_bars(reg, nac.pct_pobreza_65), 520)
     sobre = reg[reg.ic95_inf > nac.ic95_sup]            # regiones cuyo intervalo queda por encima del intervalo del país
     mas_gente = reg.sort_values("n_pobres").iloc[-1]
-    st.markdown(f"**Lectura:** {n_pobres / 1000:,.0f} mil personas 65+ viven en pobreza ({nac.pct_pobreza_65:.1f}%, menos que el {nac.pct_pobreza_menores_65:.1f}% de los menores de 65). "
-                f"{mayor.region_nombre} tiene la tasa más alta ({mayor.pct_pobreza_65:.1f}%), pero {mas_gente.region_nombre} reúne más personas ({mas_gente.n_pobres / 1000:,.0f} mil, {100 * mas_gente.n_pobres / n_pobres:.0f}% del total).")
-    st.caption("\\* Aysén, Magallanes y Tarapacá tienen intervalos amplios: lea los rangos, no solo el orden.")
+    top3 = reg.sort_values("pct_pobreza_65", ascending=False).head(3)
+    regiones_top = ", ".join(r.region_nombre for r in top3.itertuples())
+    if nac.pct_pobreza_65 < nac.pct_pobreza_menores_65:
+        _texto(f"**Lectura:** la pobreza 65+ ({nac.pct_pobreza_65:.1f}%) es menor que la de los menores de 65 ({nac.pct_pobreza_menores_65:.1f}%): la PGU protege. "
+               f"Recortarla sin compensación aumentaría la pobreza, sobre todo en {regiones_top}. "
+               f"Por número, {mas_gente.region_nombre} reúne más personas ({mas_gente.n_pobres / 1000:,.0f} mil, {100 * mas_gente.n_pobres / n_pobres:.0f}% del total).")
+    else:
+        _texto(f"**Lectura:** la pobreza 65+ ({nac.pct_pobreza_65:.1f}%) no es menor que la de los menores de 65 ({nac.pct_pobreza_menores_65:.1f}%): la PGU no alcanza "
+               f"a proteger a la vejez; las tasas más altas están en {regiones_top}.")
+    # intervalos amplios: media amplitud del IC 95% sobre UMBRAL_IC_PP puntos (se determina con los datos)
+    amplios = reg[(reg.ic95_sup - reg.ic95_inf) / 2 > UMBRAL_IC_PP].sort_values("pct_pobreza_65", ascending=False)
+    if len(amplios):
+        _nota(f"\\* Intervalos amplios (± más de {UMBRAL_IC_PP:.1f} pp) en " + ", ".join(amplios.region_nombre)
+              + ": lea los rangos, no solo el orden.")
+
+    # --- diagnóstico: pobreza 65+ frente a la cobertura de hoy ---
+    _texto("#### ¿Por qué hay más pobreza 65+ en unas regiones?")
+    pc = load_csv("kpi_pobreza_cobertura_region.csv")
+    rc = load_csv("kpi_cobertura_correlaciones_resumen.csv").set_index("variable").loc["pobreza_65"]
+    _grafico(poverty_coverage_scatter(pc, rc.pearson_r, rc.spearman_rho, int(rc.n)), 520)
+    _texto(f"**Lectura:** las regiones con menor cobertura tienen más pobreza en la vejez (r = {rc.pearson_r:.2f}, p = {num_cl(rc.pearson_p, 3)}): "
+           "la base cotizante de hoy define la presión sobre la PGU de mañana (ver KPI 1.1).")
+    _nota(f"Correlación no implica causalidad; n = {int(rc.n)}; CASEN 2022 con IC amplios en regiones pequeñas. Cobertura: cotizantes 2024 / población 15-64 (Censo 2024).")
     with st.expander("Qué se desprende para cada actor"):
         a, b = sobre.sort_values("pct_pobreza_65", ascending=False), reg.sort_values("n_pobres", ascending=False).head(3)
-        st.markdown(
-            f"**1. Hacienda y la Dipres (costo de las pensiones garantizadas).** Con las pensiones actuales, la pobreza en la vejez ({nac.pct_pobreza_65:.1f}%) queda por debajo de la de los menores de 65 ({nac.pct_pobreza_menores_65:.1f}%), "
+        cob_nac = load_csv("kpi_presion_previsional_region.csv")
+        cob_nac = 100 * cob_nac.cotizantes_2024.sum() / cob_nac.pob_15_64.sum()
+        foco = pc[(pc.pct_pobreza_65 > nac.pct_pobreza_65) & (pc.cobertura_previsional_pct < cob_nac)].sort_values("pct_pobreza_65", ascending=False)
+        _texto(
+            f"**1. AFP (base cotizante).** Menor cobertura hoy es más pobreza 65+ mañana (r = {rc.pearson_r:.2f} entre regiones). {len(foco)} regiones tienen a la vez "
+            f"pobreza 65+ sobre el país ({nac.pct_pobreza_65:.1f}%) y cobertura bajo el país ({cob_nac:.1f}%): "
+            + ", ".join(f"{r.region_nombre} ({r.pct_pobreza_65:.1f}% / {r.cobertura_previsional_pct:.1f}%)" for r in foco.itertuples())
+            + ". *Acción:* afiliación en las regiones con alta pobreza 65+ y baja cobertura, con foco en independientes e informales; "
+            "cada cotizante nuevo es base comisionable hoy y menos presión sobre la PGU mañana. Entre paréntesis: pobreza 65+ / cobertura.\n\n"
+            "**Contexto: Estado**")
+        _texto(
+            f"**2. Hacienda y la Dipres (costo de las pensiones garantizadas).** Con las pensiones actuales, la pobreza en la vejez ({nac.pct_pobreza_65:.1f}%) queda por debajo de la de los menores de 65 ({nac.pct_pobreza_menores_65:.1f}%), "
             f"pero {n_extremos / 1000:,.0f} mil personas 65+ siguen en pobreza extrema. *Acción:* medir cualquier ahorro en el Pilar (reajuste, focalización) por su efecto sobre esas personas antes de aplicarlo; "
             "este indicador es el contrapeso de los KPIs 2.1 y 2.2.\n\n"
-            f"**2. Subsecretaría de Previsión Social y municipios (focalización).** Hay dos criterios distintos: la tasa y el número. Por tasa, {len(a)} regiones superan con claridad al país "
+            f"**3. Subsecretaría de Previsión Social y municipios (focalización).** Hay dos criterios distintos: la tasa y el número. Por tasa, {len(a)} regiones superan con claridad al país "
             f"({', '.join(f'{r.region_nombre} {r.pct_pobreza_65:.0f}%' for r in a.itertuples())}: juntas {a.n_pobres.sum() / 1000:,.0f} mil personas); por número, "
             f"{', '.join(f'{r.region_nombre} ({r.n_pobres / 1000:,.0f} mil)' for r in b.itertuples())} suman {b.n_pobres.sum() / 1000:,.0f} mil. "
-            "*Acción:* las campañas de acceso a la PGU y al APS por tasa van a las primeras; la atención por volumen a las segundas. Distinto de la acción 1: aquí no se mueve el gasto total, se elige dónde llegar.")
+            "*Acción:* las campañas de acceso a la PGU y al APS por tasa van a las primeras; la atención por volumen a las segundas. Distinto de la acción 2: aquí no se mueve el gasto total, se elige dónde llegar.")
     with st.expander("Método y fuentes"):
         st.caption("**Cifra.** Proporción ponderada de personas 65+ con ingreso bajo la línea de pobreza (extrema o no) en la CASEN 2022 completa; intervalo del 95% con el diseño de la encuesta "
                    "(estratos y conglomerados). «Personas» = porcentaje × población 65+ expandida de la propia encuesta.")
@@ -487,3 +553,7 @@ def render_2_3():
 kpi_card("2.1", render_2_1)
 kpi_card("2.2", render_2_2)
 kpi_card("2.3", render_2_3)
+
+st.info("**Mensaje clave:** el costo por adulto mayor está controlado, pero el número de adultos mayores no: la carga fiscal sube con "
+        "reservas mínimas y sin margen para recortar sin aumentar la pobreza. La salida sostenible es ampliar la base cotizante, justo "
+        "donde la AFP puede crecer.")

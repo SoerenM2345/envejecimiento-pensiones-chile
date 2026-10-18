@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from components.cost_analysis import CARGA_MAX
 from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
-                   CATEGORICAL, lighten)
+                   CATEGORICAL, lighten, es_cl)
 
 UMBRAL_VEJEZ = 65
 ANIO_BASE = 2024  # último año estimado de las proyecciones INE base 2024
@@ -224,7 +224,8 @@ def cost_per_person_chart(d: pd.DataFrame, anio_hito: int, texto_hito: str) -> g
     fig.add_scatter(x=d.anio, y=d.costo_65 / 1e6, mode="lines+markers+text", line=dict(color=RED, width=3),
                     text=[f"{v / 1e6:.2f}" for v in d.costo_65], textposition="top center", showlegend=False,
                     hovertemplate="%{x}: $%{y:.2f} millones<extra></extra>")
-    fig.add_vline(x=anio_hito, line_dash="dash", line_color=INK_MUTED, annotation_text=texto_hito, annotation_position="top left")
+    # rótulo abajo: arriba tapaba el valor del año del salto
+    fig.add_vline(x=anio_hito, line_dash="dash", line_color=INK_MUTED, annotation_text=texto_hito, annotation_position="bottom left")
     fig.update_layout(**PLOTLY_LAYOUT, title="Costo público real por persona de 65+ (millones de $ de 2025)")
     fig.update_xaxes(title="Año", dtick=1)
     fig.update_yaxes(title="Millones de $ de 2025 por persona", rangemode="tozero")
@@ -548,8 +549,10 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
 def estilo_kpi(fig: go.Figure, alto: int = 560) -> go.Figure:
     """Mismo estilo de texto que los gráficos del KPI 1.3: título, ejes, leyenda (abajo) y rótulos en negro sobre fondo claro.
     Llamar st.plotly_chart con theme=None para que Streamlit no reemplace estos colores."""
-    fig.update_layout(title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY, margin=dict(l=70, r=20, t=60, b=10),
-                      legend=dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)", font_color=INK_PRIMARY), height=alto)
+    fig.update_layout(title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY, margin=dict(l=70, r=40, t=70, b=50),
+                      legend=dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)", font_color=INK_PRIMARY), height=alto,
+                      separators=",.", modebar=dict(orientation="v"))
+    con_coma(fig)
     fig.update_xaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
     fig.update_yaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
     fig.for_each_trace(lambda tr: tr.update(textfont_color=INK_PRIMARY) if hasattr(tr, "textfont") else None)   # mapas y otras trazas no tienen textfont
@@ -561,7 +564,20 @@ def estilo_kpi(fig: go.Figure, alto: int = 560) -> go.Figure:
 # dashboard esté en tema oscuro (llamar st.plotly_chart con theme=None para que Streamlit no lo reemplace)
 _TEXTO_CLARO = dict(title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY)
 _EJE_CLARO = dict(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, linecolor=GRIDLINE, automargin=True)
-_MARGEN = dict(margin=dict(l=70, r=20, t=60, b=10))
+_MARGEN = dict(margin=dict(l=70, r=40, t=70, b=50))
+
+
+def con_coma(fig: go.Figure) -> go.Figure:
+    """Rótulos de texto y anotaciones con coma decimal (es-CL); los ejes y el hover ya usan separators=",."."""
+    for tr in fig.data:
+        t = getattr(tr, "text", None)
+        if isinstance(t, str):
+            tr.text = es_cl(t)
+        elif t is not None:
+            tr.text = [es_cl(x) for x in t]
+    for a in fig.layout.annotations:
+        a.text = es_cl(a.text)
+    return fig
 
 
 def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
@@ -590,7 +606,7 @@ def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
                       title="Flujo al sistema previsional por destino (billones de pesos)")
     fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
     fig.update_yaxes(title="Billones de pesos (10^12)", rangemode="tozero", **_EJE_CLARO)
-    return fig
+    return con_coma(fig)
 
 
 def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01) -> go.Figure:
@@ -626,7 +642,7 @@ def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01) -> go.F
                       **_TEXTO_CLARO, title="Parte del flujo previsional que pasa por cuentas individuales AFP (%)")
     fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
     fig.update_yaxes(title="% del flujo total", range=[0, 70], **_EJE_CLARO)
-    return fig
+    return con_coma(fig)
 
 
 # KPI 1.1 (diagnóstico): dispersión de cobertura y matriz de riesgo
@@ -679,16 +695,17 @@ def _ubicar_rotulos(x, y, textos, radios_px, rango_x, rango_y):
     return salida
 
 
-def _burbujas(fig, df, x, y, hover, color, rango_x, rango_y):
-    """Burbujas por región con tamaño = cotizantes; rótulos como anotaciones sin solaparse."""
-    sizeref = df.cotizantes.max() / _TAM_MAX_PX ** 2
-    radios = list(np.sqrt(df.cotizantes / sizeref) / 2)
+def _burbujas(fig, df, x, y, hover, color, rango_x, rango_y, tam="cotizantes", tam_nombre="Cotizantes",
+              tam_pct="share_cotizantes_pct"):
+    """Burbujas por región con tamaño = `tam` (por defecto cotizantes); rótulos como anotaciones sin solaparse."""
+    sizeref = df[tam].max() / _TAM_MAX_PX ** 2
+    radios = list(np.sqrt(df[tam] / sizeref) / 2)
     fig.add_scatter(x=df[x], y=df[y], mode="markers", text=df.region_nombre, showlegend=False,
-                    marker=dict(size=df.cotizantes, sizemode="area", sizeref=sizeref, sizemin=4, color=color,
+                    marker=dict(size=df[tam], sizemode="area", sizeref=sizeref, sizemin=4, color=color,
                                 opacity=0.75, line=dict(color="white", width=1)),
-                    customdata=np.stack([df.cotizantes, df.share_cotizantes_pct], axis=1),
+                    customdata=np.stack([df[tam], df[tam_pct]], axis=1),
                     hovertemplate="<b>%{text}</b><br>" + hover
-                    + "<br>Cotizantes: %{customdata[0]:,.0f} (%{customdata[1]:.1f}% del total)<extra></extra>")
+                    + f"<br>{tam_nombre}: %{{customdata[0]:,.0f}} (%{{customdata[1]:.1f}}% del total)<extra></extra>")
     for (dx, dy, linea), xi, yi, nombre in zip(_ubicar_rotulos(df[x], df[y], list(df.region_nombre), radios,
                                                                rango_x, rango_y), df[x], df[y], df.region_nombre):
         fig.add_annotation(x=xi, y=yi, text=nombre, showarrow=linea, arrowhead=0, arrowwidth=1, arrowcolor=INK_MUTED,
@@ -721,7 +738,7 @@ def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unid
     fig.update_xaxes(title=f"{etiqueta} ({unidad})", tickformat="$,.0f" if var == "ingreso_per_capita_prom" else None,
                      range=list(rx), **_EJE_CLARO)
     fig.update_yaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
-    return fig
+    return con_coma(fig)
 
 
 CUADRANTES = {  # (cobertura alta, envejecimiento alto) -> (nombre, color de fondo, color del rótulo); tonos apagados
@@ -759,10 +776,31 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, 
                       title="Matriz de riesgo: cobertura previsional × envejecimiento (burbuja = cotizantes)")
     fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=[x0, x1], **_EJE_CLARO)
     fig.update_yaxes(title="Población de 65 años y más (% del total)", ticksuffix="%", range=[y0, y1], **_EJE_CLARO)
-    return fig
+    return con_coma(fig)
 
 
 def risk_quadrant(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> pd.Series:
     """Nombre del cuadrante de cada región (mismo corte que coverage_risk_matrix)."""
     return pd.Series([CUADRANTES[(c >= nac_cobertura, e > nac_65)][0]
                       for c, e in zip(df.cobertura_previsional_pct, df.pct_65_mas)], index=df.index)
+
+
+def poverty_coverage_scatter(df: pd.DataFrame, r: float, rho: float, n: int) -> go.Figure:
+    """KPI 2.3: pobreza 65+ (%) vs. cobertura previsional (%), burbuja = personas 65+ en pobreza, recta MCO.
+    df: kpi_pobreza_cobertura_region.csv (region_nombre, cobertura_previsional_pct, pct_pobreza_65, n_pobres_65, share_pobres_pct)."""
+    fig = go.Figure()
+    pendiente, intercepto = np.polyfit(df.cobertura_previsional_pct, df.pct_pobreza_65, 1)
+    xs = np.linspace(df.cobertura_previsional_pct.min(), df.cobertura_previsional_pct.max(), 50)
+    fig.add_scatter(x=xs, y=intercepto + pendiente * xs, mode="lines", name="Recta MCO",
+                    line=dict(color=RED, width=2, dash="dash"), hoverinfo="skip")
+    rx, ry = _rango(df.cobertura_previsional_pct, 0.08), _rango(df.pct_pobreza_65, 0.12)
+    _burbujas(fig, df, "cobertura_previsional_pct", "pct_pobreza_65", "Cobertura: %{x:.1f}%<br>Pobreza 65+: %{y:.1f}%", ORANGE,
+              rx, ry, tam="n_pobres_65", tam_nombre="Personas 65+ en pobreza", tam_pct="share_pobres_pct")
+    fig.add_annotation(xref="paper", yref="paper", x=0.99, y=0.99, xanchor="right", yanchor="top", showarrow=False,
+                       text=f"r = {num_cl(r)}, ρ = {num_cl(rho)}, n = {n}", font=dict(color=INK_PRIMARY, size=13),
+                       bgcolor="rgba(255,255,255,0.8)")
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=520, showlegend=False,
+                      title="Pobreza 65+ vs. cobertura previsional (burbuja = personas 65+ en pobreza)")
+    fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza, 2024)", ticksuffix="%", range=list(rx), **_EJE_CLARO)
+    fig.update_yaxes(title="Personas 65+ en pobreza (%, CASEN 2022)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
+    return con_coma(fig)

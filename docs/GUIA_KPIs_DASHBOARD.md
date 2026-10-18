@@ -32,7 +32,7 @@ Dashboard
   📌 Resumen
   🔎 Problema
   🎯 Objetivo 1: base activa
-  💰 Objetivo 2: costo por cliente
+  💰 Objetivo 2: anticipar la presión fiscal del envejecimiento
   📚 Fuentes y método
 Modo desarrollador
   🛠️ Activar modo desarrollador
@@ -59,9 +59,9 @@ Con el modo activo, la sección «Modo desarrollador» muestra las 8 páginas de
 | 1.1 Cobertura regional | **Objetivo 1: base activa** | «1.1 · Cobertura regional» | 3 cifras, mapa por región y barras con la línea del país | 🟢 |
 | 1.2 Razón de soporte | **Objetivo 1: base activa** | «1.2 · Razón de soporte» | 3 cifras, barras por región, y un escenario 2035/2050 por país o región (selector «Territorio») | 🟡 |
 | 1.3 Participación partes interesadas | **Objetivo 1: base activa** | «1.3 · Participación partes interesadas» | Tarjeta «Pendiente» con la fórmula | 🔴 |
-| 2.1 Costo real por adulto mayor | **Objetivo 2: costo por cliente** | «2.1 · Costo real por adulto mayor» | 3 cifras y 6 pestañas: evolución, componentes, por beneficiario, frente al ingreso (10 % de la mediana), proyección 2050 y qué hacer | 🟢 |
-| 2.2 Financiamiento dedicado | **Objetivo 2: costo por cliente** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; debajo, 5 pestañas (peso fiscal a 2050, quién lo financia, reservas, FAPP hoy, dónde) y «Qué se desprende para cada actor» | 🟡 |
-| 2.3 Pobreza en la vejez | **Objetivo 2: costo por cliente** | «2.3 · Pobreza en la vejez» | 5 cifras (incluye personas 65+ en pobreza), mapa y barras con intervalo de confianza 95%, lectura y «Qué se desprende para cada actor» | 🟢 |
+| 2.1 Costo real por adulto mayor | **Objetivo 2: anticipar la presión fiscal del envejecimiento** | «2.1 · Costo real por adulto mayor» | 3 cifras y 6 pestañas: evolución, componentes, por beneficiario, frente al ingreso (10 % de la mediana), proyección 2050 y qué hacer | 🟢 |
+| 2.2 Financiamiento dedicado | **Objetivo 2: anticipar la presión fiscal del envejecimiento** | «2.2 · Financiamiento dedicado» | Ratio 1 en % del PIB; debajo, 5 pestañas (peso fiscal a 2050, quién lo financia, reservas, FAPP hoy, dónde) y «Qué se desprende para cada actor» | 🟡 |
+| 2.3 Pobreza en la vejez | **Objetivo 2: anticipar la presión fiscal del envejecimiento** | «2.3 · Pobreza en la vejez» | 5 cifras (incluye personas 65+ en pobreza), mapa y barras con intervalo de confianza 95%, lectura y «Qué se desprende para cada actor» | 🟢 |
 
 El análisis del problema (pirámides, Chile vs Alemania, 14% → 43%, pico de población activa) está en **Problema**; las cifras clave, en **Resumen**; de dónde sale cada dato, en **Fuentes y método**.
 

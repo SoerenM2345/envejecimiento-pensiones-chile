@@ -175,3 +175,34 @@ def test_kpi_2_2_sensibilidad_y_gasto_2025():
     total25 = pil[(pil.anio == 2025) & (pil.tipo_beneficio == "Total")].monto_nominal_mm.iloc[0] * 1e6
     assert abs(p.loc[2025, "pilar"] - total25) < 1e6 and round(total25 / 1e12, 2) == 7.04
     assert p.index.max() == cfg["horizonte_proyeccion"]
+
+
+def test_objetivo_2_titulo_igual_en_config_y_dashboard():
+    """El nombre del Objetivo 2 es el mismo en kpis.yaml (2.1-2.3), en la página y en la navegación."""
+    import re
+    import yaml
+    cfg = yaml.safe_load((DASH.parent / "config" / "kpis.yaml").read_text(encoding="utf-8"))
+    objetivos = {k["objetivo"] for k in cfg["kpis_presentacion"] if k["id"].startswith("2.")}
+    assert len(objetivos) == 1
+    titulo = objetivos.pop()
+    pagina = (DASH / "final_pages" / "objetivo2.py").read_text(encoding="utf-8")
+    assert re.search(r'TITULO_OBJETIVO_2 = "([^"]+)"', pagina).group(1) == titulo
+    assert f'title="{titulo}"' in (DASH / "Inicio.py").read_text(encoding="utf-8")
+
+
+def test_kpi_2_3_pobreza_cobertura():
+    """KPI 2.3 diagnóstico: 16 regiones y la misma correlación que el resumen de cobertura."""
+    import pandas as pd
+    from scipy import stats
+    dp = DASH.parent / "Data processed"
+    pc = pd.read_csv(dp / "kpi_pobreza_cobertura_region.csv")
+    assert len(pc) == 16 and not pc.isna().any().any()
+    r = pd.read_csv(dp / "kpi_cobertura_correlaciones_resumen.csv").set_index("variable").loc["pobreza_65", "pearson_r"]
+    assert abs(stats.pearsonr(pc.cobertura_previsional_pct, pc.pct_pobreza_65)[0] - r) < 1e-3 and r < 0
+
+
+def test_formato_es_cl():
+    from utils import es_cl
+    assert es_cl("55.5%") == "55,5%" and es_cl("1,209 mil") == "1.209 mil" and es_cl("$1,281,744") == "$1.281.744"
+    assert es_cl("p = 0,004") == "p = 0,004" and es_cl("$0,026 billones") == "$0,026 billones"
+    assert es_cl("Ley 21.735") == "Ley 21.735" and es_cl("KPI 1.2 y KPI 1.3") == "KPI 1.2 y KPI 1.3" and es_cl("2038") == "2038"

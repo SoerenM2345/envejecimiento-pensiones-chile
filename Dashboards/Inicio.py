@@ -21,7 +21,7 @@ final_pages = [
     st.Page("final_pages/resumen.py", title="Resumen", icon="📌", url_path="resumen", default=True),
     st.Page("final_pages/problema.py", title="Problema", icon="🔎", url_path="problema"),
     st.Page("final_pages/objetivo1.py", title="Objetivo 1: base activa", icon="🎯", url_path="objetivo-1"),
-    st.Page("final_pages/objetivo2.py", title="Objetivo 2: costo por cliente", icon="💰", url_path="objetivo-2"),
+    st.Page("final_pages/objetivo2.py", title="Objetivo 2: anticipar la presión fiscal del envejecimiento", icon="💰", url_path="objetivo-2"),
     st.Page("final_pages/fuentes.py", title="Fuentes y método", icon="📚", url_path="fuentes"),
 ]
 nav = {"Dashboard": final_pages}
