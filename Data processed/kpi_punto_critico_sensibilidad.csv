@@ -1,0 +1,10 @@
+crecimiento_salario_real,tope_carga,estado,punto_critico,punto_critico_exacto,carga_requerida_2024,carga_requerida_2050,es_base
+0.0,0.08,cruza,2028,2027.32,0.0671,0.1622,False
+0.0,0.1,cruza,2034,2033.39,0.0671,0.1622,False
+0.0,0.12,cruza,2040,2039.56,0.0671,0.1622,False
+0.01,0.08,cruza,2028,2027.67,0.0671,0.1265,False
+0.01,0.1,cruza,2038,2037.75,0.0671,0.1265,True
+0.01,0.12,cruza,2048,2047.39,0.0671,0.1265,False
+0.015,0.08,cruza,2028,2027.9,0.0671,0.1118,False
+0.015,0.1,cruza,2043,2042.4,0.0671,0.1118,False
+0.015,0.12,cruza,2054,2053.66,0.0671,0.1118,False

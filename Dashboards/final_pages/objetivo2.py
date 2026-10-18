@@ -1,7 +1,7 @@
 """Objetivo 2: controlar el costo por cliente. KPIs 2.1, 2.2 y 2.3."""
 import pandas as pd
 import streamlit as st
-from utils import load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
@@ -109,7 +109,8 @@ def render_2_1():
         st.caption("\\* Escala de comparación, no un financiamiento real: el 10% va a cuentas individuales y estos gastos se pagan con impuestos generales.")
     with t5:
         c1, c2 = st.columns([2, 1])
-        crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 2.0, 0.5, format="%.1f%%") / 100
+        crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 100 * cargar_escenarios()["crecimiento_pib_real"], 0.5,
+                         format="%.1f%%") / 100
         resto = c2.radio("Resto de 'Edad avanzada'", ["Total constante", "Crece con la población 65+"],
                          help="Total constante: el sistema antiguo no crece. Crece: mismo gasto por persona 65+ que hoy.")
         pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=True)
@@ -141,7 +142,7 @@ def render_2_1():
 def _recomendaciones_2_1(h):
     """Tres lectores del KPI 2.1 con los supuestos de partida (PIB +2%, PGU de $250.000, ingreso mediano)."""
     pc = proyeccion_2_1(h, 0.02, "constante", True, "mediana")
-    pg = proyeccion_2_1(h, 0.02, "crece", True, "mediana")
+    pg = proyeccion_2_1(h, cargar_escenarios()["crecimiento_pib_real"], "crece", cargar_escenarios()["pgu_250"], "mediana")
     u, a1 = h.iloc[-1], int(h.index[-1])
     nac = load_csv("kpi_pc_nacional.csv").set_index("anio").loc[a1]
     par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
@@ -233,7 +234,8 @@ def _profundizacion_2_2():
     frp, fb, ap = load_csv("frp_reserva_anual.csv"), load_csv("fapp_balance.csv"), load_csv("fapp_aporte_fiscal.csv")
     nac = load_csv("kpi_pc_nacional.csv")
     c1, c2, c3 = st.columns([2, 2, 2])
-    crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 2.0, 0.5, format="%.1f%%", key="k22_pib",
+    crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 100 * cargar_escenarios()["crecimiento_pib_real"], 0.5,
+                     format="%.1f%%", key="k22_pib",
                      help="Mismo supuesto de partida que el KPI 2.1. Un PIB que crece más reduce el peso del Pilar en el PIB.") / 100
     pgu250 = c2.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=True, key="k22_pgu")
     con_fapp = c3.checkbox("Sumar el aporte al FAPP (Ley 21.735)", value=True, key="k22_fapp",

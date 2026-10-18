@@ -50,9 +50,10 @@ Controles (al log):
 Pago con desfase: la remuneración de agosto se paga en septiembre. Cada tasa nueva rige para las remuneraciones desde agosto,
 así que en un año calendario se pagan 8 meses con la tasa anterior (ene-ago) y 4 con la nueva (sep-dic). En 2025 el FAPP recauda 4 meses.
 
-Escenario 2026-2035 (no es pronóstico, pesos de 2025):
-  - Masa imponible = masa mensual promedio 2025 × (población 15-64 INE del año / 2025): cobertura e ingreso real constantes.
-    Variante 'escenario_crec_1_5': además, ingreso real +1,5% anual.
+Escenario 2026-2035 (no es pronóstico, pesos de 2025). Supuestos en config/escenarios.yaml (compartidos con los KPI 1.2 y 2.2):
+  - Masa imponible = masa mensual promedio 2025 × (población 15-64 INE del año / 2025) × (1 + g)^(año - 2025):
+    cobertura constante; g = crecimiento real del salario. Base 'escenario': g = crecimiento_salario_real.base (1%);
+    variantes 'escenario_crec_0' y 'escenario_crec_1_5' (0% y 1,5%).
   - Estado = gasto PGU/PBS/APS 2025 × (población 65+ INE del año / 2025): beneficio real constante.
 
 Salidas (Data processed/):
@@ -60,7 +61,7 @@ Salidas (Data processed/):
                                       ingreso_promedio, aporte_trabajadores_mes, gasto_pgu_pbs_aps_12m_mm
   - kpi_participacion_partes.csv      base real por pagador: anio, aporte_trabajadores, aporte_empleador, aporte_estado,
                                       financiamiento_total, n_meses, fuente (montos en pesos)
-  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis),
+  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_0 / escenario_crec_1_5), variante (sin_sis / con_sis),
                                       trabajadores, empleador_ci, cuentas_individuales, seguro_social_fapp (sin SIS), sis,
                                       estado, flujo_total, kpi_1_3_pct, n_meses, supuestos
 """
@@ -70,6 +71,7 @@ from pathlib import Path
 
 import pandas as pd
 import pypdf
+import yaml
 
 logging.getLogger("pypdf").setLevel(logging.ERROR)  # avisos de texto rotado en los gráficos de las fichas
 
@@ -80,7 +82,14 @@ OUT = ROOT / "Data processed"
 ANIOS = [2024, 2025]
 TASA_TRABAJADOR = 0.10
 ANIOS_ESCENARIO = range(2026, 2036)
-CRECIMIENTO_REAL = 0.015  # variante del escenario: ingreso real +1,5% anual
+ESCENARIOS = yaml.safe_load((ROOT / "config" / "escenarios.yaml").read_text(encoding="utf-8"))
+CRECIMIENTO_BASE = ESCENARIOS["crecimiento_salario_real"]["base"]          # salario real, escenario base
+CRECIMIENTO_VARIANTES = ESCENARIOS["crecimiento_salario_real"]["variantes"]
+
+
+def nombre_escenario(g):
+    """'escenario' para el base; 'escenario_crec_0', 'escenario_crec_1_5' para las variantes."""
+    return "escenario" if g == CRECIMIENTO_BASE else "escenario_crec_" + f"{100 * g:g}".replace(".", "_")
 
 NOTA_TECNICA = ROOT / "Data raw" / "_external" / "ley_21735" / "nota_tecnica_ley_21735_previsionsocial.pdf"
 
@@ -317,7 +326,7 @@ for _, b in base.iterrows():
 # =============================================================================
 proy = pd.read_csv(OUT / "proyeccion_envejecimiento_pais.csv").set_index("anio")
 masa_mensual_2025 = fichas.loc[fichas.mes_ref_cotizantes.dt.year == 2025, "masa_imponible_mes"].mean()
-for tipo, g in [("escenario", 0.0), ("escenario_crec_1_5", CRECIMIENTO_REAL)]:
+for tipo, g in [(nombre_escenario(g), g) for g in [CRECIMIENTO_BASE] + CRECIMIENTO_VARIANTES]:
     for anio in ANIOS_ESCENARIO:
         masa = (masa_mensual_2025 * proy.loc[anio, "pob_15_64"] / proy.loc[2025, "pob_15_64"]
                 * (1 + g) ** (anio - 2025))

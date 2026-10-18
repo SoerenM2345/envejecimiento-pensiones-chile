@@ -115,3 +115,40 @@ def test_kpi_1_1_correlaciones():
     assert (res.n == 16).all()
     assert res.loc["ingreso", "pearson_r"] > 0.6 and res.loc["pobreza_65", "pearson_r"] < -0.5
     assert res.loc["urbano", "pearson_r"] > 0.4 and res.loc["pct_65_mas", "pearson_r"] < 0
+
+
+def test_kpi_1_2_razon_y_sensibilidad():
+    """KPI 1.2: razón de soporte 2024 del país = 2,27 y tabla de sensibilidad 3 × 3 del punto crítico."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    pres = pd.read_csv(dp / "kpi_presion_previsional_region.csv")
+    assert round(pres.cotizantes_2024.sum() / pres.pob_65_mas.sum(), 2) == 2.27
+    sens = pd.read_csv(dp / "kpi_punto_critico_sensibilidad.csv")
+    assert len(sens) == 9 and sens.es_base.sum() == 1
+    assert sens.groupby("crecimiento_salario_real").size().eq(3).all() and sens.groupby("tope_carga").size().eq(3).all()
+    base = sens[sens.es_base].iloc[0]
+    assert (base.crecimiento_salario_real, base.tope_carga) == (0.01, 0.10)
+    # más tope o más sueldo -> el punto crítico llega más tarde
+    piv = sens.pivot(index="crecimiento_salario_real", columns="tope_carga", values="punto_critico")
+    assert (piv.diff(axis=1).iloc[:, 1:] >= 0).all().all() and (piv.diff().iloc[1:] >= 0).all().all()
+
+
+def test_kpis_1_2_1_3_2_2_leen_la_misma_config_de_escenarios():
+    """Los supuestos de los escenarios vienen de un solo archivo: config/escenarios.yaml."""
+    import yaml
+    raiz = DASH.parent
+    cfg = yaml.safe_load((raiz / "config" / "escenarios.yaml").read_text(encoding="utf-8"))
+    assert cfg["crecimiento_salario_real"]["base"] == 0.01 and cfg["tope_carga"]["base"] == 0.10
+    usan = {
+        "KPI 1.3 (Scripts/15)": raiz / "Scripts" / "15_kpi_participacion_partes.py",
+        "KPI 1.2 sensibilidad (Scripts/22)": raiz / "Scripts" / "22_punto_critico_sensibilidad.py",
+        "KPI 1.2 y 1.3 (Objetivo 1)": DASH / "final_pages" / "objetivo1.py",
+        "KPI 2.2 (Objetivo 2)": DASH / "final_pages" / "objetivo2.py",
+    }
+    for kpi, archivo in usan.items():
+        texto = archivo.read_text(encoding="utf-8")
+        assert "escenarios.yaml" in texto or "cargar_escenarios(" in texto, f"{kpi} no lee config/escenarios.yaml"
+    import pandas as pd
+    f = pd.read_csv(raiz / "Data processed" / "kpi_flujo_comisionable.csv")
+    # KPI 1.3: el escenario base y las variantes salen de la config
+    assert set(f.tipo) == {"real", "escenario", "escenario_crec_0", "escenario_crec_1_5"}

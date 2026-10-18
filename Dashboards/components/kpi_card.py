@@ -27,6 +27,8 @@ def kpi_card(kpi_id: str, render: Optional[Callable[[], None]] = None):
 
     with st.container(border=True):
         st.subheader(f"{kpi['id']} · {kpi['nombre']}")
+        if kpi.get("escenario"):  # datos reales + proyecciones: se dice explícitamente que lo proyectado es escenario
+            status_text += " · proyecciones = escenario (config/escenarios.yaml)"
         st.caption(f"{icon} {status_text} · {kpi['objetivo']}")
         st.markdown(kpi["descripcion"])
         st.code(kpi["formula"], language=None)

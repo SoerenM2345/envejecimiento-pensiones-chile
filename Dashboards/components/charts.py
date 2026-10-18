@@ -176,29 +176,43 @@ def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
                                f"Personas de 65+ y en pobreza por región (país: {nacional:.1f}%)".replace(".", ","))
 
 
-def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str, todos_los_anios: bool = False) -> go.Figure:
-    """Razón de soporte 2024 -> 2035 -> 2050 (escenario con cobertura constante). filas: anio, razon.
+def zona_escenario(fig: go.Figure, desde: float, hasta: float) -> go.Figure:
+    """Fondo gris con el rótulo «Escenario» para los años proyectados (desde el primer año que no es dato)."""
+    fig.add_vrect(x0=desde, x1=hasta, fillcolor=INK_MUTED, opacity=0.08, line_width=0, layer="below")
+    fig.add_annotation(x=desde, xref="x", y=1, yref="paper", text="Escenario", showarrow=False, xanchor="left", yanchor="top",
+                       xshift=6, font=dict(color=INK_SECONDARY, size=12))
+    return fig
+
+
+def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str, todos_los_anios: bool = False,
+                             anio_ultimo_real: int = ANIO_BASE) -> go.Figure:
+    """Razón de soporte: años reales con línea continua, escenario (cobertura constante) punteado sobre fondo gris.
+    filas: anio, razon (años siguientes a ANIO_BASE; los <= anio_ultimo_real son datos observados).
     todos_los_anios=True (país): el INE publica población de cada año, así que se marca cada año con un punto pequeño y se
-    rotulan solo los años clave. False (región): solo 2024 (Censo) y 2035 / 2050 (escenario regional) son datos; se marcan con
-    rombos (lleno = 2024, vacío = escenarios) y la recta entre ellos es interpolación."""
+    rotulan solo los años clave. False (región): solo 2024 (Censo) y 2035 / 2050 (escenario regional) son datos de población;
+    se marcan con rombos (lleno = 2024, vacío = escenarios) y la recta entre ellos es interpolación."""
     pts = pd.concat([pd.DataFrame([{"anio": ANIO_BASE, "razon": historico}]), filas]).sort_values("anio").reset_index(drop=True)
+    real, esc = pts[pts.anio <= anio_ultimo_real], pts[pts.anio >= anio_ultimo_real]
     fig = go.Figure()
+    zona_escenario(fig, anio_ultimo_real + 0.5, pts.anio.max() + (0.5 if todos_los_anios else 1))
     if todos_los_anios:
-        clave = pts.anio.isin([2024, 2030, 2035, 2040, 2050, 2060, 2070])
-        fig.add_scatter(x=pts.anio, y=pts.razon, mode="lines+markers", line=dict(color=RED, width=3), marker=dict(size=5), name=nombre,
-                        showlegend=False, hovertemplate="%{x}: %{y:.2f}<extra></extra>")
+        clave = pts.anio.isin([2024, 2025, 2030, 2035, 2040, 2050, 2060, 2070])
+        fig.add_scatter(x=real.anio, y=real.razon, mode="lines+markers", line=dict(color=RED, width=3), marker=dict(size=7),
+                        name="Dato real (cotizantes diciembre / población 65+)", hovertemplate="%{x}: %{y:.2f}<extra>real</extra>")
+        fig.add_scatter(x=esc.anio, y=esc.razon, mode="lines+markers", line=dict(color=RED, width=3, dash="dash"), marker=dict(size=4),
+                        name="Escenario (cobertura constante, población INE)", hovertemplate="%{x}: %{y:.2f}<extra>escenario</extra>")
+        # 2024 y 2025 son años vecinos: rótulos a izquierda / derecha para que no se tapen
+        posiciones = ["middle left" if a == ANIO_BASE else "top right" if a == anio_ultimo_real else "top center" for a in pts.anio[clave]]
         fig.add_scatter(x=pts.anio[clave], y=pts.razon[clave], mode="text", text=[f"{v:.2f}" for v in pts.razon[clave]],
-                        textposition="top center", showlegend=False, hoverinfo="skip")
-        fig.add_scatter(x=[None], y=[None], mode="markers", name="Un punto por año (población INE de cada año)",
-                        marker=dict(symbol="circle", size=8, color=INK_SECONDARY))
+                        textposition=posiciones, showlegend=False, hoverinfo="skip")
     else:
-        fig.add_scatter(x=pts.anio, y=pts.razon, mode="lines", line=dict(color=RED, width=3, dash="dot"), showlegend=False, hoverinfo="skip")
-        fig.add_scatter(x=pts.anio[:1], y=pts.razon[:1], mode="markers+text", text=[f"{v:.2f}" for v in pts.razon[:1]], textposition="top center",
+        fig.add_scatter(x=esc.anio, y=esc.razon, mode="lines", line=dict(color=RED, width=3, dash="dash"), showlegend=False, hoverinfo="skip")
+        fig.add_scatter(x=real.anio, y=real.razon, mode="markers+text", text=[f"{v:.2f}" for v in real.razon], textposition="top center",
                         marker=dict(symbol="diamond", size=13, color=RED, line=dict(color="white", width=1.5)), name="Año observado (Censo 2024)")
-        fig.add_scatter(x=pts.anio[1:], y=pts.razon[1:], mode="markers+text", text=[f"{v:.2f}" for v in pts.razon[1:]], textposition="top center",
+        fig.add_scatter(x=esc.anio[1:], y=esc.razon[1:], mode="markers+text", text=[f"{v:.2f}" for v in esc.razon[1:]], textposition="top center",
                         marker=dict(symbol="diamond", size=13, color="white", line=dict(color=RED, width=2.5)),
                         name="Población del escenario regional")
-    fig.update_layout(**PLOTLY_LAYOUT, title=f"Escenario: cotizantes por adulto mayor, {nombre}")
+    fig.update_layout(**PLOTLY_LAYOUT, title=f"Cotizantes por adulto mayor, {nombre}")
     fig.update_xaxes(title="Año", **({} if todos_los_anios else dict(tickvals=list(pts.anio))))
     fig.update_yaxes(title="Cotizantes por persona de 65+", rangemode="tozero")
     return fig
@@ -450,7 +464,7 @@ def _unidad_dinero(max_clp: float):
 
 
 def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float,
-                         mostrar: tuple = (True, True), pais: bool = True) -> go.Figure:
+                         mostrar: tuple = (True, True), pais: bool = True, es_base: bool = True) -> go.Figure:
     """KPI 1.2, análisis del punto crítico. d = salida de critical_point.serie_pais / serie_territorio;
     pc = critical_point.punto_critico(d); view = 'dinero' | 'razon'.
     En 'dinero' se superponen el costo (costo por persona de 65+ x población de 65+) y la capacidad (carga máxima x ingreso por
@@ -476,6 +490,7 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     base = d[~d.proyectado].tail(1)
     proy_c = pd.concat([base, proy])  # el tramo punteado parte del último punto observado
     fig = go.Figure()
+    zona_escenario(fig, float(obs.anio.max()) + 0.5, float(d.anio.max()) + 0.5)
     for (nom, y, col), visible in zip(series, mostrar):
         if not visible:
             continue
@@ -511,10 +526,14 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     if all(mostrar) and pc["estado"] in ("cruza", "ya_superado"):
         xc = pc["anio_exacto"]
         yc = float(np.interp(xc, d.anio, series[0][1].values))
-        fig.add_vline(x=xc, line_dash="dot", line_color=INK_MUTED)
-        fig.add_scatter(x=[xc], y=[yc], mode="markers+text", showlegend=False, hoverinfo="skip",
-                        text=[f"Punto crítico: {pc['anio']}" if pc["estado"] == "cruza" else f"Superado desde {pc['anio']}"],
-                        textposition="top left", marker=dict(symbol="star", size=18, color=VIOLET, line=dict(color="white", width=1.5)))
+        rotulo = (f"Punto crítico ({'escenario base' if es_base else 'escenario'}): {pc['anio']}" if pc["estado"] == "cruza"
+                  else f"Superado desde {pc['anio']}")
+        fig.add_vline(x=xc, line_dash="dot", line_color=VIOLET, line_width=2)
+        # rótulo bajo el de «Escenario» (que va arriba de la zona gris) para que no se tapen
+        fig.add_annotation(x=xc, y=0.9, yref="paper", text=rotulo, showarrow=False, xanchor="right", xshift=-6,
+                           font=dict(color=INK_PRIMARY, size=12), bgcolor="rgba(255,255,255,0.85)")
+        fig.add_scatter(x=[xc], y=[yc], mode="markers", showlegend=False, hoverinfo="skip",
+                        marker=dict(symbol="star", size=18, color=VIOLET, line=dict(color="white", width=1.5)))
     fig.update_layout(**PLOTLY_LAYOUT, title=titulo)
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title=ytitle, rangemode="tozero")
@@ -569,7 +588,7 @@ def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
+def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01) -> go.Figure:
     """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados), variante
     sin SIS; la variante con SIS va como línea gris delgada de sensibilidad (real + escenario base).
     df: anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis), kpi_1_3_pct."""
@@ -584,8 +603,9 @@ def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
     fig.add_scatter(x=real.anio.astype(str), y=real.kpi_1_3_pct, mode="lines+markers+text", name="Real",
                     line=dict(color=BLUE, width=3), text=[f"{v:.1f}%" for v in real.kpi_1_3_pct],
                     textposition="top center", textfont_color=INK_PRIMARY)
-    for tipo, nombre, color, dash in [("escenario", "Escenario base (ingreso real constante)", RED, "dash"),
-                                      ("escenario_crec_1_5", "Escenario ingreso real +1,5% anual", INK_MUTED, "dot")]:
+    variantes = sorted(t for t in df.tipo.unique() if t.startswith("escenario_crec_"))
+    for tipo, nombre, color, dash in [("escenario", f"Escenario base (salario real {crec_base:+.1%} anual)".replace(".", ","), RED, "dash")] + [
+            (t, f"Variante: salario real +{t.removeprefix('escenario_crec_').replace('_', ',')}% anual", INK_MUTED, "dot") for t in variantes]:
         e = pd.concat([ancla, df[df.tipo == tipo]]).sort_values("anio")
         if len(e) == 1:
             continue

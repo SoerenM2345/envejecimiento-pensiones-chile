@@ -60,6 +60,26 @@ PLOTLY_LAYOUT = dict(
 
 
 @st.cache_data
+def cargar_escenarios() -> dict:
+    """Supuestos de los escenarios compartidos por los KPI 1.2, 1.3 y 2.2 (config/escenarios.yaml)."""
+    import yaml
+    with open(ROOT / "config" / "escenarios.yaml", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def supuestos_escenario(crec_salarial: float = None, tope: float = None) -> list:
+    """Viñetas de los supuestos del escenario para los tooltips (valores del control si se pasan; si no, los de la config)."""
+    e = cargar_escenarios()
+    g = e["crecimiento_salario_real"]["base"] if crec_salarial is None else crec_salarial
+    t = e["tope_carga"]["base"] if tope is None else tope
+    return [f"Escenario, no pronóstico (config/escenarios.yaml)",
+            f"Salario real: {g:+.1%} anual".replace(".", ","),
+            "Cobertura constante (cotizantes / población 15-64)" if e["cobertura_constante"] else "Cobertura variable",
+            "Beneficio real constante (PGU reajustada por IPC)" if e["beneficio_real_constante"] else "Beneficio variable",
+            f"Tope de carga: {t:.0%}", "Población: proyecciones INE base 2024"]
+
+
+@st.cache_data
 def load_csv(name: str) -> pd.DataFrame:
     return pd.read_csv(DATA_PROCESSED / name)
 

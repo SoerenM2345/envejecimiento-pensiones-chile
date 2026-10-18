@@ -103,12 +103,14 @@ def test_pais_razon_de_soporte_con_el_censo_como_base(datos):
     args = (datos["nac"], datos["proy"], datos["par"])
     d = cp.serie_pais(*args, cp.Escenario())  # el Censo manda: población INE llevada al nivel del Censo 2024
     f = cp.fila_anio(d, 2024)
-    assert round(f.razon_soporte, 2) == 2.29  # 5.918.977 cotizantes (dic-2024) / 2.587.238 personas de 65+ (Censo 2024)
-    assert round(f.pob_65) == 2_587_238 and round(f.carga_requerida, 3) == 0.065
+    # 5.862.883 cotizantes de diciembre 2024 con región / 2.587.238 personas de 65+ (Censo 2024), igual que la tarjeta
+    assert round(f.razon_soporte, 2) == 2.27
+    # carga = gasto de vejez 2024 / masa imponible anual de los 12 meses (84,35 billones nominales, la misma del KPI 1.3)
+    assert round(f.pob_65) == 2_587_238 and round(f.carga_requerida, 3) == 0.067
     ine = cp.fila_anio(cp.serie_pais(*args, cp.Escenario(poblacion="ine")), 2025)
-    assert round(ine.razon_soporte, 2) == 2.06  # nivel INE sin ajustar: 5.974.428 / 2.906.461
+    assert round(ine.razon_soporte, 2) == 2.05  # nivel INE sin ajustar: 5.960.514 (con región) / 2.906.461
     # el nivel de la población 65+ cambia la razón de soporte pero no el costo total ni el año crítico
-    assert cp.punto_critico(d)["anio"] == cp.punto_critico(cp.serie_pais(*args, cp.Escenario(poblacion="ine")))["anio"] == 2039
+    assert cp.punto_critico(d)["anio"] == cp.punto_critico(cp.serie_pais(*args, cp.Escenario(poblacion="ine")))["anio"] == 2038
 
 
 def test_pais_punto_critico_por_defecto_y_orden_de_las_bases(datos):
@@ -116,7 +118,7 @@ def test_pais_punto_critico_por_defecto_y_orden_de_las_bases(datos):
     a_prom = cp.punto_critico(cp.serie_pais(*args, cp.Escenario()))
     a_med = cp.punto_critico(cp.serie_pais(*args, cp.Escenario(estadistico="mediana")))
     b_prom = cp.punto_critico(cp.serie_pais(*args, cp.Escenario(base="B")))
-    assert a_prom["estado"] == "cruza" and a_prom["anio"] == 2039
+    assert a_prom["estado"] == "cruza" and a_prom["anio"] == 2038  # antes 2039 con la masa de diciembre × 12
     assert a_med["anio"] < a_prom["anio"] < b_prom["anio"]  # mediana: menos ingreso -> antes; ocupados: más trabajadores -> después
 
 
@@ -181,11 +183,11 @@ def test_pagina_punto_critico_corre(cambios):
     assert any("Lectura" in m.value for m in at.markdown)
 
 
-def test_pagina_pais_muestra_el_punto_critico_2039():
+def test_pagina_pais_muestra_el_punto_critico_2038():
     at = correr([])
     metricas = {m.label: m.value for m in at.metric}
-    assert metricas["Punto crítico"] == "2039"
-    assert metricas["Cotizantes por 65+ (2024)"] == "2.29"
+    assert metricas["Punto crítico (escenario)"] == "2038"
+    assert metricas["Cotizantes por 65+ (2024)"] == "2.27"
 
 
 def test_tabla_de_comunas_de_una_region():

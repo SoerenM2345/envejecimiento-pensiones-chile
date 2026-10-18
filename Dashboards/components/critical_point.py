@@ -7,7 +7,9 @@ El punto crítico es el año en que la línea de costo cruza a la de capacidad. 
 (trabajadores por persona de 65+) caiga bajo la razón de equilibrio R* = costo por 65+ / (ingreso anual por trabajador x carga máxima).
 
 Dos bases de ingreso (se alternan con un interruptor):
-  A "cotizantes": ingreso imponible (SP) x cotizantes: quienes hoy aportan al sistema.
+  A "cotizantes": ingreso imponible (SP) x cotizantes: quienes hoy aportan al sistema. Los trabajadores son los cotizantes de
+    diciembre con región (razón de soporte 2024 = 2,27, igual que la tarjeta); la masa es la anual de los 12 meses (no
+    diciembre × 12, que la sobrestima 2-4 %): masa = trabajadores × ingreso anual × factor_masa (ver Scripts/18).
   B "ocupados":   ingreso de los ocupados (INE, ESI) x ocupados: la base si todos los que trabajan cotizaran.
 Cada base admite promedio o mediana.
 
@@ -48,7 +50,7 @@ COLS_INGRESO = {  # (base, estadístico) -> columna de kpi_pc_nacional.csv / kpi
     ("B", "promedio"): "ing_ocupados_medio_real25",
     ("B", "mediana"): "ing_ocupados_mediano_real25",
 }
-COL_TRABAJADORES = {"A": "cotizantes_dic", "B": "ocupados_ond"}
+COL_TRABAJADORES = {"A": "cotizantes_dic_con_region", "B": "ocupados_ond"}
 NOMBRE_TRABAJADORES = {"A": "cotizantes", "B": "ocupados"}
 
 
@@ -69,12 +71,13 @@ def _factor_pgu(anio, esc: Escenario, params: pd.DataFrame):
 def _derivados(d: pd.DataFrame, esc: Escenario) -> pd.DataFrame:
     """Columnas comunes: masas de dinero, carga requerida, razón de soporte y razón de equilibrio."""
     d["ingreso_anual_trab"] = d.ingreso_trab * MESES
-    d["masa_ingreso"] = d.trabajadores * d.ingreso_anual_trab                  # CLP de 2025 al año
+    # factor_masa: lleva cotizantes de diciembre × ingreso × 12 a la masa anual de los 12 meses (base A; 1 en base B)
+    d["masa_ingreso"] = d.trabajadores * d.ingreso_anual_trab * d.factor_masa  # CLP de 2025 al año
     d["capacidad"] = esc.carga_max * d.masa_ingreso
     d["costo_total"] = d.costo_65 * d.pob_65
     d["carga_requerida"] = d.costo_total / d.masa_ingreso                      # fracción del sueldo
     d["razon_soporte"] = d.trabajadores / d.pob_65
-    d["razon_equilibrio"] = d.costo_65 / (d.ingreso_anual_trab * esc.carga_max)
+    d["razon_equilibrio"] = d.costo_65 / (d.ingreso_anual_trab * d.factor_masa * esc.carga_max)
     d["diferencia"] = d.capacidad - d.costo_total
     return d
 
@@ -95,6 +98,10 @@ def serie_pais(nac: pd.DataFrame, proy: pd.DataFrame, params: pd.DataFrame, esc:
     d["trabajadores"] = np.where(hist, n[trab_col].reindex(anios),
                                  n.loc[t0, trab_col] * d.pob_15_64 / d.loc[t0, "pob_15_64"] * _factor_cobertura(anios, esc, t0))
     d["ingreso_trab"] = np.where(hist, n[ing_col].reindex(anios), n.loc[t0, ing_col] * (1 + esc.crec_salarial) ** dt)
+    if esc.base == "A":  # en el escenario se mantiene el factor del año base
+        d["factor_masa"] = np.where(hist, n.factor_masa_anual.reindex(anios), n.loc[t0, "factor_masa_anual"])
+    else:
+        d["factor_masa"] = 1.0
     costo_hist = n["costo_vejez_por_65_real25"] / f65  # el gasto es el mismo; con menos población 65+ cada persona cuesta más
     base_costo = costo_hist.loc[t0]
     d["costo_65"] = np.where(hist, costo_hist.reindex(anios),
@@ -130,6 +137,7 @@ def datos_territorio(region_id: int, reg: pd.DataFrame, nac: pd.DataFrame, ind_r
         cotizantes=float(r24.cotizantes_dic), ocupados=float(r24.ocupados_ond),
         ing_A_promedio=float(r24.ingreso_imponible_prom_real25), ing_A_mediana=float(n24.ingreso_imponible_mediano_real25 * escala),
         ing_B_promedio=float(r24.ing_ocupados_medio_real25), ing_B_mediana=float(r24.ing_ocupados_mediano_real25),
+        factor_masa_A=float(n24.factor_estacional),  # los cotizantes regionales ya son con región: solo la estacionalidad nacional
     )
 
 
@@ -158,6 +166,7 @@ def serie_territorio(dt: dict, params: pd.DataFrame, esc: Escenario) -> pd.DataF
     d["trabajadores"] = w0 * d.pob_15_64 / dt["pob_15_64"][t0] * _factor_cobertura(anios, esc, t0)
     ing0 = dt[f"ing_{esc.base}_{esc.estadistico}"]
     d["ingreso_trab"] = ing0 * (1 + esc.crec_salarial) ** (anios - t0)
+    d["factor_masa"] = dt["factor_masa_A"] if esc.base == "A" else 1.0
     d["costo_65"] = dt["costo_65"] * (1 + esc.crec_costo) ** (anios - t0) * _factor_pgu(anios, esc, params)
     d["proyectado"] = anios > t0
     d["ancla"] = np.isin(anios, ANIOS_REGION)

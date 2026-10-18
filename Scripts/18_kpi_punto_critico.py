@@ -19,7 +19,9 @@ Salidas (Data processed/):
   - ine_ingresos_ocupados.csv           anio, region_id (0 = país), sexo, mediana_nom, media_nom, ocupados (octubre-diciembre)
   - ipc_anual.csv                       anio, ipc_prom, deflactor_2025
   - kpi_pc_nacional.csv                 una fila por año 2010-2025: el lado ingreso y el lado costo en pesos nominales y reales (2025),
-                                        con población INE y los factores `factor_censo_*` que la llevan al nivel del Censo 2024
+                                        con población INE y los factores `factor_censo_*` que la llevan al nivel del Censo 2024;
+                                        masa imponible anual (suma de los 12 meses del 04A), cotizantes de diciembre con región y
+                                        los factores `factor_masa_anual` / `factor_estacional` (ver notas)
   - kpi_pc_region.csv                   año x región 2010-2025: cotizantes, ingreso imponible, ocupados e ingreso de los ocupados,
                                         más la cuota regional del gasto de vejez del Pilar Solidario
   - kpi_pc_parametros_reforma.csv       calendario de la PGU de $250.000 (Ley 21.735) como factor de costo, 2025-2070
@@ -29,6 +31,12 @@ Notas de método:
   - Mediana de los cotizantes: interpolación lineal dentro del tramo de ingreso imponible donde se acumula el 50 %.
     Es una aproximación (tramos de $20-50 mil); para el tramo abierto final se usa el límite inferior.
   - El IPC se encadena desde la variación mensual (redondeada a 1 decimal): sirve para razones entre años, no como nivel.
+  - Masa imponible del año = suma de los 12 meses (cotizantes × ingreso promedio del 04A), no diciembre × 12: diciembre tiene
+    más cotizantes que el promedio del año (2024: 5,92 M vs 5,79 M), así que diciembre × 12 sobrestimaba la masa en 2-4 %.
+    Es la misma masa que usa el KPI 1.3 (2024: 84,35 billones nominales).
+  - La razón de soporte usa los cotizantes de diciembre con región (sin los 'Sin Información'), igual que los KPI 1.1 y 1.2
+    por región (2024: 2,27). Para que la masa siga siendo la anual completa: masa = cotizantes con región × ingreso de diciembre
+    × 12 × factor_masa_anual. factor_estacional = masa anual / (todos los cotizantes de diciembre × ingreso × 12), para regiones.
 """
 import re
 import zipfile
@@ -311,6 +319,20 @@ def main():
     ine24 = pais[pais.anio == 2024].iloc[0]
     d["factor_censo_65"] = ind.pob_65_mas.sum() / ine24.pob_65_mas
     d["factor_censo_15_64"] = ind.pob_15_64.sum() / ine24.pob_15_64
+    # masa imponible anual (12 meses) y cotizantes de diciembre con región
+    tot = nac[(nac.tipo == "Total") & (nac.sexo == "Ambos")]
+    anual = tot.assign(masa=tot.cotizantes * tot.ingreso_promedio_nom).groupby("anio").agg(
+        meses=("mes", "nunique"), cotizantes_prom_anual=("cotizantes", "mean"), masa_imponible_anual_nom=("masa", "sum")).reset_index()
+    d = d.merge(anual[anual.meses == 12].drop(columns="meses"), on="anio", how="left")
+    cpr = pd.read_csv(OUT / "cotizantes_por_region.csv")
+    con_region = cpr[cpr.region_id.notna()].groupby("anio").cotizantes.sum().rename("cotizantes_dic_con_region")
+    d = d.merge(con_region, on="anio", how="left")
+    masa_dic = d.ingreso_imponible_prom_nom * 12
+    d["masa_imponible_anual_real25"] = d.masa_imponible_anual_nom * d.deflactor_2025
+    d["factor_masa_anual"] = d.masa_imponible_anual_nom / (d.cotizantes_dic_con_region * masa_dic)
+    d["factor_estacional"] = d.masa_imponible_anual_nom / (d.cotizantes_dic * masa_dic)
+    assert d.loc[d.anio >= 2011, ["masa_imponible_anual_nom", "cotizantes_dic_con_region"]].notna().all().all(), \
+        "faltan meses del 04A o cotizantes por región en algún año"
     d.to_csv(OUT / "kpi_pc_nacional.csv", index=False)
 
     # --- regional ---

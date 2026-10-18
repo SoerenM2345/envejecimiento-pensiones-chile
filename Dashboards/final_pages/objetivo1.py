@@ -4,7 +4,7 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
-from utils import load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.charts import (region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, region_support_people_bars,
@@ -230,14 +230,16 @@ def render_1_2_punto_critico():
     est = t2.radio("Estadístico", ["Promedio", "Mediana"], horizontal=True, key="pc_estadistico")
     vista = t3.radio("Vista", ["Dinero", "Razón de soporte"], horizontal=True, key="pc_vista")
 
+    cfg = cargar_escenarios()
+    g_base, tope_base = cfg["crecimiento_salario_real"]["base"], cfg["tope_carga"]["base"]
     s1, s2, s3, s4 = st.columns(4)
-    carga = s1.slider("Tope de carga (% del sueldo)", 3.0, 20.0, 10.0, 0.5, key="pc_carga",
+    carga = s1.slider("Tope de carga (% del sueldo)", 3.0, 20.0, 100 * tope_base, 0.5, key="pc_carga",
                       help="Parte del sueldo que se considera tolerable destinar al Pilar Solidario. "
                            "10 % = la cotización obligatoria para pensión.") / 100
-    crec = s2.slider("Crec. real del sueldo (% anual)", -1.0, 3.0, 1.0, 0.5, key="pc_crec") / 100
+    crec = s2.slider("Crec. real del sueldo (% anual)", -1.0, 3.0, 100 * g_base, 0.5, key="pc_crec") / 100
     cobertura = s3.slider("Cotizantes / pob. 15-64 en 2050 (hoy = 100)", 70, 130, 100, 5, key="pc_cobertura",
                           disabled=base != "Cotizantes", help="Solo aplica a la base de cotizantes (formalización).") / 100
-    pgu = s4.checkbox("PGU de $250.000 (Ley 21.735)", value=True, key="pc_pgu")
+    pgu = s4.checkbox("PGU de $250.000 (Ley 21.735)", value=cfg["pgu_250"], key="pc_pgu")
 
     esc = cp.Escenario(base="A" if base == "Cotizantes" else "B", estadistico="promedio" if est == "Promedio" else "mediana",
                        crec_salarial=crec, carga_max=carga, cobertura_2050=cobertura, pgu_250=pgu)
@@ -248,6 +250,9 @@ def render_1_2_punto_critico():
         d, pc = pc_serie("comuna" if comuna_code else "region", reg_ids[sel], comuna_code, esc)
         nombre, a0 = (f"{comuna_nombre} ({sel})" if comuna_code else sel), cp.ANIO_BASE_REGION
     trab = cp.NOMBRE_TRABAJADORES[esc.base]
+    es_base = (esc.base == "A" and esc.estadistico == "promedio" and abs(crec - g_base) < 1e-9 and abs(carga - tope_base) < 1e-9
+               and esc.cobertura_2050 == 1.0 and pgu == cfg["pgu_250"])
+    sup = supuestos_escenario(crec, carga)
 
     f0 = cp.fila_anio(d, a0)
     f1 = cp.fila_anio(d, 2050)
@@ -258,13 +263,13 @@ def render_1_2_punto_critico():
     else:
         pc_txt = f"no antes de {int(d.anio.max())}"
     kpi_card_row([
-        ("Punto crítico", pc_txt, f"Primer año en que el costo supera la capacidad (tope {carga:.0%})",
-         ["Costo: PGU + PBS/APS de vejez, por persona 65+ × población 65+", "Capacidad: tope × ingreso por trabajador × trabajadores",
-          "Pesos reales de 2025"]),
+        ("Punto crítico (escenario)", pc_txt, f"Primer año en que el costo supera la capacidad (tope {carga:.0%})",
+         ["Costo: PGU + PBS/APS de vejez, por persona 65+ × población 65+",
+          "Capacidad: tope × masa imponible anual (12 meses)", "Pesos reales de 2025"] + sup),
         (f"Carga requerida {a0}", f"{f0.carga_requerida:.1%}", "Costo / masa de ingreso de los trabajadores",
          ["Costo: PGU + PBS/APS de vejez", "Masa de ingreso: trabajadores × ingreso anual", "Compara con el tope (10% = cotización obligatoria)"]),
-        ("Carga requerida 2050", f"{f1.carga_requerida:.1%}", "Mismo cálculo en el escenario",
-         ["Población: Censo 2024 (país: dinámica INE llevada al nivel del Censo)", "Ingreso real crece según el escenario elegido", "PGU de $250.000 si está marcada"]),
+        ("Carga requerida 2050 (escenario)", f"{f1.carga_requerida:.1%}", "Mismo cálculo en el escenario",
+         ["Población: Censo 2024 (país: dinámica INE llevada al nivel del Censo)", "PGU de $250.000 si está marcada"] + sup),
         (f"{trab.capitalize()} por 65+ ({a0})", f"{f0.razon_soporte:.2f}", f"Equilibrio R*: {f0.razon_equilibrio:.2f}",
          ["Trabajadores ÷ población 65+", "R*: trabajadores por persona 65+ que cubren el costo con el tope",
           "Si baja de R*, el costo supera la capacidad"]),
@@ -273,21 +278,40 @@ def render_1_2_punto_critico():
     with col_panel:
         mostrar = panel_lineas(f0, a0, esc, trab, vista)
     with col_graf:
-        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, mostrar, pais=sel == "País")
+        fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, mostrar, pais=sel == "País",
+                                   es_base=es_base)
         st.plotly_chart(estilo_kpi(fig, 520), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
+    if sel != "País":
+        st.caption("Población 65+ regional = reparto de tasas nacionales (INE no publica proyección regional base 2024).")
+    with st.expander("Sensibilidad del punto crítico (país, cotizantes, promedio)"):
+        sens = load_csv("kpi_punto_critico_sensibilidad.csv")
+        tabla = sens.assign(
+            fila=lambda x: x.crecimiento_salario_real.map(lambda g: f"Salario real {g:+.1%}".replace(".", ",")),
+            col=lambda x: x.tope_carga.map(lambda t: f"Tope {t:.0%}"),
+            valor=lambda x: [str(int(a)) + (" (base)" if b else "") if e == "cruza" else ("ya superado" if e == "ya_superado" else "no cruza")
+                             for a, e, b in zip(x.punto_critico, x.estado, x.es_base)],
+        ).pivot(index="fila", columns="col", values="valor")
+        orden = sens.sort_values("tope_carga").tope_carga.map(lambda t: f"Tope {t:.0%}").unique()
+        filas = sens.sort_values("crecimiento_salario_real").crecimiento_salario_real.map(
+            lambda g: f"Salario real {g:+.1%}".replace(".", ",")).unique()
+        st.dataframe(tabla.reindex(index=filas, columns=orden), use_container_width=True)
+        st.caption("Año del punto crítico según el crecimiento real del sueldo (filas) y el tope de carga (columnas); los demás "
+                   "supuestos como en config/escenarios.yaml. Lo calcula Scripts/22_punto_critico_sensibilidad.py.")
     st.caption("\\* Solo los años con marca (punto o rombo) son datos; el resto es interpolación o escenario. ★ = punto crítico. Pesos reales de 2025.  \n"
                "\\*\\* El tope τ es un criterio, no un dato: la PGU se paga con impuestos generales, no con cotizaciones. "
                "El punto crítico mide cuándo el Pilar pesaría más de τ sobre el sueldo de los trabajadores, no cuándo falta financiamiento.")
     nac_pc = load_csv("kpi_pc_nacional.csv").set_index("anio")
     ajuste_pais = (f"País: población con la dinámica de las proyecciones INE llevada al nivel del Censo 2024 (65+ × {nac_pc.loc[2024, 'factor_censo_65']:.3f}, "
                    f"15-64 × {nac_pc.loc[2024, 'factor_censo_15_64']:.3f}; el INE corrige el subconteo del censo, ver docs/DISCUSION_FUENTES.md). "
-                   "El país incluye los cotizantes sin región, por eso difiere ~1 % de la suma de las regiones. ")
+                   "Cotizantes: diciembre, con región (razón 2024 = 2,27, igual que arriba); masa imponible: suma de los 12 meses "
+                   "de todos los cotizantes (Superintendencia, 04A), la misma del KPI 1.3. ")
     with st.expander("Método y fuentes"):
         st.caption(
-            "Se usan datos del mismo año: " + ("país 2024 (el año del Censo; la serie observada llega a 2025): cotizantes e ingreso "
-                                               "imponible de diciembre, ocupados octubre-diciembre y gasto del año. " + ajuste_pais if sel == "País" else
-                                               "región 2024 (Censo 2024, cotizantes e ingreso imponible de diciembre, ESI y gasto 2024) "
+            "Se usan datos del mismo año: " + ("país 2024 (el año del Censo; la serie observada llega a 2025): cotizantes de diciembre, "
+                                               "masa imponible de los 12 meses, ocupados octubre-diciembre y gasto del año. " + ajuste_pais if sel == "País" else
+                                               "región 2024 (Censo 2024, cotizantes e ingreso imponible de diciembre con el ajuste estacional "
+                                               "nacional de la masa, ESI y gasto 2024) "
                                                "y escenarios regionales 2035 y 2050; los años intermedios se interpolan. ")
             + "El costo por persona de 65+ es PGU + APS/PBS de vejez, constante en términos reales (la PGU se reajusta por IPC). "
               "La mediana de los cotizantes sale de los tramos de ingreso imponible; la regional se estima con la nacional. "
@@ -329,10 +353,14 @@ def render_1_2():
     with der:
         sel = st.selectbox("Escenario 2035 / 2050 para", ["País"] + sorted(pres["region_nombre"]), key="s12_proy_territorio")
         if sel == "País":
-            base = proy_pais.loc[2024, "pob_15_64"] / proy_pais.loc[2024, "pob_65_mas"]
-            filas = pd.DataFrame([{"anio": a, "razon": nac_soporte * (proy_pais.loc[a, "pob_15_64"] / proy_pais.loc[a, "pob_65_mas"]) / base}
-                                  for a in range(2025, 2071)])
-            fig = support_ratio_projection(nac_soporte, filas, "Chile", todos_los_anios=True)
+            # misma serie que el punto crítico: 2024-2025 reales (cotizantes de diciembre con región / población 65+),
+            # desde 2026 escenario con la cobertura de 2025 constante
+            cfg = cargar_escenarios()
+            d_pais, _ = pc_serie("pais", 0, 0, cp.Escenario(crec_salarial=cfg["crecimiento_salario_real"]["base"],
+                                                            carga_max=cfg["tope_carga"]["base"], pgu_250=cfg["pgu_250"]))
+            serie = d_pais[d_pais.anio >= 2024].rename(columns={"razon_soporte": "razon"})[["anio", "razon"]]
+            fig = support_ratio_projection(float(serie.razon.iloc[0]), serie.iloc[1:], "Chile", todos_los_anios=True,
+                                           anio_ultimo_real=cp.ANIO_BASE_PAIS)
         else:
             fila = pres[pres.region_nombre == sel].iloc[0]
             r = proy_reg[proy_reg.region_nombre == sel]
@@ -341,7 +369,11 @@ def render_1_2():
             filas = pd.DataFrame({"anio": r.anio, "razon": fila.cobertura_previsional_pct / r.indice_dependencia_vejez_proy})
             fig = support_ratio_projection(fila.razon_soporte_previsional, filas, sel)
         st.plotly_chart(estilo_kpi(fig), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
-    st.caption("\\* Número junto a las barras azules = cotizantes por adulto mayor. Escenario con la cobertura previsional de 2024 constante. Cotizantes: diciembre de 2024; población: Censo 2024 y proyecciones INE.")
+        if sel != "País":
+            st.caption("Población 65+ regional = reparto de tasas nacionales (INE no publica proyección regional base 2024).")
+    st.caption("\\* Número junto a las barras azules = cotizantes por adulto mayor. Línea continua = datos reales; punteada sobre fondo gris = "
+               "escenario con la cobertura previsional constante (país: la de 2025; región: la de 2024). Cotizantes: diciembre, con región; "
+               "población: Censo 2024 y proyecciones INE.")
     render_1_2_punto_critico()
 
 
@@ -371,7 +403,8 @@ def render_1_3():
     with c1:
         st.plotly_chart(commissionable_flow_bars(real), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     with c2:
-        st.plotly_chart(commissionable_share_line(todo), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        st.plotly_chart(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"]),
+                        use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     recupera = ("solo se recupera en parte, a" if e33.kpi_1_3_pct < r25.kpi_1_3_pct else "vuelve a subir, a")
     st.markdown(
         f"El dinero previsional crece, pero una parte menor pasa por la base comisionable de las AFP: del "
