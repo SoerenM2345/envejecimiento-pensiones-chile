@@ -346,7 +346,9 @@ def render_1_2():
 
 
 def render_1_3():
-    flujo = load_csv("kpi_flujo_comisionable.csv")
+    todo = load_csv("kpi_flujo_comisionable.csv")
+    flujo = todo[todo.variante == "sin_sis"]  # variante principal: el SIS no entra al flujo en ningún año
+    con_sis = todo[(todo.variante == "con_sis") & (todo.tipo == "escenario")].set_index("anio")
     real = flujo[flujo.tipo == "real"].sort_values("anio")
     esc = flujo[flujo.tipo == "escenario"].set_index("anio")
     r25 = real.iloc[-1]
@@ -355,10 +357,12 @@ def render_1_3():
     minimo = esc.kpi_1_3_pct.idxmin()
     kpi_card_row([
         (f"Flujo comisionable {int(r25.anio)} (real)", f"{r25.kpi_1_3_pct:.1f}%", "Cuentas individuales / flujo total",
-         ["Cuentas individuales: cotización del trabajador (10%) + empleador a cuenta individual", "Flujo total: cuentas individuales + Seguro Social (FAPP) + Estado (PGU, PBS, APS)",
+         ["Cuentas individuales: cotización del trabajador (10%) + empleador a cuenta individual",
+          "Flujo total: cuentas individuales + Seguro Social (FAPP, sin SIS) + Estado (PGU, PBS, APS)",
           "Aporte del trabajador estimado con ingreso imponible promedio"]),
         (f"Flujo comisionable {a_meta} (escenario)", f"{e33.kpi_1_3_pct:.1f}%", "Cotización del empleador completa (8,5%)",
-         ["Escenario de la Ley 21.735 con la cotización del empleador completa", "División empleador: cuenta individual vs Seguro Social según la Nota Técnica", "Es escenario, no pronóstico"]),
+         ["Escenario de la Ley 21.735 con la cotización del empleador completa",
+          "División empleador: cuenta individual vs Seguro Social según la Nota Técnica", "Es escenario, no pronóstico"]),
         (f"Variación {int(r25.anio)}-{a_meta}", f"{e33.kpi_1_3_pct - r25.kpi_1_3_pct:+.1f} pp",
          f"Mínimo del escenario: {esc.kpi_1_3_pct.min():.1f}% en {minimo}",
          ["pp = puntos porcentuales", "Diferencia entre el escenario y el dato real"]),
@@ -367,16 +371,21 @@ def render_1_3():
     with c1:
         st.plotly_chart(commissionable_flow_bars(real), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
     with c2:
-        st.plotly_chart(commissionable_share_line(flujo), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+        st.plotly_chart(commissionable_share_line(todo), use_container_width=True, config=PLOTLY_DL_CONFIG, theme=None)
+    recupera = ("solo se recupera en parte, a" if e33.kpi_1_3_pct < r25.kpi_1_3_pct else "vuelve a subir, a")
     st.markdown(
         f"El dinero previsional crece, pero una parte menor pasa por la base comisionable de las AFP: del "
         f"**{r25.kpi_1_3_pct:.1f}%** en {int(r25.anio)} baja a **{esc.kpi_1_3_pct.min():.1f}%** en {minimo} "
-        f"(entra el Seguro Social) y solo se recupera en parte, a **{e33.kpi_1_3_pct:.1f}%** en {a_meta}, "
-        "cuando sube la parte del empleador que va a la cuenta individual."
+        f"(crece el Seguro Social) y {recupera} **{e33.kpi_1_3_pct:.1f}%** en {a_meta}, cuando sube la parte del "
+        f"empleador que va a la cuenta individual. Incluyendo el SIS en todos los años el nivel es menor "
+        f"({con_sis.loc[a_meta, 'kpi_1_3_pct']:.1f}% en {a_meta}), pero la tendencia es la misma."
     )
-    st.caption("Escenario, no pronóstico: cobertura y beneficio real constantes, población INE. Tasas del empleador según la "
-               "Nota Técnica de la Ley 21.735 (Tabla 1). Desde agosto 2026 el 2,5% del Seguro Social incluye el SIS, que antes "
-               "el empleador pagaba aparte (1,88%) y no se contaba en el flujo.")
+    faltan = real[real.n_meses < 12]
+    if len(faltan):
+        st.warning("Años reales con fichas incompletas (proyectados a 12 meses): "
+                   + ", ".join(f"{int(r.anio)} ({int(r.n_meses)} meses)" for r in faltan.itertuples()))
+    # el caveat de kpis.yaml (SIS excluido, Nota Técnica) lo muestra kpi_card al final de la tarjeta
+    st.caption("Escenario, no pronóstico: cobertura y beneficio real constantes, población INE.")
 
 
 kpi_card("1.1", render_1_1)

@@ -7,7 +7,7 @@ transcribieron a mano de las tablas indicadas y el script las valida contra otra
         Pensiones (FRP) a julio de 2026, pág. 2: valor de mercado, aportes, retiros y composición, en millones de US$.
   - fapp/FAPP_estados_financieros_2025-12-31.pdf y ..._interinos_2026-06-30.pdf   Balance General y Estado de Variación
         Patrimonial del Fondo Autónomo de Protección Previsional (FAPP), en miles de pesos (aquí pasados a millones).
-  - ley_21735/Nota-Tecnica-Reforma-de-Pensiones-Ley-21735.pdf   Subsecretaría de Previsión Social, Tabla 2 (pág. 13-14):
+  - ley_21735/nota_tecnica_ley_21735_previsionsocial.pdf   Subsecretaría de Previsión Social, Tabla 2 (pág. 13-14):
         aporte anual del Estado al FAPP en millones de UTM, 2028-2037. La nota técnica de DIPRES (dipres/articles-397500)
         dice que desde el «año 12» el aporte queda en 15 millones de UTM, y lo mantenemos hasta 2050.
   - SII (https://www.sii.cl/valores_y_fechas/utm/utm2025.htm y .../dolar/dolarAAAA.htm, abiertas el 2026-10-13):

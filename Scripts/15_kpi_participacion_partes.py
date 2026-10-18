@@ -5,6 +5,13 @@ KPI 1.3: participación del flujo comisionable, desde la mirada de una AFP. Real
   Aportes a cuentas individuales = trabajadores (10% obligatorio) + parte del empleador que va a la cuenta individual
   Flujo total = cuentas individuales + Seguro Social (FAPP) + Estado (PGU + PBS + APS)
 
+SIS (Seguro de Invalidez y Sobrevivencia): hasta jul-2026 el empleador paga la prima aparte (1,88%); desde la remuneración de
+agosto 2026 queda dentro del 2,5% del Seguro Social. Para no crear un salto artificial se calculan dos variantes:
+  - sin_sis (principal): el SIS no entra al flujo en ningún año; desde ago-2026 se resta del Seguro Social.
+    Razón: es una prima de seguro, no financiamiento de pensiones ni base comisionable.
+  - con_sis (sensibilidad): el SIS entra al flujo en todos los años (columna 'sis').
+En ambas el Seguro Social se informa sin SIS y el SIS va en su propia columna; solo cambia si suma al flujo total.
+
 La AFP solo cobra comisión sobre lo que entra a las cuentas individuales; lo que va al FAPP o paga el Estado no genera comisión.
 
 Base (secciones 1-3, sin cambios de método): flujos reales por pagador -> kpi_participacion_partes.csv.
@@ -15,13 +22,17 @@ Fuentes:
     "Estadísticas generales": N° Cotizantes del mes e Ingreso promedio cotizantes.
       aporte mensual = cotizantes × ingreso promedio × 10% (cotización obligatoria)
       aporte anual   = suma de los meses de referencia de los cotizantes del año calendario
-    Si faltan meses se proyecta a 12 (× 12 / n) y se informa n_meses.
+    Se verifica que haya 12 meses de referencia por año (tabla año × mes en el log). Si faltan, se proyecta a 12
+    (× 12 / n), se informa n_meses en las salidas y se listan las fichas que hay que descargar.
   - Aporte empleador: Estado de Variación Patrimonial del FAPP al 31-12-2025 (Data raw/_external/fapp/),
     cuentas 40.110 "Cotizaciones" + 40.187 "Cotizaciones del Seguro Social por Identificar" (M$ = miles de pesos).
     2024 = 0: la cotización del empleador al FAPP (Ley 21.735) rige desde las remuneraciones de agosto de 2025.
-  - División de la cotización del empleador (cuenta individual / Seguro Social): Tabla 1 de la Nota Técnica
-    "Reforma de Pensiones, Ley N°21.735" (Subsecretaría de Previsión Social, ago-2025), en
-    Data raw/_external/ley_21735/. Publica todos los años intermedios: no se interpola nada.
+  - División de la cotización del empleador (cuenta individual / Seguro Social) y tasa del SIS: Nota Técnica
+    "Reforma de Pensiones, Ley N°21.735" (Subsecretaría de Previsión Social, ago-2025),
+    Data raw/_external/ley_21735/nota_tecnica_ley_21735_previsionsocial.pdf, Tabla 1 (pág. 11 del documento, pág. 12
+    del PDF): se lee del PDF. Publica todos los años intermedios: no se interpola nada. Tasa SIS = nota * de la Tabla 1
+    ("Desde julio de 2025 ... 1,88%"); la Nota no fija qué parte del 2,5% es SIS (pág. 39: se determina según el
+    DL 3.500), así que se supone 1,88% constante (supuesto documentado).
   - Aporte Estado: PGU + PBS + APS (vejez e invalidez), monto nominal anual de
     Data processed/pgu_pbs_aps_nacional_anual.csv (script 12, misma base que el KPI 2.2).
 
@@ -49,8 +60,9 @@ Salidas (Data processed/):
                                       ingreso_promedio, aporte_trabajadores_mes, gasto_pgu_pbs_aps_12m_mm
   - kpi_participacion_partes.csv      base real por pagador: anio, aporte_trabajadores, aporte_empleador, aporte_estado,
                                       financiamiento_total, n_meses, fuente (montos en pesos)
-  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_1_5), trabajadores, empleador_ci,
-                                      cuentas_individuales, seguro_social_fapp, estado, flujo_total, kpi_1_3_pct, supuestos
+  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis),
+                                      trabajadores, empleador_ci, cuentas_individuales, seguro_social_fapp (sin SIS), sis,
+                                      estado, flujo_total, kpi_1_3_pct, n_meses, supuestos
 """
 import logging
 import re
@@ -70,21 +82,7 @@ TASA_TRABAJADOR = 0.10
 ANIOS_ESCENARIO = range(2026, 2036)
 CRECIMIENTO_REAL = 0.015  # variante del escenario: ingreso real +1,5% anual
 
-# Ley 21.735, Nota Técnica Tabla 1: cotización del empleador desde la remuneración de agosto de cada año.
-# (cuenta individual, Seguro Social = cotización con rentabilidad protegida + SIS y compensación por expectativas de vida)
-# Desde ago-2026 el SIS (antes 1,88% aparte) queda dentro del 2,5% del Seguro Social. Desde 2045 la parte de rentabilidad
-# protegida baja y pasa a la cuenta individual; no afecta al escenario (hasta 2035).
-TASAS_EMPLEADOR = {
-    2025: (0.001, 0.009),
-    2026: (0.001, 0.009 + 0.025),
-    2027: (0.0025, 0.015 + 0.025),
-    2028: (0.010, 0.015 + 0.025),
-    2029: (0.017, 0.015 + 0.025),
-    2030: (0.024, 0.015 + 0.025),
-    2031: (0.031, 0.015 + 0.025),
-    2032: (0.038, 0.015 + 0.025),
-    2033: (0.045, 0.015 + 0.025),
-}
+NOTA_TECNICA = ROOT / "Data raw" / "_external" / "ley_21735" / "nota_tecnica_ley_21735_previsionsocial.pdf"
 
 MESES = {m: i for i, m in enumerate(
     ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
@@ -134,20 +132,47 @@ def leer_ficha(path):
     return fila
 
 
+def tasa_cl(s):
+    """'0,25%' -> 0.0025 ; 'No existe' / 'No existe**' -> 0.0"""
+    s = s.strip().rstrip("*")
+    return 0.0 if s.startswith("No") else float(s.rstrip("%").replace(",", ".")) / 100
+
+
+def leer_nota_tecnica(path):
+    """Tabla 1 de la Nota Técnica (pág. 12 del PDF): por año de inicio (agosto) -> (cuenta individual, rentabilidad
+    protegida, SIS + compensación por expectativas de vida, SIS dentro del Seguro Social). Más la tasa SIS de la nota *."""
+    texto = pypdf.PdfReader(path).pages[11].extract_text()
+    fila = re.compile(r"^Agosto (\d{4})\s+(No existe\**|[\d,]+%)\s+([\d,]+%)\s+(No existe|[\d,]+%)\s+([\d,]+%)\s+"
+                      r"([\d,]+%)\s+([\d,]+%)", re.M)
+    tabla = {}
+    for m in fila.finditer(texto):
+        sis_aparte, ci, crp, sis_cev, total_reforma = (tasa_cl(m.group(k)) for k in (2, 3, 4, 5, 6))
+        assert abs(ci + crp + sis_cev - total_reforma) < 1e-9, f"Tabla 1 no cuadra en {m.group(1)}"
+        tabla[int(m.group(1))] = (ci, crp, sis_cev, sis_aparte == 0.0)
+    nota = re.search(r"tasa vigente del SIS.*?es de\s*([\d,\s]+)%", texto, re.S)
+    tasa_sis = tasa_cl(re.sub(r"\s", "", nota.group(1)) + "%")
+    assert sorted(tabla) == list(range(2025, 2034)), f"años leídos de la Tabla 1: {sorted(tabla)}"
+    return tabla, tasa_sis
+
+
 def tasas_empleador(remuneracion):
-    """(tasa cuenta individual, tasa Seguro Social) para una remuneración (pd.Period mensual)."""
+    """(cuenta individual, Seguro Social sin SIS, SIS) para una remuneración (pd.Period mensual).
+    La prima SIS existe en todos los años: hasta jul-2026 aparte, desde ago-2026 dentro del 2,5% del Seguro Social."""
     tramo = remuneracion.year if remuneracion.month >= 8 else remuneracion.year - 1
-    vigentes = [a for a in TASAS_EMPLEADOR if a <= tramo]
-    return TASAS_EMPLEADOR[max(vigentes)] if vigentes else (0.0, 0.0)
+    vigentes = [a for a in TABLA_LEY if a <= tramo]
+    if not vigentes:
+        return 0.0, 0.0, TASA_SIS
+    ci, crp, sis_cev, sis_dentro = TABLA_LEY[max(vigentes)]
+    return ci, crp + sis_cev - (TASA_SIS if sis_dentro else 0.0), TASA_SIS
 
 
 def tasas_pagadas_en(anio):
     """Suma de las tasas de los 12 meses pagados en `anio` (cada pago corresponde a la remuneración del mes anterior)."""
-    ci = ss = 0.0
+    ci = ss = sis = 0.0
     for mes in range(1, 13):
-        t_ci, t_ss = tasas_empleador(pd.Period(year=anio, month=mes, freq="M") - 1)
-        ci, ss = ci + t_ci, ss + t_ss
-    return ci, ss
+        t_ci, t_ss, t_sis = tasas_empleador(pd.Period(year=anio, month=mes, freq="M") - 1)
+        ci, ss, sis = ci + t_ci, ss + t_ss, sis + t_sis
+    return ci, ss, sis
 
 
 def leer_fapp(path):
@@ -173,6 +198,25 @@ if (desfase != 1).any():
           fichas.loc[desfase != 1, "n_ficha"].tolist())
 fichas["aporte_trabajadores_mes"] = fichas.cotizantes * fichas.ingreso_promedio * TASA_TRABAJADOR
 
+# completitud: 12 meses de referencia por año, sin vacíos en cotizantes/ingreso
+assert not fichas[["cotizantes", "ingreso_promedio"]].isna().any().any(), "fichas con cotizantes o ingreso vacío"
+presentes = set(fichas.mes_ref_cotizantes)
+print("\n   Completitud (mes de referencia de los cotizantes; x = ficha presente):")
+print("   año  " + " ".join(f"{m:>3}" for m in range(1, 13)) + "   n")
+faltantes = []
+for anio in ANIOS:
+    marcas = []
+    for mes in range(1, 13):
+        ref = pd.Period(year=anio, month=mes, freq="M")
+        marcas.append("  x" if ref in presentes else "  -")
+        if ref not in presentes:
+            faltantes.append(ref)
+    print(f"   {anio} " + " ".join(marcas) + f"  {sum(m == '  x' for m in marcas):>2}")
+for ref in faltantes:  # la ficha sale ~2 meses después; N° 136 = marzo 2024
+    pub = ref + 2
+    print(f"   FALTA {ref}: descargar Ficha Estadística Previsional N° {136 + (pub - pd.Period('2024-03', 'M')).n} "
+          f"({pub.strftime('%m-%Y')}) en spensiones.cl")
+
 out_fichas = fichas[[
     "n_ficha", "mes_publicacion", "mes_ref_cotizantes", "mes_ref_ingreso", "cotizantes", "ingreso_promedio",
     "aporte_trabajadores_mes", "gasto_pgu_pbs_aps_12m_mm",
@@ -188,15 +232,27 @@ if len(ctrl):
 # 2) Aporte empleador (FAPP) y aporte Estado (PGU/PBS/APS)
 # =============================================================================
 print("\n2) Aporte empleador y Estado ...")
+TABLA_LEY, TASA_SIS = leer_nota_tecnica(NOTA_TECNICA)
+print(f"   Nota Técnica Ley 21.735, Tabla 1 (leída del PDF), tasa SIS {TASA_SIS:.2%}:")
+for a, (ci, crp, sis_cev, dentro) in TABLA_LEY.items():
+    print(f"     ago-{a}: cuenta individual {ci:.2%} | rentabilidad protegida {crp:.2%} | "
+          f"SIS+CEV {sis_cev:.2%} {'(SIS dentro)' if dentro else '(SIS aparte)'}")
 fapp = leer_fapp(FAPP)
 empleador_2025 = (fapp["40.110"] + fapp["40.187"]) * 1000  # M$ -> pesos
 print(f"   FAPP 40.110 Cotizaciones: M$ {fapp['40.110']:,} ; 40.187 SSP por identificar: M$ {fapp['40.187']:,}")
 
 # masa imponible de cada mes de pago = cotizantes del mes × ingreso promedio (remuneración del mes anterior)
 fichas["masa_imponible_mes"] = fichas.cotizantes * fichas.ingreso_promedio
-fichas["tasa_ci"], fichas["tasa_ss"] = zip(*[tasas_empleador(m - 1) for m in fichas.mes_ref_cotizantes])
+fichas["tasa_ci"], fichas["tasa_ss"], fichas["tasa_sis"] = zip(*[tasas_empleador(m - 1) for m in fichas.mes_ref_cotizantes])
 fichas["empleador_ci_mes"] = fichas.masa_imponible_mes * fichas.tasa_ci
 fichas["empleador_ss_mes"] = fichas.masa_imponible_mes * fichas.tasa_ss
+fichas["sis_mes"] = fichas.masa_imponible_mes * fichas.tasa_sis
+
+# control del cambio de jul a ago 2026: sin el SIS, el Seguro Social solo sube por la cotización nueva
+jul, ago = (tasas_empleador(pd.Period(m, "M")) for m in ("2026-07", "2026-08"))
+print(f"   Control jul->ago 2026 (remuneración): SS sin SIS {jul[1]:.2%} -> {ago[1]:.2%} (+{ago[1] - jul[1]:.2%}); "
+      f"SS + SIS {jul[1] + jul[2]:.2%} -> {ago[1] + ago[2]:.2%} (+{ago[1] + ago[2] - jul[1] - jul[2]:.2%}); "
+      f"cotización nueva del empleador sin cuenta individual: +{(sum(TABLA_LEY[2026][:3]) - TABLA_LEY[2026][0]) - (sum(TABLA_LEY[2025][:3]) - TABLA_LEY[2025][0]) - TASA_SIS:.2%}")
 ss_estimado_2025 = fichas.loc[fichas.mes_ref_cotizantes.dt.year == 2025, "empleador_ss_mes"].sum()
 print(f"   Control empleador: 0,9% × masa imponible pagos sep-dic 2025 = {ss_estimado_2025 / 1e9:,.1f} mil millones "
       f"vs FAPP {empleador_2025 / 1e9:,.1f} mil millones ({empleador_2025 / ss_estimado_2025 - 1:+.1%})")
@@ -246,10 +302,12 @@ filas = []
 for _, b in base.iterrows():
     anio = int(b.anio)
     # parte del empleador a la cuenta individual: estimada (0,1% de la masa; en 2024 no existe)
-    empleador_ci = round(fichas.loc[fichas.mes_ref_cotizantes.dt.year == anio, "empleador_ci_mes"].sum())
+    meses = fichas[fichas.mes_ref_cotizantes.dt.year == anio]
+    empleador_ci = round(meses.empleador_ci_mes.sum() * 12 / len(meses))
     filas.append({
         "anio": anio, "tipo": "real", "trabajadores": b.aporte_trabajadores, "empleador_ci": empleador_ci,
-        "seguro_social_fapp": b.aporte_empleador, "estado": b.aporte_estado,
+        "seguro_social_fapp": b.aporte_empleador, "estado": b.aporte_estado, "n_meses": int(b.n_meses),
+        "sis": round(meses.sis_mes.sum() * 12 / len(meses)),
         "supuestos": ("Trabajadores estimado (cotizantes × ingreso promedio × 10%); empleador a cuenta individual estimado "
                       "(0,1% de la masa imponible pagada sep-dic, Ley 21.735); Seguro Social = FAPP real; Estado = PGU+PBS+APS nominal"),
     })
@@ -263,12 +321,13 @@ for tipo, g in [("escenario", 0.0), ("escenario_crec_1_5", CRECIMIENTO_REAL)]:
     for anio in ANIOS_ESCENARIO:
         masa = (masa_mensual_2025 * proy.loc[anio, "pob_15_64"] / proy.loc[2025, "pob_15_64"]
                 * (1 + g) ** (anio - 2025))
-        suma_ci, suma_ss = tasas_pagadas_en(anio)
+        suma_ci, suma_ss, suma_sis = tasas_pagadas_en(anio)
         filas.append({
             "anio": anio, "tipo": tipo,
             "trabajadores": round(12 * masa * TASA_TRABAJADOR),
             "empleador_ci": round(masa * suma_ci),
             "seguro_social_fapp": round(masa * suma_ss),
+            "sis": round(masa * suma_sis), "n_meses": 12,
             "estado": round(estado.loc[2025] * proy.loc[anio, "pob_65_mas"] / proy.loc[2025, "pob_65_mas"]),
             "supuestos": ("Escenario, pesos de 2025: cobertura constante (masa 2025 × población 15-64 INE), "
                           + ("ingreso real constante" if g == 0 else f"ingreso real +{g:.1%} anual".replace(".", ","))
@@ -276,15 +335,23 @@ for tipo, g in [("escenario", 0.0), ("escenario_crec_1_5", CRECIMIENTO_REAL)]:
                           "tasas del empleador según Nota Técnica Ley 21.735, Tabla 1"),
         })
 
-flujo = pd.DataFrame(filas)
-flujo["cuentas_individuales"] = flujo.trabajadores + flujo.empleador_ci
-flujo["flujo_total"] = flujo.cuentas_individuales + flujo.seguro_social_fapp + flujo.estado
+base_flujo = pd.DataFrame(filas)
+base_flujo["cuentas_individuales"] = base_flujo.trabajadores + base_flujo.empleador_ci
+variantes = []
+for variante, suma_sis in [("sin_sis", False), ("con_sis", True)]:
+    v = base_flujo.assign(variante=variante)
+    v["flujo_total"] = v.cuentas_individuales + v.seguro_social_fapp + v.estado + (v.sis if suma_sis else 0)
+    v["supuestos"] = v.supuestos + ("; SIS fuera del flujo en todos los años" if not suma_sis else
+                                    f"; SIS {TASA_SIS:.2%} de la masa imponible dentro del flujo en todos los años".replace(".", ","))
+    variantes.append(v)
+flujo = pd.concat(variantes, ignore_index=True)
 flujo["kpi_1_3_pct"] = round(100 * flujo.cuentas_individuales / flujo.flujo_total, 2)
-flujo = flujo[["anio", "tipo", "trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp", "estado",
-               "flujo_total", "kpi_1_3_pct", "supuestos"]]
+flujo = flujo[["anio", "tipo", "variante", "trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp",
+               "sis", "estado", "flujo_total", "kpi_1_3_pct", "n_meses", "supuestos"]]
 flujo.to_csv(OUT / "kpi_flujo_comisionable.csv", index=False)
-print((flujo.drop(columns="supuestos").set_index(["tipo", "anio"])
+print((flujo.drop(columns="supuestos").set_index(["variante", "tipo", "anio"])
        .assign(**{c: lambda d, c=c: (d[c] / 1e12).round(2) for c in
-                  ["trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp", "estado", "flujo_total"]}))
+                  ["trabajadores", "empleador_ci", "cuentas_individuales", "seguro_social_fapp", "sis", "estado",
+                   "flujo_total"]}))
       .to_string())
 print("   (montos en billones de pesos)")

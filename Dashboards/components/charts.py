@@ -570,11 +570,17 @@ def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
 
 
 def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
-    """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados).
-    df: anio, tipo (real / escenario / escenario_crec_1_5), kpi_1_3_pct."""
+    """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados), variante
+    sin SIS; la variante con SIS va como línea gris delgada de sensibilidad (real + escenario base).
+    df: anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis), kpi_1_3_pct."""
+    sens = df[(df.variante == "con_sis") & df.tipo.isin(["real", "escenario"])].sort_values("anio")
+    df = df[df.variante == "sin_sis"]
     real = df[df.tipo == "real"].sort_values("anio")
     ancla = real.iloc[[-1]]  # los escenarios parten del último año real
     fig = go.Figure()
+    fig.add_scatter(x=sens.anio.astype(str), y=sens.kpi_1_3_pct, mode="lines", name="Incluyendo SIS en todos los años",
+                    line=dict(color=lighten(INK_MUTED), width=1.5),
+                    hovertemplate="Incluyendo SIS: %{y:.1f}%<extra></extra>")
     fig.add_scatter(x=real.anio.astype(str), y=real.kpi_1_3_pct, mode="lines+markers+text", name="Real",
                     line=dict(color=BLUE, width=3), text=[f"{v:.1f}%" for v in real.kpi_1_3_pct],
                     textposition="top center", textfont_color=INK_PRIMARY)
@@ -583,7 +589,10 @@ def commissionable_share_line(df: pd.DataFrame) -> go.Figure:
         e = pd.concat([ancla, df[df.tipo == tipo]]).sort_values("anio")
         if len(e) == 1:
             continue
-        rotulos = ["" if a not in (2028, 2033, 2035) or tipo != "escenario" else f"{v:.1f}%"
+        # rótulos en el mínimo, en 2033 (cotización completa) y en el último año del escenario base
+        futuro = e[e.anio > ancla.anio.iloc[0]]
+        claves = {int(futuro.loc[futuro.kpi_1_3_pct.idxmin(), "anio"]), 2033, int(e.anio.max())}
+        rotulos = ["" if a not in claves or tipo != "escenario" else f"{v:.1f}%"
                    for a, v in zip(e.anio, e.kpi_1_3_pct)]
         fig.add_scatter(x=e.anio.astype(str), y=e.kpi_1_3_pct, mode="lines+markers+text", name=nombre,
                         line=dict(color=color, width=2.5, dash=dash), text=rotulos, textposition="bottom center",

@@ -81,14 +81,25 @@ def test_kpi_1_3_participacion():
     k = pd.read_csv(dp / "kpi_participacion_partes.csv").set_index("anio")
     assert list(k.index) == [2024, 2025] and (k.n_meses == 12).all()
     assert k.loc[2024, "aporte_empleador"] == 0 and k.loc[2025, "aporte_empleador"] == 283_048_436_000
+    meses = pd.PeriodIndex(fichas.mes_ref_cotizantes, freq="M")
+    for anio in (2024, 2025):  # 12 meses de referencia distintos por año
+        assert sorted(m.month for m in meses if m.year == anio) == list(range(1, 13))
     f = pd.read_csv(dp / "kpi_flujo_comisionable.csv")
-    real = f[f.tipo == "real"].set_index("anio")
-    assert round(real.loc[2024, "kpi_1_3_pct"]) == 57 and 55 <= real.loc[2025, "kpi_1_3_pct"] <= 56
+    assert set(f.variante) == {"sin_sis", "con_sis"}
+    assert (f.n_meses == 12).all()
+    sin = f[f.variante == "sin_sis"]
+    real = sin[sin.tipo == "real"].set_index("anio")
+    # la variante principal no cambia los años reales (57,0% y 55,5%)
+    assert round(real.loc[2024, "kpi_1_3_pct"], 1) == 57.0 and round(real.loc[2025, "kpi_1_3_pct"], 1) == 55.5
     assert real.loc[2024, "empleador_ci"] == 0 and real.loc[2025, "seguro_social_fapp"] == 283_048_436_000
-    esc = f[f.tipo == "escenario"].set_index("anio")
+    esc = sin[sin.tipo == "escenario"].set_index("anio")
     assert list(esc.index) == list(range(2026, 2036))
     assert esc.kpi_1_3_pct.max() < real.loc[2025, "kpi_1_3_pct"]  # el escenario nunca vuelve al nivel de 2025
-    assert (f.cuentas_individuales + f.seguro_social_fapp + f.estado == f.flujo_total).all()
+    assert (sin.cuentas_individuales + sin.seguro_social_fapp + sin.estado == sin.flujo_total).all()
+    con = f[f.variante == "con_sis"]
+    assert (con.cuentas_individuales + con.seguro_social_fapp + con.estado + con.sis == con.flujo_total).all()
+    # mismo SIS en ambas variantes; con SIS el nivel es siempre menor
+    assert (sin.sis.values == con.sis.values).all() and (con.kpi_1_3_pct.values < sin.kpi_1_3_pct.values).all()
 
 
 def test_kpi_1_1_correlaciones():

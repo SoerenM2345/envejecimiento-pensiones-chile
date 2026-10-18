@@ -217,13 +217,13 @@ kpis_presentacion:
     nombre: "Participación del flujo comisionable"
     objetivo: "Objetivo 1: Retener y ampliar la base activa"
     descripcion: "Qué parte del dinero que entra al sistema previsional pasa por las cuentas individuales de las AFP (y por lo tanto genera comisión)"
-    formula: "Aportes a cuentas individuales / Flujo total al sistema ; cuentas individuales = trabajadores 10% + empleador a cuenta individual ; flujo total = cuentas individuales + Seguro Social (FAPP) + Estado (PGU + PBS + APS)"
+    formula: "Aportes a cuentas individuales / Flujo total al sistema ; cuentas individuales = trabajadores 10% + empleador a cuenta individual ; flujo total = cuentas individuales + Seguro Social (FAPP, sin SIS) + Estado (PGU + PBS + APS)"
     visualizacion: barras_apiladas_y_lineas
     status: live
     archivo: [kpi_flujo_comisionable.csv, kpi_participacion_partes.csv, fichas_previsionales_mensual.csv]
-    fuente: ["Superintendencia de Pensiones, Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio)", "FAPP, estados financieros al 31-12-2025 (cuentas 40.110 y 40.187)", "Subsecretaría de Previsión Social (Pilar Solidario: PGU, PBS, APS)", "Subsecretaría de Previsión Social, Nota Técnica Reforma de Pensiones Ley N°21.735 (Tabla 1, gradualidad de la cotización del empleador)", "INE proyecciones 1992-2070"]
+    fuente: ["Superintendencia de Pensiones, Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio)", "FAPP, estados financieros al 31-12-2025 (cuentas 40.110 y 40.187)", "Subsecretaría de Previsión Social (Pilar Solidario: PGU, PBS, APS)", "Subsecretaría de Previsión Social, Nota Técnica Reforma de Pensiones Ley N°21.735, Tabla 1 (gradualidad y división de la cotización del empleador; tasa SIS 1,88%), Data raw/_external/ley_21735/nota_tecnica_ley_21735_previsionsocial.pdf", "INE proyecciones 1992-2070"]
     script: 15_kpi_participacion_partes.py
-    caveat: "Aporte trabajadores estimado (cotizantes × ingreso imponible promedio × 10%, con tope imponible). Aporte Estado = gasto en PGU/PBS/APS (flujo de beneficios, no cotización). División del aporte del empleador entre cuenta individual y Seguro Social según Ley 21.735 (Nota Técnica, Tabla 1: publica todos los años intermedios, sin supuestos de interpolación). Proyección = escenario, no pronóstico."
+    caveat: "Aporte trabajadores estimado (cotizantes × ingreso imponible promedio × 10%, con tope imponible). Aporte Estado = gasto en PGU/PBS/APS (flujo de beneficios, no cotización). El SIS se excluye del flujo en todos los años (prima de seguro, no financiamiento de pensiones ni base comisionable); variante con SIS (1,88% de la masa imponible en todos los años) como sensibilidad. Tasas y división del aporte del empleador según Nota Técnica Ley 21.735 (Data raw/_external/ley_21735/). Proyección = escenario, no pronóstico."
 
   - id: "2.1"
     nombre: "Costo real por adulto mayor"
