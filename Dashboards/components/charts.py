@@ -132,9 +132,9 @@ def region_bars(df: pd.DataFrame, var: str, label: str, nacional: float, fmt: st
     return fig
 
 
-def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list, titulo: str) -> go.Figure:
+def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list, titulo: str, dtick: int = 500_000) -> go.Figure:
     """Barras en personas por región, en el orden de d (el mismo de la vista relativa): total = (columna, nombre, color) y
-    parte = (columna, nombre, color) con la tasa escrita junto a la barra. Eje con marcas cada 500.000 y rejilla cada 100.000."""
+    parte = (columna, nombre, color) con la tasa escrita junto a la barra. Eje con marcas cada dtick personas y rejilla cada dtick / 5."""
     fig = go.Figure()
     fig.add_bar(y=d.region_nombre, x=d[total[0]], orientation="h", name=total[1], marker_color=total[2],
                 hovertemplate="%{y}<br>" + total[1] + ": %{x:,.0f}<extra></extra>")
@@ -142,7 +142,8 @@ def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list
                 text=texto, textposition="outside", hovertemplate="%{y}<br>" + parte[1] + ": %{x:,.0f}<extra></extra>")
     fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.", title=titulo)
     fig.update_yaxes(categoryorder="array", categoryarray=list(d.region_nombre), title="")
-    fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=500_000, minor=dict(dtick=100_000, showgrid=True), rangemode="tozero")
+    fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=dtick, minor=dict(dtick=dtick // 5, showgrid=True), tickangle=0,
+                     rangemode="tozero")
     return fig
 
 
@@ -162,7 +163,7 @@ def region_coverage_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return _region_people_bars(d, ("pob_15_64", "Población 15-64 (Censo 2024)", lighten(ORANGE)),
                                ("cotizantes_2024", "Cotizantes (dic-2024)", ORANGE),
                                [f"{c:.1f}%".replace(".", ",") for c in d.cobertura_previsional_pct],
-                               f"Cotizantes y población de 15-64 por región (cobertura país: {nacional:.1f}%)".replace(".", ","))
+                               "Cotizantes y población de 15-64 por región", dtick=2_000_000)
 
 
 def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
@@ -173,7 +174,7 @@ def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return _region_people_bars(d, ("pob_65_expandida", "Personas 65+ (CASEN 2022)", lighten(ORANGE)),
                                ("n_pobres", "Personas 65+ en pobreza", ORANGE),
                                [f"{p:.1f}%".replace(".", ",") for p in d.pct_pobreza_65],
-                               f"Personas de 65+ y en pobreza por región (país: {nacional:.1f}%)".replace(".", ","))
+                               "Personas de 65+ y en pobreza por región", dtick=250_000)
 
 
 def zona_escenario(fig: go.Figure, desde: float, hasta: float) -> go.Figure:
@@ -438,8 +439,14 @@ def fapp_flow_chart(b: pd.DataFrame) -> go.Figure:
 def dependence_regions_chart(reg: pd.DataFrame, nacional: float) -> go.Figure:
     """KPI 2.2, dónde. reg: region_nombre, pct_sin_pension (% de los beneficiarios de la PGU que no reciben otra pensión)."""
     d = reg.sort_values("pct_sin_pension")
-    fig = go.Figure(go.Bar(y=d.region_nombre, x=d.pct_sin_pension, orientation="h", marker_color=ORANGE,
-                           hovertemplate="%{y}: %{x:.1f}%<extra></extra>"))
+    detalle = {"beneficios_por_100", "peso_mes_por_65", "razon_soporte"} <= set(d.columns)
+    fig = go.Figure(go.Bar(
+        y=d.region_nombre, x=d.pct_sin_pension, orientation="h", marker_color=ORANGE,
+        customdata=d[["beneficios_por_100", "peso_mes_por_65", "razon_soporte"]] if detalle else None,
+        hovertemplate="<b>%{y}</b><br>Sin pensión propia: %{x:.1f}%"
+                      + ("<br>Beneficios (PGU + APS vejez) por 100 personas 65+: %{customdata[0]:.0f}"
+                         "<br>Por persona 65+: $%{customdata[1]:,.0f} al mes (pesos de 2025)"
+                         "<br>Cotizantes por persona 65+: %{customdata[2]:.2f}" if detalle else "") + "<extra></extra>"))
     fig.add_vline(x=nacional, line_dash="dash", line_color=INK_MUTED, annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
     fig.update_layout(**PLOTLY_LAYOUT, title="Sin pensión propia por región (% de la PGU)")
     fig.update_xaxes(title="% de los beneficiarios de la PGU")

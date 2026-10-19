@@ -25,8 +25,7 @@ with col_txt:
     st.markdown("**Chile 1992 (estimación INE)**")
     kpi_card_row([("0-14", f"{p92.pct_0_14:.1f}%", None), ("15-64", f"{100 - p92.pct_0_14 - p92.pct_65_mas:.1f}%", None),
                   ("65+", f"{p92.pct_65_mas:.1f}%", None)])
-    st.caption("Barras por edad simple y sexo; tonos sólidos = 65 años y más (la línea roja marca los 65). "
-               "El Censo agrupa los 85+ en una sola barra.")
+    st.caption("Tonos sólidos = 65 años y más. El Censo agrupa los 85+ en una sola barra.")
 
 # --- 2. Chile vs Alemania -------------------------------------------------------
 st.header("2. Alemania es el espejo del Chile que viene")

@@ -31,22 +31,22 @@ def render_1_1():
          f"{pres['cobertura_previsional_pct'].min():.1f}%",
          ["Misma cobertura, calculada por región", "Se compara con el promedio del país"]),
     ])
-    vista_reg = st.radio("Vista de las barras por región", ["Cobertura (relativa)", "Personas (mismo orden)"], horizontal=True,
-                         key="s11_vista_region")
     c1, c2 = st.columns(2)
     with c1:
+        st.markdown("<div style='height:5.2rem'></div>", unsafe_allow_html=True)  # alinea el mapa con las barras (que llevan el selector arriba)
         mostrar(region_choropleth(pres, load_geojson("regiones_chile.geojson"), "cobertura_previsional_pct", "Cobertura previsional (%)"))
     with c2:
+        vista_reg = st.radio("Vista por región", ["Cobertura (relativa)", "Personas (mismo orden)"], horizontal=True,
+                             key="s11_vista_region")
         if vista_reg == "Cobertura (relativa)":
             fig_reg = region_bars(pres, "cobertura_previsional_pct", "Cobertura previsional (% de 15-64 que cotiza)",
                                   nac_cobertura, ".1f", ORANGE)
         else:
             fig_reg = region_coverage_people_bars(pres, nac_cobertura)
-        mostrar(fig_reg)
+        mostrar(estilo_kpi(fig_reg, 640))
     render_1_1_correlaciones()
     render_1_1_matriz()
-    st.caption("Correlación no implica causalidad; n = 16 regiones. Ingreso de CASEN 2022 (encuesta muestral). "
-               "Cotizantes 2024 vs. Censo 2024.")
+    st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
 
 
 # variable -> (etiqueta, unidad, nombre en el resumen de correlaciones)
@@ -434,7 +434,6 @@ def render_1_3():
         st.warning("Años reales con fichas incompletas (proyectados a 12 meses): "
                    + ", ".join(f"{int(r.anio)} ({int(r.n_meses)} meses)" for r in faltan.itertuples()))
     # el caveat de kpis.yaml (SIS excluido, Nota Técnica) lo muestra kpi_card al final de la tarjeta
-    st.caption("Escenario, no pronóstico: cobertura y beneficio real constantes, población INE.")
 
 
 kpi_card("1.1", render_1_1)

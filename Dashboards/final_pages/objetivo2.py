@@ -131,7 +131,6 @@ def render_2_1():
         f = pr.loc[ANIO_FIN_2_1]
         _texto(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
                     f"y un pago por ocupado de **{100 * f.carga_requerida:.0f}% del ingreso ({base})** (hoy {100 * hb.iloc[-1].carga_requerida:.0f}%).")
-        st.caption("\\* Escenario, no pronóstico: el costo del Pilar por persona 65+ se mantiene en términos reales salvo el alza de la PGU.")
     with t6:
         _recomendaciones_2_1(h)
     ips, n_ips, ips_men65 = ips_sistema_antiguo()
@@ -402,19 +401,10 @@ def _profundizacion_2_2():
             ("Sin pensión propia, 2050 (escenario)", f"{n50 / 1000:,.0f} mil", f"{n50 / nacr.n_sin_pension:.1f} veces las de 2024",
              ["Mismo supuesto que 2035"]),
         ])
-        g1, g2 = st.columns([5, 4])
-        with g1:
-            _grafico(dependence_regions_chart(rr, nacr.pct_sin_pension), 520)
-        with g2:
-            tabla = rr.sort_values("pct_sin_pension", ascending=False)[["region_nombre", "pct_sin_pension", "beneficios_por_100", "peso_mes_por_65", "razon_soporte"]].rename(columns={
-                "region_nombre": "Región", "pct_sin_pension": "% sin pensión", "beneficios_por_100": "Benef. por 100",
-                "peso_mes_por_65": "$ mensual", "razon_soporte": "Cotiz. por 65+"})
-            st.dataframe(tabla, hide_index=True, use_container_width=True, height=520,
-                         column_config={"% sin pensión": st.column_config.NumberColumn(format="%.1f"), "Benef. por 100": st.column_config.NumberColumn(format="%.0f"),
-                                        "$ mensual": st.column_config.NumberColumn(format="$%,.0f"), "Cotiz. por 65+": st.column_config.NumberColumn(format="%.2f")})
+        _grafico(dependence_regions_chart(rr, nacr.pct_sin_pension), 520)
         _texto(f"**Lectura:** {nacr.pct_sin_pension:.0f}% de los beneficiarios de la PGU no tiene otra pensión; en {alta.region_nombre} son {alta.pct_sin_pension:.0f}% y en {baja.region_nombre} {baja.pct_sin_pension:.0f}% "
                     f"(correlación {corr:.2f} con los cotizantes por persona 65+).")
-        _nota("\\* 4.º trimestre de 2024 con el Censo 2024. Tabla: beneficios (PGU + APS vejez) por 100 personas 65+; $ mensual por persona 65+ (pesos de 2025). Escenario 2035 y 2050: tasa regional de 2024 constante.")
+        _nota("\\* 4.º trimestre de 2024 con el Censo 2024. Escenario 2035 y 2050: tasa regional de 2024 constante.")
 
     with st.expander("Método y fuentes"):
         _nota("**Fechas.** Todo se ancla en 2025: Pilar y PIB son flujos de 2025; las reservas son saldos al 31-dic-2025; el retiro del FRP usa el dólar promedio del año y los saldos el dólar del último día hábil "
@@ -488,11 +478,12 @@ def render_2_3():
         ("Región con menos", menor.region_nombre, f"{menor.pct_pobreza_65:.1f}%",
          ["Pobreza 65+ por región", "Regiones pequeñas tienen intervalos amplios"]),
     ])
-    vista_reg = st.radio("Vista de las barras por región", ["Porcentaje (relativo)", "Personas (mismo orden)"], horizontal=True, key="s23_vista_region")
     c1, c2 = st.columns(2)
     with c1:
+        st.markdown("<div style='height:5.2rem'></div>", unsafe_allow_html=True)  # alinea el mapa con las barras (que llevan el selector arriba)
         _grafico(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65", "% de personas 65+ en pobreza", "Oranges"), 520)
     with c2:
+        vista_reg = st.radio("Vista por región", ["Porcentaje (relativo)", "Personas (mismo orden)"], horizontal=True, key="s23_vista_region")
         _grafico(poverty_bars(reg, nac.pct_pobreza_65) if vista_reg == "Porcentaje (relativo)" else poverty_people_bars(reg, nac.pct_pobreza_65), 520)
     sobre = reg[reg.ic95_inf > nac.ic95_sup]            # regiones cuyo intervalo queda por encima del intervalo del país
     mas_gente = reg.sort_values("n_pobres").iloc[-1]
