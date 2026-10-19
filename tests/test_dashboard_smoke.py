@@ -212,3 +212,11 @@ def test_graficos_finales_pasan_por_mostrar():
     """En el modo final todos los gráficos se dibujan con charts.mostrar (texto oscuro y theme=None): ningún st.plotly_chart directo."""
     for f in (DASH / "final_pages").glob("*.py"):
         assert "st.plotly_chart(" not in f.read_text(encoding="utf-8"), f"{f.name} dibuja un gráfico sin charts.mostrar"
+
+
+@pytest.mark.parametrize("page, clave", [("final_pages/objetivo1.py", "s11_vista_region"), ("final_pages/objetivo2.py", "s23_vista_region")])
+def test_vista_en_personas_de_las_barras_por_region(page, clave):
+    """KPI 1.1 y 2.3: la vista «Personas (mismo orden)» de las barras por región se dibuja sin errores."""
+    at = run_page(page)
+    at.radio(key=clave).set_value("Personas (mismo orden)").run()
+    assert not at.exception

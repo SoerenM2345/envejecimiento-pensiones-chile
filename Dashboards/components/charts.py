@@ -140,7 +140,7 @@ def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list
                 hovertemplate="%{y}<br>" + total[1] + ": %{x:,.0f}<extra></extra>")
     fig.add_bar(y=d.region_nombre, x=d[parte[0]], orientation="h", name=parte[1], marker_color=parte[2],
                 text=texto, textposition="outside", hovertemplate="%{y}<br>" + parte[1] + ": %{x:,.0f}<extra></extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", separators=",.", title=titulo)
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", title=titulo)
     fig.update_yaxes(categoryorder="array", categoryarray=list(d.region_nombre), title="")
     fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=dtick, minor=dict(dtick=dtick // 5, showgrid=True), tickangle=0,
                      rangemode="tozero")
