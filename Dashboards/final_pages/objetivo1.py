@@ -139,6 +139,17 @@ def pc_lectura(d: pd.DataFrame, pc: dict, esc: cp.Escenario, nombre: str, a0: in
     return _coma(txt)
 
 
+def pc_lectura_colchon(cc: dict, r: float, pc: dict, ultimo: int) -> str:
+    """Una línea de lectura del colchón acumulado (casilla «Ahorrar las holguras»)."""
+    ini = f"**Colchón · r = {r:.1%} real:** "
+    if cc["estado"] == "sin_colchon":
+        return ini + "no hay holgura de partida: el costo ya supera a la capacidad."
+    if cc["estado"] == "no_se_agota":
+        return ini + f"las holguras previas al cruce alcanzan para cubrir todos los déficits hasta {ultimo}."
+    extra = f" (**{cc['anio'] - pc['anio']} años** después del punto crítico)" if pc["estado"] == "cruza" else ""
+    return ini + f"si las holguras se ahorraran, cubrirían los déficits hasta **{cc['anio']}**{extra}. El punto crítico no cambia."
+
+
 def _num(v: float) -> str:
     """Cantidades grandes legibles: personas y pesos en miles / millones."""
     if v >= 1e12:
@@ -224,7 +235,9 @@ def render_1_2_punto_critico():
     base = t1.radio("Base de ingreso", ["Cotizantes", "Todos los ocupados"], horizontal=True, key="pc_base",
                     help="Cotizantes: ingreso imponible (Superintendencia de Pensiones) de quienes aportan hoy. "
                          "Todos los ocupados: ingreso de la Encuesta Suplementaria de Ingresos (INE), como si todos cotizaran.")
-    est = t2.radio("Estadístico", ["Promedio", "Mediana"], horizontal=True, key="pc_estadistico")
+    est = t2.radio("Estadístico", ["Promedio", "Mediana"], horizontal=True, key="pc_estadistico",
+                   help="La masa de ingreso es promedio × trabajadores. La mediana × trabajadores la subestima (la mediana es menor "
+                        "que el promedio), así que adelanta el punto crítico: úsala solo como referencia de un ingreso «típico».")
     vista = t3.radio("Vista", ["Dinero", "Razón de soporte"], horizontal=True, key="pc_vista")
 
     cfg = cargar_escenarios()
@@ -237,6 +250,17 @@ def render_1_2_punto_critico():
     cobertura = s3.slider("Cotizantes / pob. 15-64 en 2050 (hoy = 100)", 70, 130, 100, 5, key="pc_cobertura",
                           disabled=base != "Cotizantes", help="Solo aplica a la base de cotizantes (formalización).") / 100
     pgu = s4.checkbox("PGU de $250.000 (Ley 21.735)", value=cfg["pgu_250"], key="pc_pgu")
+
+    r_cfg = cfg["rentabilidad_real_colchon"]["base"]
+    k1, k2 = st.columns([1, 1])
+    usar_colchon = k1.checkbox("Ahorrar las holguras a una rentabilidad real", value=False, key="pc_colchon",
+                               help="Antes del punto crítico la capacidad supera al costo. Si esa holgura se ahorrara y se invirtiera, "
+                                    "¿cuántos años pagaría los déficits posteriores? Es un ejercicio: el tope no se ahorra de verdad. "
+                                    "No mueve el punto crítico (el flujo anual no depende de la rentabilidad ni de la inflación: "
+                                    "ambos lados se descuentan igual); calcula cuándo se agota el colchón. Todo en pesos reales de 2025, "
+                                    "es decir, ya sin inflación: r es la rentabilidad por sobre el IPC.")
+    r_colchon = k2.slider("Rentabilidad real anual del colchón (%)", 0.0, 6.0, 100 * r_cfg, 0.5, key="pc_r_colchon",
+                          disabled=not usar_colchon) / 100
 
     esc = cp.Escenario(base="A" if base == "Cotizantes" else "B", estadistico="promedio" if est == "Promedio" else "mediana",
                        crec_salarial=crec, carga_max=carga, cobertura_2050=cobertura, pgu_250=pgu)
@@ -259,6 +283,15 @@ def render_1_2_punto_critico():
         pc_txt = f"ya superado ({pc['anio']})"
     else:
         pc_txt = f"no antes de {int(d.anio.max())}"
+    fondo, cc = cp.colchon(d, r_colchon) if usar_colchon else (None, None)
+    tarjetas_colchon = []
+    if usar_colchon:
+        txt_cc = {"se_agota": str(cc["anio"]), "sin_colchon": "sin colchón",
+                  "no_se_agota": f"no antes de {int(d.anio.max())}"}[cc["estado"]]
+        tarjetas_colchon = [("El colchón se agota en", txt_cc,
+                             f"Holguras (capacidad − costo) desde {int(d.anio[~d.proyectado].max())} ahorradas a {r_colchon:.1%} real; primer año con saldo ≤ 0".replace(".", ","),
+                             ["colchón_t = colchón_(t-1) × (1 + r) + (capacidad − costo)", "Ejercicio ilustrativo: el tope no se ahorra de verdad",
+                              "El punto crítico (flujo anual) no cambia con r"])]
     kpi_card_row([
         ("Punto crítico (escenario)", pc_txt, f"Primer año en que el costo supera la capacidad (tope {carga:.0%}). "
          "Año en que el costo del Pilar supera el tope sobre el sueldo de los cotizantes; indicador de riesgo regulatorio "
@@ -272,15 +305,17 @@ def render_1_2_punto_critico():
         (f"{trab.capitalize()} por 65+ ({a0})", f"{f0.razon_soporte:.2f}", f"Equilibrio R*: {f0.razon_equilibrio:.2f}",
          ["Trabajadores ÷ población 65+", "R*: trabajadores por persona 65+ que cubren el costo con el tope",
           "Si baja de R*, el costo supera la capacidad"]),
-    ])
+    ] + tarjetas_colchon)
     col_graf, col_panel = st.columns([3, 1.4])
     with col_panel:
         visibles = panel_lineas(f0, a0, esc, trab, vista)
     with col_graf:
         fig = critical_point_chart(d, pc, "dinero" if vista == "Dinero" else "razon", nombre, trab, carga, visibles, pais=sel == "País",
-                                   es_base=es_base)
+                                   es_base=es_base, colchon=fondo if vista == "Dinero" else None, r_colchon=r_colchon)
         mostrar(estilo_kpi(fig, 520))
     st.markdown(pc_lectura(d, pc, esc, nombre, a0, trab))
+    if usar_colchon:
+        st.markdown(_coma(pc_lectura_colchon(cc, r_colchon, pc, int(d.anio.max()))))
     if pc["estado"] in ("cruza", "ya_superado"):
         desde = f"desde {pc['anio']}" if pc["estado"] == "cruza" else f"ya desde {pc['anio']}"
         st.markdown(f"**Por qué importa a la AFP:** si el Pilar pesa más que el tope sobre el sueldo de los {trab} ({desde}), "

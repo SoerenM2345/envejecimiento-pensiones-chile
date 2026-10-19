@@ -93,7 +93,7 @@ def serie_pais(nac: pd.DataFrame, proy: pd.DataFrame, params: pd.DataFrame, esc:
     f65, f1564 = (n.loc[ANIO_BASE_PAIS, "factor_censo_65"], n.loc[ANIO_BASE_PAIS, "factor_censo_15_64"]) if esc.poblacion == "censo" else (1.0, 1.0)
     d["pob_65"], d["pob_15_64"] = pr.pob_65_mas.reindex(anios) * f65, pr.pob_15_64.reindex(anios) * f1564
     t0 = ANIO_BASE_PAIS
-    dt = anios - t0
+    dt = (anios - t0).astype(float)  # float: con crec = 0 entero, 1 ** (exponente negativo) falla
     hist = anios <= t0
     d["trabajadores"] = np.where(hist, n[trab_col].reindex(anios),
                                  n.loc[t0, trab_col] * d.pob_15_64 / d.loc[t0, "pob_15_64"] * _factor_cobertura(anios, esc, t0))
@@ -165,9 +165,9 @@ def serie_territorio(dt: dict, params: pd.DataFrame, esc: Escenario) -> pd.DataF
     w0 = dt["cotizantes"] if esc.base == "A" else dt["ocupados"]
     d["trabajadores"] = w0 * d.pob_15_64 / dt["pob_15_64"][t0] * _factor_cobertura(anios, esc, t0)
     ing0 = dt[f"ing_{esc.base}_{esc.estadistico}"]
-    d["ingreso_trab"] = ing0 * (1 + esc.crec_salarial) ** (anios - t0)
+    d["ingreso_trab"] = ing0 * (1 + esc.crec_salarial) ** (anios - t0).astype(float)
     d["factor_masa"] = dt["factor_masa_A"] if esc.base == "A" else 1.0
-    d["costo_65"] = dt["costo_65"] * (1 + esc.crec_costo) ** (anios - t0) * _factor_pgu(anios, esc, params)
+    d["costo_65"] = dt["costo_65"] * (1 + esc.crec_costo) ** (anios - t0).astype(float) * _factor_pgu(anios, esc, params)
     d["proyectado"] = anios > t0
     d["ancla"] = np.isin(anios, ANIOS_REGION)
     return _derivados(d, esc)
@@ -188,6 +188,33 @@ def punto_critico(d: pd.DataFrame) -> dict:
         return dict(estado="no_cruza", anio=None, anio_exacto=None)
     f = dif[k] / (dif[k] - dif[k + 1])
     return dict(estado="cruza", anio=int(d.anio.iloc[k + 1]), anio_exacto=float(d.anio.iloc[k] + f))
+
+
+def colchon(d: pd.DataFrame, r_real: float) -> tuple:
+    """Colchón acumulado: las holguras (capacidad - costo) desde el último año observado se ahorran a una rentabilidad real
+    `r_real` y los déficits se pagan con ese ahorro: colchón_t = colchón_(t-1) x (1 + r) + diferencia_t. No es un dato ni una
+    regla del sistema (el tope no se ahorra de verdad): muestra cuánto tiempo compraría el exceso de capacidad previo al cruce.
+    Devuelve (serie del colchón, dict con estado y año):
+      'se_agota'    primer año con colchón negativo (anio_exacto interpolado dentro del año);
+      'sin_colchon' no hay holgura en el año de partida (el costo ya supera a la capacidad);
+      'no_se_agota' el colchón se mantiene positivo hasta el final de la serie.
+    El punto crítico (flujo anual) no depende de r: descontar costo y capacidad por el mismo factor no cambia dónde se cruzan."""
+    desde = int(d.anio[~d.proyectado].max())
+    fondo = pd.Series(np.nan, index=d.index)
+    acum = 0.0
+    for i in d.index[d.anio >= desde]:
+        acum = acum * (1 + r_real) + d.loc[i, "diferencia"]
+        fondo.loc[i] = acum
+    f = fondo.dropna()
+    if f.iloc[0] <= 0:
+        return fondo, dict(estado="sin_colchon", anio=desde, anio_exacto=float(desde))
+    neg = f[(f <= 0) & (f.index > f.index[0])]
+    if neg.empty:
+        return fondo, dict(estado="no_se_agota", anio=None, anio_exacto=None)
+    j = neg.index[0]
+    prev = f.index[list(f.index).index(j) - 1]
+    frac = f.loc[prev] / (f.loc[prev] - f.loc[j])
+    return fondo, dict(estado="se_agota", anio=int(d.loc[j, "anio"]), anio_exacto=float(d.loc[prev, "anio"] + frac))
 
 
 def fila_anio(d: pd.DataFrame, anio: int) -> pd.Series:

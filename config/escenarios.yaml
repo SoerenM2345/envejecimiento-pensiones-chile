@@ -8,6 +8,9 @@ crecimiento_salario_real:          # crecimiento real anual del ingreso imponibl
 
 cobertura_constante: true          # cotizantes / población 15-64 se mantiene en el valor del año base
 beneficio_real_constante: true     # gasto PGU/PBS/APS por persona de 65+ constante en pesos reales (la PGU se reajusta por IPC)
+rentabilidad_real_colchon:         # KPI 1.2, casilla «Ahorrar las holguras»: rentabilidad real anual a la que se invierten las holguras
+  base: 0.025                      # (capacidad - costo) previas al punto crítico. 2,5 % = la tasa del FRP (como en el KPI 2.2); no es la de las AFP
+  variantes: [0.0, 0.04]           # 0 % = sin rentabilidad; ~4 % = orden de magnitud de la rentabilidad real histórica del Fondo C (por confirmar en spensiones.cl)
 pgu_250: true                      # aumento de la PGU a $250.000 según el calendario de la Ley 21.735 (KPI 1.2 y 2.2)
 
 tope_carga:                        # KPI 1.2: parte del sueldo que se acepta destinar al Pilar Solidario

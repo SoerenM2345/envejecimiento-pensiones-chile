@@ -137,6 +137,23 @@ def test_punto_critico_estados(datos):
     assert cp.punto_critico(cp.serie_pais(*args, cp.Escenario(carga_max=0.01)))["estado"] == "ya_superado"
 
 
+def test_crec_salarial_entero_no_falla(datos):
+    args = (datos["nac"], datos["proy"], datos["par"])
+    assert cp.punto_critico(cp.serie_pais(*args, cp.Escenario(crec_salarial=0)))["anio"] == 2034  # antes: 1 ** (exponente negativo)
+
+
+def test_colchon_no_mueve_el_punto_critico_y_crece_con_la_rentabilidad(datos):
+    args = (datos["nac"], datos["proy"], datos["par"])
+    d = cp.serie_pais(*args, cp.Escenario())
+    agota = {r: cp.colchon(d, r)[1] for r in (0.0, 0.025, 0.05)}
+    assert [agota[r]["estado"] for r in agota] == ["se_agota"] * 3
+    assert [agota[r]["anio"] for r in agota] == [2050, 2054, 2059]  # el colchón compra 12 a 21 años tras el 2038
+    assert cp.punto_critico(d)["anio"] == 2038  # el flujo anual no depende de r
+    # sin colchón de partida / colchón que alcanza para toda la serie
+    assert cp.colchon(cp.serie_pais(*args, cp.Escenario(carga_max=0.01)), 0.025)[1]["estado"] == "sin_colchon"
+    assert cp.colchon(cp.serie_pais(*args, cp.Escenario(carga_max=0.50)), 0.025)[1]["estado"] == "no_se_agota"
+
+
 def test_region_usa_2024_y_anclas_2035_2050(datos):
     dt = cp.datos_territorio(5, datos["reg"], datos["nac"], datos["ind"], datos["pr"])
     d = cp.serie_territorio(dt, datos["par"], cp.Escenario())

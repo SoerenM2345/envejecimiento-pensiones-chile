@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from components.cost_analysis import CARGA_MAX
-from utils import (BLUE, ORANGE, VIOLET, RED, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
+from utils import (BLUE, ORANGE, VIOLET, RED, GREEN, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
                    CATEGORICAL, lighten, es_cl)
 
 UMBRAL_VEJEZ = 65
@@ -477,13 +477,16 @@ def _unidad_dinero(max_clp: float):
 
 
 def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trabajadores: str, carga_max: float,
-                         mostrar: tuple = (True, True), pais: bool = True, es_base: bool = True) -> go.Figure:
+                         mostrar: tuple = (True, True), pais: bool = True, es_base: bool = True,
+                         colchon: pd.Series = None, r_colchon: float = 0.0) -> go.Figure:
     """KPI 1.2, análisis del punto crítico. d = salida de critical_point.serie_pais / serie_territorio;
     pc = critical_point.punto_critico(d); view = 'dinero' | 'razon'.
     En 'dinero' se superponen el costo (costo por persona de 65+ x población de 65+) y la capacidad (carga máxima x ingreso por
     trabajador x trabajadores); en 'razon', la razón de soporte observada y la razón de equilibrio R*. El cruce de las dos
     líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050).
     mostrar = (primera línea, segunda línea): oculta la que esté en False (la estrella sólo se dibuja con ambas).
+    colchon (opcional, solo vista 'dinero'): colchón acumulado de critical_point.colchon, en el eje derecho (es un acumulado, no un
+    flujo anual); r_colchon = rentabilidad real con la que se calculó (solo para el rótulo).
     Marcas de datos: país = un punto por cada año observado (2010-2025, todos los insumos existen); región = rombo lleno en 2024
     (único año con todos los insumos observados) y rombos vacíos en 2035 y 2050 (población del escenario regional; ingreso y
     costo son supuestos). Los años sin marca son interpolación o escenario, no datos."""
@@ -524,6 +527,13 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
             fig.add_scatter(x=a.anio, y=y.loc[a.index], mode="markers", legendgroup=nom, showlegend=False,
                             marker=dict(symbol="diamond", size=13, color="white", line=dict(color=col, width=2.5)),
                             hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + " (población del escenario)</extra>")
+    if colchon is not None and view == "dinero":
+        c = (colchon / div).dropna()
+        fig.add_scatter(x=d.anio.loc[c.index], y=c, mode="lines", name=f"Colchón acumulado (eje derecho; holguras ahorradas a {r_colchon:.1%} real)".replace(".", ","),
+                        yaxis="y2", line=dict(color=GREEN, width=2.5, dash="dot"),
+                        hovertemplate="%{x}: %{y:" + fmt + "}<extra>Colchón acumulado</extra>")
+        fig.update_layout(yaxis2=dict(title=f"Colchón acumulado ({unidad})", overlaying="y", side="right", showgrid=False,
+                                      zeroline=True, zerolinecolor=GREEN, tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY))
     # claves de lectura de las marcas (leyenda)
     gris = INK_SECONDARY
     if pais:
