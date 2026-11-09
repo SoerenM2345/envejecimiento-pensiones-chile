@@ -1,16 +1,73 @@
 """Constructores de figuras compartidos por las páginas del modo final.
 Cada función recibe DataFrames ya cargados (no lee archivos) y devuelve un go.Figure."""
+import textwrap
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from components.cost_analysis import CARGA_MAX
-from utils import (BLUE, ORANGE, VIOLET, RED, GREEN, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
+from utils import (BLUE, ORANGE, VIOLET, RED, AQUA, INK_PRIMARY, INK_SECONDARY, INK_MUTED, GRIDLINE, SURFACE, PLOTLY_LAYOUT,
                    CATEGORICAL, lighten, es_cl)
 
 UMBRAL_VEJEZ = 65
 ANIO_BASE = 2024  # último año estimado de las proyecciones INE base 2024
+BARRAS = dict(bargap=0.33)  # pauta de la clase: separación entre barras = ½ ancho de barra
+
+
+def _titulo(mensaje: str, detalle: str = "", ancho: int = 50) -> str:
+    """Pauta de la clase: el título dice el mensaje (no describe) y no lleva siglas. Debajo, más pequeño, la unidad o el alcance.
+    Los números se escriben con punto decimal y aquí se pasan al formato es-CL. Plotly no parte las líneas largas: se parten aquí
+    (`ancho` caracteres el mensaje, 20 más el detalle) y colores_legibles agranda el margen superior según las líneas."""
+    lineas = textwrap.wrap(mensaje, ancho)
+    if detalle:
+        lineas.append("<sup>" + "<br>".join(textwrap.wrap(detalle, ancho + 20)) + "</sup>")
+    return es_cl("<br>".join(lineas))
+
+
+def _subtitulo(texto: str, ancho: int = 46) -> str:
+    """Título de un gráfico dentro de una figura con varios (subplot): el mensaje, partido en líneas cortas."""
+    return es_cl("<br>".join(textwrap.wrap(texto, ancho)))
+
+
+def _extremos(d: pd.DataFrame, col: str) -> tuple:
+    """(fila con el valor mínimo, fila con el valor máximo) de `col`."""
+    return d.loc[d[col].idxmin()], d.loc[d[col].idxmax()]
+
+
+def _envolver(texto: str, ancho: int = 22) -> str:
+    return "<br>".join(textwrap.wrap(texto, ancho))
+
+
+def rotular_final(fig: go.Figure, puntos: list, row: int = None, col: int = None, rango_y: tuple = None, alto_px: int = 360,
+                  ancho_texto: int = 24) -> go.Figure:
+    """Etiquetado directo (pauta de la clase: mejor que la leyenda): escribe el nombre de cada línea junto a su último punto.
+    puntos = [(x, y, texto, color)]. Las etiquetas se separan en vertical lo justo para no taparse: se estima la altura de cada una
+    (líneas de texto x 15 px) y los px por unidad del eje con rango_y (por defecto 0 a 1,1 x el mayor y) y alto_px (alto del área
+    de trazado). Requiere dejar espacio a la derecha con ampliar_derecha(); en ejes de categorías x va por posición."""
+    if not puntos:
+        return fig
+    lo, hi = rango_y if rango_y else (0.0, 1.1 * max(p[1] for p in puntos))
+    px_u = alto_px / (hi - lo) if hi > lo else 1.0
+    items = sorted(({"x": p[0], "y": p[1], "color": p[3], "texto": _envolver(p[2], ancho_texto)} for p in puntos), key=lambda i: i["y"])
+    for i in items:
+        i["h"] = 15 * (i["texto"].count("<br>") + 1) + 4
+        i["pos"] = i["y"] * px_u
+    for prev, cur in zip(items, items[1:]):  # de abajo hacia arriba: separa lo justo
+        cur["pos"] = max(cur["pos"], prev["pos"] + (prev["h"] + cur["h"]) / 2)
+    mover = sum(i["pos"] - i["y"] * px_u for i in items) / len(items)  # centra el desplazamiento total
+    for i in items:
+        fig.add_annotation(x=i["x"], y=i["y"], text=f"<span style='color:{i['color']}'>■</span> {i['texto']}", showarrow=False,
+                           xanchor="left", xshift=8, yshift=i["pos"] - i["y"] * px_u - mover, align="left",
+                           font=dict(color=INK_PRIMARY, size=12), row=row, col=col)
+    return fig
+
+
+def ampliar_derecha(fig: go.Figure, x0: float, x1: float, fraccion: float = 0.28, row: int = None, col: int = None) -> go.Figure:
+    """Deja espacio a la derecha del último punto para las etiquetas directas."""
+    fig.update_xaxes(range=[x0, x1 + fraccion * (x1 - x0)], row=row, col=col)
+    return fig
 
 
 def pyramid_chile(censo_pais: pd.DataFrame) -> go.Figure:
@@ -24,8 +81,9 @@ def pyramid_chile(censo_pais: pd.DataFrame) -> go.Figure:
                 marker_color=[lighten(ORANGE) if e < UMBRAL_VEJEZ else ORANGE for e in m.index])
     fig.add_hline(y=UMBRAL_VEJEZ, line_color=RED, line_width=1.5, line_dash="dot")
     xmax = max(h.max(), m.max()) / 1000 * 1.1
+    p65 = 100 * (h[h.index >= UMBRAL_VEJEZ].sum() + m[m.index >= UMBRAL_VEJEZ].sum()) / (h.sum() + m.sum())
     fig.update_layout(**PLOTLY_LAYOUT, barmode="overlay", height=520,
-                      title="Pirámide poblacional de Chile, Censo 2024 (miles de personas)")
+                      title=_titulo(f"El {p65:.1f}% de las personas en Chile tiene 65 años o más", "Pirámide de población por edad y sexo, Censo 2024"))
     fig.update_xaxes(range=[-xmax, xmax], zeroline=True, zerolinecolor=INK_MUTED, title="Miles de personas")
     fig.update_yaxes(title="Edad (85 = 85 y más)")
     return fig
@@ -46,8 +104,10 @@ def pyramid_chile_vs_alemania(censo_pais: pd.DataFrame, alemania: pd.DataFrame) 
     fig = make_subplots(rows=1, cols=2, shared_yaxes=True, horizontal_spacing=0.04,
                         subplot_titles=("Chile (Censo 2024)", "Alemania (Destatis, 2024)"))
     xmax = 0
+    p65 = []
     for col, (h, m) in enumerate([(ch, cm), (ah, am)], start=1):
         hp, mp = pct(h, m)
+        p65.append(hp[hp.index >= UMBRAL_VEJEZ].sum() + mp[mp.index >= UMBRAL_VEJEZ].sum())
         xmax = max(xmax, hp.max(), mp.max())
         fig.add_bar(y=hp.index, x=-hp.values, orientation="h", name="Hombres", legendgroup="H", showlegend=col == 1,
                     marker_color=[lighten(BLUE) if e < UMBRAL_VEJEZ else BLUE for e in hp.index], row=1, col=col)
@@ -55,7 +115,8 @@ def pyramid_chile_vs_alemania(censo_pais: pd.DataFrame, alemania: pd.DataFrame) 
                     marker_color=[lighten(ORANGE) if e < UMBRAL_VEJEZ else ORANGE for e in mp.index], row=1, col=col)
         fig.add_hline(y=UMBRAL_VEJEZ, line_color=RED, line_width=1.2, line_dash="dot", row=1, col=col)
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10)}, barmode="overlay", height=520,
-                      title="Pirámide poblacional 2024: Chile vs. Alemania (% de la población total)")
+                      title=_titulo(f"En 2024, {p65[0]:.1f}% de la población de Chile y {p65[1]:.1f}% de la de Alemania tiene 65 años o más",
+                                    "Pirámides de población por edad y sexo, en % de la población total de cada país"))
     fig.update_xaxes(range=[-xmax * 1.1, xmax * 1.1], zeroline=True, zerolinecolor=INK_MUTED, title="% de la población")
     fig.update_yaxes(title_text="Edad", col=1)
     return fig
@@ -84,9 +145,11 @@ def aging_share_series(proy: pd.DataFrame) -> go.Figure:
         fig.add_scatter(x=[anio], y=[v], mode="markers+text", text=[f"{v:.0f}%"], textposition="top center",
                         marker=dict(size=9, color=RED if anio == ANIO_BASE else VIOLET), showlegend=False,
                         hovertemplate=f"{anio}: {v:.1f}%<extra></extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Evolución y proyección del envejecimiento en Chile, 1992-2070")
+    v24, v70 = (float(proy.loc[proy.anio == a, "pct_65_mas"].iloc[0]) for a in (ANIO_BASE, 2070))
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(f"La población de 65 años o más pasará de {v24:.0f}% en {ANIO_BASE} a {v70:.0f}% en 2070",
+                                                     "Chile, 1992-2070; desde 2025 es proyección"))
     fig.update_xaxes(title="Año")
-    fig.update_yaxes(title="% de la población de 65 años o más")
+    fig.update_yaxes(title="% de la población de 65 años o más", rangemode="tozero")
     return fig
 
 
@@ -101,9 +164,10 @@ def working_age_peak(proy: pd.DataFrame) -> go.Figure:
     fig.add_scatter(x=[peak.anio], y=[peak.pob_15_64 / 1e6], mode="markers+text", marker=dict(size=10, color=RED),
                     text=[f"Máximo {int(peak.anio)}: {peak.pob_15_64 / 1e6:.2f}M"], textposition="top right",
                     showlegend=False)
-    fig.update_layout(**PLOTLY_LAYOUT, title="Chile: cuándo comienza a declinar la población en edad de trabajar")
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(f"La población de 15 a 64 años llega a su máximo en {int(peak.anio)} y desde entonces disminuye",
+                                                     "Chile, personas en edad de trabajar, 1992-2070"))
     fig.update_xaxes(title="Año")
-    fig.update_yaxes(title="Población de 15 a 64 años (millones)")
+    fig.update_yaxes(title="Población de 15 a 64 años (millones)", rangemode="tozero")
     return fig
 
 
@@ -116,7 +180,9 @@ def region_choropleth(df: pd.DataFrame, geojson: dict, var: str, label: str, sca
         center={"lat": -35.5, "lon": -71.5}, zoom=3.0, opacity=0.85,
         labels={var: label},
     )
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=0, r=0, t=30, b=0)}, height=640, title=label)
+    lo, hi = _extremos(df, var)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=0, r=0, t=70, b=0)}, height=640,
+                      title=_titulo(f"{hi.region_nombre} tiene el valor más alto ({hi[var]:.1f}) y {lo.region_nombre} el más bajo ({lo[var]:.1f})", label))
     return fig
 
 
@@ -127,7 +193,9 @@ def region_bars(df: pd.DataFrame, var: str, label: str, nacional: float, fmt: st
                  labels={var: label, "region_nombre": ""})
     fig.add_vline(x=nacional, line_dash="dash", line_color="#52514e",
                   annotation_text=f"País: {format(nacional, fmt)}", annotation_position="top")
-    fig.update_layout(**PLOTLY_LAYOUT, title=label)
+    lo, hi = _extremos(d, var)
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS,
+                      title=_titulo(f"{hi.region_nombre} tiene el valor más alto ({format(hi[var], fmt)}) y {lo.region_nombre} el más bajo ({format(lo[var], fmt)})", label))
     fig.update_yaxes(categoryorder="total ascending")
     return fig
 
@@ -140,7 +208,7 @@ def _region_people_bars(d: pd.DataFrame, total: tuple, parte: tuple, texto: list
                 hovertemplate="%{y}<br>" + total[1] + ": %{x:,.0f}<extra></extra>")
     fig.add_bar(y=d.region_nombre, x=d[parte[0]], orientation="h", name=parte[1], marker_color=parte[2],
                 text=texto, textposition="outside", hovertemplate="%{y}<br>" + parte[1] + ": %{x:,.0f}<extra></extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", title=titulo)
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", title=titulo, **BARRAS, bargroupgap=0)
     fig.update_yaxes(categoryorder="array", categoryarray=list(d.region_nombre), title="")
     fig.update_xaxes(title="Personas", tickformat=",.0f", dtick=dtick, minor=dict(dtick=dtick // 5, showgrid=True), tickangle=0,
                      rangemode="tozero")
@@ -153,7 +221,9 @@ def region_support_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     d = df.sort_values("razon_soporte_previsional")
     return _region_people_bars(d, ("pob_65_mas", "Personas de 65+", ORANGE), ("cotizantes_2024", "Cotizantes (dic-2024)", BLUE),
                                [f"{r:.2f}" for r in d.razon_soporte_previsional],
-                               f"Cotizantes y personas de 65+ por región* (país: {nacional:.2f})")
+                               _titulo(f"En {d.iloc[0].region_nombre} hay {d.iloc[0].razon_soporte_previsional:.2f} cotizantes por persona de 65+; en "
+                                       f"{d.iloc[-1].region_nombre}, {d.iloc[-1].razon_soporte_previsional:.2f}",
+                                       f"Cotizantes y personas de 65+ por región* (país: {nacional:.2f})"))
 
 
 def region_coverage_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
@@ -163,7 +233,9 @@ def region_coverage_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return _region_people_bars(d, ("pob_15_64", "Población 15-64 (Censo 2024)", lighten(ORANGE)),
                                ("cotizantes_2024", "Cotizantes (dic-2024)", ORANGE),
                                [f"{c:.1f}%".replace(".", ",") for c in d.cobertura_previsional_pct],
-                               "Cotizantes y población de 15-64 por región", dtick=2_000_000)
+                               _titulo(f"Cotiza {d.iloc[0].cobertura_previsional_pct:.1f}% de las personas de 15 a 64 años en {d.iloc[0].region_nombre} y "
+                                       f"{d.iloc[-1].cobertura_previsional_pct:.1f}% en {d.iloc[-1].region_nombre}",
+                                       "Cotizantes y población de 15 a 64 años por región"), dtick=2_000_000)
 
 
 def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
@@ -174,7 +246,8 @@ def poverty_people_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
     return _region_people_bars(d, ("pob_65_expandida", "Personas 65+ (CASEN 2022)", lighten(ORANGE)),
                                ("n_pobres", "Personas 65+ en pobreza", ORANGE),
                                [f"{p:.1f}%".replace(".", ",") for p in d.pct_pobreza_65],
-                               "Personas de 65+ y en pobreza por región", dtick=250_000)
+                               _titulo(f"En {d.iloc[-1].region_nombre}, {d.iloc[-1].pct_pobreza_65:.1f}% de las personas de 65+ está en pobreza; en "
+                                       f"{d.iloc[0].region_nombre}, {d.iloc[0].pct_pobreza_65:.1f}%", "Personas de 65+ y en pobreza por región"), dtick=250_000)
 
 
 def zona_escenario(fig: go.Figure, desde: float, hasta: float) -> go.Figure:
@@ -199,9 +272,11 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str,
     if todos_los_anios:
         clave = pts.anio.isin([2024, 2025, 2030, 2035, 2040, 2050, 2060, 2070])
         fig.add_scatter(x=real.anio, y=real.razon, mode="lines+markers", line=dict(color=RED, width=3), marker=dict(size=7),
-                        name="Dato real (cotizantes diciembre / población 65+)", hovertemplate="%{x}: %{y:.2f}<extra>real</extra>")
+                        name="Dato real (cotizantes diciembre / población 65+)", showlegend=False,
+                        hovertemplate="%{x}: %{y:.2f}<extra>real</extra>")
         fig.add_scatter(x=esc.anio, y=esc.razon, mode="lines+markers", line=dict(color=RED, width=3, dash="dash"), marker=dict(size=4),
-                        name="Escenario (cobertura constante, población INE)", hovertemplate="%{x}: %{y:.2f}<extra>escenario</extra>")
+                        name="Escenario (cobertura constante, población INE)", showlegend=False,
+                        hovertemplate="%{x}: %{y:.2f}<extra>escenario</extra>")
         # 2024 y 2025 son años vecinos: rótulos a izquierda / derecha para que no se tapen
         posiciones = ["middle left" if a == ANIO_BASE else "top right" if a == anio_ultimo_real else "top center" for a in pts.anio[clave]]
         fig.add_scatter(x=pts.anio[clave], y=pts.razon[clave], mode="text", text=[f"{v:.2f}" for v in pts.razon[clave]],
@@ -213,7 +288,9 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str,
         fig.add_scatter(x=esc.anio[1:], y=esc.razon[1:], mode="markers+text", text=[f"{v:.2f}" for v in esc.razon[1:]], textposition="top center",
                         marker=dict(symbol="diamond", size=13, color="white", line=dict(color=RED, width=2.5)),
                         name="Población del escenario regional")
-    fig.update_layout(**PLOTLY_LAYOUT, title=f"Cotizantes por adulto mayor, {nombre}")
+    r0, r1 = pts.iloc[0], pts.iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(f"En {nombre}, los cotizantes por persona de 65+ bajan de {r0.razon:.2f} en {int(r0.anio)} a {r1.razon:.2f} en {int(r1.anio)}",
+                                                     "Línea continua = datos; punteada sobre fondo gris = escenario con cobertura constante"))
     fig.update_xaxes(title="Año", **({} if todos_los_anios else dict(tickvals=list(pts.anio))))
     fig.update_yaxes(title="Cotizantes por persona de 65+", rangemode="tozero")
     return fig
@@ -227,7 +304,9 @@ def cost_per_person_chart(d: pd.DataFrame, anio_hito: int, texto_hito: str) -> g
                     hovertemplate="%{x}: $%{y:.2f} millones<extra></extra>")
     # rótulo abajo: arriba tapaba el valor del año del salto
     fig.add_vline(x=anio_hito, line_dash="dash", line_color=INK_MUTED, annotation_text=texto_hito, annotation_position="bottom left")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Costo público real por persona de 65+ (millones de $ de 2025)")
+    v0, v1 = d.iloc[0], d.iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(f"El costo público por persona de 65+ subió de ${v0.costo_65 / 1e6:.2f} millones en {int(v0.anio)} a ${v1.costo_65 / 1e6:.2f} millones en {int(v1.anio)}",
+                                                     "Gasto en vejez por persona de 65+, millones de pesos de 2025"))
     fig.update_xaxes(title="Año", dtick=1)
     fig.update_yaxes(title="Millones de $ de 2025 por persona", rangemode="tozero")
     return fig
@@ -239,7 +318,11 @@ def spending_vs_population_growth(d: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
     fig.add_bar(x=g.index, y=g.gasto, name="Gasto real en edad avanzada", marker_color=RED)
     fig.add_bar(x=g.index, y=g.pob_65, name="Población 65+", marker_color=BLUE)
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", title="Crecimiento anual: gasto vs. población 65+ (%)")
+    n = len(d) - 1
+    cagr = lambda c: 100 * ((d[c].iloc[-1] / d[c].iloc[0]) ** (1 / n) - 1)  # noqa: E731
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="group", **BARRAS,
+                      title=_titulo(f"Entre {int(d.anio.iloc[0])} y {int(d.anio.iloc[-1])}, el gasto real creció {cagr('gasto'):.1f}% al año y la población de 65+, {cagr('pob_65'):.1f}%",
+                                    "Variación anual de cada año, %"))
     fig.update_xaxes(title="Año", dtick=1)
     fig.update_yaxes(title="Variación anual (%)", zeroline=True, zerolinecolor=INK_MUTED)
     return fig
@@ -248,12 +331,16 @@ def spending_vs_population_growth(d: pd.DataFrame) -> go.Figure:
 def cost_components_chart(h: pd.DataFrame) -> go.Figure:
     """KPI 2.1: costo público por persona 65+ apilado por componente (millones de $ de 2025). h: salida de serie_historica."""
     fig = go.Figure()
-    for col, nombre, color in (("pgu_65", "PGU (desde 2022)", BLUE), ("pbs_aps_65", "PBS y APS de vejez", VIOLET),
+    for col, nombre, color in (("pgu_65", "Pensión Garantizada Universal (desde 2022)", BLUE), ("pbs_aps_65", "Pensión Básica y Aporte Previsional Solidario de vejez", VIOLET),
                                ("resto_65", "Resto de 'Edad avanzada' (sistema antiguo y otros)", ORANGE)):
         fig.add_bar(x=h.index, y=h[col] / 1e6, name=nombre, marker_color=color,
                     hovertemplate="%{x}: $%{y:.2f} millones<extra>" + nombre + "</extra>")
-    fig.add_vline(x=2021.5, line_dash="dash", line_color=INK_MUTED, annotation_text="PGU", annotation_position="top")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Costo público por persona 65+, por componente (millones de $ de 2025)")
+    fig.add_vline(x=2021.5, line_dash="dash", line_color=INK_MUTED, annotation_text="Pensión Garantizada Universal", annotation_position="top")
+    ult = h.iloc[-1]
+    tot = ult.pgu_65 + ult.pbs_aps_65 + ult.resto_65
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", **BARRAS,
+                      title=_titulo(f"En {int(h.index[-1])}, la Pensión Garantizada Universal es {100 * ult.pgu_65 / tot:.0f}% del costo público por persona de 65+",
+                                    "Costo por persona de 65+ según componente, millones de pesos de 2025"))
     fig.update_xaxes(title="Año", dtick=1)
     fig.update_yaxes(title="Millones de $ de 2025 por persona 65+")
     return fig
@@ -261,8 +348,10 @@ def cost_components_chart(h: pd.DataFrame) -> go.Figure:
 
 def beneficiaries_chart(h: pd.DataFrame) -> go.Figure:
     """KPI 2.1: cuántos de cada 100 personas 65+ reciben un beneficio (PGU/PBS/APS) y cuánto paga el Estado por beneficio."""
+    a0, a1 = h.index[0], h.index[-1]
     fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
-                        subplot_titles=("Beneficios de vejez por cada 100 personas 65+", "Pago anual por beneficio (millones de $ de 2025)"))
+                        subplot_titles=(_subtitulo(f"De cada 100 personas de 65+, {100 * h.cobertura.iloc[0]:.0f} recibían un beneficio en {a0} y {100 * h.cobertura.iloc[-1]:.0f} en {a1}"),
+                                        _subtitulo(f"El pago anual por beneficio pasó de ${h.monto_por_beneficio.iloc[0] / 1e6:.2f} a ${h.monto_por_beneficio.iloc[-1] / 1e6:.2f} millones")))
     fig.add_scatter(x=h.index, y=100 * h.cobertura, mode="lines+markers", line=dict(color=BLUE, width=3), showlegend=False,
                     hovertemplate="%{x}: %{y:.0f} por cada 100<extra></extra>", row=1, col=1)
     fig.add_scatter(x=h.index, y=h.monto_por_beneficio / 1e6, mode="lines+markers", line=dict(color=RED, width=3), showlegend=False,
@@ -281,29 +370,37 @@ def cost_pct_pibpc_chart(h: pd.DataFrame) -> go.Figure:
     fig.add_scatter(x=h.index, y=h.costo_pct_pib_pc, mode="lines+markers+text", line=dict(color=RED, width=3), showlegend=False,
                     text=[f"{v:.1f}" if a in (h.index[0], pico, h.index[-1]) else "" for a, v in h.costo_pct_pib_pc.items()],
                     textposition="top center", hovertemplate="%{x}: %{y:.1f}% del PIB per cápita<extra></extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Costo por persona 65+ como % del PIB per cápita")
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(f"El costo por persona de 65+ llegó a {h.costo_pct_pib_pc[pico]:.1f}% del producto interno bruto per cápita en {pico}",
+                                                     "Costo público por persona de 65+ en % del producto interno bruto por habitante"))
     fig.update_xaxes(title="Año", dtick=1)
-    fig.update_yaxes(title="% del PIB per cápita", rangemode="tozero")
+    fig.update_yaxes(title="% del producto interno bruto per cápita", rangemode="tozero")
     return fig
 
 
 def burden_chart(h: pd.DataFrame, base: str = "mediana") -> go.Figure:
     """KPI 2.1: izquierda, pago plano mensual por ocupado frente al 10 % del ingreso típico (mediana o promedio);
     derecha, ocupados por persona 65+: los que hay vs. los necesarios si cada uno aportara ese 10 %."""
-    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
-                        subplot_titles=(f"Pago por ocupado vs. 10 % del ingreso ({base}), $ de 2025 al mes",
-                                        "Ocupados por persona 65+: los que hay vs. los necesarios"))
-    fig.add_scatter(x=h.index, y=h.pago_plano, mode="lines+markers", name="Pago por ocupado si se repartiera el gasto",
+    u = h.iloc[-1]
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.22,
+                        subplot_titles=(_subtitulo(f"En {h.index[-1]}, repartir el gasto cuesta ${u.pago_plano:,.0f} al mes por ocupado: {100 * u.pago_plano / u.ingreso_mensual:.1f}% del ingreso ({base})"),
+                                        _subtitulo(f"Hay {u.ocupados_por_65:.1f} ocupados por persona de 65+; harían falta {u.razon_necesaria:.1f} aportando el 10 %")))
+    fig.add_scatter(x=h.index, y=h.pago_plano, mode="lines+markers", name="Pago por ocupado si se repartiera el gasto", showlegend=False,
                     line=dict(color=RED, width=3), row=1, col=1, hovertemplate="%{x}: $%{y:,.0f} al mes<extra></extra>")
-    fig.add_scatter(x=h.index, y=CARGA_MAX * h.ingreso_mensual, mode="lines+markers", name=f"10 % del ingreso ({base})",
+    fig.add_scatter(x=h.index, y=CARGA_MAX * h.ingreso_mensual, mode="lines+markers", name=f"10 % del ingreso ({base})", showlegend=False,
                     line=dict(color=INK_MUTED, width=3, dash="dot"), row=1, col=1, hovertemplate="%{x}: $%{y:,.0f} al mes<extra></extra>")
-    fig.add_scatter(x=h.index, y=h.ocupados_por_65, mode="lines+markers", name="Ocupados por persona 65+ (los que hay)",
+    fig.add_scatter(x=h.index, y=h.ocupados_por_65, mode="lines+markers", name="Ocupados por persona 65+ (los que hay)", showlegend=False,
                     line=dict(color=BLUE, width=3), row=1, col=2)
-    fig.add_scatter(x=h.index, y=h.razon_necesaria, mode="lines+markers", name="Ocupados necesarios aportando el 10 %",
+    fig.add_scatter(x=h.index, y=h.razon_necesaria, mode="lines+markers", name="Ocupados necesarios aportando el 10 %", showlegend=False,
                     line=dict(color=RED, width=3, dash="dash"), row=1, col=2)
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10),
-                         "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
+    x0, x1 = float(h.index.min()), float(h.index.max())
+    rotular_final(fig, [(x1, u.pago_plano, "Pago por ocupado si se repartiera el gasto", RED),
+                        (x1, CARGA_MAX * u.ingreso_mensual, f"10 % del ingreso ({base})", INK_MUTED)], row=1, col=1)
+    rotular_final(fig, [(x1, u.ocupados_por_65, "Ocupados por persona de 65+ (los que hay)", BLUE),
+                        (x1, u.razon_necesaria, "Ocupados necesarios aportando el 10 %", RED)], row=1, col=2)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=170, t=90, b=10)})  # r: sitio para las etiquetas del panel derecho
     fig.update_xaxes(title_text="Año", dtick=2)
+    ampliar_derecha(fig, x0, x1, row=1, col=1)
+    ampliar_derecha(fig, x0, x1, row=1, col=2)
     fig.update_yaxes(title_text="$ de 2025 al mes", rangemode="tozero", col=1)
     fig.update_yaxes(title_text="Ocupados por persona 65+", rangemode="tozero", col=2)
     return fig
@@ -312,7 +409,8 @@ def burden_chart(h: pd.DataFrame, base: str = "mediana") -> go.Figure:
 def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame, base: str = "mediana") -> go.Figure:
     """KPI 2.1: escenario 2025-2050. Izquierda: gasto en edad avanzada (% del PIB). Derecha: carga requerida sobre el sueldo mediano vs. 10 %."""
     fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.12,
-                        subplot_titles=("Gasto en edad avanzada (% del PIB)", f"Pago plano por ocupado como % del ingreso ({base})"))
+                        subplot_titles=(_subtitulo(f"El gasto en edad avanzada pasaría de {h.pct_pib.iloc[-1]:.1f}% a {p.pct_pib.iloc[-1]:.1f}% del producto interno bruto entre {h.index[-1]} y {p.index[-1]}"),
+                                        _subtitulo(f"La carga sobre el ingreso ({base}) pasaría de {100 * h.carga_requerida.iloc[-1]:.1f}% a {100 * p.carga_requerida.iloc[-1]:.1f}% en {p.index[-1]}")))
     fig.add_scatter(x=h.index, y=h.pct_pib, mode="lines", line=dict(color=RED, width=3), showlegend=False,
                     hovertemplate="%{x}: %{y:.2f}%<extra></extra>", row=1, col=1)
     fig.add_scatter(x=p.index, y=p.pct_pib, mode="lines", line=dict(color=RED, width=3, dash="dash"), showlegend=False,
@@ -323,10 +421,10 @@ def cost_projection_chart(h: pd.DataFrame, p: pd.DataFrame, base: str = "mediana
                     hovertemplate="%{x}: %{y:.1f}% (escenario)<extra></extra>", row=1, col=2)
     fig.add_hline(y=10, line_dash="dot", line_color=INK_MUTED, annotation_text="10 % (cotización obligatoria)",
                   annotation_position="bottom right", row=1, col=2)
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=70, b=10),
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=10, r=10, t=90, b=10),
                       "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")})
     fig.update_xaxes(title_text="Año")
-    fig.update_yaxes(title_text="% del PIB", rangemode="tozero", col=1)
+    fig.update_yaxes(title_text="% del producto interno bruto", rangemode="tozero", col=1)
     fig.update_yaxes(title_text=f"% del ingreso ({base})", rangemode="tozero", col=2)
     return fig
 
@@ -339,9 +437,15 @@ def spending_pct_pib(df: pd.DataFrame) -> go.Figure:
     ea = df.dropna(subset=["edad_avanzada_pct_pib"])
     fig.add_scatter(x=ea.anio, y=ea.edad_avanzada_pct_pib, mode="lines+markers", name="Gasto total del Gobierno Central en edad avanzada",
                     line=dict(color=VIOLET, width=3, dash="dash"))
-    fig.update_layout(**PLOTLY_LAYOUT, title="Peso fiscal de las pensiones no contributivas (% del PIB)")
+    u = df.dropna(subset=["pilar_pct_pib"]).iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False,
+                      title=_titulo(f"En {int(u.anio)}, la Pensión Garantizada Universal y las pensiones solidarias pesan {u.pilar_pct_pib:.2f}% del producto interno bruto",
+                                    "Peso fiscal de las pensiones no contributivas, % del producto interno bruto"))
+    rotular_final(fig, [(df.anio.max(), df.pilar_pct_pib.iloc[-1], "Pensión Garantizada Universal y pensiones solidarias", ORANGE)]
+                  + ([(ea.anio.max(), ea.edad_avanzada_pct_pib.iloc[-1], "Gasto total del Gobierno Central en edad avanzada", VIOLET)] if len(ea) else []))
     fig.update_xaxes(title="Año", dtick=1)
-    fig.update_yaxes(title="% del PIB", rangemode="tozero")
+    ampliar_derecha(fig, float(df.anio.min()), float(df.anio.max()), 0.4)
+    fig.update_yaxes(title="% del producto interno bruto", rangemode="tozero")
     return fig
 
 
@@ -360,13 +464,25 @@ def fiscal_weight_chart(hist: pd.DataFrame, p: pd.DataFrame, con_fapp: bool, mos
                         line=dict(color=ORANGE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
     if con_fapp and mostrar[2]:
         fig.add_scatter(x=p.index, y=p.carga_pct_pib, mode="lines", name="Escenario: más aporte del Estado al FAPP",
-                        line=dict(color=VIOLET, width=3, dash="dash"), fill="tonexty" if mostrar[1] else None, fillcolor="rgba(120,90,170,0.15)",
+                        line=dict(color=VIOLET, width=3, dash="dash"), fill="tonexty" if mostrar[1] else None, fillcolor="rgba(92,26,92,0.12)",
                         hovertemplate="%{x}: %{y:.2f}% (escenario)<extra></extra>")
     fig.add_hline(y=base, line_dash="dot", line_color=INK_MUTED, annotation_text=f"Peso de 2025: {base:.2f}%",
                   annotation_position="bottom right")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Peso fiscal del Pilar Solidario y la PGU (% del PIB)")
+    fin = p.carga_pct_pib.iloc[-1] if con_fapp and mostrar[2] else p.pilar_pct_pib.iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False,
+                      title=_titulo(f"El peso fiscal del Pilar Solidario pasaría de {base:.2f}% en {int(p.index.min())} a {fin:.2f}% del producto interno bruto en {int(p.index.max())}",
+                                    "Observado hasta el último año con datos; escenario después"))
+    puntos = []
+    if mostrar[0]:
+        puntos.append((hist.anio.max(), hist.pilar_pct_pib.iloc[-1], "Observado", ORANGE))
+    if mostrar[1]:
+        puntos.append((p.index.max(), p.pilar_pct_pib.iloc[-1], "Escenario del Pilar Solidario", ORANGE))
+    if con_fapp and mostrar[2]:
+        puntos.append((p.index.max(), p.carga_pct_pib.iloc[-1], "Escenario con aporte al Fondo de Ahorro Previsional Solidario", VIOLET))
+    rotular_final(fig, puntos)
     fig.update_xaxes(title="Año")
-    fig.update_yaxes(title="% del PIB", rangemode="tozero")
+    ampliar_derecha(fig, float(hist.anio.min()), float(p.index.max()), 0.4)
+    fig.update_yaxes(title="% del producto interno bruto", rangemode="tozero")
     return fig
 
 
@@ -382,7 +498,9 @@ def financing_sources_chart(f: pd.DataFrame) -> go.Figure:
                 hovertemplate="%{y:.2f} billones<extra>Retiro del FRP</extra>")
     fig.add_bar(x=anios, y=resto / 1e12, name="Resto: presupuesto general", marker_color=lighten(ORANGE),
                 hovertemplate="%{y:.2f} billones<extra>Presupuesto general</extra>")
-    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", title="Quién paga el Pilar (billones de $ de 2025)")
+    fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", **BARRAS,
+                      title=_titulo(f"En {int(f.anio.iloc[-1])}, el Fondo de Reserva de Pensiones financió {pct.iloc[-1]:.1f}% del Pilar Solidario; el resto salió del presupuesto general",
+                                    "Quién paga el Pilar Solidario, billones de pesos de 2025"))
     fig.update_yaxes(title="Billones de pesos de 2025")
     return fig
 
@@ -392,7 +510,9 @@ def fapp_schedule_chart(p: pd.DataFrame) -> go.Figure:
     d = p[p.aporte_fapp > 0]
     fig = go.Figure(go.Bar(x=d.index, y=d.aporte_fapp / 1e12, marker_color=VIOLET, customdata=100 * d.aporte_fapp / d.pib_real25,
                            hovertemplate="%{x}: %{y:.2f} billones (%{customdata:.2f}% del PIB)<extra></extra>"))
-    fig.update_layout(**PLOTLY_LAYOUT, title="Aporte del Estado al FAPP (billones de $ de 2025)", showlegend=False)
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
+                      title=_titulo(f"El Estado aportará al Fondo de Ahorro Previsional Solidario desde {int(d.index.min())}, hasta {d.aporte_fapp.max() / 1e12:.2f} billones al año",
+                                    "Calendario del aporte según la Ley 21.735, billones de pesos de 2025"))
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title="Billones de pesos de 2025", rangemode="tozero")
     return fig
@@ -415,8 +535,10 @@ def reserve_chart(d: pd.DataFrame, res: dict, cubre: str, mostrar=(True, True)) 
                         line=dict(color=BLUE, width=3, dash="dash"), hovertemplate="%{x}: %{y:.2f} billones<extra>Saldo (escenario)</extra>")
         if res["anio_agotamiento"]:
             a = res["anio_agotamiento"]
-            fig.add_scatter(x=[a], y=[0], mode="markers", marker=dict(symbol="star", size=18, color=RED), name=f"Se agota en {a}")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Reserva frente al gasto que cubre (billones de $ de 2025)")
+            fig.add_scatter(x=[a], y=[0], mode="markers", marker=dict(symbol="star", size=18, color=VIOLET), name=f"Se agota en {a}")
+    msg = (f"La reserva se agotaría en {res['anio_agotamiento']}" if res["anio_agotamiento"]
+           else f"La reserva alcanza para todo el período hasta {int(d.index.max())}")
+    fig.update_layout(**PLOTLY_LAYOUT, title=_titulo(msg, "Reserva frente al gasto que cubre, billones de pesos de 2025"))
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title="Billones de pesos de 2025", rangemode="tozero")
     return fig
@@ -429,9 +551,11 @@ def fapp_flow_chart(b: pd.DataFrame) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=["Cotizaciones recibidas", "Beneficios pagados", "Resultado del semestre"],
         y=[r.cotizaciones_periodo_mm / 1e6, -r.beneficios_periodo_mm / 1e6, neto / 1e6],
-        marker_color=[BLUE, ORANGE, RED], text=[f"{v / 1e6:.2f}" for v in (r.cotizaciones_periodo_mm, -r.beneficios_periodo_mm, neto)],
+        marker_color=BLUE, text=[f"{v / 1e6:.2f}" for v in (r.cotizaciones_periodo_mm, -r.beneficios_periodo_mm, neto)],
         textposition="outside", cliponaxis=False, hovertemplate="%{x}: %{y:.2f} billones<extra></extra>"))
-    fig.update_layout(**PLOTLY_LAYOUT, title="FAPP, enero-junio de 2026 (billones de pesos corrientes)", showlegend=False)
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
+                      title=_titulo(f"En el primer semestre de 2026 el Fondo de Ahorro Previsional Solidario recibió {r.cotizaciones_periodo_mm / 1e6:.2f} billones y pagó {r.beneficios_periodo_mm / 1e6:.2f}",
+                                    "Caja de enero a junio de 2026, billones de pesos corrientes"))
     fig.update_yaxes(title="Billones de pesos")
     return fig
 
@@ -448,8 +572,11 @@ def dependence_regions_chart(reg: pd.DataFrame, nacional: float) -> go.Figure:
                          "<br>Por persona 65+: $%{customdata[1]:,.0f} al mes (pesos de 2025)"
                          "<br>Cotizantes por persona 65+: %{customdata[2]:.2f}" if detalle else "") + "<extra></extra>"))
     fig.add_vline(x=nacional, line_dash="dash", line_color=INK_MUTED, annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Sin pensión propia por región (% de la PGU)")
-    fig.update_xaxes(title="% de los beneficiarios de la PGU")
+    lo, hi = d.iloc[0], d.iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS,
+                      title=_titulo(f"En {hi.region_nombre}, {hi.pct_sin_pension:.0f}% de quienes reciben la Pensión Garantizada Universal no tiene otra pensión; en {lo.region_nombre}, {lo.pct_sin_pension:.0f}%",
+                                    "Sin pensión propia por región, % de los beneficiarios"))
+    fig.update_xaxes(title="% de los beneficiarios de la Pensión Garantizada Universal")
     return fig
 
 
@@ -462,7 +589,10 @@ def poverty_bars(df: pd.DataFrame, nacional: float) -> go.Figure:
         hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
     ))
     fig.add_vline(x=nacional, line_dash="dash", line_color="#52514e", annotation_text=f"País: {nacional:.1f}%", annotation_position="top")
-    fig.update_layout(**PLOTLY_LAYOUT, title="Pobreza por ingresos en personas de 65+ (% con IC 95%)")
+    lo, hi = d.iloc[0], d.iloc[-1]
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS,
+                      title=_titulo(f"La pobreza en personas de 65+ va de {lo.pct_pobreza_65:.1f}% en {lo.region_nombre} a {hi.pct_pobreza_65:.1f}% en {hi.region_nombre}",
+                                    "Pobreza por ingresos, % de personas de 65+ (barra = intervalo de confianza de 95%)"))
     fig.update_xaxes(title="% de personas 65+ en pobreza")
     return fig
 
@@ -485,8 +615,8 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     trabajador x trabajadores); en 'razon', la razón de soporte observada y la razón de equilibrio R*. El cruce de las dos
     líneas es el punto crítico. Tramo observado sólido, escenario punteado; rombos = años con población regional (2024/2035/2050).
     mostrar = (primera línea, segunda línea): oculta la que esté en False (la estrella sólo se dibuja con ambas).
-    colchon (opcional, solo vista 'dinero'): colchón acumulado de critical_point.colchon, en el eje derecho (es un acumulado, no un
-    flujo anual); r_colchon = rentabilidad real con la que se calculó (solo para el rótulo).
+    colchon (opcional, solo vista 'dinero'): colchón acumulado de critical_point.colchon, como área en el mismo eje (misma unidad,
+    pero es un saldo acumulado, no un flujo anual); r_colchon = rentabilidad real con la que se calculó (la lleva la tarjeta).
     Marcas de datos: país = un punto por cada año observado (2010-2025, todos los insumos existen); región = rombo lleno en 2024
     (único año con todos los insumos observados) y rombos vacíos en 2035 y 2050 (población del escenario regional; ingreso y
     costo son supuestos). Los años sin marca son interpolación o escenario, no datos."""
@@ -495,13 +625,20 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
         series = [("Costo del Pilar Solidario de vejez", d.costo_total / div, RED),
                   (f"Capacidad: {carga_max:.0%} del sueldo de los {trabajadores}", d.capacidad / div, BLUE)]
         ytitle, fmt = unidad, ",.2f"
-        titulo = f"Costo vs. capacidad de financiamiento, {nombre}"
+        titulo = _titulo({"cruza": f"{nombre}: el costo del Pilar Solidario supera la capacidad desde {pc['anio']}",
+                          "ya_superado": f"{nombre}: el costo del Pilar Solidario ya supera la capacidad desde {pc['anio']}",
+                          "no_cruza": f"{nombre}: el costo del Pilar Solidario no supera la capacidad antes de {int(d.anio.max())}"}[pc["estado"]],
+                         f"Costo frente a capacidad (tope de {carga_max:.0%} del sueldo), {unidad}")
     else:
         series = [(f"Razón de soporte observada ({trabajadores} por persona de 65+)", d.razon_soporte, BLUE),
                   (f"Razón de equilibrio R* (carga máxima {carga_max:.0%})", d.razon_equilibrio, ORANGE)]
         ytitle, fmt = f"{trabajadores.capitalize()} por persona de 65+", ".2f"
-        titulo = f"Razón de soporte vs. razón de equilibrio, {nombre}"
+        titulo = _titulo({"cruza": f"{nombre}: los {trabajadores} por persona de 65+ caen bajo la razón de equilibrio desde {pc['anio']}",
+                          "ya_superado": f"{nombre}: los {trabajadores} por persona de 65+ ya están bajo la razón de equilibrio desde {pc['anio']}",
+                          "no_cruza": f"{nombre}: los {trabajadores} por persona de 65+ no caen bajo la razón de equilibrio antes de {int(d.anio.max())}"}[pc["estado"]],
+                         f"Razón de soporte frente a razón de equilibrio (tope de {carga_max:.0%} del sueldo)")
 
+    ancho = d.anio.max() - d.anio.min()
     obs, proy = d[~d.proyectado], d[d.proyectado]
     base = d[~d.proyectado].tail(1)
     proy_c = pd.concat([base, proy])  # el tramo punteado parte del último punto observado
@@ -512,11 +649,11 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
             continue
         yo, yp = y.loc[obs.index], y.loc[proy_c.index]
         if pais:  # un punto por año observado
-            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom,
+            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom, showlegend=False,
                             line=dict(color=col, width=3), marker=dict(size=6),
                             hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
         else:     # región: un solo año observado, rombo lleno
-            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom,
+            fig.add_scatter(x=obs.anio, y=yo, mode="lines+markers", name=nom, legendgroup=nom, showlegend=False,
                             line=dict(color=col, width=3), marker=dict(symbol="diamond", size=13, color=col, line=dict(color="white", width=1.5)),
                             hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + "</extra>")
         fig.add_scatter(x=proy_c.anio, y=yp, mode="lines", name=nom + " (escenario)", legendgroup=nom, showlegend=False,
@@ -528,12 +665,22 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
                             marker=dict(symbol="diamond", size=13, color="white", line=dict(color=col, width=2.5)),
                             hovertemplate="%{x}: %{y:" + fmt + "}<extra>" + nom + " (población del escenario)</extra>")
     if colchon is not None and view == "dinero":
+        # pauta de la clase para el doble eje: estilo distinto (área) y color contrastante; se dibuja hasta que el colchón se agota
         c = (colchon / div).dropna()
-        fig.add_scatter(x=d.anio.loc[c.index], y=c, mode="lines", name=f"Colchón acumulado (eje derecho; holguras ahorradas a {r_colchon:.1%} real)".replace(".", ","),
-                        yaxis="y2", line=dict(color=GREEN, width=2.5, dash="dot"),
+        neg = c[c <= 0]
+        if len(neg):
+            c = c.loc[:neg.index[0]].clip(lower=0)
+        fig.add_scatter(x=d.anio.loc[c.index], y=c, mode="lines", name="Colchón acumulado", showlegend=False,
+                        line=dict(color=AQUA, width=1.5), fill="tozeroy", fillcolor="rgba(27,175,122,0.18)",
                         hovertemplate="%{x}: %{y:" + fmt + "}<extra>Colchón acumulado</extra>")
-        fig.update_layout(yaxis2=dict(title=f"Colchón acumulado ({unidad})", overlaying="y", side="right", showgrid=False,
-                                      zeroline=True, zerolinecolor=GREEN, tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY))
+        fig.add_annotation(x=float(d.anio.loc[c.index].iloc[-1]), y=0, text=f"<span style='color:{AQUA}'>■</span> Colchón acumulado",
+                           showarrow=False, xanchor="left", xshift=8, yshift=26, font=dict(color=INK_PRIMARY, size=12))
+    # etiquetado directo de las líneas (pauta de la clase); la leyenda queda solo para las claves de las marcas
+    puntos = [(float(d.anio.max()), float(y.iloc[-1]), nom, col) for (nom, y, col), visible in zip(series, mostrar) if visible]
+    rotular_final(fig, puntos)
+    paso = 10 if ancho > 30 else 5  # sin marcas en el espacio que se deja para las etiquetas
+    fig.update_xaxes(range=[d.anio.min() - 0.5, d.anio.max() + 0.34 * ancho],
+                     tickvals=list(range(int(np.ceil(d.anio.min() / paso) * paso), int(d.anio.max()) + 1, paso)))
     # claves de lectura de las marcas (leyenda)
     gris = INK_SECONDARY
     if pais:
@@ -560,6 +707,30 @@ def critical_point_chart(d: pd.DataFrame, pc: dict, view: str, nombre: str, trab
     fig.update_layout(**PLOTLY_LAYOUT, title=titulo)
     fig.update_xaxes(title="Año")
     fig.update_yaxes(title=ytitle, rangemode="tozero")
+    return fig
+
+
+def carga_waterfall(dec: dict, nombre: str, a0: int, a1: int) -> go.Figure:
+    """KPI 1.2, gráfico de cascada (pauta de la clase para mostrar de qué se compone un aumento): de la carga requerida del año a0
+    a la del año a1, cuánto aporta cada factor. dec = critical_point.descomponer_carga. Barras en puntos porcentuales del sueldo."""
+    partes = dec["partes"]
+    sube = lambda v: v > 0  # noqa: E731
+    x = [f"Carga {a0}"] + [n for n, _, _ in partes] + [f"Carga {a1}"]
+    y = [100 * dec["carga0"]] + [100 * v for _, v, _ in partes] + [100 * dec["carga1"]]
+    fig = go.Figure(go.Waterfall(
+        x=x, y=y, measure=["absolute"] + ["relative"] * len(partes) + ["total"], orientation="v",
+        text=[f"{v:.1f}%" if i in (0, len(y) - 1) else f"{v:+.1f} puntos" for i, v in enumerate(y)], textposition="outside",
+        increasing=dict(marker=dict(color=ORANGE)), decreasing=dict(marker=dict(color=BLUE)),
+        totals=dict(marker=dict(color=INK_SECONDARY)), connector=dict(line=dict(color=INK_MUTED, width=1)),
+        customdata=[None] + [r for _, _, r in partes] + [None],
+        hovertemplate="%{x}: %{y:.2f}<extra></extra>", cliponaxis=False))
+    mayor = max(partes, key=lambda p: p[1])
+    msg = (f"{nombre}: la carga sube de {100 * dec['carga0']:.1f}% a {100 * dec['carga1']:.1f}% del sueldo, sobre todo por la «{mayor[0].lower()}»"
+           if dec["carga1"] > dec["carga0"] else
+           f"{nombre}: la carga baja de {100 * dec['carga0']:.1f}% a {100 * dec['carga1']:.1f}% del sueldo")
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
+                      title=_titulo(msg, f"Aporte de cada factor al cambio de la carga requerida entre {a0} y {a1}, en puntos porcentuales del sueldo"))
+    fig.update_yaxes(title="% del sueldo de los trabajadores", rangemode="tozero")
     return fig
 
 
@@ -618,29 +789,38 @@ def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
                 fig.add_annotation(x=i, y=b + v / 2, text=f"{v:.2f} ({p:.1f}%)", showarrow=True, arrowhead=0,
                                    ax=150, ay=0, font=dict(color=INK_PRIMARY, size=12), arrowcolor=INK_MUTED)
         base = base + val
+    ult = df.iloc[-1]
     fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN, "legend": dict(orientation="h", y=-0.15, bgcolor="rgba(0,0,0,0)")},
-                      **_TEXTO_CLARO, barmode="stack", bargap=0.45,
-                      title="Flujo al sistema previsional por destino (billones de pesos)")
+                      **_TEXTO_CLARO, barmode="stack", **BARRAS,
+                      title=_titulo(f"En {int(ult.anio)}, las cuentas individuales reciben {100 * ult.cuentas_individuales / ult.flujo_total:.0f}% del flujo previsional",
+                                    "Flujo al sistema previsional por destino, billones de pesos"))
     fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
     fig.update_yaxes(title="Billones de pesos (10^12)", rangemode="tozero", **_EJE_CLARO)
     return con_coma(fig)
 
 
-def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01) -> go.Figure:
+def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01, con_sis: bool = False) -> go.Figure:
     """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados), variante
-    sin SIS; la variante con SIS va como línea gris delgada de sensibilidad (real + escenario base).
+    sin SIS. Pauta de la clase: máximo 4 líneas, así que la variante con SIS (línea gris delgada, real + escenario base) solo se
+    dibuja con con_sis=True.
     df: anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis), kpi_1_3_pct."""
     sens = df[(df.variante == "con_sis") & df.tipo.isin(["real", "escenario"])].sort_values("anio")
     df = df[df.variante == "sin_sis"]
     real = df[df.tipo == "real"].sort_values("anio")
     ancla = real.iloc[[-1]]  # los escenarios parten del último año real
     fig = go.Figure()
-    fig.add_scatter(x=sens.anio.astype(str), y=sens.kpi_1_3_pct, mode="lines", name="Incluyendo SIS en todos los años",
-                    line=dict(color=lighten(INK_MUTED), width=1.5),
-                    hovertemplate="Incluyendo SIS: %{y:.1f}%<extra></extra>")
-    fig.add_scatter(x=real.anio.astype(str), y=real.kpi_1_3_pct, mode="lines+markers+text", name="Real",
+    anios_cat = [str(int(a)) for a in sorted(set(df.anio) | set(sens.anio))]
+    pos = lambda a: anios_cat.index(str(int(a)))  # noqa: E731
+    puntos = []
+    if con_sis:
+        fig.add_scatter(x=sens.anio.astype(str), y=sens.kpi_1_3_pct, mode="lines", name="Incluyendo SIS en todos los años", showlegend=False,
+                        line=dict(color=lighten(INK_MUTED), width=1.5),
+                        hovertemplate="Incluyendo SIS: %{y:.1f}%<extra></extra>")
+        puntos.append((pos(sens.anio.max()), float(sens.kpi_1_3_pct.iloc[-1]), "Con el Seguro de Invalidez y Sobrevivencia", lighten(INK_MUTED)))
+    fig.add_scatter(x=real.anio.astype(str), y=real.kpi_1_3_pct, mode="lines+markers+text", name="Real", showlegend=False,
                     line=dict(color=BLUE, width=3), text=[f"{v:.1f}%" for v in real.kpi_1_3_pct],
                     textposition="top center", textfont_color=INK_PRIMARY)
+    base_e = ancla
     variantes = sorted(t for t in df.tipo.unique() if t.startswith("escenario_crec_"))
     for tipo, nombre, color, dash in [("escenario", f"Escenario base (salario real {crec_base:+.1%} anual)".replace(".", ","), RED, "dash")] + [
             (t, f"Variante: salario real +{t.removeprefix('escenario_crec_').replace('_', ',')}% anual", INK_MUTED, "dot") for t in variantes]:
@@ -652,12 +832,29 @@ def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01) -> go.F
         claves = {int(futuro.loc[futuro.kpi_1_3_pct.idxmin(), "anio"]), 2033, int(e.anio.max())}
         rotulos = ["" if a not in claves or tipo != "escenario" else f"{v:.1f}%"
                    for a, v in zip(e.anio, e.kpi_1_3_pct)]
-        fig.add_scatter(x=e.anio.astype(str), y=e.kpi_1_3_pct, mode="lines+markers+text", name=nombre,
+        fig.add_scatter(x=e.anio.astype(str), y=e.kpi_1_3_pct, mode="lines+markers+text", name=nombre, showlegend=False,
                         line=dict(color=color, width=2.5, dash=dash), text=rotulos, textposition="bottom center",
                         textfont_color=INK_PRIMARY)
-    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN, "legend": dict(orientation="h", y=-0.2, bgcolor="rgba(0,0,0,0)")},
-                      **_TEXTO_CLARO, title="Parte del flujo previsional que pasa por cuentas individuales AFP (%)")
-    fig.update_xaxes(type="category", title="Año", **_EJE_CLARO)
+        puntos.append((pos(e.anio.max()), float(e.kpi_1_3_pct.iloc[-1]), nombre, color))
+        if tipo == "escenario":
+            base_e = e
+    rotular_final(fig, puntos, rango_y=(0, 70), alto_px=330)
+    fig.add_annotation(x=pos(real.anio.min()), y=float(real.kpi_1_3_pct.iloc[0]), text=f"<span style='color:{BLUE}'>■</span> Real",
+                       showarrow=False, xanchor="left", yshift=-22, font=dict(color=INK_PRIMARY, size=12))
+    # el mensaje del título sale del escenario base: mínimo y último año
+    fut = base_e[base_e.anio > ancla.anio.iloc[0]]
+    if fut.empty:
+        fut = base_e
+    imin = fut.kpi_1_3_pct.idxmin()
+    if int(fut.loc[imin, "anio"]) == int(base_e.anio.max()):
+        msg = f"La parte del flujo en cuentas individuales llegaría a {fut.loc[imin, 'kpi_1_3_pct']:.1f}% en {int(fut.loc[imin, 'anio'])}"
+    else:
+        msg = (f"La parte del flujo en cuentas individuales bajaría a {fut.loc[imin, 'kpi_1_3_pct']:.1f}% en {int(fut.loc[imin, 'anio'])} "
+               f"y volvería a {base_e.kpi_1_3_pct.iloc[-1]:.1f}% en {int(base_e.anio.max())}")
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO,
+                      title=_titulo(msg, "Cuentas individuales de las Administradoras de Fondos de Pensiones, % del flujo previsional"))
+    fig.update_xaxes(type="category", categoryorder="array", categoryarray=anios_cat, title="Año",
+                     range=[-0.5, len(anios_cat) - 0.5 + 0.45 * len(anios_cat)], **_EJE_CLARO)
     fig.update_yaxes(title="% del flujo total", range=[0, 70], **_EJE_CLARO)
     return con_coma(fig)
 
@@ -671,8 +868,8 @@ _POSICIONES = [  # (dirección x, dirección y) alrededor de la burbuja, en el o
 
 
 def _rango(serie: pd.Series, margen: float) -> tuple:
-    d = serie.max() - serie.min()
-    return serie.min() - margen * d, serie.max() + margen * d
+    """Rango del eje: pauta de la clase, los ejes de las dispersiones parten en 0 (un eje recortado distorsiona la lectura)."""
+    return 0.0, float(serie.max()) * (1 + margen)
 
 
 def _ubicar_rotulos(x, y, textos, radios_px, rango_x, rango_y):
@@ -742,7 +939,7 @@ def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unid
     pendiente, intercepto = np.polyfit(df[var], df.cobertura_previsional_pct, 1)
     xs = np.linspace(df[var].min(), df[var].max(), 50)
     fig.add_scatter(x=xs, y=intercepto + pendiente * xs, mode="lines", name="Recta MCO",
-                    line=dict(color=RED, width=2, dash="dash"), hoverinfo="skip")
+                    line=dict(color=INK_PRIMARY, width=2, dash="dash"), hoverinfo="skip")
     formato_x = ":$,.0f" if var == "ingreso_per_capita_prom" else ":.1f"
     rx, ry = _rango(df[var], 0.08), _rango(df.cobertura_previsional_pct, 0.12)
     _burbujas(fig, df, var, "cobertura_previsional_pct",
@@ -750,8 +947,11 @@ def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unid
     fig.add_annotation(xref="paper", yref="paper", x=0.01, y=0.99, xanchor="left", yanchor="top", showarrow=False,
                        text=f"r = {num_cl(corr.pearson_r)}, ρ = {num_cl(corr.spearman_rho)}, n = {int(corr.n)}",
                        font=dict(color=INK_PRIMARY, size=13), bgcolor="rgba(255,255,255,0.8)")
+    r = float(corr.pearson_r)
+    msg = (f"La cobertura previsional casi no se relaciona con {etiqueta.lower()}" if abs(r) < 0.3 else
+           f"Las regiones con mayor {etiqueta.lower()} tienen {'mayor' if r > 0 else 'menor'} cobertura previsional")
     fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=520, showlegend=False,
-                      title=f"Cobertura previsional vs. {etiqueta.lower()} (burbuja = cotizantes)")
+                      title=_titulo(msg + f" (r = {r:.2f})", "Una burbuja por región; su tamaño es el número de cotizantes"))
     fig.update_xaxes(title=f"{etiqueta} ({unidad})", tickformat="$,.0f" if var == "ingreso_per_capita_prom" else None,
                      range=list(rx), **_EJE_CLARO)
     fig.update_yaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
@@ -782,15 +982,17 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, 
                            align="right" if alta_cob else "left", showarrow=False, font=dict(color=color_texto, size=13), xshift=-6 if alta_cob else 6,
                            yshift=-4 if alto_env else 4)
     fig.add_vline(x=nac_cobertura, line_dash="dash", line_color=INK_MUTED,
-                  annotation_text=f"Cobertura país {num_cl(nac_cobertura, 1)}%", annotation_position="bottom right",
+                  annotation_text=f"Cobertura país {num_cl(nac_cobertura, 1)}%", annotation_position="bottom left",
                   annotation_font_color=INK_PRIMARY)
     fig.add_hline(y=nac_65, line_dash="dash", line_color=INK_MUTED,
                   annotation_text=f"65+ país {num_cl(nac_65, 1)}%", annotation_position="top left",
                   annotation_font_color=INK_PRIMARY)
     _burbujas(fig, df, "cobertura_previsional_pct", "pct_65_mas", "Cobertura: %{x:.1f}%<br>65+: %{y:.1f}%", INK_SECONDARY,
               (x0, x1), (y0, y1))
+    n_doble = int((risk_quadrant(df, nac_cobertura, nac_65) == "Riesgo doble").sum())
     fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=560, showlegend=False,
-                      title="Matriz de riesgo: cobertura previsional × envejecimiento (burbuja = cotizantes)")
+                      title=_titulo(f"{n_doble} regiones combinan baja cobertura previsional y alto envejecimiento",
+                                    "Cobertura previsional frente a envejecimiento; una burbuja por región, su tamaño es el número de cotizantes"))
     fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=[x0, x1], **_EJE_CLARO)
     fig.update_yaxes(title="Población de 65 años y más (% del total)", ticksuffix="%", range=[y0, y1], **_EJE_CLARO)
     return con_coma(fig)
@@ -809,15 +1011,17 @@ def poverty_coverage_scatter(df: pd.DataFrame, r: float, rho: float, n: int) -> 
     pendiente, intercepto = np.polyfit(df.cobertura_previsional_pct, df.pct_pobreza_65, 1)
     xs = np.linspace(df.cobertura_previsional_pct.min(), df.cobertura_previsional_pct.max(), 50)
     fig.add_scatter(x=xs, y=intercepto + pendiente * xs, mode="lines", name="Recta MCO",
-                    line=dict(color=RED, width=2, dash="dash"), hoverinfo="skip")
+                    line=dict(color=INK_PRIMARY, width=2, dash="dash"), hoverinfo="skip")
     rx, ry = _rango(df.cobertura_previsional_pct, 0.08), _rango(df.pct_pobreza_65, 0.12)
     _burbujas(fig, df, "cobertura_previsional_pct", "pct_pobreza_65", "Cobertura: %{x:.1f}%<br>Pobreza 65+: %{y:.1f}%", ORANGE,
               rx, ry, tam="n_pobres_65", tam_nombre="Personas 65+ en pobreza", tam_pct="share_pobres_pct")
     fig.add_annotation(xref="paper", yref="paper", x=0.99, y=0.99, xanchor="right", yanchor="top", showarrow=False,
                        text=f"r = {num_cl(r)}, ρ = {num_cl(rho)}, n = {n}", font=dict(color=INK_PRIMARY, size=13),
                        bgcolor="rgba(255,255,255,0.8)")
+    msg = ("La pobreza en personas de 65+ casi no se relaciona con la cobertura previsional" if abs(r) < 0.3 else
+           f"Las regiones con menor cobertura previsional tienen {'más' if r < 0 else 'menos'} pobreza en personas de 65+")
     fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=520, showlegend=False,
-                      title="Pobreza 65+ vs. cobertura previsional (burbuja = personas 65+ en pobreza)")
+                      title=_titulo(msg + f" (r = {r:.2f})", "Una burbuja por región; su tamaño es el número de personas de 65+ en pobreza"))
     fig.update_xaxes(title="Cobertura previsional (% de 15-64 que cotiza, 2024)", ticksuffix="%", range=list(rx), **_EJE_CLARO)
     fig.update_yaxes(title="Personas 65+ en pobreza (%, CASEN 2022)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
     return con_coma(fig)
@@ -829,6 +1033,18 @@ def colores_legibles(fig: go.Figure) -> go.Figure:
     fig.update_layout(font_color=INK_PRIMARY, title_font_color=INK_PRIMARY, legend_font_color=INK_PRIMARY,
                       legend_title_font_color=INK_PRIMARY, paper_bgcolor=SURFACE, plot_bgcolor=SURFACE,
                       separators=",.", modebar=dict(orientation="v"))
+    # margen superior según las líneas del título (y de los títulos de subgráficos), para que el texto largo no se corte
+    lineas = (fig.layout.title.text or "").split("<br>") if fig.layout.title.text else []
+    en_sup, alto = False, (28 if lineas else 0)
+    for l in lineas:  # las líneas del subtítulo (<sup> ... </sup>) son más bajas que las del mensaje
+        en_sup = en_sup or "<sup>" in l
+        alto += 20 if en_sup else 26
+        en_sup = en_sup and "</sup>" not in l
+    for an in fig.layout.annotations:
+        if an.yref == "paper" and an.y is not None and an.y >= 1 and an.text and not an.showarrow:
+            alto = max(alto, 20 * (an.text.count("<br>") + 1) + 28)
+    if alto:
+        fig.update_layout(margin_t=max(fig.layout.margin.t or 0, alto + 8))
     # automargin: los nombres de región y los ticks no se cortan (el margen fijo de 10 px era muy chico)
     fig.update_xaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, automargin=True)
     fig.update_yaxes(tickfont_color=INK_PRIMARY, title_font_color=INK_PRIMARY, automargin=True)

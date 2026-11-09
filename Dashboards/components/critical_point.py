@@ -217,5 +217,29 @@ def colchon(d: pd.DataFrame, r_real: float) -> tuple:
     return fondo, dict(estado="se_agota", anio=int(d.loc[j, "anio"]), anio_exacto=float(d.loc[prev, "anio"] + frac))
 
 
+FACTORES_CARGA = (  # (columna, nombre, signo): carga = costo_65 x pob_65 / (trabajadores x ingreso anual x factor_masa)
+    ("pob_65", "Población de 65+", +1),
+    ("costo_65", "Costo por persona de 65+", +1),
+    ("trabajadores", "Cantidad de trabajadores", -1),
+    ("ingreso_masa", "Ingreso por trabajador", -1),
+)
+
+
+def descomponer_carga(d: pd.DataFrame, a0: int, a1: int) -> dict:
+    """De qué se compone el cambio de la carga requerida entre dos años de la serie: población de 65+, costo por persona,
+    trabajadores e ingreso. Descomposición logarítmica exacta: la contribución de cada factor es (carga1 - carga0) x ln(razón del
+    factor) / ln(carga1 / carga0), así que las contribuciones suman exactamente el cambio. Devuelve carga0, carga1 y una lista
+    de (nombre, contribución como fracción del sueldo, razón del factor entre los dos años); un factor que no cambia aporta 0."""
+    f0, f1 = fila_anio(d, a0), fila_anio(d, a1)
+    ingreso_masa = lambda f: f.ingreso_anual_trab * f.factor_masa  # noqa: E731
+    valor = lambda f, col: ingreso_masa(f) if col == "ingreso_masa" else f[col]  # noqa: E731
+    razones = [(nombre, valor(f1, col) / valor(f0, col), sg) for col, nombre, sg in FACTORES_CARGA]
+    logs = [sg * np.log(r) for _, r, sg in razones]
+    total = sum(logs)
+    delta = float(f1.carga_requerida - f0.carga_requerida)
+    partes = [(nombre, delta * lg / total if abs(total) > 1e-12 else 0.0, float(r)) for (nombre, r, _), lg in zip(razones, logs)]
+    return dict(carga0=float(f0.carga_requerida), carga1=float(f1.carga_requerida), partes=partes)
+
+
 def fila_anio(d: pd.DataFrame, anio: int) -> pd.Series:
     return d[d.anio == anio].iloc[0]

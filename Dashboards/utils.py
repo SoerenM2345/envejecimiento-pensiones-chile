@@ -16,7 +16,7 @@ AQUA = "#1baf7a"
 YELLOW = "#eda100"
 MAGENTA = "#e87ba4"
 GREEN = "#008300"
-VIOLET = "#4a3aa7"
+VIOLET = "#5c1a5c"  # ciruela oscuro: el violeta anterior (#4a3aa7) se confundía con BLUE en deuteranopía (ΔE 15)
 RED = "#e34948"
 CATEGORICAL = [BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GREEN, VIOLET, RED]
 

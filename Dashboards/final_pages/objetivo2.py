@@ -79,7 +79,7 @@ def render_2_1():
     with t1:
         c1, c2 = st.columns(2)
         with c1:
-            _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "PGU"))
+            _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "Pensión Garantizada Universal"))
         with c2:
             _g21(cost_pct_pibpc_chart(h))
         pob = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio").pob_65_mas

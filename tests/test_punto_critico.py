@@ -213,3 +213,14 @@ def test_tabla_de_comunas_de_una_region():
     tabla = at.dataframe[-1].value
     assert len(tabla) == 38 and tabla["Razón de soporte 2024"].is_monotonic_increasing  # 38 comunas, de mayor a menor presión
     assert tabla["Personas 65+ (Censo 2024)"].sum() == 314_343  # las comunas suman la región (Censo 2024)
+
+
+def test_descomposicion_de_la_carga_suma_el_cambio_exacto(datos):
+    """Cascada del KPI 1.2: las contribuciones de población, costo, trabajadores e ingreso suman exactamente el cambio de la carga."""
+    d = cp.serie_pais(datos["nac"], datos["proy"], datos["par"], cp.Escenario())
+    dec = cp.descomponer_carga(d, 2024, 2038)
+    assert sum(v for _, v, _ in dec["partes"]) == pytest.approx(dec["carga1"] - dec["carga0"])
+    nombres = {n: v for n, v, _ in dec["partes"]}
+    assert nombres["Población de 65+"] > 0 > nombres["Ingreso por trabajador"]  # más personas de 65+ empujan la carga; más ingreso la baja
+    # sin cambio entre años: aporte cero en todos los factores
+    assert all(v == 0 for _, v, _ in cp.descomponer_carga(d, 2030, 2030)["partes"])

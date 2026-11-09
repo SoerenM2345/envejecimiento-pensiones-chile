@@ -7,7 +7,7 @@ import streamlit as st
 from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from components.kpi_card import kpi_card
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
-                               commissionable_share_line, critical_point_chart, region_support_people_bars,
+                               commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
                                coverage_correlation_scatter, coverage_risk_matrix, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
 
@@ -137,6 +137,13 @@ def pc_lectura(d: pd.DataFrame, pc: dict, esc: cp.Escenario, nombre: str, a0: in
     else:
         txt += f"Con un tope de {esc.carga_max:.0%}, la capacidad alcanza para todo el período."
     return _coma(txt)
+
+
+def pc_lectura_cascada(dec: dict, a0: int, a1: int) -> str:
+    """Una línea de lectura de la cascada: cuánto aporta cada factor, con los números que se ven en el gráfico."""
+    partes = sorted(dec["partes"], key=lambda p: -abs(p[1]))
+    detalle = "; ".join(f"{n.lower()} {100 * v:+.1f} puntos (×{r:.2f})" for n, v, r in partes)
+    return f"**Cascada · {a0}-{a1}:** {detalle}. El tope aplica sobre la carga final, no sobre cada factor."
 
 
 def pc_lectura_colchon(cc: dict, r: float, pc: dict, ultimo: int) -> str:
@@ -327,6 +334,11 @@ def render_1_2_punto_critico():
                     "Ese riesgo se mide en el KPI 1.3.")
     if sel != "País":
         st.caption("Población 65+ regional = reparto de tasas nacionales (INE no publica proyección regional base 2024).")
+    a1 = pc["anio"] if pc["estado"] == "cruza" else int(d.anio.max()) if d.anio.max() <= 2050 else 2050
+    if a1 > a0:
+        dec = cp.descomponer_carga(d, a0, a1)
+        mostrar(estilo_kpi(carga_waterfall(dec, nombre, a0, a1), 440))
+        st.markdown(_coma(pc_lectura_cascada(dec, a0, a1)))
     with st.expander("Sensibilidad del punto crítico (país, cotizantes, promedio)"):
         sens = load_csv("kpi_punto_critico_sensibilidad.csv")
         tabla = sens.assign(
@@ -449,7 +461,9 @@ def render_1_3():
     with c1:
         mostrar(commissionable_flow_bars(real))
     with c2:
-        mostrar(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"]))
+        ver_sis = st.checkbox("Agregar la sensibilidad que incluye el Seguro de Invalidez y Sobrevivencia", value=False, key="s13_con_sis",
+                              help="El gráfico muestra como máximo 4 líneas; esta sensibilidad es la quinta.")
+        mostrar(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"], ver_sis))
     # caída y recuperación: si la recuperación hasta 2033 cubre al menos 90% de la caída, no se dice «solo en parte»
     caida, recuperacion = r25.kpi_1_3_pct - v_min, e33.kpi_1_3_pct - v_min
     parte = recuperacion / caida if caida > 0 else 1.0

@@ -34,3 +34,14 @@ Open the page in a headless browser (or use the project's app tests) and look at
 
 ## 7. Consistency sweep
 When a convention is established on one KPI, grep the sibling KPI render functions (`st.plotly_chart(` without the style helper, long `st.markdown` blocks, captions longer than a sentence) and list which ones deviate. Fix them if the user asked for the convention project-wide ("apply to 2.3"); otherwise list them in the report.
+
+## 8. Class design rules (docs/Clase_visualizacion_storytelling.pdf; decisions of 2026-11-09)
+Applied to every chart in `components/charts.py`, new ones included. The checks live in `tests/test_dashboard_smoke.py`.
+- **Title = message, no abbreviations.** Build it with `_titulo(mensaje, detalle)`: the sentence states the finding with numbers computed from the data ("El costo supera la capacidad desde 2038"), the small subtitle gives unit and scope. No sigla in a title: write "Pensión Garantizada Universal", "Administradoras de Fondos de Pensiones", "producto interno bruto" (test `test_titulos_de_graficos_sin_siglas`). Subplot titles go through `_subtitulo`. Plotly does not wrap, so the helpers wrap and `colores_legibles` grows the top margin.
+- **Direct labels instead of a legend** for line charts where each line is a different variable: `rotular_final` + `ampliar_derecha`. Keep a legend for bars and for keys that explain a style (observed vs scenario markers).
+- **At most 4 lines per chart.** KPI 1.3 keeps the sensitivity with the invalidity insurance behind a checkbox.
+- **Axes start at 0, scatter plots included** (`_rango`), no exception. **Bars**: one colour per series, gap = half a bar (`BARRAS`), sorted by value.
+- **Double axis** only with different chart styles and contrasting colours; prefer one axis when both series share the unit (the 1.2 cushion is an area on the main axis).
+- **Scenario stays dashed** (project convention kept; the user will ask the professor in person; if the answer is "solid only", change every `dash=` in `charts.py`).
+- **Colour blindness** (simulated, Machado 2009, CIE76 ΔE ≥ 25 between colours of one chart): VIOLET is now a dark plum (#5c1a5c) because the old violet clashed with BLUE; RED vs ORANGE is still weak (ΔE 10 in tritanopia), so never use them together as the only cue (the MCO trend lines are dark navy); RED vs green/AQUA needs a second cue (area style or direct label). Re-run the audit (all figures of the 3 final pages) when adding a colour.
+- **Storytelling**: introduction → development → conflict → climax → call to action; a card that ends without a concrete action for a stakeholder is unfinished.

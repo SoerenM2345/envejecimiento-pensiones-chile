@@ -220,3 +220,50 @@ def test_vista_en_personas_de_las_barras_por_region(page, clave):
     at = run_page(page)
     at.radio(key=clave).set_value("Personas (mismo orden)").run()
     assert not at.exception
+
+
+# ───────────── pautas de diseño de la clase (docs/Clase_visualizacion_storytelling.pdf) ─────────────
+SIGLAS_PROHIBIDAS = r"\b(AFP|PGU|FAPP|FRP|APS|PBS|SIS|IC|INE|CASEN|PIB|MCO|ESI)\b"
+
+
+def _graficos(at):
+    import json
+    return [json.loads(el.proto.spec) for el in at.get("plotly_chart")]
+
+
+def _textos_de_titulo(spec):
+    """Título del gráfico y títulos de subgráficos (anotaciones sobre el área de trazado)."""
+    lay = spec.get("layout", {})
+    textos = [lay.get("title", {}).get("text", "")]
+    textos += [a.get("text", "") for a in lay.get("annotations", []) if a.get("yref") == "paper" and a.get("y", 0) >= 1 and not a.get("showarrow")]
+    return [t for t in textos if t]
+
+
+@pytest.mark.parametrize("page", ["final_pages/problema.py", "final_pages/objetivo1.py", "final_pages/objetivo2.py"])
+def test_titulos_de_graficos_sin_siglas(page):
+    """Los títulos dicen el mensaje y no llevan siglas (decisión del usuario, 2026-11-09, incluida AFP)."""
+    import re
+    at = run_page(page)
+    assert not at.exception, [e.value for e in at.exception]
+    for spec in _graficos(at):
+        for t in _textos_de_titulo(spec):
+            limpio = re.sub(r"<[^>]+>", " ", t)
+            assert not re.search(SIGLAS_PROHIBIDAS, limpio), limpio
+
+
+def test_dispersiones_con_eje_desde_cero():
+    """Pauta de la clase: los ejes de las dispersiones parten en 0, sin excepción."""
+    at = run_page("final_pages/objetivo1.py")
+    dispersiones = [s for s in _graficos(at) if any(t.get("type") == "scatter" and t.get("mode") == "markers" and t.get("marker", {}).get("sizemode") == "area"
+                                                    for t in s["data"])]
+    assert len(dispersiones) >= 2
+    for s in dispersiones:
+        assert s["layout"]["xaxis"]["range"][0] == 0 and s["layout"]["yaxis"]["range"][0] == 0
+
+
+def test_grafico_del_kpi_1_3_tiene_como_maximo_4_lineas():
+    """Pauta de la clase: no más de 4 líneas por gráfico (la variante con el seguro de invalidez es opcional)."""
+    at = run_page("final_pages/objetivo1.py")
+    lineas = [s for s in _graficos(at) if s["layout"].get("title", {}).get("text", "").startswith("La parte del flujo")]
+    assert len(lineas) == 1
+    assert len([t for t in lineas[0]["data"] if t.get("type") == "scatter"]) <= 4
