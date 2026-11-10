@@ -296,6 +296,62 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str,
     return fig
 
 
+LINEAS_INDICE_COSTO = (  # (columna de indices_costo, nombre, color, grosor)
+    ("pilar", "Costo del Pilar", INK_PRIMARY, 3.5), ("monto", "Monto por beneficio", ORANGE, 2.5), ("pob_65", "Personas de 65+", BLUE, 2.5),
+    ("pib", "Economía real", INK_MUTED, 2.5),
+)
+
+
+def cost_index_chart(idx: pd.DataFrame, futuro: bool = False) -> go.Figure:
+    """KPI 2.1: qué sube más rápido. Índice (primer año = 100) del costo del Pilar Solidario de vejez, el monto por beneficio, las personas de 65+
+    y el PIB real; cuatro líneas con la etiqueta directa al final (pauta de la clase), eje desde 0. futuro=True es el escenario (línea punteada).
+    idx = components.cost_analysis.indices_costo."""
+    fig = go.Figure()
+    puntos = []
+    a0, a1 = int(idx.index[0]), int(idx.index[-1])
+    for col, nombre, color, ancho in LINEAS_INDICE_COSTO:
+        fig.add_scatter(x=idx.index, y=idx[col], mode="lines", showlegend=False, line=dict(color=color, width=ancho, dash="dash" if futuro else "solid"),
+                        hovertemplate="%{x}: %{y:.0f}<extra>" + nombre + "</extra>")
+        puntos.append((a1, float(idx[col].iloc[-1]), f"{nombre}: {idx[col].iloc[-1]:.0f}", color))
+    ymax = float(idx.max().max()) * 1.08
+    rotular_final(fig, puntos, rango_y=(0, ymax), alto_px=330, ancho_texto=22)
+    ampliar_derecha(fig, a0, a1, 0.3)
+    v = lambda c: idx[c].iloc[-1] / 100  # noqa: E731
+    msg = (f"Hasta {a1} el costo del Pilar se {'multiplicaría' if futuro else 'multiplicó'} por {v('pilar'):.1f}: el monto por beneficio sube ×{v('monto'):.1f}, "
+           f"las personas de 65+ ×{v('pob_65'):.1f} y la economía real ×{v('pib'):.1f}")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=110, b=50)}, showlegend=False,
+                      title=_titulo(msg, f"Índice con {a0} = 100; Pilar Solidario de vejez (Pensión Garantizada Universal y pensiones solidarias), pesos reales de 2025" + ("; escenario" if futuro else ""), ancho=70))
+    fig.update_xaxes(title="", dtick=1 if a1 - a0 <= 10 else 5)
+    fig.update_yaxes(range=[0, ymax], title="")
+    return fig
+
+
+def cost_drivers_chart(descs: list) -> go.Figure:
+    """KPI 2.1: de dónde viene el alza del costo del Pilar. Una barra apilada (100 % del aumento) por período con las tres piezas del costo:
+    personas de 65+ (demografía, azul), beneficios por persona de 65+ (cobertura, naranja claro) y monto por beneficio (naranja); el color
+    naranja es lo que decide la política. descs = lista de (etiqueta del período, resultado de cost_analysis.descomponer_pilar)."""
+    estilo = {"pob_65": ("Personas de 65+", BLUE, "white"), "cobertura": ("Cobertura", lighten(ORANGE), INK_PRIMARY), "monto": ("Monto", ORANGE, "white")}
+    filas = [(et, d) for et, d in descs][::-1]  # el primero, arriba
+    nombres_y = [es_cl(f"{et}<br>+${(d['costo1'] - d['costo0']) / 1e12:.1f} billones") for et, d in filas]
+    fig = go.Figure()
+    for clave in ("pob_65", "cobertura", "monto"):
+        nombre, color, texto = estilo[clave]
+        pct = [100 * next(p["parte"] for p in d["partes"] if p["clave"] == clave) for _, d in filas]
+        fig.add_bar(y=nombres_y, x=pct, orientation="h", marker_color=color, showlegend=False,
+                    text=[f"{nombre} {v:.0f} %" if v >= 9 else "" for v in pct], textposition="inside", insidetextanchor="middle",
+                    textfont=dict(color=texto, size=12), hovertemplate="%{y}<br>" + nombre + ": %{x:.0f} % del aumento<extra></extra>")
+    principal = {d["a0"]: max(d["partes"], key=lambda p: p["parte"])["clave"] for _, d in descs}
+    frase = {"pob_65": "el número de personas de 65+", "cobertura": "la cobertura", "monto": "el monto por beneficio"}
+    (e0, d0), (e1, d1), (e2, d2) = descs[0], descs[1], descs[2]
+    msg = (f"El alza del costo cambia de motor: hasta {d0['a1']} la empuja {frase[principal[d0['a0']]]}, con la Pensión Garantizada Universal {frase[principal[d1['a0']]]} "
+           f"y hasta {d2['a1']} la empujará {frase[principal[d2['a0']]]}")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=140, r=30, t=110, b=50)}, **BARRAS, barmode="stack", showlegend=False,
+                      title=_titulo(msg, "Parte del aumento del costo del Pilar Solidario de vejez que aporta cada pieza; azul = demografía, naranja = política", ancho=70))
+    fig.update_xaxes(range=[0, 100], ticksuffix=" %", title="% del aumento del costo")
+    fig.update_yaxes(title="")
+    return fig
+
+
 def cost_per_person_chart(d: pd.DataFrame, anio_hito: int, texto_hito: str) -> go.Figure:
     """KPI 2.1: costo público real por persona 65+ (millones de $ de 2025). d: anio, costo_65. Marca el año del salto."""
     fig = go.Figure()

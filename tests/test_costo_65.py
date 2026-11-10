@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -92,3 +93,61 @@ def test_proyeccion_parte_del_dato_observado(h):
     p = proyeccion(h, pop, par, 0.02, "constante")
     assert p.loc[2025, "costo_pct_pib_pc"] == pytest.approx(h.loc[2025, "costo_pct_pib_pc"], rel=0.01)
     assert p.loc[2025, "carga_requerida"] == pytest.approx(h.loc[2025, "carga_requerida"], rel=1e-6)
+
+
+# ── Por qué suben los costos (KPI 2.1): descomposición exacta del Pilar ──
+@pytest.fixture(scope="module")
+def pilar():
+    from components.cost_analysis import serie_historica, proyeccion
+    P = ROOT / "Data processed"
+    L = lambda f: pd.read_csv(P / f)  # noqa: E731
+    h = serie_historica(L("gasto_proteccion_social.csv"), L("macro_pib_anual.csv"), L("proyeccion_envejecimiento_pais.csv"), L("kpi_pc_nacional.csv"),
+                        L("pgu_pbs_aps_nacional_anual.csv"), "mediana")
+    pr = proyeccion(h, L("proyeccion_envejecimiento_pais.csv"), L("kpi_pc_parametros_reforma.csv"), 0.02, "constante", True)
+    return h, pr
+
+
+def test_los_aportes_de_las_tres_piezas_suman_el_cambio_del_costo_del_pilar(pilar):
+    from components.cost_analysis import descomponer_pilar
+    h, pr = pilar
+    for a0, a1 in ((2016, 2021), (2021, 2025), (2016, 2025), (2025, 2050)):
+        d = descomponer_pilar(h, pr, a0, a1)
+        assert sum(p["aporte"] for p in d["partes"]) == pytest.approx(d["costo1"] - d["costo0"], rel=1e-9)
+        assert sum(p["parte"] for p in d["partes"]) == pytest.approx(1.0, rel=1e-9)
+        assert d["costo1"] / d["costo0"] == pytest.approx(np.prod([p["razon"] for p in d["partes"]]), rel=1e-9)  # costo = personas × cobertura × monto
+
+
+def test_el_motor_del_alza_pasa_de_la_politica_a_la_demografia(pilar):
+    from components.cost_analysis import descomponer_pilar
+    h, pr = pilar
+    par = lambda d: {p["clave"]: 100 * p["parte"] for p in d["partes"]}  # noqa: E731
+    antes, con_pgu, futuro = par(descomponer_pilar(h, pr, 2016, 2021)), par(descomponer_pilar(h, pr, 2021, 2025)), par(descomponer_pilar(h, pr, 2025, 2050))
+    assert max(antes, key=antes.get) == "monto" and antes["monto"] > 55
+    assert max(con_pgu, key=con_pgu.get) == "cobertura"
+    assert max(futuro, key=futuro.get) == "pob_65" and futuro["pob_65"] > 80 and futuro["cobertura"] == pytest.approx(0, abs=1e-9)  # cobertura constante en el escenario
+    todo = par(descomponer_pilar(h, pr, 2016, 2025))
+    assert todo["monto"] > todo["cobertura"] > 0 and todo["monto"] > todo["pob_65"]  # el monto y la cobertura crecieron más que la población
+
+
+def test_indices_del_costo_parten_en_100_y_el_pib_del_escenario_crece_2_por_ciento(pilar):
+    from components.cost_analysis import indices_costo
+    h, pr = pilar
+    pasado, futuro = indices_costo(h, pr, 2016, 2025), indices_costo(h, pr, 2025, 2050)
+    assert (pasado.iloc[0] == 100).all() and (futuro.iloc[0] == 100).all()
+    assert pasado.pilar.iloc[-1] > pasado.monto.iloc[-1] > pasado.pob_65.iloc[-1] > pasado.pib.iloc[-1]
+    assert futuro.pib.iloc[-1] == pytest.approx(100 * 1.02 ** 25, rel=1e-3)  # sin saltos de base entre el observado y el escenario
+
+
+def test_pagina_2_1_explica_por_que_suben_los_costos():
+    import json
+    from streamlit.testing.v1 import AppTest
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo2.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    titulos = lambda: [json.loads(el.proto.spec).get("layout", {}).get("title", {}).get("text", "") for el in at.get("plotly_chart")]  # noqa: E731
+    assert any(t.startswith("Hasta 2025 el costo del Pilar se multiplicó") for t in titulos())
+    assert any(t.startswith("El alza del costo cambia de motor") for t in titulos())
+    at.radio(key="c21_periodo").set_value("2025-2050 (escenario)").run()
+    assert not at.exception and any("se multiplicaría" in t for t in titulos())
+    sub = [m.value for m in at.markdown if m.value.startswith("##### ")]
+    assert sub[:3] == ["##### 1. ¿Qué sube más rápido?", "##### 2. ¿De dónde viene el aumento?", "##### 3. Las razones una por una (resumen)"]
+    assert at.get("table") and "Posible razón" in at.get("table")[0].value.index.name

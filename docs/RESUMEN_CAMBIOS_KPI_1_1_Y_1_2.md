@@ -18,10 +18,10 @@ Orden de arriba a abajo: tarjetas y mapa/barras de siempre, y después:
 
 | Bloque | Qué es |
 |---|---|
-| **Selector de las 5 regiones prioritarias** | 4 listas; por defecto la recomendada «bajo el promedio y en caída desde 2022»: La Araucanía, Valparaíso, Biobío, Los Ríos, Los Lagos. Las otras: mayor brecha, caída más fuerte, mayor peso. Cambia todo lo de abajo. Detalle en `docs/SHORTLIST_REGIONES.md` |
+| **Selector de las 5 regiones prioritarias** | 4 listas; por defecto la recomendada «bajo el promedio y en caída desde 2022»: con 2024 como referencia, La Araucanía, Valparaíso, Biobío, Coquimbo y Ñuble (antes de fijar 2024 eran Los Ríos y Los Lagos en lugar de Coquimbo y Ñuble). Las otras: mayor brecha, caída más fuerte, mayor peso. Cambia todo lo de abajo. Detalle en `docs/SHORTLIST_REGIONES.md` |
 | **Barras: cambio de la cobertura desde 2022** | Las 16 regiones, prioritarias en naranja, línea de Chile; mismo diseño que «Cobertura relativa» |
 | **Gráfico de 2002 a hoy** | 3 líneas: Chile, la prioritaria más rezagada (o la que más cayó) y la mejor región |
-| **«Región por región»** | 16 paneles (o 13 con regiones fusionadas), período 2019-2025 o 2002-2025, franja 2020-2021, casilla «población sin ajustar» con el Censo 2024 como rombo; tabla con peso, nivel y tendencia |
+| **«Región por región»** | 16 paneles (o 13 con regiones fusionadas), período 2019-2024 o 2002-2024, franja 2020-2021, casilla «población sin ajustar» con el Censo 2024 como rombo; tabla con peso, nivel y tendencia |
 | **¿De dónde viene la diferencia?** | Cobertura = participación × empleo × cotización de los ocupados; 4 paneles, filtro 5 o 16 regiones, línea de Chile, orden por gravedad |
 | **¿Qué se asocia con la cobertura?** | Correlaciones (n = 16), tabla de las prioritarias frente a Chile, y desplegables: factores probados, contraste con el estudio de la Asociación de AFP, prueba de asignación regional |
 
@@ -44,7 +44,7 @@ El simulador de arriba **no cambió**. Debajo hay **6 escenarios fijos del país
 
 ## Resultados que conviene conocer
 
-- Cobertura de Chile: 30,0 % (2002) → 47,8 % (2021) → 46,9 % (2025). Desde 2022 bajan 7 de 16 regiones; desde 2019 solo Arica y Parinacota y la Metropolitana.
+- Cobertura de Chile: 30,0 % (2002) → 47,8 % (2021) → 46,5 % (2024; 2025: 46,9 %, con población proyectada). Con 2024 como referencia, desde 2022 bajan 12 de 16 regiones y desde 2019 solo la Metropolitana (−1,1) y Arica y Parinacota (−0,4).
 - La diferencia con Chile viene sobre todo de **«ocupados que cotizan»** (La Araucanía −7,7 puntos, Ñuble −7,3) y en Biobío de la participación laboral (−3,8). **El desempleo casi no aporta** (entre −0,6 y +0,2).
 - La desocupación oficial no se asocia con la cobertura (r = −0,32, no significativa). La informalidad oficial sí (r = −0,83), pero es en parte lo mismo que «no cotiza».
 - Los cotizantes de `cotizantes_region.xls` coinciden al decimal con los de la Asociación de AFP en las 16 regiones: son «cotizantes del mes» de diciembre, **sin honorarios** (el archivo no lo dice; se deduce).
@@ -110,3 +110,9 @@ La carpeta de paso `import razones/` ya no existe.
 - **Matriz de riesgo y dispersiones:** punto negro de 5 px en el centro de cada burbuja (`_burbujas`), donde termina la línea del rótulo.
 - **Escenarios fijos del KPI 1.2 rediseñados:** 6 paneles, cada uno con el costo (la misma curva roja) y la capacidad (azul); el cruce se ve como cruce, con una línea punteada al eje y el año escrito fuera del gráfico, bajo el eje. Sin puntos con rótulo dentro del gráfico.
 - **Comparación de los KPI de costo:** `docs/KPIS_DE_COSTO_COMPARACION.md`.
+
+## Actualización 2026-11-10, segunda parte
+
+- **Mismo año de referencia en todo el KPI 1.1: 2024** (constante `ANIO_REF` en `Scripts/24`; columnas `cobertura_ref`, `cambio_2019_ref`, `cambio_2022_ref`). El problema (barras, listas, tabla) y la causa (descomposición) usan 2024: es el año del Censo y el último con ocupados por región. La cobertura de 2025 queda fuera de las comparaciones (población proyectada, sin empleo regional). **Efecto: cambian 2 de las 5 regiones prioritarias** (entran Coquimbo y Ñuble, salen Los Ríos y Los Lagos); ver `docs/SHORTLIST_REGIONES.md` y la fila 25 de `docs/DISCUSION_FUENTES.md`. Quedó en un commit aparte por si hay que revertirlo.
+- **KPI 2.1 reconstruido:** nuevo bloque «¿Por qué suben los costos?» arriba de las pestañas (que siguen como detalle): índice 2016 = 100, barras apiladas con el aporte de cada pieza del costo del Pilar (personas de 65+, cobertura, monto) y tabla «Las razones una por una». Hallazgo: el motor del alza pasa de la política (monto 64 %, luego cobertura 43 %) a la demografía (87 % hasta 2050). Análisis en `docs/KPIS_DE_COSTO_COMPARACION.md`.
+- `subtitulo_visible` ahora está en `Dashboards/utils.py` (lo usan los KPI 1.1, 1.2 y 2.1).

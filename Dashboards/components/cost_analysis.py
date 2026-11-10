@@ -102,3 +102,46 @@ def proyeccion(h: pd.DataFrame, pop: pd.DataFrame, params: pd.DataFrame, crec_pi
     d["costo_pct_pib_pc"] = d.pct_pib * d.pob_total / d.pob_65   # costo por persona 65+ como % del PIB per cápita
     d["ocupados"] = b.ocupados * d.pob_15_64 / b.pob_15_64
     return _derivados(d)
+
+
+def _piezas_pilar(h: pd.DataFrame, pr: pd.DataFrame, a: int) -> tuple:
+    """(costo del Pilar, personas 65+, beneficios por persona 65+, monto por beneficio) de un año: observado en `h` o escenario en `pr`.
+    En el escenario la cobertura queda como en el último año observado y el monto por beneficio es lo que resta (incluye el alza de la PGU)."""
+    ult = int(h.index.max())
+    if a <= ult:
+        r = h.loc[a]
+        return float(r.pgu + r.pbs_aps), float(r.pob_65), float(r.cobertura), float(r.monto_por_beneficio)
+    r, cob = pr.loc[a], float(h.loc[ult].cobertura)
+    return float(r.pilar), float(r.pob_65), cob, float(r.pilar) / (float(r.pob_65) * cob)
+
+
+PIEZAS_PILAR = (("pob_65", "Personas de 65+"), ("cobertura", "Beneficios por persona de 65+"), ("monto", "Monto por beneficio"))
+
+
+def descomponer_pilar(h: pd.DataFrame, pr: pd.DataFrame, a0: int, a1: int) -> dict:
+    """De qué se compone el cambio del costo del Pilar Solidario de vejez (PGU + pensiones solidarias) entre dos años:
+    costo = personas de 65+ × beneficios por persona de 65+ (cobertura) × monto por beneficio. Descomposición logarítmica exacta: el aporte
+    de cada pieza es (costo1 - costo0) x ln(razón de la pieza) / ln(costo1 / costo0), así que los aportes suman exactamente el cambio.
+    h = serie_historica; pr = proyeccion (solo si a1 es posterior al último año observado). Devuelve costo0, costo1 y una lista de
+    dicts (clave, nombre, razon, aporte en pesos, parte del cambio entre 0 y 1)."""
+    p0, pob0, cob0, m0 = _piezas_pilar(h, pr, a0)
+    p1, pob1, cob1, m1 = _piezas_pilar(h, pr, a1)
+    razones = {"pob_65": pob1 / pob0, "cobertura": cob1 / cob0, "monto": m1 / m0}
+    L = (p1 - p0) / np.log(p1 / p0)
+    partes = [dict(clave=k, nombre=n, razon=razones[k], aporte=L * np.log(razones[k]), parte=L * np.log(razones[k]) / (p1 - p0)) for k, n in PIEZAS_PILAR]
+    return dict(a0=a0, a1=a1, costo0=p0, costo1=p1, partes=partes)
+
+
+def indices_costo(h: pd.DataFrame, pr: pd.DataFrame, a0: int, a1: int) -> pd.DataFrame:
+    """Índice (a0 = 100) de lo que se compara en «qué sube más rápido»: costo del Pilar, monto por beneficio, personas de 65+ y PIB real.
+    Un período observado (a1 <= último año de `h`) usa el PIB real encadenado de `h`; uno futuro (a0 >= último año) usa solo el escenario `pr`,
+    porque sus PIB están en precios distintos y no se pueden empalmar."""
+    ult = int(h.index.max())
+    futuro = a0 >= ult
+    filas = {}
+    for a in range(a0, a1 + 1):
+        p, pob, _, m = _piezas_pilar(h, pr, a)
+        pib = float(pr.loc[a].gasto / (pr.loc[a].pct_pib / 100)) if futuro else float(h.loc[a].pib_pc_real * h.loc[a].pob_total)
+        filas[a] = dict(pilar=p, monto=m, pob_65=pob, pib=pib)
+    d = pd.DataFrame(filas).T
+    return 100 * d / d.iloc[0]

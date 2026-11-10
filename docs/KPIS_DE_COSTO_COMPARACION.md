@@ -1,6 +1,6 @@
 # Los KPI de costo: comparación y cuáles profundizar (punto 3 del profesor)
 
-Pedido del profesor: ver los **costos como problema nacional**, no regional, y, si los datos y los KPI lo permiten, profundizar en **por qué unos factores de costo suben más rápido que otros**, con razones y trasfondo como en el KPI 1.1. Este documento compara los KPI que miden costos y recomienda cuáles profundizar. **No se construyó nada todavía.**
+Pedido del profesor: ver los **costos como problema nacional**, no regional, y, si los datos y los KPI lo permiten, profundizar en **por qué unos factores de costo suben más rápido que otros**, con razones y trasfondo como en el KPI 1.1. Este documento compara los KPI que miden costos y recomienda cuáles profundizar. **Construido el 2026-11-10 en el KPI 2.1** (bloque «¿Por qué suben los costos?»); el KPI 1.2 ya tenía la cascada del futuro y los seis escenarios fijos.
 
 ## 1. Los KPI que miden costos
 
@@ -46,16 +46,16 @@ Ahora el 87 % del aumento viene de la **demografía** (población 65+) y solo el
 
 Descartados: 1.3 y 2.3 (no son costos).
 
-## 4. Qué se construiría (propuesta, con los datos que ya están en el proyecto)
+## 4. Qué se construyó (con los datos que ya estaban en el proyecto)
 
-Un bloque nacional «Por qué suben los costos» en el KPI 2.1, con el mismo molde del KPI 1.1:
+Un bloque nacional «¿Por qué suben los costos?» al comienzo del KPI 2.1 (las pestañas de detalle siguen debajo), con el mismo molde del KPI 1.1:
 
 1. **Índice 2016 = 100, cuatro líneas:** costo del Pilar, monto por beneficio, población de 65+ y PIB real. Muestra de un vistazo qué factor sube más rápido.
 2. **Descomposición exacta** (media logarítmica, como en el 1.1): el aumento del Pilar en población × cobertura × monto, para 2016-2025 y 2025-2050, en dos paneles comparables.
 3. **«Las razones una por una»:** tabla con cada razón (la PGU de 2022, el reajuste por IPC, el envejecimiento, menos trabajadores por persona de 65+), la pieza en que cae, cuánto aporta y la lectura, con la ley y el año como trasfondo.
 4. **Conexión con 1.2 y 2.2:** una línea que lleve del costo a «hasta cuándo» (punto crítico) y «cuánto del PIB» (2.2).
 
-Se construye sin descargas nuevas.
+Sin descargas nuevas. Código: `descomponer_pilar` e `indices_costo` en `Dashboards/components/cost_analysis.py`, gráficos `cost_index_chart` y `cost_drivers_chart`, pruebas en `tests/test_costo_65.py`. Resultado: hasta 2021 manda el monto por beneficio (64 % del alza), con la PGU la cobertura (43 %) y hacia 2050 las personas de 65+ (87 %).
 
 ## 5. Límites que hay que decir
 

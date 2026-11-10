@@ -1,12 +1,12 @@
 """Objetivo 2: anticipar la presión fiscal del envejecimiento. KPIs 2.1, 2.2 y 2.3."""
 import pandas as pd
 import streamlit as st
-from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG, subtitulo_visible
 from components.kpi_card import kpi_card
-from components.cost_analysis import serie_historica, proyeccion
+from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
 from components.charts import mostrar, cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
-from components.charts import num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
+from components.charts import cost_index_chart, cost_drivers_chart, num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
 
 TITULO_OBJETIVO_2 = "Objetivo 2: anticipar la presión fiscal del envejecimiento"  # igual que config/kpis.yaml e Inicio.py
 st.title(TITULO_OBJETIVO_2)
@@ -16,6 +16,7 @@ st.markdown("La carga del envejecimiento sobre el Estado crece y sus reservas so
 
 from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart
 
+ANIO_BASE_COSTO = 2025
 ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
 ANIO_FIN_2_1 = 2050
 
@@ -75,6 +76,9 @@ def render_2_1():
          [f"Gasto real: {cagr('gasto'):+.1f}% al año", f"Población 65+: {cagr('pob_65'):+.1f}% al año",
           "Cada año hay más personas 65+ entre las que repartir el gasto"]),
     ])
+    render_2_1_por_que(h)
+    st.divider()
+    st.markdown("#### Detalle del costo por persona de 65+")
     t1, t2, t3, t4, t5, t6 = st.tabs(["Evolución", "Qué lo explica", "Por beneficiario", "Frente al ingreso", "Proyección 2050", "Qué hacer"])
     with t1:
         c1, c2 = st.columns(2)
@@ -148,6 +152,68 @@ def render_2_1():
             f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. La cobertura cuenta beneficios, no personas.\n"
             f"- **Proyección:** población INE; ocupados proporcionales a la población 15-64; el ingreso crece como el PIB per cápita; con la base «promedio» el pago por ocupado pesa menos porque el ingreso promedio es mayor que la mediana."
         )
+
+
+PERIODOS_COSTO = (("2016 → 2021", 2016, 2021), ("2021 → 2025", 2021, 2025), ("2025 → 2050 (escenario)", 2025, 2050))
+
+
+def render_2_1_por_que(h: pd.DataFrame):
+    """Costos como problema nacional (punto 3 del profesor): qué sube más rápido y por qué, con las tres piezas exactas del costo del Pilar."""
+    cfg = cargar_escenarios()
+    pr = proyeccion_2_1(h, cfg["crecimiento_pib_real"], "constante", cfg["pgu_250"], "mediana")
+    ult = int(h.index[-1])
+    st.markdown("#### ¿Por qué suben los costos?")
+    st.markdown("El Pilar Solidario de vejez (la Pensión Garantizada Universal y las pensiones solidarias, que paga el Estado con impuestos) cuesta "
+                "**personas de 65+ × cuántas reciben beneficio × cuánto recibe cada beneficio**. Es una multiplicación exacta, así que se puede ver cuál de las tres "
+                "piezas explica el alza: la demografía (las personas de 65+) o las decisiones de política (a cuántas se llega y con cuánto).")
+    st.markdown("##### 1. ¿Qué sube más rápido?")
+    per = st.radio("Período", [f"{h.index[0]}-{ult} (observado)", f"{ult}-{ANIO_FIN_2_1} (escenario)"], horizontal=True, key="c21_periodo")
+    futuro = "escenario" in per
+    a0, a1 = (ult, ANIO_FIN_2_1) if futuro else (int(h.index[0]), ult)
+    idx = indices_costo(h, pr, a0, a1)
+    mostrar(estilo_kpi(cost_index_chart(idx, futuro), 520))
+    v = lambda c: idx[c].iloc[-1] / 100  # noqa: E731
+    subtitulo_visible(f"Qué muestra: cuánto creció cada cosa desde {a0} (= 100); lo que queda más arriba creció más rápido. Entre {a0} y {a1} el costo del Pilar se multiplica por {v('pilar'):.1f}, "
+                      f"el monto por beneficio por {v('monto'):.1f}, las personas de 65+ por {v('pob_65'):.1f} y la economía (PIB real) por {v('pib'):.1f}. "
+                      + ("Por eso el costo pesa cada vez más frente a la economía." if v("pilar") > v("pib") else "El costo crece menos que la economía."))
+    st.markdown("##### 2. ¿De dónde viene el aumento?")
+    descs = [(et, descomponer_pilar(h, pr, x0, x1)) for et, x0, x1 in PERIODOS_COSTO]
+    mostrar(estilo_kpi(cost_drivers_chart(descs), 400))
+    pp = lambda d, k: 100 * next(p["parte"] for p in d["partes"] if p["clave"] == k)  # noqa: E731
+    d0, d1, d2 = (d for _, d in descs)
+    subtitulo_visible(f"Qué muestra: de cada 100 pesos que sube el costo del Pilar, cuántos vienen de cada pieza. Hasta 2021 el monto por beneficio explica {pp(d0, 'monto'):.0f}; "
+                      f"con la PGU (2022) la cobertura pasa a {pp(d1, 'cobertura'):.0f} y el monto a {pp(d1, 'monto'):.0f}; hacia 2050 las personas de 65+ explican {pp(d2, 'pob_65'):.0f} "
+                      f"(escenario con la cobertura de {ult} constante). El motor pasa de la política a la demografía.")
+    st.markdown("##### 3. Las razones una por una (resumen)")
+    par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
+    anio28 = int(par.index[par.factor_costo_pgu >= par.factor_costo_pgu.max() - 1e-9][0])
+    p0, pf = h.iloc[0], h.iloc[-1]
+    g_resto = 100 * ((pf.resto / p0.resto) ** (1 / (ult - h.index[0])) - 1)
+    g_pib = 100 * (((pf.pib_pc_real * pf.pob_total) / (p0.pib_pc_real * p0.pob_total)) ** (1 / (ult - h.index[0])) - 1)
+    pc = lambda d, k: f"{pp(d, k):.0f} %"  # noqa: E731
+    filas = [
+        ("Más personas de 65+ (envejecimiento)", "Personas de 65+", pc(d0, "pob_65"), pc(d1, "pob_65"), pc(d2, "pob_65"),
+         f"De {p0.pob_65 / 1e6:.1f} a {pf.pob_65 / 1e6:.1f} millones entre {h.index[0]} y {ult}, y a {pr.loc[ANIO_FIN_2_1].pob_65 / 1e6:.1f} millones en {ANIO_FIN_2_1} (INE). Es la pieza que no depende de decisiones."),
+        ("Más personas reciben el beneficio", "Beneficios por persona de 65+", pc(d0, "cobertura"), pc(d1, "cobertura"), pc(d2, "cobertura"),
+         f"De {100 * p0.cobertura:.0f} a {100 * pf.cobertura:.0f} beneficios por cada 100 personas de 65+. La Pensión Garantizada Universal (Ley 21.419, desde febrero de {ANIO_PGU}) llegó a más gente. "
+         f"En el escenario se supone constante."),
+        ("Cada beneficio paga más", "Monto por beneficio", pc(d0, "monto"), pc(d1, "monto"), pc(d2, "monto"),
+         f"El pago anual real por beneficio pasa de ${p0.monto_por_beneficio / 1e6:.2f} a ${pf.monto_por_beneficio / 1e6:.2f} millones. "
+         f"La PGU de $250.000 (Ley 21.735) suma otro {100 * (par.factor_costo_pgu.max() - 1):.0f} % hasta {anio28} (escenario)."),
+        ("Menos trabajadores por persona de 65+", "No cambia el costo: cambia quién lo paga", "—", "—", "—",
+         f"Ocupados por persona de 65+: {pf.ocupados_por_65:.1f} en {ult} y {pr.loc[ANIO_FIN_2_1].ocupados_por_65:.1f} en {ANIO_FIN_2_1} (escenario). El mismo costo recae en menos personas: ver el KPI 1.2."),
+        ("Sistema antiguo y otros («resto»)", "Fuera del Pilar", "—", "—", "—",
+         f"Crece {g_resto:.1f} % al año en pesos reales ({h.index[0]}-{ult}), menos que el PIB ({g_pib:.1f} %): no empuja el alza. DIPRES no lo abre."),
+    ]
+    tabla = pd.DataFrame(filas, columns=["Posible razón", "En qué pieza cae", f"{PERIODOS_COSTO[0][0]}", f"{PERIODOS_COSTO[1][0]}", f"{PERIODOS_COSTO[2][0]}", "Trasfondo"])
+    tabla["Trasfondo"] = tabla["Trasfondo"].map(lambda x: es_cl(x).replace("$", "\\$"))  # coma decimal; sin que el «$» se lea como fórmula
+    st.table(tabla.set_index("Posible razón"))
+    _nota("Las tres columnas de períodos son el % del aumento del costo del Pilar que aporta cada pieza (los gráficos de arriba). "
+          f"Fuente: DIPRES (Estadísticas de las Finanzas Públicas), Subsecretaría de Previsión Social (PGU, PBS y APS), INE (población base 2024), pesos reales de {ANIO_BASE_COSTO}. "
+          f"Escenario hasta {ANIO_FIN_2_1}: PIB +{cfg['crecimiento_pib_real']:.0%} al año, PGU de $250.000 y cobertura constante; no es un pronóstico. "
+          "La cobertura cuenta beneficios, no personas (una persona puede tener más de uno), y el «Total» del Pilar incluye invalidez además de vejez. "
+          "El gasto en «Edad avanzada» incluye el sistema antiguo, que DIPRES no abre: por eso la descomposición es del Pilar y no de todo el gasto. "
+          "Cuánto pesa en el PIB: KPI 2.2. Hasta cuándo alcanza lo que aportan los cotizantes: KPI 1.2.")
 
 
 def _recomendaciones_2_1(h):
