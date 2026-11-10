@@ -49,7 +49,7 @@ def test_los_tres_factores_reproducen_la_cobertura():
     f = pd.read_csv(DP / "kpi_cobertura_factores_anual.csv")
     prod = 100 * f.participacion * f.empleo * f.cotizacion
     assert np.allclose(prod, f.cobertura_pct)
-    assert f.anio.min() == 2010 and f.anio.max() == 2023
+    assert f.anio.min() == 2010 and f.anio.max() == 2024
     assert not ((f.anio < 2018) & f.territorio_id.isin([8, 16])).any()  # antes de 2018 solo vale Biobío y Ñuble juntas
 
 
@@ -58,7 +58,7 @@ def test_aportes_suman_exacto_la_diferencia_de_cobertura():
     f = pd.read_csv(DP / "kpi_cobertura_factores_anual.csv").set_index(["territorio_id", "anio"]).cobertura_pct
     for (tid, comp), g in d.groupby(["territorio_id", "comparacion"]):
         if comp.startswith("Nivel"):
-            esperado = f[(tid, 2023)] - f[(0, 2023)]
+            esperado = f[(tid, 2024)] - f[(0, 2024)]
         else:
             a0, a1 = int(comp[7:11]), int(comp[12:16])
             esperado = f[(tid, a1)] - f[(tid, a0)]
@@ -67,7 +67,7 @@ def test_aportes_suman_exacto_la_diferencia_de_cobertura():
 
 def test_las_regiones_prioritarias_pierden_sobre_todo_por_cotizacion_de_los_ocupados():
     d = pd.read_csv(DP / "kpi_cobertura_descomposicion.csv")
-    n = d[(d.comparacion == "Nivel frente a Chile en 2023") & d.territorio_id.isin([9, 16])].pivot(index="territorio_id", columns="factor", values="aporte_pp")
+    n = d[(d.comparacion == "Nivel frente a Chile en 2024") & d.territorio_id.isin([9, 16])].pivot(index="territorio_id", columns="factor", values="aporte_pp")
     assert (n.idxmin(axis=1) == "cotizacion").all() and n.cotizacion.max() < -5  # La Araucanía y Ñuble
 
 
@@ -113,8 +113,8 @@ def test_pagina_muestra_tendencia_descomposicion_y_cambia_de_ventana():
     assert tend["layout"]["yaxis"]["range"][0] == 0  # eje desde 0
     assert len(tend["layout"]["shapes"]) >= 13  # franja 2020-2021 en cada panel
     vistos += titulos()
-    at.radio(key="cob_desc_comp").set_value("Cambio 2019-2023").run()
-    assert not at.exception and any(x.startswith("Entre 2019 y 2023") for x in titulos())
+    at.radio(key="cob_desc_comp").set_value("Cambio 2019-2024").run()
+    assert not at.exception and any(x.startswith("Entre 2019 y 2024") for x in titulos())
     vistos += titulos()
     for t in vistos:  # pauta de la clase: títulos sin siglas, también en las variantes
         assert not re.search(SIGLAS_PROHIBIDAS, re.sub(r"<[^>]+>", " ", t)), t
@@ -220,3 +220,66 @@ def test_pagina_muestra_los_escenarios_fijos_sin_cambiar_el_simulador():
     assert sp["layout"]["yaxis"]["range"][0] == 0
     # el simulador de arriba sigue igual: sus deslizadores y su resultado base
     assert at.slider(key="pc_carga").value == 10.0 and at.slider(key="pc_cobertura").value == 100
+
+
+def test_cambios_de_la_descomposicion_llegan_hasta_hoy():
+    """Los cambios son «2023 a hoy» y «2019 a hoy» (hoy = diciembre de 2024, el último con empleo por región), no 2019-2023."""
+    d = pd.read_csv(DP / "kpi_cobertura_descomposicion.csv")
+    assert {"Nivel frente a Chile en 2024", "Cambio 2023-2024", "Cambio 2019-2024"} <= set(d.comparacion)
+    e = pd.read_csv(DP / "ene_region_anual.csv")
+    e24 = e[(e.anio == 2024) & (e.territorio_id == 0)].iloc[0]
+    assert e24.fuente.startswith("Anexo del estudio") and e24.ocupados == 9394112 and (e[(e.anio == 2023)].fuente.str.startswith("ENE")).all()
+    # la serie del anexo es la misma de las exportaciones del INE: en 2019 coinciden (ver contraste); aquí, que 2024 es continua con 2023
+    pais = e[e.territorio_id == 0].set_index("anio").ocupados
+    assert abs(pais[2024] / pais[2023] - 1) < 0.03
+
+
+def test_filas_de_la_descomposicion_se_ordenan_por_cada_columna():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    clave = "la brecha con Chile viene sobre todo de"
+
+    def orden_y_valores(j):
+        sp = _spec_con_titulo(at, clave)
+        b = [t for t in sp["data"] if t["type"] == "bar"][j]
+        return list(sp["layout"]["yaxis"]["categoryarray"])[::-1], dict(zip(b["y"], _vals(b["x"])))  # arriba -> abajo
+
+    for j, col in enumerate(["Participación laboral", "Empleo (1 − desocupación)", "Ocupados que cotizan", "Diferencia total"]):
+        at.selectbox(key="cob_desc_orden").set_value({0: "participacion", 1: "empleo", 2: "cotizacion", 3: "total"}[j]).run()
+        arriba_abajo, v = orden_y_valores(j)
+        vals = [v[r] for r in arriba_abajo]
+        assert vals == sorted(vals), col  # de menor a mayor: arriba el valor más bajo
+    at.radio(key="cob_desc_dir").set_value("De mayor a menor").run()
+    arriba_abajo, v = orden_y_valores(3)
+    vals = [v[r] for r in arriba_abajo]
+    assert vals == sorted(vals, reverse=True)
+
+
+def test_resumen_de_razones_una_por_una():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    subt = [m.value for m in at.markdown if m.value.startswith("##### ")]
+    assert subt[-3:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
+                        "##### 3. ¿Qué características de las regiones se asocian con la cobertura? (estadística, no causa)"]
+
+
+def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    sp = _spec_con_titulo(at, "regiones combinan") or next(json.loads(el.proto.spec) for el in at.get("plotly_chart")
+                                                         if any(t.get("type") == "scatter" and t.get("mode") == "markers" and t.get("marker", {}).get("sizemode") == "area"
+                                                                for t in json.loads(el.proto.spec)["data"]))
+    puntos = [t for t in sp["data"] if t.get("mode") == "markers" and t.get("marker", {}).get("color") == "black" and t["marker"].get("size") == 5]
+    burbujas = [t for t in sp["data"] if t.get("marker", {}).get("sizemode") == "area"]
+    assert len(puntos) == 1 and len(burbujas) == 1 and len(_vals(puntos[0]["x"])) == len(_vals(burbujas[0]["x"])) == 16
+
+
+def test_escenarios_fijos_son_seis_paneles_con_costo_y_capacidad():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
+    assert len([t for t in sp["data"] if t["type"] == "scatter"]) == 12  # costo y capacidad en cada uno de los 6 paneles
+    costo = [_vals(t["y"]) for t in sp["data"] if "Costo" in t["hovertemplate"]]
+    assert len(costo) == 6 and all(c == costo[0] for c in costo)  # la curva del costo es la misma en los seis
+    lineas = [s for s in sp["layout"]["shapes"] if s["type"] == "line" and s["line"].get("dash") == "dash" and s["x0"] == s["x1"]]
+    assert len(lineas) == 6  # el cruce baja con una línea punteada al eje
+    anios = sorted(a["text"] for a in sp["layout"]["annotations"] if a["text"].startswith("<b>"))
+    assert anios == sorted(f"<b>{a}</b>" for a in (2038, 2044, 2048, 2036, 2048, 2055))  # el año, fuera del gráfico
+    assert not any(t.get("mode") and "text" in t.get("mode", "") for t in sp["data"])  # sin puntos con rótulo dentro del gráfico

@@ -59,19 +59,21 @@ cotizantes / pob. 15-64  =  (fuerza de trabajo / pob. 15-64) × (ocupados / fuer
                                 participación laboral             1 − desocupación               ocupados que cotizan
 ```
 
-Cada hipótesis del profesor cae en un factor: desempleo → empleo; informalidad y rama → ocupados que cotizan; participación (mujeres, desaliento) → participación. Los aportes se miden en puntos con la media logarítmica y **suman exacto** la diferencia de cobertura (test `test_aportes_suman_exacto_la_diferencia_de_cobertura`). Último diciembre con ENE: 2023.
+Cada hipótesis del profesor cae en un factor: desempleo → empleo; informalidad y rama → ocupados que cotizan; participación (mujeres, desaliento) → participación. Los aportes se miden en puntos con la media logarítmica y **suman exacto** la diferencia de cobertura (test `test_aportes_suman_exacto_la_diferencia_de_cobertura`). «Hoy» es diciembre de 2024, el último con ocupados y desocupados por región (2010-2023: exportaciones del INE; 2024: anexo del estudio de la Asociación de AFP, la misma serie). Para 2025 no hay empleo regional.
 
-**Diferencia con Chile en 2023 (puntos de cobertura):**
+**Diferencia con Chile hoy, 2024 (puntos de cobertura; las 5 regiones prioritarias recomendadas):**
 
 | Región | Participación | Empleo | Ocupados que cotizan | Total |
 |---|---|---|---|---|
-| La Araucanía | −1,7 | −0,6 | **−7,7** | −10,1 |
-| Ñuble | −1,8 | −0,1 | **−7,3** | −9,2 |
-| Coquimbo | −3,2 | −0,3 | −3,0 | −6,4 |
-| Valparaíso | +0,2 | −0,3 | **−3,4** | −3,5 |
-| Biobío | **−3,8** | +0,2 | +0,7 | −3,0 |
+| La Araucanía | −1,9 | −0,4 | **−7,7** | −10,0 |
+| Los Ríos | −0,1 | +0,5 | **−8,8** | −8,3 |
+| Valparaíso | −0,5 | −0,0 | **−3,7** | −4,2 |
+| Biobío | **−2,8** | −0,3 | +0,1 | −3,1 |
+| Los Lagos | **−2,9** | +1,9 | −2,1 | −3,1 |
 
-Lectura: en 3 de las 5 regiones prioritarias la diferencia viene sobre todo de que menos ocupados cotizan (La Araucanía, Ñuble, Valparaíso); en Biobío viene de la participación; en Coquimbo se reparte. **El desempleo casi no aporta en ninguna** (entre −0,6 y +0,2 puntos). Entre 2019 y 2023 el cambio vino de los ocupados que cotizan en 4 de 5 (Coquimbo +4,4, con −2,8 de participación).
+Lectura: en 3 de las 5 la diferencia viene sobre todo de que menos ocupados cotizan (La Araucanía, Los Ríos, Valparaíso); en Biobío y Los Lagos viene de la participación. **El desempleo casi no aporta** (entre −0,4 y +1,9 puntos; en Los Lagos incluso suma). El promedio de las 5: cotización −4,4, participación −1,7, empleo +0,3.
+
+**Cambios hasta hoy:** entre 2019 y 2024 la cobertura sumó +1,3 puntos en promedio en las 5 (La Araucanía +1,5, Biobío +2,1, Los Ríos +1,2, Los Lagos +1,4, Valparaíso +0,3), casi todo por «ocupados que cotizan» (+1,7 en promedio); Valparaíso es la excepción (−0,3 de cotización), en línea con el estudio de la Asociación de AFP, que le calcula −0,4. Entre 2023 y 2024 los cambios son chicos (+0,5 en promedio). En el tablero se elige «Diferencia con Chile hoy», «Cambio entre 2023 y hoy» o «Cambio entre 2019 y hoy», y las filas se ordenan por cada columna.
 
 ## 5. Asociaciones con la cobertura 2024 (16 regiones, no causas)
 

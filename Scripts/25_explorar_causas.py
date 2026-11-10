@@ -26,7 +26,8 @@ Descomposición (identidad exacta, por región y año; el trimestre móvil nov-e
   la misma proporción en las personas y en los ocupados). Así el empleo no cambia (es un cociente) y los cotizantes, que son un
   registro administrativo, se comparan con ocupados al nivel del Censo.
   Los aportes en puntos se reparten con la media logarítmica (LMDI): suman exacto la diferencia de cobertura.
-  Límite: la ENE llega a mar-may 2024, por eso la descomposición termina en diciembre de 2023.
+  Límite: la ENE del INE llega a mar-may 2024; diciembre de 2024 (el «hoy» de la descomposición) sale del anexo del estudio de la Asociación de AFP.
+  Para 2025 no hay ocupados por región.
 
 Salidas (Data processed/):
   - ene_region_anual.csv                   una fila por territorio y año (diciembre), con los datos de la ENE y el PIB
@@ -56,7 +57,7 @@ PIB_XLSX = EXT / "bcentral_pib_regional" / "CCNN2018_PIB_REGIONAL_T.xlsx"
 CENSO = ROOT / "Data raw" / "personas_censo2024.csv"
 NS = {"s": "urn:schemas-microsoft-com:office:spreadsheet"}
 
-ANIOS = range(2010, 2024)  # diciembre de cada año con ENE (nov-ene); la serie termina en mar-may 2024
+ANIOS = range(2010, 2025)  # diciembre de cada año (nov-ene): ENE hasta 2023 y, para 2024, el anexo del estudio de la Asociación de AFP
 ID_BIOBIO_NUBLE = 816
 FACTORES_DESC = ["participacion", "empleo", "cotizacion"]
 NOMBRE_FACTOR = {
@@ -70,11 +71,17 @@ AAFP = pd.DataFrame({
     "region_id": AAFP_ORDEN,
     "ocupados_2019": [112880, 164390, 317037, 143918, 375059, 873469, 3974401, 464109, 535323, 233379, 702575, 450027, 198424, 417411, 59890, 93350],
     "ocupados_2024": [115220, 188980, 347573, 152052, 382046, 907774, 4139320, 467349, 535765, 224828, 725671, 440402, 191634, 417133, 59240, 99125],
+    "desocupados_2024": [10131, 16612, 27629, 15475, 32416, 79965, 393492, 37209, 34674, 21834, 68902, 42586, 13978, 17888, 2579, 4062],
+    "informales_2024": [34141, 55732, 65500, 44161, 117139, 274377, 938650, 133466, 163351, 77156, 187182, 162237, 62880, 112010, 19315, 20063],
     "desocupados_2019": [8159, 14176, 25902, 11939, 32544, 76622, 346836, 38986, 35460, 17724, 59158, 32093, 11616, 16168, 2168, 3493],
     "informales_2019": [40434, 48541, 74864, 39002, 130828, 252876, 1089269, 133041, 189283, 80911, 185423, 163069, 70070, 122635, 18433, 18169],
     "cobertura_ocupados_2019": [56.3, 59.6, 64.2, 63.5, 53.8, 59.1, 64.2, 62.7, 58.1, 52.6, 64.1, 52.0, 49.5, 60.1, 49.9, 64.1],
     "cobertura_ocupados_2024": [57.7, 58.2, 67.0, 65.6, 59.2, 58.7, 63.4, 70.2, 61.5, 57.2, 65.3, 55.7, 53.4, 63.7, 55.7, 62.7],
 })
+
+
+# Total país del anexo (diciembre 2024): ocupados, desocupados, informales
+AAFP_PAIS_2024 = dict(ocupados=9394112, desocupados=819433, informales=2467359)
 
 
 def cargar_modulo(nombre_archivo: str):
@@ -166,7 +173,23 @@ def ene_anual() -> pd.DataFrame:
     e = pd.concat(filas, axis=1).reset_index()
     for c in ("ocupados", "desocupados", "informales"):
         e[c] = e[c] * 1000  # el INE publica en miles de personas
+    e = e.assign(fuente="ENE, INE (explorador de datos)")
+    e = pd.concat([e, ene_2024_aafp()], ignore_index=True)
     return e[e.anio.isin(ANIOS) | e.anio.isin([2017, 2018])].sort_values(["territorio_id", "anio"]).reset_index(drop=True)
+
+
+def ene_2024_aafp() -> pd.DataFrame:
+    """Diciembre de 2024 (el último con ocupados y desocupados por región): el anexo del estudio de la Asociación de AFP, que trae la ENE
+    del INE. El mismo anexo reproduce al decimal los datos de 2019 de las exportaciones del INE (contraste en kpi_cobertura_contraste_aafp.csv),
+    así que es la misma serie. Solo ocupados, desocupados e informales; las demás columnas quedan vacías."""
+    r = AAFP.set_index("region_id")
+    filas = [dict(anio=2024, territorio_id=i, ocupados=float(r.loc[i, "ocupados_2024"]), desocupados=float(r.loc[i, "desocupados_2024"]),
+                  informales=float(r.loc[i, "informales_2024"])) for i in r.index]
+    filas.append(dict(anio=2024, territorio_id=0, **{k: float(x) for k, x in AAFP_PAIS_2024.items()}))
+    d = pd.DataFrame(filas)
+    d["tasa_informal"] = 100 * d.informales / d.ocupados
+    return d.assign(fuente="Anexo del estudio de la Asociación de AFP (ENE, INE)")
+
 
 
 def pib_anual() -> pd.DataFrame:
@@ -245,7 +268,7 @@ def media_log(a: float, b: float) -> float:
     return a if np.isclose(a, b) else (a - b) / (np.log(a) - np.log(b))
 
 
-def descomposicion(f: pd.DataFrame, nivel_anio: int = 2023, cambios=((2019, 2023), (2010, 2019))) -> pd.DataFrame:
+def descomposicion(f: pd.DataFrame, nivel_anio: int = 2024, cambios=((2019, 2024), (2023, 2024), (2010, 2019))) -> pd.DataFrame:
     """Aporte de cada factor a (a) la diferencia con Chile en un año y (b) el cambio entre años, en puntos (LMDI: suma exacta)."""
     g = f.set_index(["territorio_id", "anio"])
     filas = []
@@ -465,7 +488,7 @@ def main():
     print("factores nuevos (nivel):")
     print(fac[fac.factor.isin(FACTORES_NUEVOS)][["nombre", "objetivo", "n", "pearson_r", "pearson_p", "elegido"]].round(2).to_string(index=False))
     print("mostrados:", list(fac[fac.elegido].nombre))
-    print("descomposición, 5 prioritarias vs Chile (nivel 2023):")
+    print("descomposición, 5 prioritarias vs Chile (nivel 2024):")
     print(d[(d.comparacion.str.startswith("Nivel")) & d.territorio_id.isin([9, 5, 8, 4, 16, 816])]
           .pivot(index="territorio", columns="factor_nombre", values="aporte_pp").round(1).to_string())
 

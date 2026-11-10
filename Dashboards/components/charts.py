@@ -920,9 +920,11 @@ def _burbujas(fig, df, x, y, hover, color, rango_x, rango_y, tam="cotizantes", t
                     customdata=np.stack([df[tam], df[tam_pct]], axis=1),
                     hovertemplate="<b>%{text}</b><br>" + hover
                     + f"<br>{tam_nombre}: %{{customdata[0]:,.0f}} (%{{customdata[1]:.1f}}% del total)<extra></extra>")
+    # punto negro en el centro de cada burbuja: ahí termina la línea del rótulo (sin él la línea acababa en la nada)
+    fig.add_scatter(x=df[x], y=df[y], mode="markers", showlegend=False, hoverinfo="skip", marker=dict(size=5, color="black"))
     for (dx, dy, linea), xi, yi, nombre in zip(_ubicar_rotulos(df[x], df[y], list(df.region_nombre), radios,
                                                                rango_x, rango_y), df[x], df[y], df.region_nombre):
-        fig.add_annotation(x=xi, y=yi, text=nombre, showarrow=linea, arrowhead=0, arrowwidth=1, arrowcolor=INK_MUTED,
+        fig.add_annotation(x=xi, y=yi, text=nombre, showarrow=linea, arrowhead=0, arrowwidth=1, arrowcolor=INK_MUTED, standoff=0,
                            ax=dx, ay=-dy, xshift=0 if linea else dx, yshift=0 if linea else dy,
                            font=dict(color=INK_PRIMARY, size=11))
 
@@ -1137,18 +1139,20 @@ FRASE_FACTOR = {  # (frase para la brecha con Chile, frase para el cambio en el 
 }
 
 
-def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombres: dict, todas: bool = False) -> go.Figure:
+def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombres: dict, todas: bool = False, orden: str = "total",
+                         ascendente: bool = True) -> go.Figure:
     """KPI 1.1, de dónde viene la diferencia de cobertura: cobertura = participación × empleo × cotización de los ocupados; el aporte
     de cada factor, en puntos, suma exacto la diferencia (media logarítmica). d = kpi_cobertura_descomposicion.csv; comparacion =
-    «Nivel frente a Chile en 2023» o «Cambio 2019-2023»; ids = regiones prioritarias; nombres = id -> nombre de las 16 regiones.
-    todas=True muestra las 16 regiones, ordenadas por gravedad (la que más pierde, arriba) y con las prioritarias en naranja; si no,
-    solo las prioritarias. La línea punteada es Chile: el 0 en la diferencia con Chile y su propio valor en el cambio."""
+    «Nivel frente a Chile en 2024», «Cambio 2023-2024» o «Cambio 2019-2024»; ids = regiones prioritarias; nombres = id -> nombre de las 16
+    regiones. todas=True muestra las 16 regiones con las prioritarias en naranja; si no, solo las prioritarias. `orden` es la columna por la
+    que se ordenan las filas («total», «participacion», «empleo» o «cotizacion») y `ascendente` la dirección: True = de menor a mayor, con
+    la que más pierde arriba. La línea punteada es Chile: el 0 en la diferencia con Chile y su propio valor en el cambio."""
     nivel = comparacion.startswith("Nivel")
     ver = list(nombres) if todas else list(ids)
     dd = d[d.comparacion == comparacion]
     ancho = dd[dd.territorio_id.isin(ver)].pivot(index="territorio_id", columns="factor", values="aporte_pp")
     ancho["total"] = ancho.sum(axis=1)
-    ancho = ancho.sort_values("total", ascending=False)  # la que más pierde (o la que menos gana), arriba
+    ancho = ancho.sort_values(orden, ascending=not ascendente)  # de abajo hacia arriba; la primera categoría del eje queda abajo
     chile = {} if nivel else dd[dd.territorio_id == 0].set_index("factor").aporte_pp.to_dict()
     chile = {k: chile.get(k, 0.0) for k in ("participacion", "empleo", "cotizacion")} if not nivel else {"participacion": 0.0, "empleo": 0.0, "cotizacion": 0.0}
     chile["total"] = sum(chile.values())
@@ -1181,66 +1185,52 @@ def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombres: 
     return fig
 
 
-COLOR_ESCENARIO = {  # clave de kpi_pc_escenarios_fijos.csv -> color (cuatro colores que se distinguen con daltonismo, ΔE ≥ 25)
-    "tope_10": INK_PRIMARY, "cobertura_cae": ORANGE, "mitad_informalidad": lighten(BLUE), "sin_informalidad": BLUE,
-}
+PANELES_ESCENARIOS = (  # (clave de kpi_pc_escenarios_fijos.csv, título del panel); la fila de arriba cambia el tope, la de abajo la cobertura
+    ("tope_10", "Tope 10 % (base)"), ("tope_11", "Tope 11 %"), ("tope_12", "Tope 12 %"),
+    ("cobertura_cae", "Cobertura sigue cayendo"), ("mitad_informalidad", "Mitad de los informales cotiza"), ("sin_informalidad", "Todos los informales cotizan"),
+)
 
 
 def fixed_scenarios_chart(esc: pd.DataFrame, series: dict, hasta: int = 2065) -> go.Figure:
-    """KPI 1.2, escenarios fijos: la carga requerida (% del sueldo de los cotizantes) de cada escenario frente al tope de carga.
-    Izquierda: la carga de hoy con los topes de 10, 11 y 12 %. Derecha: cómo cambia la carga si cambia la cobertura (tendencia que
-    sigue, mitad de los informales, todos los informales), con el tope de 10 %. El punto crítico es donde la curva cruza al tope.
-    esc = kpi_pc_escenarios_fijos.csv; series = {clave: (serie del motor, punto_critico)}. Máximo 4 líneas por panel."""
-    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, horizontal_spacing=0.05,
-                        subplot_titles=["Si el sistema tolera más (tope de carga)", "Si cambia la cobertura (tope de 10 %)"])
-    fila = esc.set_index("clave")
-
-    def curva(clave, col, nombre, color, ancho=3, pos="top left"):
-        d, pc = series[clave]
+    """KPI 1.2, escenarios fijos: un panel por escenario con las dos curvas del punto crítico, el costo del Pilar Solidario de vejez (la misma
+    en los seis, en rojo) y la capacidad (tope de carga × masa de ingreso de los cotizantes, en azul). El punto crítico es donde se cruzan: una
+    línea punteada baja del cruce al eje y el año se escribe fuera del gráfico, bajo el eje. Fila de arriba: el tope cambia (10, 11, 12 %);
+    fila de abajo: cambia la cobertura (tope de 10 %). Mismo eje vertical en los seis. esc = kpi_pc_escenarios_fijos.csv;
+    series = {clave: (serie del motor, punto_critico)}."""
+    unidades = {}
+    for clave, _ in PANELES_ESCENARIOS:
+        d = series[clave][0]
         d = d[(d.anio >= 2025) & (d.anio <= hasta)]
-        fig.add_scatter(x=d.anio, y=100 * d.carga_requerida, mode="lines", line=dict(color=color, width=ancho), showlegend=False,
-                        hovertemplate="%{x}: %{y:.1f}% del sueldo<extra>" + nombre + "</extra>", row=1, col=col)
+        unidades[clave] = d
+    div, unidad = _unidad_dinero(max(max(d.costo_total.max(), d.capacidad.max()) for d in unidades.values()))
+    ymax = max(max(d.costo_total.max(), d.capacidad.max()) for d in unidades.values()) / div * 1.08
+    fig = make_subplots(rows=2, cols=3, shared_yaxes=True, horizontal_spacing=0.04, vertical_spacing=0.2,
+                        subplot_titles=[t for _, t in PANELES_ESCENARIOS])
+    for i, (clave, _) in enumerate(PANELES_ESCENARIOS):
+        r, c = i // 3 + 1, i % 3 + 1
+        d, pc = unidades[clave], series[clave][1]
+        fig.add_scatter(x=d.anio, y=d.costo_total / div, mode="lines", line=dict(color=RED, width=2.5), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}<extra>Costo</extra>", row=r, col=c)
+        fig.add_scatter(x=d.anio, y=d.capacidad / div, mode="lines", line=dict(color=BLUE, width=2.5), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}<extra>Capacidad</extra>", row=r, col=c)
+        rotular_final(fig, [(hasta, float(d.costo_total.iloc[-1] / div), "Costo", RED), (hasta, float(d.capacidad.iloc[-1] / div), "Capacidad", BLUE)],
+                      row=r, col=c, rango_y=(0, ymax), alto_px=220, ancho_texto=12)
+        ampliar_derecha(fig, 2025, hasta, 0.38, row=r, col=c)
         if pc["estado"] == "cruza":
-            tope = 100 * fila.loc[clave, "carga_max"]
-            fig.add_scatter(x=[pc["anio_exacto"]], y=[tope], mode="markers+text", text=[f"{pc['anio']}"], textposition=pos, showlegend=False,
-                            marker=dict(color=color, size=10, line=dict(color="white", width=1.5)), textfont=dict(size=12, color=INK_PRIMARY),
-                            hovertemplate=f"Punto crítico {pc['anio']}<extra>{nombre}</extra>", row=1, col=col)
-        return d
-
-    # izquierda: una curva y tres topes
-    d0 = curva("tope_10", 1, "Carga requerida de hoy", INK_PRIMARY)
-    puntos_i = [(hasta, float(100 * d0.carga_requerida.iloc[-1]), "Carga requerida", INK_PRIMARY)]
-    for clave in ("tope_10", "tope_11", "tope_12"):
-        tope = 100 * float(fila.loc[clave, "carga_max"])
-        fig.add_hline(y=tope, line_dash="dash", line_color=INK_MUTED, line_width=1.2, row=1, col=1)
-        puntos_i.append((hasta, tope, f"Tope {tope:.0f} %", INK_MUTED))
-        if clave != "tope_10":
-            d, pc = series[clave]
-            fig.add_scatter(x=[pc["anio_exacto"]], y=[tope], mode="markers+text", text=[f"{pc['anio']}"], textposition="top left", showlegend=False,
-                            marker=dict(color=INK_PRIMARY, size=10, line=dict(color="white", width=1.5)), textfont=dict(size=12, color=INK_PRIMARY),
-                            hovertemplate=f"Punto crítico {pc['anio']}<extra>Tope {tope:.0f} %</extra>", row=1, col=1)
-    # derecha: cuatro curvas y el tope de 10 %
-    puntos_d = []
-    for clave, nombre, pos in (("cobertura_cae", "Sigue cayendo", "top left"), ("tope_10", "Como hoy", "bottom right"), ("mitad_informalidad", "Mitad de los informales", "bottom right"),
-                               ("sin_informalidad", "Todos los informales", "bottom right")):
-        d = curva(clave, 2, nombre, COLOR_ESCENARIO[clave], pos=pos)
-        anio = series[clave][1]["anio"]
-        puntos_d.append((hasta, float(100 * d.carga_requerida.iloc[-1]), f"{nombre} ({anio})", COLOR_ESCENARIO[clave]))
-    fig.add_hline(y=10, line_dash="dash", line_color=INK_MUTED, line_width=1.2, row=1, col=2)
-    puntos_d.append((hasta, 10.0, "Tope 10 %", INK_MUTED))
-    rotular_final(fig, puntos_i, row=1, col=1, rango_y=(0, 22), alto_px=400, ancho_texto=18)
-    rotular_final(fig, puntos_d, row=1, col=2, rango_y=(0, 22), alto_px=400, ancho_texto=24)
-    for c in (1, 2):
-        ampliar_derecha(fig, 2025, hasta, 0.42, row=1, col=c)
-    anios = {c: series[c][1]["anio"] for c in series if series[c][1]["estado"] == "cruza"}
+            y_cruce = float(np.interp(pc["anio_exacto"], d.anio, d.capacidad / div))
+            fig.add_shape(type="line", x0=pc["anio_exacto"], x1=pc["anio_exacto"], y0=0, y1=y_cruce, line=dict(color=INK_PRIMARY, width=1.2, dash="dash"), row=r, col=c)
+            eje = "" if i == 0 else str(i + 1)  # make_subplots numera los ejes x, x2, x3... en orden de panel
+            fig.add_annotation(x=pc["anio_exacto"], y=0, xref=f"x{eje}", yref=f"y{eje}", text=f"<b>{pc['anio']}</b>", showarrow=False,
+                               yshift=-34, yanchor="top", font=dict(size=12, color=INK_PRIMARY))
+    anios = {c: series[c][1]["anio"] for c, _ in PANELES_ESCENARIOS if series[c][1]["estado"] == "cruza"}
     lo, hi = min(anios, key=anios.get), max(anios, key=anios.get)
-    nombre = lambda c: fila.loc[c, "nombre"].lower().split(" (")[0]  # noqa: E731
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=20, t=110, b=50)}, showlegend=False,
-                      title=_titulo(f"El punto crítico va de {anios[lo]} a {anios[hi]} según el escenario: de «{nombre(lo)}» a «{nombre(hi)}»",
-                                    "Carga requerida del Pilar Solidario de vejez, % del sueldo de los cotizantes; el punto crítico es donde la curva cruza el tope", ancho=80))
-    fig.update_xaxes(dtick=10, tickvals=[2025, 2035, 2045, 2055, 2065], range=[2025, hasta + 0.42 * (hasta - 2025)])
-    fig.update_yaxes(range=[0, 22], ticksuffix="%", title="")
-    for an in fig.layout.annotations[:2]:
+    nombre = dict(PANELES_ESCENARIOS)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=20, t=110, b=60)}, showlegend=False,
+                      title=_titulo(f"El punto crítico va de {anios[lo]} a {anios[hi]}: de «{nombre[lo].lower()}» a «{nombre[hi].lower()}»",
+                                    f"Costo y capacidad del Pilar Solidario de vejez, {unidad}; el punto crítico es donde se cruzan (año bajo el eje)", ancho=80))
+    fig.update_xaxes(tickvals=[2025, 2045, 2065], range=[2025, hasta + 0.38 * (hasta - 2025)])
+    fig.update_yaxes(range=[0, ymax])
+    for an in fig.layout.annotations[:6]:
         an.font = dict(size=12, color=INK_PRIMARY)
     return fig
 
