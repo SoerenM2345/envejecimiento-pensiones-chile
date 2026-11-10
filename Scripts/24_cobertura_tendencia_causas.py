@@ -36,7 +36,8 @@ Salidas (Data processed/):
   - kpi_cobertura_tendencia.csv   anio, territorio_id (0 país, 1-16 regiones, 801/810/816 series fusionadas), territorio, cotizantes,
                                   pob_15_64 (al nivel del Censo), cobertura_pct, y la misma cobertura con la proyección del INE sin
                                   ajustar (pob_15_64_proy, cobertura_sin_ajuste_pct)
-  - kpi_cobertura_regiones.csv    una fila por región: cobertura 2019/2022/2025, cambios en puntos, peso en los cotizantes, brecha, prioridad,
+  - kpi_cobertura_regiones.csv    una fila por región: cobertura 2019/2022/2024/2025, cambios en puntos, y con el año de referencia (ANIO_REF = 2024)
+                                  cobertura_ref, cambio_2019_ref, cambio_2022_ref, peso en los cotizantes, brecha y las 4 listas prioritarias,
                                   y los factores del Censo 2024 (desocupación, independientes, ramas, migración, escolaridad)
   - kpi_cobertura_factores.csv    cada factor candidato con su correlación con la cobertura 2024 (16 regiones)
 """
@@ -66,6 +67,10 @@ FUSIONES = {  # id de la serie fusionada -> (nombre, regiones, primer año en qu
 PARTICION = [2, 3, 4, 5, 6, 7, 9, 11, 12, 13, *FUSIONES]  # territorios sin solapamiento que suman el país en todos los años
 SEPARADAS_DESDE = {1: 2007, 10: 2007, 8: 2018}  # región «grande» que hasta ese año incluye a la nueva en su numerador
 N_PRIORIDAD = 5
+# Año de referencia de todas las comparaciones del KPI 1.1 (barras, listas de regiones prioritarias, tabla y descomposición). 2024 es el año
+# del Censo (la única población medida, no proyectada) y el último con ocupados por región; 2025 tiene cotizantes pero su población es una
+# proyección y no hay empleo regional. Si se consiguen la ENE de 2025 y la proyección regional base 2024, basta cambiar esta constante.
+ANIO_REF = 2024
 
 RAMAS = {  # CAENES (CIIU rev. 4): letra -> nombre
     "A": "Agricultura, ganadería, silvicultura y pesca", "B": "Minería", "C": "Industria manufacturera", "F": "Construcción",
@@ -204,19 +209,24 @@ def main():
         r[f"cobertura_{a}"] = cob[a].reindex(r.index)
     r["cobertura_2010"] = r.cobertura_2010.where(~r.index.isin([8, 16]))  # Biobío y Ñuble separados solo desde 2018
     cotz = t.pivot(index="territorio_id", columns="anio", values="cotizantes")
-    r["peso_cotizantes_pct"] = 100 * cotz[2025].reindex(r.index) / cotz.loc[0, 2025]  # parte de los cotizantes del país (con región)
+    r["anio_ref"] = ANIO_REF
+    r["cobertura_ref"] = cob[ANIO_REF].reindex(r.index)
+    r["cambio_2019_ref"] = r.cobertura_ref - r.cobertura_2019
+    r["cambio_2022_ref"] = r.cobertura_ref - r.cobertura_2022
+    r["peso_cotizantes_pct"] = 100 * cotz[ANIO_REF].reindex(r.index) / cotz.loc[0, ANIO_REF]  # parte de los cotizantes del país (con región)
     r["cambio_2010_2025"] = r.cobertura_2025 - r.cobertura_2010
     r["cambio_2019_2025"] = r.cobertura_2025 - r.cobertura_2019
     r["cambio_2022_2025"] = r.cobertura_2025 - r.cobertura_2022
     nac25 = cob.loc[0, 2025]
+    nac_ref = cob.loc[0, ANIO_REF]
     # brecha de cotizantes: cuántos cotizantes más habría si la región alcanzara la cobertura del país (pesa tanto el nivel como el tamaño)
-    r["brecha_cotizantes"] = (nac25 - r.cobertura_2025).clip(lower=0) / 100 * r.pob_15_64
+    r["brecha_cotizantes"] = (nac_ref - r.cobertura_ref).clip(lower=0) / 100 * r.pob_15_64
     top = lambda rank: rank.where(rank <= N_PRIORIDAD)  # noqa: E731
     # cuatro listas de las 5 regiones «más importantes» (el dashboard deja elegir; ver docs/SHORTLIST_REGIONES.md)
     r["prioridad_brecha"] = top(r.brecha_cotizantes.rank(ascending=False, method="first"))  # nivel × tamaño
-    r["prioridad_caida"] = top(r.cambio_2022_2025.rank(method="first"))  # caída de la cobertura desde 2022 (puntos), la más fuerte primero
+    r["prioridad_caida"] = top(r.cambio_2022_ref.rank(method="first"))  # caída de la cobertura desde 2022 (puntos), la más fuerte primero
     r["prioridad_peso"] = top(r.peso_cotizantes_pct.rank(ascending=False, method="first"))  # parte de los cotizantes del país
-    cae = (r.brecha_cotizantes > 0) & (r.cambio_2022_2025 < 0)  # bajo el promedio de Chile y bajando
+    cae = (r.brecha_cotizantes > 0) & (r.cambio_2022_ref < 0)  # bajo el promedio de Chile y bajando
     r["prioridad_brecha_caida"] = top((r.brecha_cotizantes + 1e9 * cae).rank(ascending=False, method="first"))  # primero las que caen, por brecha
     r["prioridad"] = r.prioridad_brecha_caida  # la recomendada: la que muestra el dashboard por defecto
     f = factores_censo()
@@ -225,7 +235,7 @@ def main():
         f[c] = cor[c]
         f.loc[0, c] = np.average(cor[c], weights=ind.pob_total.reindex(cor.index))  # Chile: promedio ponderado por población
     f_regiones = f.drop(index=0)
-    f_pais = f.loc[[0]].assign(region_nombre="Chile", pob_15_64=ind.pob_15_64.sum(), cobertura_2025=nac25)
+    f_pais = f.loc[[0]].assign(region_nombre="Chile", pob_15_64=ind.pob_15_64.sum(), cobertura_2025=nac25, cobertura_ref=nac_ref, anio_ref=ANIO_REF)
     r = r.join(f_regiones)
     r = pd.concat([f_pais, r])
     r.index.name = "region_id"
@@ -252,7 +262,7 @@ def main():
     p = lambda v: f"{v:.1f}".replace(".", ",")  # noqa: E731
     print(f"cobertura del país 2010 / 2019 / 2022 / 2025: {p(cob.loc[0, 2010])} / {p(cob.loc[0, 2019])} / {p(cob.loc[0, 2022])} / {p(cob.loc[0, 2025])}")
     print("prioridad (bajo el promedio de Chile y cayendo desde 2022, por brecha de cotizantes):")
-    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_2025", "cambio_2019_2025", "cambio_2022_2025", "brecha_cotizantes"]]
+    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "brecha_cotizantes"]]
           .round(1).to_string())
     print("factores con mayor correlación con la cobertura 2024:")
     print(fac[["nombre", "hipotesis", "pearson_r", "pearson_p", "elegido"]].head(12).round(2).to_string(index=False))

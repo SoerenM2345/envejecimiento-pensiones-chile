@@ -130,11 +130,11 @@ def test_el_selector_de_criterio_cambia_las_regiones_analizadas():
             if "la brecha con Chile viene sobre todo de" in sp.get("layout", {}).get("title", {}).get("text", ""):
                 return set(sp["data"][0]["y"])
 
-    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Los Ríos", "Los Lagos"}  # recomendada
+    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"}  # recomendada (2024)
     at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
     assert not at.exception and regiones_descomposicion() == {"Metropolitana", "Valparaíso", "Biobío", "Maule", "O'Higgins"}
-    at.radio(key="cob_criterio").set_value("Mayor brecha de cotizantes").run()
-    assert not at.exception and regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"}
+    at.radio(key="cob_criterio").set_value("Caída más fuerte desde 2022").run()
+    assert not at.exception and regiones_descomposicion() == {"Arica y Parinacota", "Valparaíso", "Metropolitana", "Biobío", "Los Ríos"}
 
 
 def _vals(a):
@@ -169,7 +169,7 @@ def test_grafico_largo_tiene_tres_lineas_desde_2002():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
     sp = _spec_con_titulo(at, "La distancia entre Magallanes y La Araucanía")
     lineas = [t for t in sp["data"] if t.get("mode") == "lines"]
-    assert len(lineas) == 3 and all(_vals(t["x"])[0] == 2002 and _vals(t["x"])[-1] == 2025 for t in lineas)
+    assert len(lineas) == 3 and all(_vals(t["x"])[0] == 2002 and _vals(t["x"])[-1] == 2024 for t in lineas)  # hasta el año de referencia
     assert sp["layout"]["yaxis"]["range"][0] == 0
     at.radio(key="cob_largo_modo").set_value("Mayor caída desde 2022").run()
     assert _spec_con_titulo(at, "Magallanes y Valparaíso") is not None  # la prioritaria que más cayó

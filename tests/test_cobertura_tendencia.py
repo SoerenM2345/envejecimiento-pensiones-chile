@@ -63,10 +63,10 @@ def test_prioridad_son_5_regiones_y_la_brecha_es_cotizantes_que_faltan(datos):
     r = datos["r"][datos["r"].region_id > 0]
     prio = r[r.prioridad.notna()]
     assert sorted(prio.prioridad) == [1, 2, 3, 4, 5]
-    nac = datos["r"].query("region_id == 0").cobertura_2025.iloc[0]
-    assert (prio.cobertura_2025 < nac).all()  # solo regiones bajo el promedio tienen brecha
+    nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
+    assert (prio.cobertura_ref < nac).all()  # solo regiones bajo el promedio tienen brecha
     ejemplo = prio.iloc[0]
-    assert ejemplo.brecha_cotizantes == pytest.approx((nac - ejemplo.cobertura_2025) / 100 * ejemplo.pob_15_64, rel=1e-3)
+    assert ejemplo.brecha_cotizantes == pytest.approx((nac - ejemplo.cobertura_ref) / 100 * ejemplo.pob_15_64, rel=1e-3)
     assert set(prio.sort_values("prioridad").region_nombre.head(2)) == {"La Araucanía", "Valparaíso"}
 
 
@@ -75,10 +75,12 @@ def test_cuatro_listas_de_5_regiones_y_la_recomendada_es_brecha_mas_caida(datos)
     for col in ("prioridad_brecha", "prioridad_caida", "prioridad_peso", "prioridad_brecha_caida"):
         assert sorted(r[col].dropna()) == [1, 2, 3, 4, 5], col
     assert list(r.prioridad_brecha.dropna().sort_values().index) == ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"]
-    assert list(r.prioridad_caida.dropna().sort_values().index)[:3] == ["Arica y Parinacota", "Valparaíso", "Biobío"]
+    assert list(r.prioridad_caida.dropna().sort_values().index)[:3] == ["Arica y Parinacota", "Valparaíso", "Metropolitana"]
+    # con 2024 como año de referencia las 5 de mayor brecha ya cayeron todas desde 2022: la lista «bajo el promedio y en caída» coincide con la de brecha
+    assert set(r.prioridad_brecha_caida.dropna().index) == set(r.prioridad_brecha.dropna().index)
     assert list(r.prioridad_peso.dropna().sort_values().index)[:2] == ["Metropolitana", "Valparaíso"]
     rec = r[r.prioridad_brecha_caida.notna()]
-    assert (rec.brecha_cotizantes > 0).all() and (rec.cambio_2022_2025 < 0).all()  # bajo el promedio de Chile y en caída
+    assert (rec.brecha_cotizantes > 0).all() and (rec.cambio_2022_ref < 0).all()  # bajo el promedio de Chile y en caída
     assert (r.prioridad.fillna(0) == r.prioridad_brecha_caida.fillna(0)).all()  # la que muestra el dashboard por defecto
 
 
@@ -113,3 +115,15 @@ def test_pagina_muestra_la_tendencia_entre_el_primer_bloque_y_las_correlaciones(
     subtitulos = [h.value for h in at.markdown if h.value.startswith("#### ")]
     assert "#### ¿Sube o baja la cobertura?" in subtitulos
     assert "#### ¿Qué puede explicar la baja cobertura en las regiones prioritarias?" in subtitulos
+
+
+def test_el_ano_de_referencia_es_2024_en_todo_el_bloque(datos):
+    """Problema y causas comparten el mismo año: el del Censo y el último con empleo por región (2024)."""
+    r = datos["r"]
+    assert (r.anio_ref == 2024).all()
+    reg = r[r.region_id > 0].set_index("region_id")
+    t = datos["t"]
+    c = t[t.territorio_id.between(1, 16)].pivot(index="territorio_id", columns="anio", values="cobertura_pct")
+    assert (reg.cobertura_ref - c[2024].reindex(reg.index)).abs().max() < 1e-3
+    assert (reg.cambio_2022_ref - (c[2024] - c[2022]).reindex(reg.index)).abs().max() < 1e-3
+    assert reg.peso_cotizantes_pct.sum() == pytest.approx(100, abs=0.01)

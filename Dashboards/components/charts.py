@@ -1000,23 +1000,23 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, 
     return con_coma(fig)
 
 
-def region_change_bars(df: pd.DataFrame, ids_sel: list, cambio_pais: float, desde: int = 2022, hasta: int = 2025) -> go.Figure:
+def region_change_bars(df: pd.DataFrame, ids_sel: list, cambio_pais: float, desde: int = 2022, hasta: int = 2024) -> go.Figure:
     """KPI 1.1: cuánto cambió la cobertura de cada región entre `desde` y `hasta` (puntos), con el mismo diseño de las barras de
     cobertura por región (barras horizontales y línea punteada del país). La región que más perdió, arriba; las regiones prioritarias
-    en naranja y las demás en azul. df = filas de región de kpi_cobertura_regiones.csv (region_id, region_nombre, cambio_2022_2025)."""
-    d = df.sort_values("cambio_2022_2025")
+    en naranja y las demás en azul. df = filas de región de kpi_cobertura_regiones.csv (region_id, region_nombre, cambio_2022_ref)."""
+    d = df.sort_values("cambio_2022_ref")
     sel = d.region_id.isin(ids_sel)
-    fig = go.Figure(go.Bar(y=d.region_nombre, x=d.cambio_2022_2025, orientation="h", marker_color=[ORANGE if v else BLUE for v in sel],
-                           text=[f"{v:+.1f}" for v in d.cambio_2022_2025], textposition="outside", cliponaxis=False,
+    fig = go.Figure(go.Bar(y=d.region_nombre, x=d.cambio_2022_ref, orientation="h", marker_color=[ORANGE if v else BLUE for v in sel],
+                           text=[f"{v:+.1f}" for v in d.cambio_2022_ref], textposition="outside", cliponaxis=False,
                            hovertemplate="%{y}: %{x:+.2f} puntos<extra></extra>"))
     fig.add_vline(x=cambio_pais, line_dash="dash", line_color="#52514e", annotation_text=f"Chile: {cambio_pais:+.1f}", annotation_position="top")
     peor, mejor = d.iloc[0], d.iloc[-1]
-    n_baja = int((d.cambio_2022_2025 < 0).sum())
+    n_baja = int((d.cambio_2022_ref < 0).sum())
     fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
-                      title=_titulo(f"{peor.region_nombre} perdió la mayor cobertura desde {desde} ({peor.cambio_2022_2025:+.1f} puntos); {n_baja} de {len(d)} regiones bajaron",
+                      title=_titulo(f"{peor.region_nombre} perdió la mayor cobertura desde {desde} ({peor.cambio_2022_ref:+.1f} puntos); {n_baja} de {len(d)} regiones bajaron",
                                     f"Puntos de cobertura entre {desde} y {hasta}; naranja = prioritarias", ancho=60))
     fig.update_yaxes(categoryorder="total descending", title="")
-    lim = float(d.cambio_2022_2025.abs().max()) * 1.25
+    lim = float(d.cambio_2022_ref.abs().max()) * 1.25
     fig.update_xaxes(range=[-lim, lim], zeroline=True, zerolinecolor=INK_PRIMARY, title=f"Puntos de cobertura ({hasta} menos {desde})")
     return fig
 
@@ -1028,8 +1028,8 @@ def extremos_largo(reg: pd.DataFrame, ids_sel: list, modo: str = "nivel"):
     """(región prioritaria que se dibuja, mejor región del país) del gráfico largo: entre las prioritarias, la de menor cobertura hoy
     («nivel») o la que más cayó desde 2022 («caida»); la mejor es la de mayor cobertura hoy entre las 16."""
     sel = reg[reg.region_id.isin(ids_sel)]
-    peor = sel.loc[sel.cobertura_2025.idxmin() if modo == "nivel" else sel.cambio_2022_2025.idxmin()]
-    return peor, reg.loc[reg.cobertura_2025.idxmax()]
+    peor = sel.loc[sel.cobertura_ref.idxmin() if modo == "nivel" else sel.cambio_2022_ref.idxmin()]
+    return peor, reg.loc[reg.cobertura_ref.idxmax()]
 
 
 def coverage_long_chart(t: pd.DataFrame, reg: pd.DataFrame, ids_sel: list, modo: str = "nivel") -> go.Figure:

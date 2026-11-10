@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
+from utils import subtitulo_visible as _subtitulo_visible
 from components.kpi_card import kpi_card
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
@@ -51,11 +52,6 @@ def render_1_1():
     st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
 
 
-def _subtitulo_visible(texto: str):
-    """Qué muestra el gráfico de arriba, en letra más grande que un pie de figura (el pie es para fuentes y límites)."""
-    st.markdown(f"<div style='font-size:1.05rem;font-weight:600;line-height:1.45;margin:-0.2rem 0 1.1rem 0'>{_coma(texto)}</div>", unsafe_allow_html=True)
-
-
 CRITERIOS = {  # etiqueta -> (columna de kpi_cobertura_regiones.csv, definición para el pie de la tabla)
     "Bajo el promedio y en caída (recomendado)": ("prioridad_brecha_caida", "las 5 regiones con cobertura bajo la de Chile que además perdieron cobertura desde 2022, ordenadas por brecha de cotizantes"),
     "Mayor brecha de cotizantes": ("prioridad_brecha", "las 5 regiones con mayor brecha de cotizantes: (cobertura de Chile − cobertura de la región) × población de 15 a 64 años de la región; pesa el nivel y el tamaño"),
@@ -74,19 +70,21 @@ def _prioritarias(reg: pd.DataFrame) -> pd.DataFrame:
 def render_1_1_tendencia():
     """Pedido del profesor: ¿la cobertura sube o baja?, ¿dónde es más baja y dónde pesa más? (Scripts/24)."""
     st.markdown("#### ¿Sube o baja la cobertura?")
-    t = load_csv("kpi_cobertura_tendencia.csv")
     reg = load_csv("kpi_cobertura_regiones.csv")
+    ref = int(reg.anio_ref.iloc[0])  # año de referencia de todo el bloque (2024: el del Censo y el último con empleo por región)
+    t = load_csv("kpi_cobertura_tendencia.csv")
+    t = t[t.anio <= ref]
     reg16 = reg[reg.region_id > 0]
     criterio = st.radio("Regiones prioritarias (las 5 de cada criterio)", list(CRITERIOS), horizontal=True, key="cob_criterio",
                         help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista de 5; la recomendada es: cobertura bajo la de Chile y en caída desde 2022.")
     prio = _prioritarias(reg)
     ids_sel = [int(i) for i in prio.region_id]
     pais = t[t.territorio_id == 0].set_index("anio").cobertura_pct
-    cambio_pais = float(pais[2025] - pais[2022])
+    cambio_pais = float(pais[ref] - pais[2022])
     mostrar(estilo_kpi(region_change_bars(reg16, ids_sel, cambio_pais), 640))
     sel16 = reg16.region_id.isin(ids_sel)
-    n_sel, n_otras = int((reg16[sel16].cambio_2022_2025 < 0).sum()), int((reg16[~sel16].cambio_2022_2025 < 0).sum())
-    _subtitulo_visible(f"Qué muestra: cuántos puntos de cobertura ganó o perdió cada región entre 2022 y 2025; la que más perdió, arriba. Naranja = las 5 regiones "
+    n_sel, n_otras = int((reg16[sel16].cambio_2022_ref < 0).sum()), int((reg16[~sel16].cambio_2022_ref < 0).sum())
+    _subtitulo_visible(f"Qué muestra: cuántos puntos de cobertura ganó o perdió cada región entre 2022 y {ref}; la que más perdió, arriba. Naranja = las 5 regiones "
                        f"prioritarias, azul = las otras 11, línea punteada = Chile ({cambio_pais:+.1f} puntos). Bajaron {n_sel} de las 5 prioritarias y {n_otras} de las otras 11.")
     st.markdown("##### Chile, la región prioritaria más rezagada y la mejor región, desde 2002")
     modo_txt = st.radio("Región prioritaria que se dibuja", ["Cobertura más baja hoy", "Mayor caída desde 2022"], horizontal=True, key="cob_largo_modo")
@@ -94,7 +92,7 @@ def render_1_1_tendencia():
     peor, mejor = extremos_largo(reg16, ids_sel, modo)
     mostrar(estilo_kpi(coverage_long_chart(t, reg16, ids_sel, modo), 560))
     _subtitulo_visible(f"Qué muestra: la cobertura de Chile, la de {peor.region_nombre} (la prioritaria con {'la cobertura más baja hoy' if modo == 'nivel' else 'la mayor caída desde 2022'}, "
-                       f"{peor.cobertura_2025:.1f}%) y la de {mejor.region_nombre} (la mejor, {mejor.cobertura_2025:.1f}%) desde 2002. Franja gris = 2020 y 2021. "
+                       f"{peor.cobertura_ref:.1f}%) y la de {mejor.region_nombre} (la mejor, {mejor.cobertura_ref:.1f}%), de 2002 a {ref}. Franja gris = 2020 y 2021. "
                        "Si las líneas de la prioritaria y la mejor no se acercan, la brecha entre regiones no se está cerrando.")
     st.caption("Fuente: Superintendencia de Pensiones (cotizantes de diciembre) e INE (proyección de población base 2017, llevada al nivel del Censo 2024). Antes de 2007 y de 2018 algunas regiones van fusionadas (ver nota al pie).")
     st.markdown("##### Región por región")
@@ -107,26 +105,27 @@ def render_1_1_tendencia():
                                        "Marcada, se usa la proyección tal como la publicó el INE y el Censo 2024 aparece como un punto aparte (rombo). "
                                        "La tendencia es la misma; cambia el nivel.")
     mostrar(estilo_kpi(coverage_trend_panels(t, ids_sel, ventana, sin_ajustar), 720))
-    st.caption("Paneles de la cobertura más baja a la más alta en el último año. Fuente: Superintendencia de Pensiones (cotizantes de diciembre, 1985-2025), INE (proyección de población base 2017) y Censo 2024.")
-    bajan = reg16[reg16.cambio_2022_2025 < 0]
+    st.caption("Paneles de la cobertura más baja a la más alta en el último año. Fuente: Superintendencia de Pensiones (cotizantes de diciembre), INE (proyección de población base 2017) y Censo 2024.")
+    bajan = reg16[reg16.cambio_2022_ref < 0]
     nac = reg[reg.region_id == 0].iloc[0]
     st.markdown(_coma(
         f"**Lectura:** {len(bajan)} de las 16 regiones tienen hoy menos cobertura que en 2022 "
-        f"({', '.join(bajan.sort_values('cambio_2022_2025').region_nombre)}). Las 5 prioritarias suman una brecha de "
-        f"{f'{prio.brecha_cotizantes.sum():,.0f}'.replace(',', '.')} cotizantes frente al promedio de Chile ({nac.cobertura_2025:.1f}%)."))
-    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_2025", "cambio_2019_2025", "cambio_2022_2025", "brecha_cotizantes"]].rename(columns={
-        "region_nombre": "Región prioritaria", "peso_cotizantes_pct": "Peso (% de los cotizantes)", "cobertura_2025": "Nivel: cobertura 2025 (%)",
-        "cambio_2019_2025": "Tendencia desde 2019 (puntos)", "cambio_2022_2025": "Tendencia desde 2022 (puntos)",
+        f"({', '.join(bajan.sort_values('cambio_2022_ref').region_nombre)}). Las 5 prioritarias suman una brecha de "
+        f"{f'{prio.brecha_cotizantes.sum():,.0f}'.replace(',', '.')} cotizantes frente al promedio de Chile ({nac.cobertura_ref:.1f}% en {ref})."))
+    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "brecha_cotizantes"]].rename(columns={
+        "region_nombre": "Región prioritaria", "peso_cotizantes_pct": "Peso (% de los cotizantes)", "cobertura_ref": f"Nivel: cobertura {ref} (%)",
+        "cambio_2019_ref": "Tendencia desde 2019 (puntos)", "cambio_2022_ref": "Tendencia desde 2022 (puntos)",
         "brecha_cotizantes": "Brecha (personas)"})
-    st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", "Nivel: cobertura 2025 (%)": "{:.1f}", "Tendencia desde 2019 (puntos)": "{:+.1f}",
+    st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", f"Nivel: cobertura {ref} (%)": "{:.1f}", "Tendencia desde 2019 (puntos)": "{:+.1f}",
                                      "Tendencia desde 2022 (puntos)": "{:+.1f}", "Brecha (personas)": "{:,.0f}"}, decimal=",", thousands="."),
                  hide_index=True, use_container_width=True)
     mayor = reg16.sort_values("pob_15_64").iloc[-1]
     fuera = "" if mayor.region_id in set(prio.region_id) else (
-        f" {mayor.region_nombre}, la más grande, queda fuera: su cobertura ({mayor.cobertura_2025:.1f}%) está sobre el promedio.")
+        f" {mayor.region_nombre}, la más grande, queda fuera: su cobertura ({mayor.cobertura_ref:.1f}%) está sobre el promedio.")
     st.caption(_coma(
         f"\\* Prioridad = {CRITERIOS[criterio][1]}.{fuera}  \n"
-        "La población de cada región por año es la proyección del INE base 2017 llevada al nivel del Censo 2024: 2018-2025 son proyecciones, no datos. "
+        f"Todo el bloque usa {ref} como año de referencia (el del Censo 2024 y el último con empleo por región); 2025 queda fuera porque su población es solo una proyección y no hay empleo regional. "
+        "La población de cada región por año es la proyección del INE base 2017 llevada al nivel del Censo 2024: 2018-2024 son proyecciones salvo 2024, que es el Censo. "
         "Hasta 2017 Biobío y Ñuble son una sola serie, y hasta 2006 Tarapacá con Arica y Parinacota y Los Lagos con Los Ríos (la Superintendencia las publicó juntas). "
         "Entre 2006 y 2007 la cobertura sube 3 puntos en casi todas las regiones: puede ser un cambio en cómo se cuenta, no confirmado. "
         "Detalle y límites en docs/supuestos_y_limitaciones.md."))

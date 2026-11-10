@@ -194,6 +194,12 @@ def es_cl(texto):
     return marcado
 
 
+def subtitulo_visible(texto: str):
+    """Qué muestra el gráfico de arriba, en letra más grande que un pie de figura (el pie es para fuentes y límites). Coma decimal es-CL."""
+    st.markdown(f"<div style='font-size:1.05rem;font-weight:600;line-height:1.45;margin:-0.2rem 0 1.1rem 0'>{es_cl(texto).replace('$', chr(92) + '$')}</div>",
+                unsafe_allow_html=True)
+
+
 def kpi_card_row(cols_data):
     """cols_data: list of (label, value, help), (label, value, help, detalle) o (label, value, help, detalle, delta).
     delta (opcional) = texto bajo la cifra con flecha (st.metric), p. ej. "−5,5 pp vs. 2025".

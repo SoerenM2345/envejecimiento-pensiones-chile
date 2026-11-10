@@ -36,6 +36,8 @@ Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que
 
 ## 1. Población (denominador)
 
+**Año de referencia: 2024** para todas las comparaciones del KPI 1.1 (barras de cambio, listas de regiones prioritarias, tabla y descomposición): el problema y su explicación usan el mismo año. Es el año del Censo y el último con ocupados por región. La cobertura de 2025 se calcula (46,9 % en Chile) pero con población proyectada y sin empleo regional, y por eso queda fuera de las comparaciones; cambiarlo es una constante del script 24 (`ANIO_REF`) cuando haya ENE de 2025 y la proyección regional base 2024. Efecto: con 2025 como final, Coquimbo y Ñuble «se recuperaban» y entraban en su lugar Los Ríos y Los Lagos.
+
 | # | Supuesto o límite | Efecto |
 |---|---|---|
 | 1.1 | La población regional por año es la proyección del INE base 2017 llevada al nivel del Censo 2024 con un factor constante por región (0,88 a 1,00; Antofagasta y Metropolitana los más bajos, Ñuble 1,00). Solo corrige el nivel. | La tendencia no cambia; el nivel sí (Chile 2025: 46,9 % ajustado, 43,4 % sin ajustar). La casilla «Población proyectada sin ajustar» del gráfico muestra ambas. |
