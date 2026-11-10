@@ -32,7 +32,7 @@ Lo que se pudo comprobar: el estudio de la Asociación de AFP (informe N° 135) 
 | Diciembre 2023 | 45,2 % | 44,2 % | 40,8 % |
 | Censo 2024 (abril) | 44,8 % | 43,4 % | 41,1 % |
 
-Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que en los ocupados** en todas las fechas, y la diferencia **se achica** (5,0 puntos en 2010, 1,0 en 2023). Con estos datos no se distingue entre «se asigna por la región de la empresa» (las casas matrices están en Santiago) y «la Metropolitana tiene más empleo formal». Para saberlo habría que preguntarle a la Superintendencia cuál es la regla; **no bloquea nada**: mientras no se sepa, el argumento de migración se presenta como contexto y no como causa (cambia el denominador; el numerador solo si se asigna por residencia).
+Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que en los ocupados** en todas las fechas, y la diferencia **se achica** (5,0 puntos en 2010, 1,0 en 2023). Con estos datos no se distingue entre «se asigna por la región de la empresa» (las casas matrices están en Santiago) y «la Metropolitana tiene más empleo formal». **La sensibilidad ya está calculada** (Censo 2024, ocupados que viven en una región y trabajan en otra; `kpi_cobertura_pendularidad.csv`, tabla en el desplegable del dashboard): si fuera por lugar de trabajo, Antofagasta bajaría 7,8 puntos de cobertura y Coquimbo subiría 2,3, pero las tres regiones de menor cobertura (La Araucanía, Los Ríos, Ñuble) cambiarían menos de 0,7 puntos. La pregunta para la Superintendencia cabe en una línea: ¿cada cotizante se cuenta en la comuna de su empleador o en el domicilio del afiliado? Para saberlo habría que preguntarle a la Superintendencia cuál es la regla; **no bloquea nada**: mientras no se sepa, el argumento de migración se presenta como contexto y no como causa (cambia el denominador; el numerador solo si se asigna por residencia).
 
 ## 1. Población (denominador)
 
@@ -73,7 +73,7 @@ Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que
 | # | Supuesto o límite |
 |---|---|
 | 4.1 | n = 16 regiones (15 con PIB: **el archivo del Banco Central no trae Magallanes**). Una correlación de |r| = 0,5 con n = 16 tiene p ≈ 0,05. |
-| 4.2 | Se probaron 34 factores sobre el nivel y 3 sobre el cambio: con tantos, 1 o 2 salen significativos por azar. Por eso se muestra la medida **oficial** de cada hipótesis (desocupación e informalidad de la ENE, migración del Censo), aunque no sea la que mejor calza, y no «la que salió». |
+| 4.2 | Se probaron 39 factores sobre el nivel y 3 sobre el cambio: con tantos, 1 o 2 salen significativos por azar. Por eso se muestra la medida **oficial** de cada hipótesis (desocupación e informalidad de la ENE, migración del Censo), aunque no sea la que mejor calza, y no «la que salió». |
 | 4.3 | **Informalidad oficial = en parte «no cotiza».** La ENE cuenta como informal al dependiente sin cotizaciones previsionales por su empleo (y al independiente cuyo negocio no está registrado). Que la informalidad «explique» la cobertura es en parte lo mismo dicho de otro modo (r = −0,83). |
 | 4.4 | Desocupación del Censo (abril 2024) y de la ENE (diciembre 2023) dan correlaciones distintas con la cobertura (−0,71 y −0,32): la definición y el momento importan. El tablero muestra la oficial. |
 | 4.5 | «Ocupados en enseñanza» es probablemente un efecto de composición (regiones con poco empleo privado), no una causa. |

@@ -35,6 +35,8 @@ Salidas (Data processed/):
   - kpi_cobertura_descomposicion.csv       aporte de cada factor en puntos: nivel frente a Chile y cambios entre años
   - kpi_cobertura_contraste_aafp.csv       nuestras cifras de diciembre 2019 y 2024 junto a las del estudio de la AAFP
   - kpi_cobertura_test_asignacion.csv      participación de la Metropolitana en cotizantes, ocupados y población
+  - kpi_cobertura_pendularidad.csv         ocupados que viven en una región y trabajan en otra (Censo 2024) y la cobertura si los cotizantes se contaran por lugar de trabajo
+  - kpi_cobertura_siete_vs_chile.csv       las regiones prioritarias recomendadas juntas frente a Chile y frente a las demás (y docs/SIETE_VS_CHILE.md)
   - kpi_pc_escenarios_fijos.csv            los 6 escenarios fijos del KPI 1.2 (tope 10/11/12 %, cobertura que sigue cayendo, sin informalidad
                                            y mitad del camino); los calcula el dashboard con el motor de components/critical_point.py
   - kpi_cobertura_factores.csv y kpi_cobertura_regiones.csv: se les agregan los factores de la ENE y del PIB (idempotente)
@@ -330,7 +332,7 @@ def test_asignacion(f: pd.DataFrame, ene: pd.DataFrame, ind: pd.DataFrame) -> pd
 
 # ───────────────────────────── factores de la ENE y del PIB para la correlación con la cobertura ─────────────────────────────
 
-def factores_ene_pib(ene, pib, pob, ind, f, censo_part_mujeres) -> pd.DataFrame:
+def factores_ene_pib(ene, pib, pob, ind, f, censo_part_mujeres, extra) -> pd.DataFrame:
     """Un valor por territorio (0 = Chile, 1-16 = regiones) de cada factor oficial, medido en diciembre de 2023 (último diciembre con
     ENE); cambios 2019-2023. El PIB no tiene Chile ni Magallanes: quedan vacíos."""
     e = ene.set_index(["anio", "territorio_id"])
@@ -346,6 +348,8 @@ def factores_ene_pib(ene, pib, pob, ind, f, censo_part_mujeres) -> pd.DataFrame:
     out["tiempo_parcial_ene"] = [e.loc[(2023, r), "tasa_parcial_involuntario"] for r in ids]
     out["participacion_ene"] = [partic(2023, r) for r in ids]
     out["participacion_mujeres_censo"] = [censo_part_mujeres[r] for r in ids]
+    for c in extra.columns:
+        out[c] = [extra.loc[r, c] for r in ids]
     pt = pob["ptot"].mul(pob["escala"], axis=0)  # población total al nivel del Censo (el mismo ajuste de la cobertura)
     pb = pib.pivot(index="territorio_id", columns="anio", values="pib_mmm")
     tiene = lambda r: r in pb.index and r != 0  # noqa: E731
@@ -368,6 +372,11 @@ FACTORES_NUEVOS = {  # factor -> (nombre legible, hipótesis, fuente, ámbito, o
     "tiempo_parcial_ene": ("Tiempo parcial involuntario (%)", "Otros", "ENE (INE), dic. 2023", "regiones", "nivel"),
     "participacion_ene": ("Participación laboral oficial (% de las personas de 15+)", "Otros", "ENE (INE), dic. 2023", "regiones", "nivel"),
     "participacion_mujeres_censo": ("Participación laboral de las mujeres (% de las de 15+)", "Otros", "Censo 2024", "regiones", "nivel"),
+    "participacion_15_64_censo": ("Participación laboral de 15 a 64 años (sin el efecto de los mayores)", "Otros", "Censo 2024", "regiones", "nivel"),
+    "indigena_pct": ("Población que se declara de un pueblo originario (%)", "Otros", "Censo 2024", "regiones", "nivel"),
+    "rural_pct": ("Población rural (%)", "Otros", "Censo 2024", "regiones", "nivel"),
+    "neto_pendular_pct": ("Saldo de pendulares entre regiones (% de los ocupados que viven allí)", "Medición", "Censo 2024", "regiones", "nivel"),
+    "salida_pendular_pct": ("Ocupados que trabajan en otra región (%)", "Medición", "Censo 2024", "regiones", "nivel"),
     "pib_per_capita": ("PIB por habitante", "Otros", "Banco Central, 2023", "15 regiones (sin Magallanes)", "nivel"),
     "pib_por_ocupado": ("PIB por ocupado", "Otros", "Banco Central e INE, 2023", "15 regiones (sin Magallanes)", "nivel"),
     "crecimiento_pib": ("Crecimiento anual del PIB 2013-2023 (%)", "Otros", "Banco Central", "15 regiones (sin Magallanes)", "nivel"),
@@ -384,6 +393,46 @@ def participacion_mujeres() -> dict:
                         FROM read_csv_auto('{CENSO.as_posix()}', delim=';', sample_size=300000) WHERE sexo=2 AND edad>=15
                         GROUP BY GROUPING SETS ((region), ())""").df()
     return d.set_index("region").p.to_dict()
+
+
+def pendularidad(ref: int = 2024) -> pd.DataFrame:
+    """Ocupados que viven en una región y trabajan en otra (Censo 2024: p44_lug_trab = 3 «en otra comuna», con la comuna de destino en
+    p44_lug_trab_esp; los códigos de lugar de trabajo se infieren, no hay diccionario en el proyecto). Una fila por región (1-16) con los que salen,
+    los que entran y el saldo, y una sensibilidad a la regla de asignación que NO conocemos: si la Superintendencia contara a cada cotizante en la
+    región del empleo y no en la de residencia, la cobertura de una región sería cotizantes ÷ (población 15-64 + saldo de pendulares)."""
+    con = duckdb.connect()
+    src = f"read_csv_auto('{CENSO.as_posix()}', delim=';', sample_size=300000)"
+    res = con.execute(f"SELECT region, count(*) ocupados_residentes FROM {src} WHERE sit_fuerza_trabajo=1 GROUP BY 1").df().set_index("region")
+    sal = con.execute(f"""SELECT region, floor(p44_lug_trab_esp/1000)::int destino, count(*) n FROM {src}
+                          WHERE sit_fuerza_trabajo=1 AND p44_lug_trab=3 AND p44_lug_trab_esp>0 GROUP BY ALL""").df()
+    sal = sal[sal.region != sal.destino]
+    d = res.assign(salen=sal.groupby("region").n.sum(), entran=sal.groupby("destino").n.sum()).fillna(0)
+    d["neto"] = d.entran - d.salen
+    d["neto_pct"] = 100 * d.neto / d.ocupados_residentes
+    d["salen_pct"] = 100 * d.salen / d.ocupados_residentes
+    t = pd.read_csv(DP / "kpi_cobertura_tendencia.csv")
+    t = t[(t.anio == ref) & t.territorio_id.between(1, 16)].set_index("territorio_id")
+    d["cobertura_ref"] = t.cobertura_pct
+    d["cobertura_si_lugar_de_trabajo"] = 100 * t.cotizantes / (t.pob_15_64 + d.neto)
+    d["diferencia_puntos"] = d.cobertura_si_lugar_de_trabajo - d.cobertura_ref
+    d.insert(0, "region_nombre", t.territorio)
+    return d.reset_index(names="region_id")
+
+
+def censo_extra(pend: pd.DataFrame) -> pd.DataFrame:
+    """Factores del Censo 2024 que no estaban (0 = Chile, 1-16 = regiones): participación de 15 a 64 años, población que se declara de un
+    pueblo originario, población rural y los pendulares entre regiones (neto y salida, en % de los ocupados que viven en la región)."""
+    con = duckdb.connect()
+    src = f"read_csv_auto('{CENSO.as_posix()}', delim=';', sample_size=300000)"
+    a = con.execute(f"""SELECT coalesce(region, 0) region,
+          sum((edad BETWEEN 15 AND 64 AND sit_fuerza_trabajo IN (1,2))::int)*100.0/sum((edad BETWEEN 15 AND 64)::int) participacion_15_64_censo,
+          sum((p28_autoid_pueblo=1)::int)*100.0/sum((p28_autoid_pueblo IN (1,2))::int) indigena_pct,
+          sum((area=2)::int)*100.0/count(*) rural_pct FROM {src} GROUP BY GROUPING SETS ((region), ())""").df().set_index("region")
+    p = pend.set_index("region_id")
+    a["neto_pendular_pct"] = p.neto_pct
+    a["salida_pendular_pct"] = p.salen_pct
+    a.loc[0, ["neto_pendular_pct", "salida_pendular_pct"]] = [0.0, 100 * p.salen.sum() / p.ocupados_residentes.sum()]
+    return a.sort_index()
 
 
 def actualizar_factores(nuevos: pd.DataFrame, cobertura_2024: pd.Series):
@@ -451,6 +500,155 @@ def escenarios_fijos_kpi12(ene: pd.DataFrame) -> pd.DataFrame:
         orden=lambda d: range(1, len(d) + 1), pendiente_pp_anio=pend, informales_censo=inf)
 
 
+def _piezas(g: dict) -> dict:
+    ft = g["O"] + g["D"]
+    return dict(participacion=ft / g["P"], empleo=g["O"] / ft, cotizacion=g["C"] / g["O"], cobertura=100 * g["C"] / g["P"])
+
+
+def _aporte(a: dict, b: dict) -> dict:
+    """Aporte en puntos de cada pieza a la diferencia de cobertura a - b (media logarítmica: suman exacto)."""
+    L = media_log(a["cobertura"], b["cobertura"])
+    return {k: L * (np.log(a[k]) - np.log(b[k])) for k in FACTORES_DESC}
+
+
+def resumen_grupo(f: pd.DataFrame, ene: pd.DataFrame, ind: pd.DataFrame) -> pd.DataFrame:
+    """Las regiones prioritarias recomendadas (columna `prioridad` de kpi_cobertura_regiones.csv) juntas, frente a Chile y frente a las demás.
+    Siempre agregados, no promedios simples: cada indicador se pondera con lo que corresponde (cotizantes ÷ población de las regiones sumadas;
+    tasas de empleo con los ocupados o la fuerza de trabajo; el resto con la población). «Chile» es la suma de las 16 regiones, igual que en la
+    descomposición. Devuelve una fila por indicador con las columnas siete, chile, otras, diferencia."""
+    reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv")
+    reg = reg[reg.region_id > 0].set_index("region_id")
+    sel = list(reg[reg.prioridad.notna()].index)
+    otros = [i for i in reg.index if i not in sel]
+    grupos = {"siete": sel, "chile": list(reg.index), "otras": otros}
+    filas = []
+
+    def fila(seccion, indicador, unidad, valores, pond):
+        filas.append(dict(seccion=seccion, indicador=indicador, unidad=unidad, **valores, ponderacion=pond))
+
+    # 1. nivel y cambio de la cobertura (suma de cotizantes ÷ suma de población, por año)
+    t = pd.read_csv(DP / "kpi_cobertura_tendencia.csv")
+    t = t[t.territorio_id.between(1, 16)]
+
+    def cob(ids, a):
+        g = t[(t.anio == a) & t.territorio_id.isin(ids)]
+        return 100 * g.cotizantes.sum() / g.pob_15_64.sum(), g.cotizantes.sum(), g.pob_15_64.sum()
+
+    ref = int(reg.anio_ref.iloc[0])
+    fila("Cobertura", f"Cobertura {ref}", "% de 15-64", {k: cob(v, ref)[0] for k, v in grupos.items()}, "cotizantes ÷ población 15-64 de las regiones sumadas")
+    for a0 in (2019, 2022):
+        fila("Cobertura", f"Cambio desde {a0}", "puntos", {k: cob(v, ref)[0] - cob(v, a0)[0] for k, v in grupos.items()}, "cobertura del grupo en {} menos en {}".format(ref, a0))
+    fila("Cobertura", "Cotizantes desde 2022", "personas", {k: cob(v, ref)[1] - cob(v, 2022)[1] for k, v in grupos.items()}, "suma de las regiones")
+    fila("Cobertura", "Cotizantes desde 2022", "%", {k: 100 * (cob(v, ref)[1] / cob(v, 2022)[1] - 1) for k, v in grupos.items()}, "suma de las regiones")
+    fila("Peso", "Parte de la población de 15 a 64 años", "%", {k: 100 * cob(v, ref)[2] / cob(grupos["chile"], ref)[2] for k, v in grupos.items()}, "Censo 2024")
+    fila("Peso", "Parte de los cotizantes", "%", {k: 100 * cob(v, ref)[1] / cob(grupos["chile"], ref)[1] for k, v in grupos.items()}, "suma de las regiones")
+    brecha = {k: float(reg.loc[v, "brecha_cotizantes"].sum()) for k, v in grupos.items()}
+    fila("Peso", "Brecha de cotizantes frente a Chile", "personas", {**brecha, "chile": np.nan}, "suma de las brechas regionales (solo regiones bajo el promedio)")
+
+    # 2. descomposición: de dónde viene la diferencia con Chile, el grupo entero como un solo territorio
+    g = f.set_index(["territorio_id", "anio"])
+
+    def agregado(ids, a):
+        x = g.loc[[(i, a) for i in ids]]
+        return _piezas(dict(C=x.cotizantes.sum(), O=x.ocupados.sum(), D=x.desocupados.sum(), P=x.p1564.sum()))
+
+    ch = agregado(grupos["chile"], ref)
+    for k, nom in (("participacion", "Participación laboral (de 15 a 64 años)"), ("empleo", "Empleo (1 − desocupación)"), ("cotizacion", "Ocupados que cotizan")):
+        fila("Diferencia con Chile", nom, "puntos", {"siete": _aporte(agregado(sel, ref), ch)[k], "chile": 0.0, "otras": _aporte(agregado(otros, ref), ch)[k]}, "descomposición exacta del grupo como un solo territorio")
+    ap = {k: sum(_aporte(agregado(v, ref), ch).values()) for k, v in (("siete", sel), ("otras", otros))}
+    fila("Diferencia con Chile", "Diferencia total", "puntos", {"siete": ap["siete"], "chile": 0.0, "otras": ap["otras"]}, "suma de las tres piezas")
+    for a0 in (2019,):
+        for k, nom in (("participacion", "Participación laboral"), ("empleo", "Empleo"), ("cotizacion", "Ocupados que cotizan")):
+            vals = {c: _aporte(agregado(v, ref), agregado(v, a0))[k] for c, v in grupos.items()}
+            fila(f"Cambio {a0}-{ref}", nom, "puntos", vals, "descomposición del cambio de cada grupo")
+
+    # 3. el resto de los indicadores: tasas ponderadas
+    e23 = ene[(ene.anio == 2023)].set_index("territorio_id")
+    pesos = {"ocupados 2023": e23.ocupados, "fuerza de trabajo 2023": e23.ocupados + e23.desocupados,
+             "población total": ind.pob_total, "población 15-64": ind.pob_15_64, "personas de 65+": ind.pob_65_mas}
+    pen = pd.read_csv(DP / "kpi_cobertura_pendularidad.csv").set_index("region_id")
+    pesos["ocupados que viven en la región"] = pen.ocupados_residentes
+    tabla = [("Informalidad (tasa oficial, ENE dic. 2023)", "informalidad_ene", "%", "ocupados 2023"),
+             ("Desocupación (ENE dic. 2023)", "desocupacion_ene", "%", "fuerza de trabajo 2023"),
+             ("Participación laboral de 15 a 64 años (Censo 2024)", "participacion_15_64_censo", "%", "población 15-64"),
+             ("Participación laboral de las mujeres de 15+ (Censo 2024)", "participacion_mujeres_censo", "%", "población 15-64"),
+             ("Ocupados independientes (Censo 2024)", "independientes", "%", "ocupados 2023"),
+             ("Ingreso per cápita (CASEN 2022)", "ingreso_per_capita_prom", "$ al mes", "población total"),
+             ("Pobreza en personas de 65+ (CASEN 2022)", "pct_pobreza_65", "%", "personas de 65+"),
+             ("Personas de 65+ (Censo 2024)", "pct_65_mas", "% de la población", "población total"),
+             ("Población urbana (Censo 2024)", "pct_urbano", "%", "población total"),
+             ("Migración interna neta en 5 años (Censo 2024)", "migracion_interna_neta", "por 1.000 habitantes", "población total"),
+             ("Ocupados que trabajan en otra región (Censo 2024)", "salida_pendular_pct", "%", "ocupados que viven en la región")]
+    for nombre, col, unidad, pond in tabla:
+        w = pesos[pond]
+        fila("Otros indicadores", nombre, unidad, {k: float(np.average(reg.loc[v, col], weights=w.reindex(v))) for k, v in grupos.items()}, f"promedio ponderado por {pond}")
+    r = pd.DataFrame(filas)
+    r["dif_siete_chile"] = r.siete - r.chile
+    r.attrs["regiones"] = [(int(i), reg.loc[i, "region_nombre"]) for i in sel]
+    return r
+
+
+def escribir_doc_siete(r: pd.DataFrame, ruta: Path):
+    """docs/SIETE_VS_CHILE.md: las tablas de resumen_grupo con una lectura que se arma con los mismos números."""
+    nombres = ", ".join(n for _, n in r.attrs["regiones"])
+    n = len(r.attrs["regiones"])
+    num = lambda v, d=1: "—" if pd.isna(v) else f"{v:,.{d}f}".replace(",", "§").replace(".", ",").replace("§", ".").replace("-", "−")  # noqa: E731
+    sg = lambda v, d=1: "—" if pd.isna(v) else ("+" if v >= 0 else "−") + num(abs(v), d)  # noqa: E731
+    cab = f"| Indicador | Las {n} juntas | Chile | Las otras {16 - n} | Las {n} menos Chile | Cómo se calcula |\n|---|---|---|---|---|---|\n"
+    def tabla(seccion, signo=False, dec=1):
+        x = r[r.seccion == seccion]
+        filas = []
+        for q in x.itertuples():
+            d = 0 if q.unidad == "personas" or q.unidad == "$ al mes" else dec
+            f_ = sg if signo or q.unidad in ("puntos",) else num
+            dif = "—" if (q.seccion == "Peso" or q.unidad == "personas") else sg(q.dif_siete_chile, d)  # restar sumas o partes no significa nada
+            filas.append(f"| {q.indicador} ({q.unidad}) | {f_(q.siete, d)} | {f_(q.chile, d)} | {f_(q.otras, d)} | {dif} | {q.ponderacion} |")
+        return cab + "\n".join(filas)
+    v = lambda ind, col="siete": float(r[r.indicador == ind][col].iloc[0])  # noqa: E731
+    sec = lambda s_, i_: float(r[(r.seccion == s_) & (r.indicador == i_)].siete.iloc[0])  # noqa: E731
+    ref = [q for q in r.indicador if q.startswith("Cobertura 20")][0]
+    texto = f"""# Las {n} regiones prioritarias frente al promedio de Chile
+
+Documento generado por `Scripts/25_explorar_causas.py` (`Data processed/kpi_cobertura_siete_vs_chile.csv`); se rehace solo cada vez que se corre el script. Regiones: **{nombres}**.
+
+**Cómo leer los promedios.** Son **agregados**, no promedios simples de tasas: la cobertura de «las {n} juntas» es la suma de sus cotizantes dividida por la suma de su población de 15 a 64 años; las tasas de empleo se ponderan con los ocupados o la fuerza de trabajo, y el resto con la población. «Chile» es la suma de las 16 regiones (igual que en la descomposición del dashboard) y «las otras {16 - n}» son las regiones no seleccionadas. Así el promedio de las {n} se compara de igual a igual con el del país.
+
+## 1. Nivel y cambio de la cobertura
+
+{tabla("Cobertura")}
+
+Las {n} regiones juntas tienen una cobertura de **{num(v(ref))} %**, frente a {num(v(ref, 'chile'))} % de Chile y {num(v(ref, 'otras'))} % de las otras {16 - n}: **{num(abs(v(ref) - v(ref, 'chile')))} puntos bajo el país**. Desde 2019 subieron {num(v("Cambio desde 2019"))} puntos (Chile: {num(v("Cambio desde 2019", "chile"))}); desde 2022 {sg(v("Cambio desde 2022"))} (Chile: {sg(v("Cambio desde 2022", "chile"))}), y su cantidad de cotizantes cambió {sg(r[(r.indicador == "Cotizantes desde 2022") & (r.unidad == "%")].siete.iloc[0])} % frente a {sg(r[(r.indicador == "Cotizantes desde 2022") & (r.unidad == "%")].chile.iloc[0])} % del país.
+
+**Dos lecturas honestas.** (1) La brecha de las {n} con el país es sobre todo de **nivel**, no de caída reciente: desde 2022 su cobertura cae casi igual que la del resto ({sg(v("Cambio desde 2022"))} puntos frente a {sg(v("Cambio desde 2022", "otras"))}); lo que sí es peor es la pérdida de cotizantes en personas ({sg(r[(r.indicador == "Cotizantes desde 2022") & (r.unidad == "%")].siete.iloc[0])} % frente a {sg(r[(r.indicador == "Cotizantes desde 2022") & (r.unidad == "%")].otras.iloc[0])} % en las otras {16 - n}). (2) Desde 2019 el grupo mejoró más que el país ({sg(v("Cambio desde 2019"))} frente a {sg(v("Cambio desde 2019", "chile"))} puntos): la distancia con Chile se achicó {num(v("Cambio desde 2019") - v("Cambio desde 2019", "chile"))} puntos, aunque sigue en {num(abs(v(ref) - v(ref, "chile")))}.
+
+## 2. Cuánto pesan
+
+{tabla("Peso")}
+
+## 3. De dónde viene la diferencia con Chile (las {n} juntas como un solo territorio)
+
+{tabla("Diferencia con Chile", signo=True)}
+
+La diferencia total de las {n} con el país es de **{sg(v("Diferencia total"))} puntos**; de ellos, {sg(v("Ocupados que cotizan"))} vienen de que menos ocupados cotizan, {sg(v("Participación laboral (de 15 a 64 años)"))} de la participación laboral y {sg(v("Empleo (1 − desocupación)"))} del desempleo. Las otras {16 - n} regiones, en cambio, están {sg(v("Diferencia total", "otras"))} puntos respecto del país (sobre el promedio).
+
+## 4. Cómo cambió la cobertura desde 2019, por pieza
+
+{tabla("Cambio 2019-" + ref.split()[-1])}
+
+## 5. El resto de los indicadores
+
+{tabla("Otros indicadores")}
+
+## Límites
+
+- Los promedios ocultan diferencias entre las regiones del grupo (La Araucanía y Los Ríos tienen la cotización mucho más baja que Biobío, por ejemplo); el detalle por región está en `docs/ANALISIS_SIETE_REGIONES.md` y en el dashboard.
+- La descomposición del grupo trata a las {n} regiones como un solo territorio: es exacta, pero sus piezas no son el promedio de las piezas de cada región.
+- Las tasas de la ENE son de diciembre de 2023; la desocupación y la informalidad de 2024 no están por región en los archivos bajados (solo en el anexo del estudio de la Asociación de AFP).
+- Todo es asociación y aritmética, no causa; con 16 regiones no hay regresión.
+"""
+    ruta.write_text(texto)
+
+
 def main():
     s24 = cargar_modulo("24_cobertura_tendencia_causas.py")
     s24.asegurar_ine17()
@@ -474,9 +672,14 @@ def main():
     esc = escenarios_fijos_kpi12(ene)
     esc.round(6).to_csv(DP / "kpi_pc_escenarios_fijos.csv", index=False)
 
-    nuevos = factores_ene_pib(ene, pib, pob, ind, f, participacion_mujeres())
+    pend = pendularidad()
+    pend.round(3).to_csv(DP / "kpi_cobertura_pendularidad.csv", index=False)
+    nuevos = factores_ene_pib(ene, pib, pob, ind, f, participacion_mujeres(), censo_extra(pend))
     reg24 = pd.read_csv(DP / "kpi_cobertura_correlaciones_region.csv").set_index("region_id")
     fac = actualizar_factores(nuevos, reg24.cobertura_previsional_pct.reindex(range(1, 17)))
+    sv = resumen_grupo(f, ene, ind)
+    sv.round(4).to_csv(DP / "kpi_cobertura_siete_vs_chile.csv", index=False)
+    escribir_doc_siete(sv, ROOT / "docs" / "SIETE_VS_CHILE.md")
     pib.round(3).to_csv(DP / "pib_regional_anual.csv", index=False)
 
     print("escenarios fijos del KPI 1.2:"); print(esc[["clave", "carga_max", "cobertura_2050", "cobertura_salto"]].round(3).to_string(index=False))

@@ -130,7 +130,7 @@ def test_el_selector_de_criterio_cambia_las_regiones_analizadas():
             if "la brecha con Chile viene sobre todo de" in sp.get("layout", {}).get("title", {}).get("text", ""):
                 return set(sp["data"][0]["y"])
 
-    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"}  # recomendada (2024)
+    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"}  # recomendada (2024)
     at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
     assert not at.exception and regiones_descomposicion() == {"Metropolitana", "Valparaíso", "Biobío", "Maule", "O'Higgins"}
     at.radio(key="cob_criterio").set_value("Caída más fuerte desde 2022").run()
@@ -157,12 +157,12 @@ def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")
     barra = sp["data"][0]
-    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 5  # las 5 prioritarias, en naranja
+    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 7  # las 7 prioritarias, en naranja
     assert barra["y"][0] == "Arica y Parinacota" or min(barra["x"]) == barra["x"][list(barra["y"]).index("Arica y Parinacota")]
     assert any(s.get("x0") is not None and s["x0"] == s["x1"] for s in sp["layout"]["shapes"])  # línea punteada de Chile
     # al elegir otra lista cambian los colores pero siguen siendo 5
     at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
-    assert _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")["data"][0]["marker"]["color"].count("#eb6834") == 5
+    assert _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")["data"][0]["marker"]["color"].count("#eb6834") == 5  # las otras listas siguen siendo de 5
 
 
 def test_grafico_largo_tiene_tres_lineas_desde_2002():
@@ -172,18 +172,18 @@ def test_grafico_largo_tiene_tres_lineas_desde_2002():
     assert len(lineas) == 3 and all(_vals(t["x"])[0] == 2002 and _vals(t["x"])[-1] == 2024 for t in lineas)  # hasta el año de referencia
     assert sp["layout"]["yaxis"]["range"][0] == 0
     at.radio(key="cob_largo_modo").set_value("Mayor caída desde 2022").run()
-    assert _spec_con_titulo(at, "Magallanes y Valparaíso") is not None  # la prioritaria que más cayó
+    assert _spec_con_titulo(at, "Magallanes y Arica y Parinacota") is not None  # la prioritaria que más cayó (con serie propia desde 2007)
 
 
 def test_descomposicion_permite_ver_las_16_regiones_con_las_5_marcadas():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
     clave = "la brecha con Chile viene sobre todo de"
-    assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 5
+    assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 7
     at.radio(key="cob_desc_alcance").set_value("Las 16 regiones (las prioritarias en naranja)").run()
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, clave)
     barras = [t for t in sp["data"] if t["type"] == "bar"]
-    assert len(barras) == 4 and all(len(b["y"]) == 16 for b in barras) and barras[0]["marker"]["color"].count("#eb6834") == 5
+    assert len(barras) == 4 and all(len(b["y"]) == 16 for b in barras) and barras[0]["marker"]["color"].count("#eb6834") == 7
     assert len([s for s in sp["layout"]["shapes"] if s["x0"] == s["x1"]]) == 4  # la línea de Chile en cada panel
     total = _vals(barras[3]["x"])
     peor = barras[3]["y"][total.index(min(total))]
@@ -298,3 +298,39 @@ def test_dos_palancas_explican_la_cobertura():
     assert abs(d.residuo.sum()) < 0.2  # MCO con constante: los residuos suman 0
     assert (d.afiliados_sin_cotizar == d.afiliados_menores_65 - d.cotizantes).all() and (d.afiliados_sin_cotizar > 0).all()
     assert set(d.palanca) <= {"Ambas", "Informalidad", "Participación", "Ninguna"}
+
+
+def test_pendularidad_mide_la_sensibilidad_a_la_regla_de_asignacion():
+    pe = pd.read_csv(DP / "kpi_cobertura_pendularidad.csv").set_index("region_nombre")
+    assert len(pe) == 16 and abs(pe.neto.sum()) < 1  # lo que sale de unas regiones entra a otras
+    assert pe.loc["Antofagasta", "neto_pct"] > 20 and pe.loc["Coquimbo", "neto_pct"] < -8   # la minería importa trabajadores; Coquimbo los exporta
+    assert pe.loc["Antofagasta", "diferencia_puntos"] < -7 and pe.loc["Coquimbo", "diferencia_puntos"] > 2
+    # la dispersión baja, y las tres de menor cobertura casi no cambian: su problema no depende de la regla
+    cv = lambda s: s.std() / s.mean()  # noqa: E731
+    assert cv(pe.cobertura_si_lugar_de_trabajo) < cv(pe.cobertura_ref)
+    assert pe.sort_values("cobertura_ref").head(3).diferencia_puntos.abs().max() < 1
+    f = pd.read_csv(DP / "kpi_cobertura_factores.csv").set_index("factor")
+    assert f.loc["salida_pendular_pct", "pearson_r"] < -0.5 and f.loc["neto_pendular_pct", "pearson_r"] > 0.5
+    assert abs(f.loc["indigena_pct", "pearson_r"]) < 0.3  # un negativo útil: no es la población originaria
+
+
+def test_siete_vs_chile_son_agregados_consistentes():
+    r = pd.read_csv(DP / "kpi_cobertura_siete_vs_chile.csv")
+    v = lambda sec, ind, col="siete": float(r[(r.seccion == sec) & (r.indicador == ind)][col].iloc[0])  # noqa: E731
+    reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv")
+    n = int(reg[reg.region_id > 0].prioridad.notna().sum())
+    assert n == 7
+    t = pd.read_csv(DP / "kpi_cobertura_tendencia.csv")
+    chile24 = t[(t.territorio_id == 0) & (t.anio == 2024)].cobertura_pct.iloc[0]
+    assert v("Cobertura", "Cobertura 2024", "chile") == pytest.approx(chile24, abs=0.05)
+    # Chile = los dos grupos, ponderados por su parte de la población de 15-64 años
+    w = v("Peso", "Parte de la población de 15 a 64 años") / 100
+    assert w * v("Cobertura", "Cobertura 2024") + (1 - w) * v("Cobertura", "Cobertura 2024", "otras") == pytest.approx(chile24, abs=0.05)
+    # los cotizantes perdidos de los dos grupos suman los del país
+    pers = r[(r.indicador == "Cotizantes desde 2022") & (r.unidad == "personas")].iloc[0]
+    assert pers.siete + pers.otras == pytest.approx(pers.chile, abs=1)
+    # la descomposición del grupo suma la diferencia de cobertura con Chile
+    piezas = sum(v("Diferencia con Chile", i) for i in ("Participación laboral (de 15 a 64 años)", "Empleo (1 − desocupación)", "Ocupados que cotizan"))
+    assert piezas == pytest.approx(v("Diferencia con Chile", "Diferencia total"), abs=1e-3)
+    assert v("Diferencia con Chile", "Diferencia total") == pytest.approx(v("Cobertura", "Cobertura 2024") - chile24, abs=0.05)
+    assert (ROOT / "docs" / "SIETE_VS_CHILE.md").read_text().startswith("# Las 7 regiones prioritarias frente al promedio de Chile")

@@ -59,29 +59,46 @@ def test_biobio_y_nuble_no_se_rompen_en_2018(datos):
     assert b.index.min() == 2018 and t[t.territorio_id == 16].anio.min() == 2018
 
 
-def test_prioridad_son_5_regiones_y_la_brecha_es_cotizantes_que_faltan(datos):
+SIETE = ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"]
+
+
+def test_prioridad_recomendada_son_7_regiones_y_la_brecha_es_cotizantes_que_faltan(datos):
     r = datos["r"][datos["r"].region_id > 0]
     prio = r[r.prioridad.notna()]
-    assert sorted(prio.prioridad) == [1, 2, 3, 4, 5]
+    assert sorted(prio.prioridad) == [1, 2, 3, 4, 5, 6, 7]
     nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
     assert (prio.cobertura_ref < nac).all()  # solo regiones bajo el promedio tienen brecha
     ejemplo = prio.iloc[0]
     assert ejemplo.brecha_cotizantes == pytest.approx((nac - ejemplo.cobertura_ref) / 100 * ejemplo.pob_15_64, rel=1e-3)
     assert set(prio.sort_values("prioridad").region_nombre.head(2)) == {"La Araucanía", "Valparaíso"}
+    assert set(prio.region_nombre) == set(SIETE)
 
 
-def test_cuatro_listas_de_5_regiones_y_la_recomendada_es_brecha_mas_caida(datos):
+def test_listas_de_regiones_y_la_recomendada_une_brecha_y_perdida_de_cotizantes(datos):
     r = datos["r"][datos["r"].region_id > 0].set_index("region_nombre")
-    for col in ("prioridad_brecha", "prioridad_caida", "prioridad_peso", "prioridad_brecha_caida"):
+    for col in ("prioridad_brecha", "prioridad_caida", "prioridad_peso"):
         assert sorted(r[col].dropna()) == [1, 2, 3, 4, 5], col
     assert list(r.prioridad_brecha.dropna().sort_values().index) == ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"]
     assert list(r.prioridad_caida.dropna().sort_values().index)[:3] == ["Arica y Parinacota", "Valparaíso", "Metropolitana"]
-    # con 2024 como año de referencia las 5 de mayor brecha ya cayeron todas desde 2022: la lista «bajo el promedio y en caída» coincide con la de brecha
-    assert set(r.prioridad_brecha_caida.dropna().index) == set(r.prioridad_brecha.dropna().index)
     assert list(r.prioridad_peso.dropna().sort_values().index)[:2] == ["Metropolitana", "Valparaíso"]
-    rec = r[r.prioridad_brecha_caida.notna()]
-    assert (rec.brecha_cotizantes > 0).all() and (rec.cambio_2022_ref < 0).all()  # bajo el promedio de Chile y en caída
-    assert (r.prioridad.fillna(0) == r.prioridad_brecha_caida.fillna(0)).all()  # la que muestra el dashboard por defecto
+    # la recomendada = bajo el promedio Y (entre las 5 de mayor brecha O con menos cotizantes que en 2022)
+    nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
+    esperada = r[(r.cobertura_ref < nac) & (r.prioridad_brecha.notna() | (r.dif_cotizantes_22_ref < 0))]
+    assert set(r.prioridad_brecha_perdida.dropna().index) == set(esperada.index) == set(SIETE)
+    assert (r.prioridad.fillna(0) == r.prioridad_brecha_perdida.fillna(0)).all()  # la que muestra el dashboard por defecto
+    # los motivos: Coquimbo entra solo por brecha (ganó cotizantes), Los Ríos y Arica solo por pérdida
+    assert r.loc["Coquimbo", "motivo_prioridad"] == "Solo brecha" and r.loc["Coquimbo", "dif_cotizantes_22_ref"] > 0
+    assert r.loc["Los Ríos", "motivo_prioridad"] == r.loc["Arica y Parinacota", "motivo_prioridad"] == "Solo pérdida"
+    assert (r.loc[["La Araucanía", "Valparaíso", "Biobío", "Ñuble"], "motivo_prioridad"] == "Brecha y pérdida").all()
+
+
+def test_siete_regiones_perdieron_cotizantes_y_solo_la_metropolitana_esta_sobre_el_promedio(datos):
+    """Entre 2022 y 2024 pierden cotizantes (personas) exactamente 7 regiones; seis están bajo el promedio de Chile y la séptima es la Metropolitana."""
+    r = datos["r"][datos["r"].region_id > 0].set_index("region_nombre")
+    pierden = set(r[r.dif_cotizantes_22_ref < 0].index)
+    assert pierden == {"Metropolitana", "Valparaíso", "Biobío", "La Araucanía", "Ñuble", "Arica y Parinacota", "Los Ríos"}
+    nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
+    assert set(r[r.index.isin(pierden) & (r.cobertura_ref >= nac)].index) == {"Metropolitana"}
 
 
 def test_factores_elegidos_cubren_las_hipotesis_del_profesor(datos):

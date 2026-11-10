@@ -17,7 +17,7 @@ Pedido del profesor (2026-11): ver dónde la cobertura (cotizantes ÷ población
 
 ## 2. «Las 5 regiones más importantes»
 
-Hay cuatro listas de 5 (bajo el promedio y en caída, mayor brecha, caída más fuerte, mayor peso), en `docs/SHORTLIST_REGIONES.md`; el tablero deja elegir y **recomienda la primera** (cobertura bajo la de Chile y cayendo desde 2022). Con 2024 como referencia es La Araucanía, Valparaíso, Biobío, Coquimbo y Ñuble, la misma de «mayor brecha». Con 2025 como año final eran La Araucanía, Valparaíso, Biobío, Los Ríos y Los Lagos (Coquimbo y Ñuble se «recuperaban» en 2025, pero con población proyectada).
+Hay cuatro listas (bajo el promedio con brecha o pérdida de cotizantes, mayor brecha, caída más fuerte, mayor peso), en `docs/SHORTLIST_REGIONES.md`; el tablero deja elegir y **recomienda la primera**: cobertura bajo la de Chile y, o bien entre las 5 de mayor brecha, o bien con menos cotizantes (personas) que en 2022. Con 2024 como referencia son **7 regiones**: La Araucanía, Valparaíso, Biobío, Coquimbo, Ñuble, Los Ríos y Arica y Parinacota. Qué las une y qué hay que cuestionar: `docs/ANALISIS_SIETE_REGIONES.md`.
 
 **Brecha:** prioridad = brecha de cotizantes = (cobertura de Chile − cobertura de la región) × población 15-64 de la región = cuántos cotizantes más habría si alcanzara el promedio. Pesa el nivel (qué tan baja es) y el tamaño (cuánta gente). Es la misma fórmula que propone el informe de Claude Desktop.
 
@@ -61,19 +61,21 @@ cotizantes / pob. 15-64  =  (fuerza de trabajo / pob. 15-64) × (ocupados / fuer
 
 Cada hipótesis del profesor cae en un factor: desempleo → empleo; informalidad y rama → ocupados que cotizan; participación (mujeres, desaliento) → participación. Los aportes se miden en puntos con la media logarítmica y **suman exacto** la diferencia de cobertura (test `test_aportes_suman_exacto_la_diferencia_de_cobertura`). «Hoy» es diciembre de 2024, el último con ocupados y desocupados por región (2010-2023: exportaciones del INE; 2024: anexo del estudio de la Asociación de AFP, la misma serie). Para 2025 no hay empleo regional.
 
-**Diferencia con Chile hoy, 2024 (puntos de cobertura; las 5 regiones prioritarias recomendadas):**
+**Diferencia con Chile hoy, 2024 (puntos de cobertura; las 7 regiones prioritarias recomendadas):**
 
 | Región | Participación | Empleo | Ocupados que cotizan | Total |
 |---|---|---|---|---|
 | La Araucanía | −1,9 | −0,4 | **−7,7** | −10,0 |
+| Los Ríos | −0,1 | +0,5 | **−8,8** | −8,3 |
 | Ñuble | −1,3 | −0,4 | **−7,0** | −8,6 |
+| Arica y Parinacota | −2,3 | −0,0 | **−3,9** | −6,3 |
 | Coquimbo | −2,1 | +0,1 | **−4,0** | −6,0 |
 | Valparaíso | −0,5 | −0,0 | **−3,7** | −4,2 |
 | Biobío | **−2,8** | −0,3 | +0,1 | −3,1 |
 
-Lectura: en 4 de las 5 la diferencia viene sobre todo de que menos ocupados cotizan (La Araucanía, Ñuble, Coquimbo, Valparaíso); en Biobío viene de la participación. **El desempleo casi no aporta** (entre −0,4 y +0,1 puntos). Promedio de las 5: cotización −4,5, participación −1,7, empleo −0,2.
+Lectura: en 6 de las 7 la diferencia viene sobre todo de que menos ocupados cotizan; en Biobío viene de la participación. **El desempleo casi no aporta** (entre −0,4 y +0,5 puntos). Promedio de las 7: cotización −5,0, participación −1,6, empleo −0,1.
 
-**Cambios hasta hoy:** entre 2019 y 2024 la cobertura sumó +1,6 puntos en promedio en las 5 (La Araucanía +1,5, Biobío +2,1, Coquimbo +2,4, Ñuble +1,6, Valparaíso +0,3), por «ocupados que cotizan» (+2,0 en promedio, Coquimbo +3,8); Valparaíso es la excepción (−0,3 de cotización), en línea con el estudio de la Asociación de AFP, que le calcula −0,4. Entre 2023 y 2024 los cambios son chicos (+0,7 en promedio). En el tablero se elige «Diferencia con Chile hoy», «Cambio entre 2023 y hoy» o «Cambio entre 2019 y hoy», y las filas se ordenan por cada columna.
+**Cambios hasta hoy:** entre 2019 y 2024 la cobertura sumó +1,2 puntos en promedio en las 7 (Coquimbo +2,4, Biobío +2,1, Ñuble +1,6, La Araucanía +1,5, Los Ríos +1,2, Valparaíso +0,3) y **bajó en Arica y Parinacota (−0,4)**; casi todo por «ocupados que cotizan» (+2,0 en promedio). Valparaíso es la excepción (−0,3 de cotización), en línea con el estudio de la Asociación de AFP, que le calcula −0,4. En el tablero se elige «Diferencia con Chile hoy», «Cambio entre 2023 y hoy» o «Cambio entre 2019 y hoy», y las filas se ordenan por cada columna.
 
 ## 5. Asociaciones con la cobertura 2024 (16 regiones, no causas)
 
@@ -86,7 +88,7 @@ Lectura: en 4 de las 5 la diferencia viene sobre todo de que menos ocupados coti
 | Migración interna neta en 5 años | Migración | −0,66 | 0,006 | Censo 2024 |
 | Desocupación oficial | Desempleo | **−0,32 (no significativa)** | 0,23 | ENE dic. 2023 |
 
-Otros resultados del cuadro completo (34 factores sobre el nivel, 3 sobre el cambio; desplegable «Exploración» del dashboard): informalidad sin agricultura −0,81, ocupados en el sector informal −0,75, participación oficial de la ENE +0,72, PIB por habitante +0,71 (n = 15), PIB por ocupado +0,68, participación de las mujeres +0,65, crecimiento del PIB 2013-2023 −0,59, tiempo parcial involuntario −0,46 (n.s.). Los cambios 2019-2023 de desocupación, informalidad y participación **no se asocian** con el cambio de la cobertura (|r| ≤ 0,19).
+Otros resultados del cuadro completo (39 factores sobre el nivel, 3 sobre el cambio; desplegable «Exploración» del dashboard): informalidad sin agricultura −0,81, ocupados en el sector informal −0,75, participación oficial de la ENE +0,72, PIB por habitante +0,71 (n = 15), PIB por ocupado +0,68, participación de las mujeres +0,65, crecimiento del PIB 2013-2023 −0,59, tiempo parcial involuntario −0,46 (n.s.). Los cambios 2019-2023 de desocupación, informalidad y participación **no se asocian** con el cambio de la cobertura (|r| ≤ 0,19).
 
 **Cambio de regla frente a la primera versión:** antes se mostraba la mejor correlación por hipótesis; con eso «desempleo» era la desocupación del Censo (r = −0,71). Ahora se muestra la medida **oficial** (ENE), que no es significativa. La diferencia entre ambas (Censo en abril de 2024, ENE en diciembre de 2023) está anotada en supuestos 4.4. Mostrar la que mejor calza entre 37 pruebas habría exagerado el papel del desempleo.
 
@@ -108,7 +110,7 @@ Se comparó lo hecho antes de esta ronda con el prompt y el informe que preparó
 | Paso 1: denominador INE base 2017 y el Censo como **marcador aparte**, sin empalmar | Línea ajustada al Censo (constante por región), sin marcador | Por defecto igual (así 2024 coincide con el KPI y se respeta «el Censo manda»); casilla para la proyección sin ajustar con el Censo como rombo | El ajuste es un factor constante: **la forma de la serie es la misma**; solo cambia el nivel (Chile 2025: 46,9 % vs 43,4 %). El informe teme un «salto»: con ajuste constante no hay salto |
 | Paso 1: serie larga con Tarapacá+Arica, Los Lagos+Los Ríos, Biobío+Ñuble | Solo Biobío+Ñuble y desde 2010 | Las tres fusiones, 2002-2025 | |
 | Paso 1: ventana corta 2019-2025 con 16 regiones | No | Sí (por defecto) | |
-| Paso 1: país + 5 regiones prioritarias, marcar 2020-2021 | 15 paneles con las 5 en naranja, sin marca | 16 paneles (o 13) con las 5 en naranja, Chile en gris y franja 2020-2021 | Una sola gráfica con 6 líneas rompe la pauta de la clase (máximo 4 líneas): se usan paneles pequeños |
+| Paso 1: país + regiones prioritarias, marcar 2020-2021 | 15 paneles con las prioritarias en naranja, sin marca | 16 paneles (o 13) con las 5 en naranja, Chile en gris y franja 2020-2021 | Una sola gráfica con 6 líneas rompe la pauta de la clase (máximo 4 líneas): se usan paneles pequeños |
 | Paso 2: brecha = (cob. nacional − cob. región) × pob. 15-64; tabla con peso, nivel y tendencia | Brecha y tabla sin peso | Igual fórmula, tabla con peso, nivel y tendencia 2019 y 2022 | Misma lista de 5 regiones |
 | Paso 3: descomposición en tres factores | No estaba | Sí, con el Censo aplicado también a los ocupados | El «ajuste al Censo» como factor propio daba ±3 puntos artificiales; se eliminó al llevar ocupados al nivel del Censo. Se usó la media logarítmica en vez de «log-diferencias simples» para que la suma sea exacta |
 | Paso 3: nombre `Scripts/10_explorar_causas.py` | — | `Scripts/25_explorar_causas.py` | El 10 ya existe (`10_procesar_piramide_alemania.py`) |

@@ -1101,7 +1101,7 @@ def region_change_bars(df: pd.DataFrame, ids_sel: list, cambio_pais: float, desd
     return fig
 
 
-SERIE_LARGA = {1: 801, 15: 801, 10: 810, 14: 810, 8: 816, 16: 816}  # región -> serie fusionada de 2002 (ver Scripts/24)
+SERIE_LARGA = {8: 816, 16: 816}  # región -> serie fusionada: Biobío y Ñuble solo existen por separado desde 2018; Arica, Los Ríos, Tarapacá y Los Lagos tienen serie propia desde 2007
 
 
 def extremos_largo(reg: pd.DataFrame, ids_sel: list, modo: str = "nivel"):
@@ -1133,12 +1133,14 @@ def coverage_long_chart(t: pd.DataFrame, reg: pd.DataFrame, ids_sel: list, modo:
     rotular_final(fig, puntos, rango_y=(0, 65), alto_px=380, ancho_texto=26)
     ampliar_derecha(fig, a0, a1, 0.26)
     fig.add_annotation(x=2020.5, y=3, text="2020-2021", showarrow=False, font=dict(color=INK_PRIMARY, size=11))
-    brecha0 = float(lineas[2][0].cobertura_pct.iloc[0] - lineas[1][0].cobertura_pct.iloc[0])
-    brecha1 = float(lineas[2][0].cobertura_pct.iloc[-1] - lineas[1][0].cobertura_pct.iloc[-1])
+    comun = sorted(set(lineas[1][0].anio) & set(lineas[2][0].anio))  # la región prioritaria puede empezar después de 2002 (Arica y Los Ríos, en 2007)
+    a_c0 = int(comun[0])
+    v = lambda d, a: float(d[d.anio == a].cobertura_pct.iloc[0])  # noqa: E731
+    brecha0, brecha1 = v(lineas[2][0], a_c0) - v(lineas[1][0], a_c0), v(lineas[2][0], a1) - v(lineas[1][0], a1)
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=110, b=50)}, showlegend=False,
-                      title=_titulo((f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} no se ha cerrado: {brecha0:.0f} puntos en {a0} y {brecha1:.0f} en {a1}"
+                      title=_titulo((f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} no se ha cerrado: {brecha0:.0f} puntos en {a_c0} y {brecha1:.0f} en {a1}"
                                     if abs(brecha1 - brecha0) < 1 else
-                                    f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} {'creció' if brecha1 > brecha0 else 'se achicó'} de {brecha0:.0f} puntos en {a0} a {brecha1:.0f} en {a1}"),
+                                    f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} {'creció' if brecha1 > brecha0 else 'se achicó'} de {brecha0:.0f} puntos en {a_c0} a {brecha1:.0f} en {a1}"),
                                     f"Cobertura previsional (cotizantes ÷ población de 15 a 64 años): Chile, la región prioritaria {'con la cobertura más baja' if modo == 'nivel' else 'que más cayó desde 2022'} y la mejor región", ancho=70))
     fig.update_yaxes(range=[0, 65], ticksuffix="%", title="")
     fig.update_xaxes(title="", dtick=2)

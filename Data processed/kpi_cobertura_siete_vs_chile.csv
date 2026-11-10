@@ -1,0 +1,27 @@
+seccion,indicador,unidad,siete,chile,otras,ponderacion,dif_siete_chile
+Cobertura,Cobertura 2024,% de 15-64,40.7222,46.4624,49.4928,cotizantes ÷ población 15-64 de las regiones sumadas,-5.7402
+Cobertura,Cambio desde 2019,puntos,1.3206,0.6917,0.2695,cobertura del grupo en 2024 menos en 2019,0.6289
+Cobertura,Cambio desde 2022,puntos,-0.845,-0.7416,-0.695,cobertura del grupo en 2024 menos en 2022,-0.1034
+Cobertura,Cotizantes desde 2022,personas,-28037.0,-54201.0,-26164.0,suma de las regiones,26164.0
+Cobertura,Cotizantes desde 2022,%,-1.5546,-0.916,-0.636,suma de las regiones,-0.6386
+Peso,Parte de la población de 15 a 64 años,%,34.5513,100.0,65.4487,Censo 2024,-65.4487
+Peso,Parte de los cotizantes,%,30.2827,100.0,69.7173,suma de las regiones,-69.7173
+Peso,Brecha de cotizantes frente a Chile,personas,250266.3699,,45064.8236,suma de las brechas regionales (solo regiones bajo el promedio),
+Diferencia con Chile,Participación laboral (de 15 a 64 años),puntos,-1.6054,0.0,0.9082,descomposición exacta del grupo como un solo territorio,-1.6054
+Diferencia con Chile,Empleo (1 − desocupación),puntos,-0.1374,0.0,0.0754,descomposición exacta del grupo como un solo territorio,-0.1374
+Diferencia con Chile,Ocupados que cotizan,puntos,-3.9974,0.0,2.0468,descomposición exacta del grupo como un solo territorio,-3.9974
+Diferencia con Chile,Diferencia total,puntos,-5.7402,0.0,3.0303,suma de las tres piezas,-5.7402
+Cambio 2019-2024,Participación laboral,puntos,0.1687,-0.007,-0.1423,descomposición del cambio de cada grupo,0.1757
+Cambio 2019-2024,Empleo,puntos,-0.3582,-0.2915,-0.2478,descomposición del cambio de cada grupo,-0.0668
+Cambio 2019-2024,Ocupados que cotizan,puntos,1.5101,0.9902,0.6596,descomposición del cambio de cada grupo,0.5199
+Otros indicadores,"Informalidad (tasa oficial, ENE dic. 2023)",%,32.0121,27.5509,25.4921,promedio ponderado por ocupados 2023,4.4612
+Otros indicadores,Desocupación (ENE dic. 2023),%,8.8575,8.4356,8.2396,promedio ponderado por fuerza de trabajo 2023,0.4219
+Otros indicadores,Participación laboral de 15 a 64 años (Censo 2024),%,64.6699,68.1062,69.9203,promedio ponderado por población 15-64,-3.4363
+Otros indicadores,Participación laboral de las mujeres de 15+ (Censo 2024),%,45.9027,50.5948,53.0718,promedio ponderado por población 15-64,-4.6921
+Otros indicadores,Ocupados independientes (Censo 2024),%,34.2929,33.76,33.5141,promedio ponderado por ocupados 2023,0.5329
+Otros indicadores,Ingreso per cápita (CASEN 2022),$ al mes,438714.949,530177.1616,579888.3361,promedio ponderado por población total,-91462.2126
+Otros indicadores,Pobreza en personas de 65+ (CASEN 2022),%,17.0725,14.9108,13.5422,promedio ponderado por personas de 65+,2.1617
+Otros indicadores,Personas de 65+ (Censo 2024),% de la población,15.4121,13.9989,13.2309,promedio ponderado por población total,1.4132
+Otros indicadores,Población urbana (Censo 2024),%,80.9584,86.6779,89.7865,promedio ponderado por población total,-5.7194
+Otros indicadores,Migración interna neta en 5 años (Censo 2024),por 1.000 habitantes,28.7727,0.1522,-15.4034,promedio ponderado por población total,28.6204
+Otros indicadores,Ocupados que trabajan en otra región (Censo 2024),%,6.5237,3.5303,2.0951,promedio ponderado por ocupados que viven en la región,2.9934

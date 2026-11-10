@@ -221,14 +221,20 @@ def main():
     nac_ref = cob.loc[0, ANIO_REF]
     # brecha de cotizantes: cuántos cotizantes más habría si la región alcanzara la cobertura del país (pesa tanto el nivel como el tamaño)
     r["brecha_cotizantes"] = (nac_ref - r.cobertura_ref).clip(lower=0) / 100 * r.pob_15_64
+    r["cotizantes_ref"] = cotz[ANIO_REF].reindex(r.index)
+    r["dif_cotizantes_22_ref"] = (cotz[ANIO_REF] - cotz[2022]).reindex(r.index)  # personas que pagan: cambio absoluto entre 2022 y el año de referencia
     top = lambda rank: rank.where(rank <= N_PRIORIDAD)  # noqa: E731
-    # cuatro listas de las 5 regiones «más importantes» (el dashboard deja elegir; ver docs/SHORTLIST_REGIONES.md)
+    # cuatro listas de regiones «más importantes» (el dashboard deja elegir; ver docs/SHORTLIST_REGIONES.md)
     r["prioridad_brecha"] = top(r.brecha_cotizantes.rank(ascending=False, method="first"))  # nivel × tamaño
     r["prioridad_caida"] = top(r.cambio_2022_ref.rank(method="first"))  # caída de la cobertura desde 2022 (puntos), la más fuerte primero
     r["prioridad_peso"] = top(r.peso_cotizantes_pct.rank(ascending=False, method="first"))  # parte de los cotizantes del país
-    cae = (r.brecha_cotizantes > 0) & (r.cambio_2022_ref < 0)  # bajo el promedio de Chile y bajando
-    r["prioridad_brecha_caida"] = top((r.brecha_cotizantes + 1e9 * cae).rank(ascending=False, method="first"))  # primero las que caen, por brecha
-    r["prioridad"] = r.prioridad_brecha_caida  # la recomendada: la que muestra el dashboard por defecto
+    # la recomendada: cobertura bajo la de Chile Y (entre las 5 de mayor brecha O con menos cotizantes que en 2022); orden por brecha. Une
+    # el nivel (cuánta gente falta) con el flujo (cuánta gente dejó de cotizar), así que el número de regiones lo da la regla, no un corte fijo
+    bajo, pierde, grande = r.cobertura_ref < nac_ref, r.dif_cotizantes_22_ref < 0, r.prioridad_brecha.notna()
+    elegida = bajo & (grande | pierde)
+    r["prioridad_brecha_perdida"] = r.brecha_cotizantes.where(elegida).rank(ascending=False, method="first")
+    r["motivo_prioridad"] = np.select([elegida & grande & pierde, elegida & grande, elegida & pierde], ["Brecha y pérdida", "Solo brecha", "Solo pérdida"], "")
+    r["prioridad"] = r.prioridad_brecha_perdida  # la que muestra el dashboard por defecto
     f = factores_censo()
     cor = pd.read_csv(DP / "kpi_cobertura_correlaciones_region.csv").set_index("region_id")
     for c in ("ingreso_per_capita_prom", "pct_pobreza_65", "pct_urbano", "pct_65_mas"):
@@ -261,8 +267,8 @@ def main():
 
     p = lambda v: f"{v:.1f}".replace(".", ",")  # noqa: E731
     print(f"cobertura del país 2010 / 2019 / 2022 / 2025: {p(cob.loc[0, 2010])} / {p(cob.loc[0, 2019])} / {p(cob.loc[0, 2022])} / {p(cob.loc[0, 2025])}")
-    print("prioridad (bajo el promedio de Chile y cayendo desde 2022, por brecha de cotizantes):")
-    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "brecha_cotizantes"]]
+    print("prioridad (bajo el promedio de Chile y con mayor brecha o pérdida de cotizantes desde 2022, por brecha):")
+    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_ref", "cambio_2022_ref", "dif_cotizantes_22_ref", "brecha_cotizantes", "motivo_prioridad"]]
           .round(1).to_string())
     print("factores con mayor correlación con la cobertura 2024:")
     print(fac[["nombre", "hipotesis", "pearson_r", "pearson_p", "elegido"]].head(12).round(2).to_string(index=False))

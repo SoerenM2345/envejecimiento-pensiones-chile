@@ -53,7 +53,7 @@ def render_1_1():
 
 
 CRITERIOS = {  # etiqueta -> (columna de kpi_cobertura_regiones.csv, definición para el pie de la tabla)
-    "Bajo el promedio y en caída (recomendado)": ("prioridad_brecha_caida", "las 5 regiones con cobertura bajo la de Chile que además perdieron cobertura desde 2022, ordenadas por brecha de cotizantes"),
+    "Bajo el promedio, con brecha o pérdida (recomendado)": ("prioridad_brecha_perdida", "las regiones con cobertura bajo la de Chile que además están entre las 5 de mayor brecha de cotizantes o tienen menos cotizantes que en 2022 (personas); ordenadas por brecha"),
     "Mayor brecha de cotizantes": ("prioridad_brecha", "las 5 regiones con mayor brecha de cotizantes: (cobertura de Chile − cobertura de la región) × población de 15 a 64 años de la región; pesa el nivel y el tamaño"),
     "Caída más fuerte desde 2022": ("prioridad_caida", "las 5 regiones cuya cobertura más cayó (en puntos) desde 2022, el año del máximo reciente del país"),
     "Mayor peso en los cotizantes": ("prioridad_peso", "las 5 regiones con más cotizantes: las que más pesan en el total del país, estén sobre o bajo el promedio"),
@@ -75,8 +75,8 @@ def render_1_1_tendencia():
     t = load_csv("kpi_cobertura_tendencia.csv")
     t = t[t.anio <= ref]
     reg16 = reg[reg.region_id > 0]
-    criterio = st.radio("Regiones prioritarias (las 5 de cada criterio)", list(CRITERIOS), horizontal=True, key="cob_criterio",
-                        help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista de 5; la recomendada es: cobertura bajo la de Chile y en caída desde 2022.")
+    criterio = st.radio("Regiones prioritarias", list(CRITERIOS), horizontal=True, key="cob_criterio",
+                        help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista (5 regiones, salvo la recomendada, que es una regla: cobertura bajo la de Chile y, o bien entre las 5 de mayor brecha, o bien con menos cotizantes que en 2022).")
     prio = _prioritarias(reg)
     ids_sel = [int(i) for i in prio.region_id]
     pais = t[t.territorio_id == 0].set_index("anio").cobertura_pct
@@ -84,15 +84,16 @@ def render_1_1_tendencia():
     mostrar(estilo_kpi(region_change_bars(reg16, ids_sel, cambio_pais), 640))
     sel16 = reg16.region_id.isin(ids_sel)
     n_sel, n_otras = int((reg16[sel16].cambio_2022_ref < 0).sum()), int((reg16[~sel16].cambio_2022_ref < 0).sum())
-    _subtitulo_visible(f"Qué muestra: cuántos puntos de cobertura ganó o perdió cada región entre 2022 y {ref}; la que más perdió, arriba. Naranja = las 5 regiones "
-                       f"prioritarias, azul = las otras 11, línea punteada = Chile ({cambio_pais:+.1f} puntos). Bajaron {n_sel} de las 5 prioritarias y {n_otras} de las otras 11.")
+    n = len(ids_sel)
+    _subtitulo_visible(f"Qué muestra: cuántos puntos de cobertura ganó o perdió cada región entre 2022 y {ref}; la que más perdió, arriba. Naranja = las {n} regiones "
+                       f"prioritarias, azul = las otras {16 - n}, línea punteada = Chile ({cambio_pais:+.1f} puntos). Bajaron {n_sel} de las {n} prioritarias y {n_otras} de las otras {16 - n}.")
     st.markdown("##### Chile, la región prioritaria más rezagada y la mejor región, desde 2002")
     modo_txt = st.radio("Región prioritaria que se dibuja", ["Cobertura más baja hoy", "Mayor caída desde 2022"], horizontal=True, key="cob_largo_modo")
     modo = "nivel" if modo_txt.startswith("Cobertura") else "caida"
     peor, mejor = extremos_largo(reg16, ids_sel, modo)
     mostrar(estilo_kpi(coverage_long_chart(t, reg16, ids_sel, modo), 560))
     _subtitulo_visible(f"Qué muestra: la cobertura de Chile, la de {peor.region_nombre} (la prioritaria con {'la cobertura más baja hoy' if modo == 'nivel' else 'la mayor caída desde 2022'}, "
-                       f"{peor.cobertura_ref:.1f}%) y la de {mejor.region_nombre} (la mejor, {mejor.cobertura_ref:.1f}%), de 2002 a {ref}. Franja gris = 2020 y 2021. "
+                       f"{peor.cobertura_ref:.1f}%) y la de {mejor.region_nombre} (la mejor, {mejor.cobertura_ref:.1f}%), de 2002 a {ref} (Arica y Parinacota y Los Ríos, desde 2007). Franja gris = 2020 y 2021. "
                        "Si las líneas de la prioritaria y la mejor no se acercan, la brecha entre regiones no se está cerrando.")
     st.caption("Fuente: Superintendencia de Pensiones (cotizantes de diciembre) e INE (proyección de población base 2017, llevada al nivel del Censo 2024). Antes de 2007 y de 2018 algunas regiones van fusionadas (ver nota al pie).")
     st.markdown("##### Región por región")
@@ -110,14 +111,16 @@ def render_1_1_tendencia():
     nac = reg[reg.region_id == 0].iloc[0]
     st.markdown(_coma(
         f"**Lectura:** {len(bajan)} de las 16 regiones tienen hoy menos cobertura que en 2022 "
-        f"({', '.join(bajan.sort_values('cambio_2022_ref').region_nombre)}). Las 5 prioritarias suman una brecha de "
+        f"({', '.join(bajan.sort_values('cambio_2022_ref').region_nombre)}). Las {len(prio)} prioritarias suman una brecha de "
         f"{f'{prio.brecha_cotizantes.sum():,.0f}'.replace(',', '.')} cotizantes frente al promedio de Chile ({nac.cobertura_ref:.1f}% en {ref})."))
-    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "brecha_cotizantes"]].rename(columns={
+    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "dif_cotizantes_22_ref", "brecha_cotizantes", "motivo_prioridad"]].rename(columns={
         "region_nombre": "Región prioritaria", "peso_cotizantes_pct": "Peso (% de los cotizantes)", "cobertura_ref": f"Nivel: cobertura {ref} (%)",
-        "cambio_2019_ref": "Tendencia desde 2019 (puntos)", "cambio_2022_ref": "Tendencia desde 2022 (puntos)",
-        "brecha_cotizantes": "Brecha (personas)"})
+        "cambio_2019_ref": "Tendencia desde 2019 (puntos)", "cambio_2022_ref": "Tendencia desde 2022 (puntos)", "dif_cotizantes_22_ref": "Cotizantes desde 2022 (personas)",
+        "brecha_cotizantes": "Brecha (personas)", "motivo_prioridad": "Por qué entra"})
+    if not tabla["Por qué entra"].fillna("").astype(str).str.len().gt(0).any():
+        tabla = tabla.drop(columns="Por qué entra")  # solo la lista recomendada tiene motivo
     st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", f"Nivel: cobertura {ref} (%)": "{:.1f}", "Tendencia desde 2019 (puntos)": "{:+.1f}",
-                                     "Tendencia desde 2022 (puntos)": "{:+.1f}", "Brecha (personas)": "{:,.0f}"}, decimal=",", thousands="."),
+                                     "Tendencia desde 2022 (puntos)": "{:+.1f}", "Cotizantes desde 2022 (personas)": "{:+,.0f}", "Brecha (personas)": "{:,.0f}"}, decimal=",", thousands="."),
                  hide_index=True, use_container_width=True)
     mayor = reg16.sort_values("pob_15_64").iloc[-1]
     fuera = "" if mayor.region_id in set(prio.region_id) else (
@@ -201,7 +204,7 @@ def render_1_1_descomposicion(prio: pd.DataFrame):
     d = load_csv("kpi_cobertura_descomposicion.csv")
     c1, c2 = st.columns(2)
     comp = c1.radio("Comparar", list(COMPARACIONES), horizontal=True, key="cob_desc_comp", format_func=COMPARACIONES.get)
-    alcance = c2.radio("Regiones", ["Solo las 5 prioritarias", "Las 16 regiones (las prioritarias en naranja)"], horizontal=True, key="cob_desc_alcance")
+    alcance = c2.radio("Regiones", ["Solo las prioritarias", "Las 16 regiones (las prioritarias en naranja)"], horizontal=True, key="cob_desc_alcance")
     o1, o2 = st.columns(2)
     orden = o1.selectbox("Ordenar las filas por", list(ORDEN_PANELES), key="cob_desc_orden", format_func=ORDEN_PANELES.get,
                          help="Cada panel es una columna; aquí eliges por cuál se ordenan las regiones.")
@@ -252,9 +255,9 @@ def render_1_1_razones(prio: pd.DataFrame, fac: pd.DataFrame, d: pd.DataFrame):
         ("Participación laboral y otras", "Participación laboral (de 15 a 64 años)", ap("participacion"), f"Ingreso per cápita: {asoc(f.loc['ingreso_per_capita_prom'])}",
          _lectura_pieza(m["participacion"]) + "; el ingreso acompaña a la cobertura"),
     ]
-    tabla = pd.DataFrame(filas, columns=["Posible razón", "En qué pieza cae", "Aporte a la brecha (puntos, promedio de las 5)", "Asociación entre las 16 regiones (r)", "Lectura"])
+    tabla = pd.DataFrame(filas, columns=["Posible razón", "En qué pieza cae", "Aporte a la brecha (puntos, promedio de las prioritarias)", "Asociación entre las 16 regiones (r)", "Lectura"])
     st.table(tabla.set_index("Posible razón"))
-    st.caption(_coma("La columna «Aporte» sale del gráfico de arriba (diferencia con Chile hoy, promedio de las 5 regiones prioritarias); la «Asociación», del gráfico de abajo. "
+    st.caption(_coma("La columna «Aporte» sale del gráfico de arriba (diferencia con Chile hoy, promedio de las regiones prioritarias); la «Asociación», del gráfico de abajo. "
                      "Una razón puede aportar mucho a la brecha y no asociarse (o al revés): son dos preguntas distintas."))
 
 
@@ -289,8 +292,8 @@ def render_1_1_causas():
     st.dataframe(tabla.style.apply(pintar, axis=0), hide_index=True, use_container_width=True)
     st.caption("Naranja = la región está del lado del factor que se asocia con menos cobertura, frente a Chile (solo factores con asociación significativa).")
     peores = sorted(((n, m) for n, m in malos.items() if elegidos[elegidos.nombre == n].iloc[0].pearson_p < 0.05), key=lambda x: -x[1])
-    st.markdown(_coma("**Lectura:** las 5 regiones prioritarias están del lado desfavorable en " + "; ".join(
-        f"{n.split(' (')[0].lower()} ({m} de 5)" for n, m in peores) + ". "
+    st.markdown(_coma(f"**Lectura:** las {len(prio)} regiones prioritarias están del lado desfavorable en " + "; ".join(
+        f"{n.split(' (')[0].lower()} ({m} de {len(prio)})" for n, m in peores) + ". "
         "La desocupación oficial casi no se asocia con la cobertura: la diferencia viene sobre todo de cuántos ocupados cotizan, que es lo que mide la informalidad."))
     n_nivel, n_cambio = int((fac.objetivo == "nivel").sum()), int((fac.objetivo == "cambio").sum())
     st.caption(_coma(
@@ -330,8 +333,24 @@ def render_1_1_causas():
         st.markdown(_coma(
             f"La Metropolitana pesa más en los cotizantes que en los ocupados, y la diferencia se achicó ({dif_.iloc[0]:.1f} puntos en {ta.Fecha.iloc[0][-4:]}, {dif_.iloc[3]:.1f} en {ta.Fecha.iloc[3][-4:]}). "
             "Con estas cifras no se puede decir si es porque se cuenta por la región de la empresa o porque allí hay más empleo formal. "
-            "Ni la Superintendencia ni el estudio de la Asociación de AFP indican la regla; hay que preguntarla a la Superintendencia."))
+            "Ni la Superintendencia ni el estudio de la Asociación de AFP indican la regla. La pregunta para la Superintendencia cabe en una línea: "
+            "¿cada cotizante se cuenta en la comuna de su empleador o en el domicilio del afiliado?"))
         st.caption("Fuente: Superintendencia de Pensiones, INE (Encuesta Nacional de Empleo, trimestre nov-ene), Censo 2024.")
+        st.markdown("**¿Cuánto importaría la regla?** El Censo 2024 pregunta dónde trabaja cada ocupado: hay regiones que «exportan» trabajadores (viven allí y trabajan en otra) "
+                    "y otras que los «importan». Si los cotizantes se contaran por lugar de trabajo, la cobertura de cada región cambiaría así:")
+        pe = load_csv("kpi_cobertura_pendularidad.csv").sort_values("diferencia_puntos")
+        cv = lambda s: 100 * s.std() / s.mean()  # noqa: E731
+        orden_pe = pe.rename(columns={"region_nombre": "Región", "salen_pct": "Ocupados que trabajan en otra región (%)", "neto_pct": "Saldo de pendulares (% de los ocupados que viven allí)",
+                                      "cobertura_ref": "Cobertura actual (%)", "cobertura_si_lugar_de_trabajo": "Cobertura si se contara por lugar de trabajo (%)", "diferencia_puntos": "Diferencia (puntos)"})
+        cols_pe = ["Región", "Ocupados que trabajan en otra región (%)", "Saldo de pendulares (% de los ocupados que viven allí)", "Cobertura actual (%)",
+                   "Cobertura si se contara por lugar de trabajo (%)", "Diferencia (puntos)"]
+        st.dataframe(orden_pe[cols_pe].style.format({c: "{:.1f}" for c in cols_pe[1:5]} | {"Diferencia (puntos)": "{:+.1f}"}, decimal=","), hide_index=True, use_container_width=True)
+        peor3 = pe.sort_values("cobertura_ref").head(3)
+        _subtitulo_visible(f"Qué muestra: la regla importa mucho para unas regiones y casi nada para otras. {pe.iloc[0].region_nombre} bajaría {abs(pe.iloc[0].diferencia_puntos):.1f} puntos y "
+                           f"{pe.iloc[-1].region_nombre} subiría {pe.iloc[-1].diferencia_puntos:.1f}; la dispersión entre regiones pasaría de {cv(pe.cobertura_ref):.1f} % a {cv(pe.cobertura_si_lugar_de_trabajo):.1f} %. "
+                           f"Las tres de menor cobertura ({', '.join(peor3.region_nombre)}) cambian menos de {peor3.diferencia_puntos.abs().max() + 0.05:.1f} punto: su problema no depende de la regla.")
+        st.caption("Sensibilidad, no corrección: se supone que los pendulares del Censo (abril de 2024) valen para los cotizantes de diciembre y que cuentan en la población de 15 a 64 años de la región de trabajo; "
+                   "la codificación del lugar de trabajo del Censo (p44) se infiere, no hay diccionario en el proyecto. Datos: Data processed/kpi_cobertura_pendularidad.csv.")
     render_1_1_dos_palancas(prio)
 
 
