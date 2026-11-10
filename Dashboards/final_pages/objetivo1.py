@@ -8,7 +8,7 @@ from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson
 from components.kpi_card import kpi_card
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
+                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -44,9 +44,69 @@ def render_1_1():
         else:
             fig_reg = region_coverage_people_bars(pres, nac_cobertura)
         mostrar(estilo_kpi(fig_reg, 640))
+    render_1_1_tendencia()
     render_1_1_correlaciones()
     render_1_1_matriz()
+    render_1_1_causas()
     st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
+
+
+CRITERIOS = {  # etiqueta -> (columna de kpi_cobertura_regiones.csv, definición para el pie de la tabla)
+    "Bajo el promedio y en caída (recomendado)": ("prioridad_brecha_caida", "las 5 regiones con cobertura bajo la de Chile que además perdieron cobertura desde 2022, ordenadas por brecha de cotizantes"),
+    "Mayor brecha de cotizantes": ("prioridad_brecha", "las 5 regiones con mayor brecha de cotizantes: (cobertura de Chile − cobertura de la región) × población de 15 a 64 años de la región; pesa el nivel y el tamaño"),
+    "Caída más fuerte desde 2022": ("prioridad_caida", "las 5 regiones cuya cobertura más cayó (en puntos) desde 2022, el año del máximo reciente del país"),
+    "Mayor peso en los cotizantes": ("prioridad_peso", "las 5 regiones con más cotizantes: las que más pesan en el total del país, estén sobre o bajo el promedio"),
+}
+
+
+def _prioritarias(reg: pd.DataFrame) -> pd.DataFrame:
+    """Las 5 regiones del criterio elegido en el selector de «¿Sube o baja la cobertura?» (por defecto, el recomendado)."""
+    col = CRITERIOS[st.session_state.get("cob_criterio", next(iter(CRITERIOS)))][0]
+    r16 = reg[reg.region_id > 0]
+    return r16[r16[col].notna()].sort_values(col)
+
+
+def render_1_1_tendencia():
+    """Pedido del profesor: ¿la cobertura sube o baja?, ¿dónde es más baja y dónde pesa más? (Scripts/24)."""
+    st.markdown("#### ¿Sube o baja la cobertura?")
+    t = load_csv("kpi_cobertura_tendencia.csv")
+    reg = load_csv("kpi_cobertura_regiones.csv")
+    reg16 = reg[reg.region_id > 0]
+    criterio = st.radio("Regiones prioritarias (las 5 de cada criterio)", list(CRITERIOS), horizontal=True, key="cob_criterio",
+                        help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista de 5; la recomendada es: cobertura bajo la de Chile y en caída desde 2022.")
+    prio = _prioritarias(reg)
+    c1, c2 = st.columns([3, 2])
+    with c1:
+        ventana = st.radio("Período", list(VENTANAS_TENDENCIA), horizontal=True, key="cob_ventana")
+    with c2:
+        sin_ajustar = st.checkbox("Población proyectada sin ajustar al Censo 2024", key="cob_sin_ajuste",
+                                  help="Por defecto la población de cada región por año es la proyección del INE (base 2017) llevada al nivel del Censo 2024. "
+                                       "Marcada, se usa la proyección tal como la publicó el INE y el Censo 2024 aparece como un punto aparte (rombo). "
+                                       "La tendencia es la misma; cambia el nivel.")
+    mostrar(estilo_kpi(coverage_trend_panels(t, [int(i) for i in prio.region_id], ventana, sin_ajustar), 720))
+    st.caption("Paneles de la cobertura más baja a la más alta en el último año. Fuente: Superintendencia de Pensiones (cotizantes de diciembre, 1985-2025), INE (proyección de población base 2017) y Censo 2024.")
+    bajan = reg16[reg16.cambio_2022_2025 < 0]
+    nac = reg[reg.region_id == 0].iloc[0]
+    st.markdown(_coma(
+        f"**Lectura:** {len(bajan)} de las 16 regiones tienen hoy menos cobertura que en 2022 "
+        f"({', '.join(bajan.sort_values('cambio_2022_2025').region_nombre)}). Las 5 prioritarias suman una brecha de "
+        f"{f'{prio.brecha_cotizantes.sum():,.0f}'.replace(',', '.')} cotizantes frente al promedio de Chile ({nac.cobertura_2025:.1f}%)."))
+    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_2025", "cambio_2019_2025", "cambio_2022_2025", "brecha_cotizantes"]].rename(columns={
+        "region_nombre": "Región prioritaria", "peso_cotizantes_pct": "Peso (% de los cotizantes)", "cobertura_2025": "Nivel: cobertura 2025 (%)",
+        "cambio_2019_2025": "Tendencia desde 2019 (puntos)", "cambio_2022_2025": "Tendencia desde 2022 (puntos)",
+        "brecha_cotizantes": "Brecha (personas)"})
+    st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", "Nivel: cobertura 2025 (%)": "{:.1f}", "Tendencia desde 2019 (puntos)": "{:+.1f}",
+                                     "Tendencia desde 2022 (puntos)": "{:+.1f}", "Brecha (personas)": "{:,.0f}"}, decimal=",", thousands="."),
+                 hide_index=True, use_container_width=True)
+    mayor = reg16.sort_values("pob_15_64").iloc[-1]
+    fuera = "" if mayor.region_id in set(prio.region_id) else (
+        f" {mayor.region_nombre}, la más grande, queda fuera: su cobertura ({mayor.cobertura_2025:.1f}%) está sobre el promedio.")
+    st.caption(_coma(
+        f"\\* Prioridad = {CRITERIOS[criterio][1]}.{fuera}  \n"
+        "La población de cada región por año es la proyección del INE base 2017 llevada al nivel del Censo 2024: 2018-2025 son proyecciones, no datos. "
+        "Hasta 2017 Biobío y Ñuble son una sola serie, y hasta 2006 Tarapacá con Arica y Parinacota y Los Lagos con Los Ríos (la Superintendencia las publicó juntas). "
+        "Entre 2006 y 2007 la cobertura sube 3 puntos en casi todas las regiones: puede ser un cambio en cómo se cuenta, no confirmado. "
+        "Detalle y límites en docs/supuestos_y_limitaciones.md."))
 
 
 # variable -> (etiqueta, unidad, nombre en el resumen de correlaciones)
@@ -82,6 +142,116 @@ def render_1_1_correlaciones():
         f"Más por sobre lo esperado está {arriba.region_nombre} ({num_cl(residuo.max(), 1)} pp); "
         f"más por debajo, {abajo.region_nombre} ({num_cl(residuo.min(), 1)} pp)."
     )
+
+
+def _bullets_descomposicion(d: pd.DataFrame, comparacion: str, prio: pd.DataFrame) -> str:
+    """Una línea por región prioritaria: la diferencia total y lo que aporta cada una de las tres piezas."""
+    frases = {"participacion": "participación laboral", "empleo": "desempleo", "cotizacion": "ocupados que cotizan"}
+    lineas = []
+    for r in prio.itertuples():
+        x = d[(d.comparacion == comparacion) & (d.territorio_id == r.region_id)].set_index("factor").aporte_pp
+        if x.empty:
+            continue
+        orden = x.abs().sort_values(ascending=False).index
+        if comparacion.startswith("Nivel"):
+            cab = f"**{r.region_nombre}** está {abs(x.sum()):.1f} puntos {'bajo' if x.sum() < 0 else 'sobre'} Chile"
+        else:
+            cab = f"**{r.region_nombre}**: {x.sum():+.1f} puntos"
+        lineas.append(f"- {cab} → " + ", ".join(f"{frases[k]} {x[k]:+.1f}" for k in orden))
+    return _coma("\n".join(lineas))
+
+
+def render_1_1_descomposicion(prio: pd.DataFrame):
+    st.markdown("##### ¿De dónde viene la diferencia? Tres piezas de la cobertura")
+    st.markdown(
+        "La cobertura es exactamente el producto de tres cosas: **(1)** cuántas personas de 15 a 64 años trabajan o buscan trabajo, "
+        "**(2)** cuántas de ellas tienen empleo (1 − desocupación) y **(3)** cuántos de los ocupados cotizan. Cada posible causa cae en una: "
+        "desempleo en la (2), informalidad y rama de actividad en la (3), y participación laboral en la (1). Es aritmética, no una estimación.")
+    d = load_csv("kpi_cobertura_descomposicion.csv")
+    opciones = ["Nivel frente a Chile en 2023", "Cambio 2019-2023"]
+    comp = st.radio("Comparar", opciones, horizontal=True, key="cob_desc_comp", format_func=lambda c: "Diferencia con Chile en 2023" if c.startswith("Nivel") else "Cambio entre 2019 y 2023")
+    nombres = dict(zip(prio.region_id.astype(int), prio.region_nombre))
+    mostrar(estilo_kpi(decomposition_panels(d, comp, list(nombres), nombres), 460))
+    st.markdown(_bullets_descomposicion(d, comp, prio))
+    st.caption(_coma(
+        "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), INE Encuesta Nacional de Empleo (trimestre nov-ene = «diciembre», proyecciones base 2017) y Censo 2024. "
+        "El último diciembre con datos de la encuesta en el archivo bajado es 2023. Ocupados y fuerza de trabajo se llevan al nivel del Censo con el mismo factor que la población. "
+        "La fuerza de trabajo incluye a las personas de 65+ que trabajan, por eso la participación sobre 15-64 mezcla participación y envejecimiento. "
+        "Muestra de dónde sale la diferencia, no por qué ocurre."))
+
+
+def render_1_1_causas():
+    """Pedido del profesor: causas posibles en las regiones prioritarias (desempleo, informalidad, industria, migración)."""
+    st.markdown("#### ¿Qué puede explicar la baja cobertura en las regiones prioritarias?")
+    fac = load_csv("kpi_cobertura_factores.csv")
+    reg = load_csv("kpi_cobertura_regiones.csv")
+    nac = reg[reg.region_id == 0].iloc[0]
+    prio = _prioritarias(reg)
+    render_1_1_descomposicion(prio)
+    st.markdown("##### ¿Qué se asocia con la cobertura de las 16 regiones?")
+    elegidos = fac[fac.elegido].reindex(fac[fac.elegido].pearson_r.abs().sort_values(ascending=False).index)
+    mostrar(estilo_kpi(factor_bars(elegidos), 440))
+    st.caption("Fuente: Censo 2024, CASEN 2022, Encuesta Nacional de Empleo (INE, diciembre 2023) y Superintendencia de Pensiones (cobertura 2024). n = 16 regiones.")
+    fmt = lambda k, v: f"{v:,.0f}" if k == "ingreso_per_capita_prom" else f"{v:+.1f}" if k == "migracion_interna_neta" else f"{v:.1f}"  # noqa: E731
+    cols, malos = {}, {}
+    for f in elegidos.itertuples():
+        k = f.factor
+        malos[f.nombre] = int(((prio[k] - nac[k]) * np.sign(f.pearson_r) < 0).sum())  # del lado que se asocia con menos cobertura
+        cols[f.nombre] = [f"{fmt(k, v)} (Chile {fmt(k, nac[k])})".replace(",", "§").replace(".", ",").replace("§", ".") for v in prio[k]]
+    tabla = pd.DataFrame({"Región prioritaria": prio.region_nombre.values, **cols})
+    tabla["Industria con más peso frente a Chile"] = [f"{n} ({i:.1f}×)".replace(".", ",") for n, i in zip(prio.rama_especializada, prio.rama_especializada_indice)]
+    def pintar(col):
+        f = elegidos[elegidos.nombre == col.name]
+        if f.empty or f.iloc[0].pearson_p >= 0.05:
+            return [""] * len(col)
+        k, sg = f.iloc[0].factor, np.sign(f.iloc[0].pearson_r)
+        return ["background-color: rgba(235,104,52,0.22)" if (v - nac[k]) * sg < 0 else "" for v in prio[k]]
+    st.dataframe(tabla.style.apply(pintar, axis=0), hide_index=True, use_container_width=True)
+    st.caption("Naranja = la región está del lado del factor que se asocia con menos cobertura, frente a Chile (solo factores con asociación significativa).")
+    peores = sorted(((n, m) for n, m in malos.items() if elegidos[elegidos.nombre == n].iloc[0].pearson_p < 0.05), key=lambda x: -x[1])
+    st.markdown(_coma("**Lectura:** las 5 regiones prioritarias están del lado desfavorable en " + "; ".join(
+        f"{n.split(' (')[0].lower()} ({m} de 5)" for n, m in peores) + ". "
+        "La desocupación oficial casi no se asocia con la cobertura: la diferencia viene sobre todo de cuántos ocupados cotizan, que es lo que mide la informalidad."))
+    n_nivel, n_cambio = int((fac.objetivo == "nivel").sum()), int((fac.objetivo == "cambio").sum())
+    st.caption(_coma(
+        f"\\* Correlaciones entre las 16 regiones: muestran asociación, no causa. Se probaron {n_nivel} factores (más {n_cambio} cambios en el tiempo) y con tantos, algunos salen por azar. "
+        "Para desempleo e informalidad se muestra la medida oficial de la encuesta aunque no sea la que mejor calza; para la industria, la rama con mayor asociación entre 12; "
+        "las dos últimas son las mejores de las demás. La informalidad oficial es en parte la misma información que «no cotiza» (se cuentan como informales los dependientes sin "
+        "cotizaciones previsionales por su empleo), por eso la asociación con la cobertura es alta. Migración interna neta = llegados desde otras regiones menos salidos en los últimos 5 años, por 1.000 habitantes. "
+        "Falta: PIB por rama de actividad, cotizantes por rama, participación por sexo de la encuesta y la encuesta después de mayo de 2024 (docs/EXPLORACION_COBERTURA.md)."))
+    with st.expander("Exploración: todos los factores probados"):
+        todo = fac[["objetivo", "ranking", "nombre", "hipotesis", "fuente", "ambito", "n", "pearson_r", "pearson_p", "spearman_rho", "elegido"]].rename(columns={
+            "objetivo": "Se compara con", "ranking": "Orden", "nombre": "Factor", "hipotesis": "Hipótesis", "fuente": "Fuente", "ambito": "Ámbito", "n": "n",
+            "pearson_r": "Correlación (r)", "pearson_p": "Valor p", "spearman_rho": "Correlación de rangos", "elegido": "Mostrado arriba"})
+        todo["Se compara con"] = todo["Se compara con"].map({"nivel": "Cobertura 2024", "cambio": "Cambio de la cobertura 2019-2023"})
+        st.dataframe(todo.style.format({"Correlación (r)": "{:+.2f}", "Valor p": "{:.3f}", "Correlación de rangos": "{:+.2f}"}, decimal=","),
+                     hide_index=True, use_container_width=True)
+    with st.expander("Contraste con el estudio de la Asociación de AFP (diciembre 2019 y 2024)"):
+        c = load_csv("kpi_cobertura_contraste_aafp.csv").merge(load_csv("indicadores_region.csv")[["region", "region_nombre"]], left_on="region_id", right_on="region")
+        dif = (c.cot_sobre_ocupados_2019 - c.cobertura_ocupados_aafp_2019).abs().max()
+        st.markdown(_coma(
+            f"Reproduje las cifras del estudio de la Asociación de AFP con los datos del INE y de la Superintendencia: la diferencia máxima en los ocupados de 2019 es de {c.dif_ocupados_pct.abs().max():.2f}% "
+            f"y en la cobertura sobre ocupados, de {dif:.1f} puntos, en las 16 regiones. Eso confirma la lectura de los archivos y que los cotizantes son la misma estadística. "
+            "El estudio mide cotizantes ÷ ocupados; este tablero, cotizantes ÷ población de 15 a 64 años: los niveles no son comparables, el orden sí."))
+        t = c[["region_nombre", "desocupacion_ine_2019", "desocupacion_aafp_2019", "informalidad_ine_2019", "informalidad_aafp_2019", "cot_sobre_ocupados_2019",
+               "cobertura_ocupados_aafp_2019", "cot_sobre_ocupados_2024_con_aafp", "cobertura_ocupados_aafp_2024"]].rename(columns={
+            "region_nombre": "Región", "desocupacion_ine_2019": "Desocupación 2019, aquí (%)", "desocupacion_aafp_2019": "Desocupación 2019, estudio (%)",
+            "informalidad_ine_2019": "Informalidad 2019, aquí (%)", "informalidad_aafp_2019": "Informalidad 2019, estudio (%)",
+            "cot_sobre_ocupados_2019": "Cotizantes ÷ ocupados 2019, aquí (%)", "cobertura_ocupados_aafp_2019": "Cotizantes ÷ ocupados 2019, estudio (%)",
+            "cot_sobre_ocupados_2024_con_aafp": "Cotizantes ÷ ocupados 2024, aquí con los ocupados del estudio (%)", "cobertura_ocupados_aafp_2024": "Cotizantes ÷ ocupados 2024, estudio (%)"})
+        st.dataframe(t.style.format({k: "{:.1f}" for k in t.columns[1:]}, decimal=","), hide_index=True, use_container_width=True)
+        st.caption("Fuente: estudio de la Asociación de AFP (Informe Previsional Económico N° 135), INE y Superintendencia de Pensiones. La Asociación de AFP es el gremio de las administradoras: sus cifras se pueden recalcular, sus interpretaciones no.")
+    with st.expander("Prueba: ¿en qué región se cuenta a cada cotizante?"):
+        ta = load_csv("kpi_cobertura_test_asignacion.csv").rename(columns={
+            "fuente": "Fecha", "cotizantes_pct": "Metropolitana en los cotizantes (%)", "ocupados_ene_pct": "Metropolitana en los ocupados (%)",
+            "pob_15_64_pct": "Metropolitana en la población de 15 a 64 años (%)"})
+        st.dataframe(ta.style.format({k: "{:.1f}" for k in ta.columns[1:]}, decimal=","), hide_index=True, use_container_width=True)
+        dif_ = ta["Metropolitana en los cotizantes (%)"] - ta["Metropolitana en los ocupados (%)"]
+        st.markdown(_coma(
+            f"La Metropolitana pesa más en los cotizantes que en los ocupados, y la diferencia se achicó ({dif_.iloc[0]:.1f} puntos en {ta.Fecha.iloc[0][-4:]}, {dif_.iloc[3]:.1f} en {ta.Fecha.iloc[3][-4:]}). "
+            "Con estas cifras no se puede decir si es porque se cuenta por la región de la empresa o porque allí hay más empleo formal. "
+            "Ni la Superintendencia ni el estudio de la Asociación de AFP indican la regla; hay que preguntarla a la Superintendencia."))
+        st.caption("Fuente: Superintendencia de Pensiones, INE (Encuesta Nacional de Empleo, trimestre nov-ene), Censo 2024.")
 
 
 def render_1_1_matriz():

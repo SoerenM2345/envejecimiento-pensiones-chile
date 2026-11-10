@@ -77,6 +77,19 @@ Convenciones: «MM$» = millones de pesos; «M$» = miles de pesos; las cifras d
 - **Atención:** el «Total» incluye PBS/APS de invalidez, no solo vejez. La PBS de vejez queda en 0 en 2025 (la reemplaza la PGU).
 - **Uso:** script 12 → `pgu_pbs_aps_nacional_anual/mensual.csv`, `pgu_pbs_aps_region_trimestral.csv` → KPI 2.1 y 2.2.
 
+### 2.2b `ine_proyecciones_base2017/`: Proyecciones de población regionales (INE, base 2017)
+- **Archivo:** `estimaciones-y-proyecciones-2002-2035-comunas.xlsx` (11 MB), descargado el 2026-11-09 de `https://www.ine.gob.cl/docs/default-source/proyecciones-de-poblacion/cuadros-estadisticos/base-2017/estimaciones-y-proyecciones-2002-2035-comunas.xlsx` (el script 24 lo vuelve a bajar si falta).
+- **Estructura:** una fila por comuna × sexo × edad simple; columnas `Poblacion 2002` … `Poblacion 2035`; `Region` 1-16 con Ñuble (16) separada desde 2002.
+- **Atención:** es base Censo 2017, con otro nivel que el Censo 2024 (factor 0,88-1,00 por región); solo se usa su dinámica, llevada al nivel del Censo (docs/DISCUSION_FUENTES.md, fila 16).
+- **Uso:** script 24 → `kpi_cobertura_tendencia.csv` (cobertura por región 2002-2025).
+
+### 2.2c `_external/ine_ene_regional/`, `bcentral_pib_regional/`, `aafp_cobertura_regiones/`: ENE regional, PIB regional y estudio de la AAFP (descargado 2026-11-09)
+- **Archivos (21 `.xls`, renombrados desde el código del explorador, + 1 `.xlsx` + 1 `.pdf`):** los `.xls` son **XML de Excel 2003** exportado del explorador de datos del INE («MyOECD export»), no Excel binario; se leen con `xml.etree`. Se reconocen por su contenido, no por el nombre.
+- **ENE (INE), proyecciones base 2017, ambos sexos, trimestre móvil 2010 ene-mar a 2024 mar-may (informalidad desde 2017 jul-sep):** ocupados, desocupados, ocupados informales, tasa de ocupación informal (dos copias, español e inglés), tasa en el sector informal, tasa informal sin el sector agropecuario y tasa de tiempo parcial involuntario, **nacional y por las 16 regiones**. Hay además 3 archivos regionales de rama, categoría ocupacional y grupo ocupacional pero solo con «Total», y 10 de solo país (por edad, educación, rama). Los valores van en miles de personas (conteos) o %.
+- **`CCNN2018_PIB_REGIONAL_T.xlsx` (Banco Central):** PIB trimestral por región, volumen a precios del año anterior encadenado, series empalmadas, referencia 2018 (miles de millones de pesos), 2013-I a 2026-II, preliminar. **15 regiones, falta Magallanes**; solo el total.
+- **`Estudio-AAFP-cotizacion-previsional-por-regiones.pdf` (Asociación de AFP, IPE N° 135):** desocupación, ocupación, informalidad y cobertura previsional (cotizantes del mes ÷ ocupados) por región, diciembre 2019 y 2024, y el anexo con población en edad de trabajar, fuerza de trabajo, ocupados, desocupados e informales. Es el gremio de las AFP: sus cifras son recalculables (se contrastaron), sus interpretaciones no.
+- **Uso:** script 25 → `ene_region_anual.csv`, `kpi_cobertura_factores_anual.csv`, `kpi_cobertura_descomposicion.csv`, `kpi_cobertura_contraste_aafp.csv`, `pib_regional_anual.csv` y los factores oficiales de `kpi_cobertura_factores.csv`. Límites: `docs/supuestos_y_limitaciones.md`.
+
 ### 2.3 `dipres/`: Finanzas públicas (4 archivos)
 - **Productor:** Dirección de Presupuestos (DIPRES), Ministerio de Hacienda.
 

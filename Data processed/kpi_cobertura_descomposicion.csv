@@ -1,0 +1,154 @@
+territorio_id,territorio,comparacion,factor,factor_nombre,aporte_pp
+1,Tarapacá,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-0.2626
+1,Tarapacá,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),1.3784
+1,Tarapacá,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-3.6738
+1,Tarapacá,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),2.2372
+1,Tarapacá,Cambio 2019-2023,empleo,Empleo (1 − desocupación),1.1062
+1,Tarapacá,Cambio 2019-2023,cotizacion,Ocupados que cotizan,-2.4679
+1,Tarapacá,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),-2.4542
+1,Tarapacá,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.5036
+1,Tarapacá,Cambio 2010-2019,cotizacion,Ocupados que cotizan,6.6483
+2,Antofagasta,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-1.1533
+2,Antofagasta,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.4132
+2,Antofagasta,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,6.8563
+2,Antofagasta,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),0.1656
+2,Antofagasta,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.0423
+2,Antofagasta,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.782
+2,Antofagasta,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),0.6294
+2,Antofagasta,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.2733
+2,Antofagasta,Cambio 2010-2019,cotizacion,Ocupados que cotizan,3.1663
+3,Atacama,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),2.1674
+3,Atacama,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.9093
+3,Atacama,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,1.18
+3,Atacama,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),1.9811
+3,Atacama,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-1.2953
+3,Atacama,Cambio 2019-2023,cotizacion,Ocupados que cotizan,1.5243
+3,Atacama,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),2.0129
+3,Atacama,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.349
+3,Atacama,Cambio 2010-2019,cotizacion,Ocupados que cotizan,3.03
+4,Coquimbo,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-3.2247
+4,Coquimbo,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.2574
+4,Coquimbo,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-2.9628
+4,Coquimbo,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-2.7733
+4,Coquimbo,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.4141
+4,Coquimbo,Cambio 2019-2023,cotizacion,Ocupados que cotizan,4.3994
+4,Coquimbo,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),3.4491
+4,Coquimbo,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.1611
+4,Coquimbo,Cambio 2010-2019,cotizacion,Ocupados que cotizan,2.7025
+5,Valparaíso,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),0.1868
+5,Valparaíso,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.3152
+5,Valparaíso,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-3.3866
+5,Valparaíso,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),1.0171
+5,Valparaíso,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.46
+5,Valparaíso,Cambio 2019-2023,cotizacion,Ocupados que cotizan,-0.2451
+5,Valparaíso,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),0.5661
+5,Valparaíso,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.5894
+5,Valparaíso,Cambio 2010-2019,cotizacion,Ocupados que cotizan,4.6657
+6,O'Higgins,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-1.4262
+6,O'Higgins,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.5837
+6,O'Higgins,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,1.4296
+6,O'Higgins,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-2.549
+6,O'Higgins,Cambio 2019-2023,empleo,Empleo (1 − desocupación),0.2513
+6,O'Higgins,Cambio 2019-2023,cotizacion,Ocupados que cotizan,3.3783
+6,O'Higgins,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),3.4432
+6,O'Higgins,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.8114
+6,O'Higgins,Cambio 2010-2019,cotizacion,Ocupados que cotizan,4.7281
+7,Maule,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),0.7661
+7,Maule,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.8612
+7,Maule,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-5.8471
+7,Maule,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.0799
+7,Maule,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.1668
+7,Maule,Cambio 2019-2023,cotizacion,Ocupados que cotizan,-0.7259
+7,Maule,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),4.7886
+7,Maule,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.1652
+7,Maule,Cambio 2010-2019,cotizacion,Ocupados que cotizan,4.3157
+9,La Araucanía,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-1.6825
+9,La Araucanía,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.6481
+9,La Araucanía,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-7.7469
+9,La Araucanía,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.1705
+9,La Araucanía,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-1.2355
+9,La Araucanía,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.096
+9,La Araucanía,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),2.0876
+9,La Araucanía,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.603
+9,La Araucanía,Cambio 2010-2019,cotizacion,Ocupados que cotizan,5.0918
+10,Los Lagos,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-2.925
+10,Los Lagos,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),1.9514
+10,Los Lagos,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-1.8834
+10,Los Lagos,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-1.2094
+10,Los Lagos,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.247
+10,Los Lagos,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.4257
+10,Los Lagos,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),2.4102
+10,Los Lagos,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.7846
+10,Los Lagos,Cambio 2010-2019,cotizacion,Ocupados que cotizan,5.621
+11,Aysén,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),5.772
+11,Aysén,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),1.7247
+11,Aysén,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-7.7229
+11,Aysén,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.7656
+11,Aysén,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.6507
+11,Aysén,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.8131
+11,Aysén,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),4.2659
+11,Aysén,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.2117
+11,Aysén,Cambio 2010-2019,cotizacion,Ocupados que cotizan,2.7002
+12,Magallanes,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),5.1777
+12,Magallanes,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),1.5284
+12,Magallanes,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-0.0191
+12,Magallanes,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),2.3724
+12,Magallanes,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-1.0597
+12,Magallanes,Cambio 2019-2023,cotizacion,Ocupados que cotizan,-2.6701
+12,Magallanes,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),5.7906
+12,Magallanes,Cambio 2010-2019,empleo,Empleo (1 − desocupación),1.3066
+12,Magallanes,Cambio 2010-2019,cotizacion,Ocupados que cotizan,-0.4232
+13,Metropolitana,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),1.9222
+13,Metropolitana,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.3898
+13,Metropolitana,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,3.4084
+13,Metropolitana,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.1532
+13,Metropolitana,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.6303
+13,Metropolitana,Cambio 2019-2023,cotizacion,Ocupados que cotizan,-0.5743
+13,Metropolitana,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),3.6288
+13,Metropolitana,Cambio 2010-2019,empleo,Empleo (1 − desocupación),-0.4001
+13,Metropolitana,Cambio 2010-2019,cotizacion,Ocupados que cotizan,0.0872
+14,Los Ríos,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-1.2079
+14,Los Ríos,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.1153
+14,Los Ríos,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-7.242
+14,Los Ríos,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-2.3275
+14,Los Ríos,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-1.0474
+14,Los Ríos,Cambio 2019-2023,cotizacion,Ocupados que cotizan,3.8921
+14,Los Ríos,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),5.1033
+14,Los Ríos,Cambio 2010-2019,empleo,Empleo (1 − desocupación),1.0425
+14,Los Ríos,Cambio 2010-2019,cotizacion,Ocupados que cotizan,1.6582
+15,Arica y Parinacota,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-2.0717
+15,Arica y Parinacota,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.418
+15,Arica y Parinacota,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-2.4702
+15,Arica y Parinacota,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.827
+15,Arica y Parinacota,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-1.1287
+15,Arica y Parinacota,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.146
+15,Arica y Parinacota,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),0.503
+15,Arica y Parinacota,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.5634
+15,Arica y Parinacota,Cambio 2010-2019,cotizacion,Ocupados que cotizan,3.831
+816,Biobío y Ñuble,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-3.306
+816,Biobío y Ñuble,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.0876
+816,Biobío y Ñuble,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-1.2314
+816,Biobío y Ñuble,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),0.0007
+816,Biobío y Ñuble,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.2824
+816,Biobío y Ñuble,Cambio 2019-2023,cotizacion,Ocupados que cotizan,1.5346
+816,Biobío y Ñuble,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),1.2592
+816,Biobío y Ñuble,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.2354
+816,Biobío y Ñuble,Cambio 2010-2019,cotizacion,Ocupados que cotizan,5.0934
+0,Chile,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-0.2498
+0,Chile,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.4948
+0,Chile,Cambio 2019-2023,cotizacion,Ocupados que cotizan,0.7459
+0,Chile,Cambio 2010-2019,participacion,Participación laboral (de 15 a 64 años),2.7566
+0,Chile,Cambio 2010-2019,empleo,Empleo (1 − desocupación),0.0137
+0,Chile,Cambio 2010-2019,cotizacion,Ocupados que cotizan,2.8049
+8,Biobío,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-3.8125
+8,Biobío,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),0.1694
+8,Biobío,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,0.6839
+8,Biobío,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),0.5691
+8,Biobío,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.1335
+8,Biobío,Cambio 2019-2023,cotizacion,Ocupados que cotizan,1.1315
+16,Ñuble,Nivel frente a Chile en 2023,participacion,Participación laboral (de 15 a 64 años),-1.8072
+16,Ñuble,Nivel frente a Chile en 2023,empleo,Empleo (1 − desocupación),-0.1476
+16,Ñuble,Nivel frente a Chile en 2023,cotizacion,Ocupados que cotizan,-7.2889
+16,Ñuble,Cambio 2019-2023,participacion,Participación laboral (de 15 a 64 años),-1.4849
+16,Ñuble,Cambio 2019-2023,empleo,Empleo (1 − desocupación),-0.6642
+16,Ñuble,Cambio 2019-2023,cotizacion,Ocupados que cotizan,2.404

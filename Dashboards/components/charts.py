@@ -998,6 +998,134 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, 
     return con_coma(fig)
 
 
+VENTANAS_TENDENCIA = {  # nombre -> (primer año, territorios)
+    "Desde 2019, las 16 regiones": (2019, [1, 15, 2, 3, 4, 5, 13, 6, 7, 16, 8, 9, 14, 10, 11, 12]),
+    "Desde 2002, con regiones fusionadas": (2002, [801, 2, 3, 4, 5, 6, 7, 816, 9, 810, 11, 12, 13]),
+}
+
+
+def coverage_trend_panels(t: pd.DataFrame, prioritarias: list, ventana: str = "Desde 2019, las 16 regiones", sin_ajustar: bool = False,
+                          columnas: int = 4) -> go.Figure:
+    """KPI 1.1, tendencia de la cobertura (cotizantes / población 15-64), un panel por territorio con Chile en gris como referencia
+    (2 líneas por panel, pauta de la clase: máximo 4). Paneles de la cobertura más baja a la más alta; el eje parte en 0 y es el
+    mismo en todos. t = kpi_cobertura_tendencia.csv; prioritarias = ids de región (en la ventana larga, 8 y 16 marcan el panel
+    «Biobío y Ñuble»: la Superintendencia las publicó juntas hasta 2017; Arica y Los Ríos, antes de 2007, dentro de Tarapacá y Los Lagos).
+    sin_ajustar=True usa la proyección del INE tal como se publicó (base 2017) y muestra el Censo 2024 como punto aparte (rombo): la
+    cobertura que resulta con la población contada. Gris claro = 2020 y 2021 (pandemia). Prioritarias en naranja."""
+    desde, ids = VENTANAS_TENDENCIA[ventana]
+    col = "cobertura_sin_ajuste_pct" if sin_ajustar else "cobertura_pct"
+    t = t[t.anio >= desde]
+    ultimo = int(t.anio.max())
+    pais = t[t.territorio_id == 0].set_index("anio")[col]
+    terr = t[t.territorio_id.isin(ids)]
+    orden = terr[terr.anio == ultimo].sort_values(col)[["territorio_id", "territorio"]].values.tolist()
+    filas = -(-len(orden) // columnas)
+
+    def cambio(tid):  # puntos entre el primer y el último año de la ventana
+        v = terr[terr.territorio_id == tid].set_index("anio")[col]
+        return v[ultimo] - v[desde]
+
+    titulos = [es_cl(f"{n}: {cambio(tid):+.1f} puntos") if desde >= 2019 else n for tid, n in orden]
+    fig = make_subplots(rows=filas, cols=columnas, shared_xaxes=True, shared_yaxes=True, horizontal_spacing=0.025, vertical_spacing=0.1,
+                        subplot_titles=titulos)
+    for i, (tid, nombre) in enumerate(orden):
+        r, c = i // columnas + 1, i % columnas + 1
+        es_prio = tid in prioritarias or (tid == 816 and ({8, 16} & set(prioritarias)))
+        color = ORANGE if es_prio else BLUE
+        s_ = terr[terr.territorio_id == tid].sort_values("anio")
+        fig.add_vrect(x0=2019.5, x1=2021.5, fillcolor=GRIDLINE, opacity=0.6, line_width=0, layer="below", row=r, col=c, exclude_empty_subplots=False)
+        fig.add_scatter(x=pais.index, y=pais.values, mode="lines", line=dict(color=INK_MUTED, width=1.5), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}% (Chile)<extra></extra>", row=r, col=c)
+        rotulos = [f"{v:.0f}%" if k in (0, len(s_) - 1) else "" for k, v in enumerate(s_[col])]
+        fig.add_scatter(x=s_.anio, y=s_[col], mode="lines+text", line=dict(color=color, width=2.5), showlegend=False,
+                        text=rotulos, textposition=["top right"] + ["top center"] * (len(s_) - 2) + ["middle right"], textfont=dict(size=10, color=INK_PRIMARY),
+                        hovertemplate="%{x}: %{y:.1f}%<extra>" + nombre + "</extra>", row=r, col=c)
+        if sin_ajustar and 2024 in set(s_.anio):
+            censo = s_[s_.anio == 2024].iloc[0]
+            fig.add_scatter(x=[2024], y=[censo.cobertura_pct], mode="markers", showlegend=False,
+                            marker=dict(symbol="diamond", size=9, color=INK_PRIMARY, line=dict(color="white", width=1)),
+                            hovertemplate="Censo 2024: %{y:.1f}%<extra>" + nombre + "</extra>", row=r, col=c)
+    p0, p1 = pais.loc[desde], pais.loc[ultimo]
+    if desde >= 2019:
+        n_baja = sum(1 for tid, _ in orden if terr[(terr.territorio_id == tid) & (terr.anio == ultimo)][col].iloc[0]
+                     < terr[(terr.territorio_id == tid) & (terr.anio == desde)][col].iloc[0])
+        msg = f"Desde {desde} la cobertura de Chile pasó de {p0:.1f}% a {p1:.1f}%; {n_baja} de {len(orden)} regiones están hoy bajo su nivel de {desde}"
+    else:
+        a_pico = int(pais.idxmax())
+        msg = (f"La cobertura de Chile subió de {p0:.0f}% en {desde} a {pais.max():.0f}% en {a_pico} y desde entonces bajó a {p1:.0f}%"
+               if a_pico < ultimo else f"La cobertura de Chile subió de {p0:.0f}% en {desde} a {p1:.0f}% en {ultimo}")
+    detalle = ("Cotizantes ÷ población de 15 a 64 años; gris = Chile, naranja = regiones prioritarias, franja = 2020 y 2021"
+               + ("; ◆ = Censo 2024 (población sin ajustar)" if sin_ajustar else ""))
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=50, r=20, t=135, b=40)}, showlegend=False, title=_titulo(msg, detalle, ancho=70))
+    holgura = max(1.5, 0.12 * (ultimo - desde))  # sitio a la derecha para la etiqueta del último punto
+    fig.update_xaxes(tickvals=[desde, ultimo] if desde >= 2019 else [desde, 2010, 2020], range=[desde - 0.7, ultimo + holgura])
+    fig.update_yaxes(range=[0, 65], dtick=20, ticksuffix="%")
+    for an in fig.layout.annotations:  # títulos de panel más chicos
+        an.font = dict(size=12, color=INK_PRIMARY)
+    return fig
+
+
+FRASE_FACTOR = {  # (frase para la brecha con Chile, frase para el cambio en el tiempo)
+    "participacion": ("que menos personas trabajan o buscan trabajo", "la participación laboral"),
+    "empleo": ("el desempleo", "el desempleo"),
+    "cotizacion": ("que menos ocupados cotizan", "los ocupados que cotizan"),
+}
+
+
+def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombre_prio: dict) -> go.Figure:
+    """KPI 1.1, de dónde viene la diferencia de cobertura: cobertura = participación × empleo × cotización de los ocupados; el aporte
+    de cada factor, en puntos, suma exacto la diferencia (media logarítmica). d = kpi_cobertura_descomposicion.csv; comparacion =
+    «Nivel frente a Chile en 2023» o «Cambio 2019-2023»; ids = regiones prioritarias (Chile se agrega, en gris, solo en los cambios)."""
+    d = d[(d.comparacion == comparacion) & d.territorio_id.isin(ids + ([0] if comparacion.startswith("Cambio") else []))]
+    ancho = d.pivot(index="territorio_id", columns="factor", values="aporte_pp")
+    ancho["total"] = ancho.sum(axis=1)
+    ancho = ancho.sort_values("total", ascending=False)  # la mayor brecha (o el mayor cambio negativo) arriba
+    nombres = [nombre_prio.get(i, "Chile") for i in ancho.index]
+    es_chile = [i == 0 for i in ancho.index]
+    paneles = [("participacion", "Participación laboral"), ("empleo", "Empleo (1 − desocupación)"), ("cotizacion", "Ocupados que cotizan"), ("total", "Diferencia total")]
+    fig = make_subplots(rows=1, cols=4, shared_yaxes=True, horizontal_spacing=0.03, subplot_titles=[n for _, n in paneles])
+    for j, (k, _) in enumerate(paneles, start=1):
+        base = INK_PRIMARY if k == "total" else BLUE
+        fig.add_bar(y=nombres, x=ancho[k], orientation="h", marker_color=[INK_MUTED if c else base for c in es_chile], showlegend=False,
+                    text=[f"{v:+.1f}" for v in ancho[k]], textposition="outside", cliponaxis=False, textfont=dict(size=11, color=INK_PRIMARY),
+                    hovertemplate="%{y}: %{x:+.1f} puntos<extra>" + dict(paneles)[k] + "</extra>", row=1, col=j)
+    prio = ancho.drop(index=0, errors="ignore")
+    mayor = prio[["participacion", "empleo", "cotizacion"]].abs().idxmax(axis=1) if comparacion.startswith("Cambio") else \
+        prio[["participacion", "empleo", "cotizacion"]].idxmin(axis=1)
+    f_top, n_top = mayor.value_counts().index[0], int(mayor.value_counts().iloc[0])
+    if comparacion.startswith("Nivel"):
+        msg = f"En {n_top} de las {len(prio)} regiones prioritarias, la brecha con Chile viene sobre todo de {FRASE_FACTOR[f_top][0]}"
+    else:
+        msg = f"Entre {comparacion[7:11]} y {comparacion[12:]}, en {n_top} de las {len(prio)} regiones prioritarias el mayor cambio vino de {FRASE_FACTOR[f_top][1]}"
+    detalle = ("Puntos de cobertura frente a Chile; los tres primeros paneles suman el cuarto" if comparacion.startswith("Nivel") else
+               "Puntos de cobertura que cambiaron; los tres primeros paneles suman el cuarto")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=110, r=30, t=150, b=50)}, **BARRAS, showlegend=False, title=_titulo(msg, detalle, ancho=80))
+    lim = float(np.abs(ancho.drop(columns="total").to_numpy()).max()) * 1.25
+    for j, (k, _) in enumerate(paneles, start=1):
+        r_ = float(np.abs(ancho[k]).max()) * 1.35 if k == "total" else lim
+        fig.update_xaxes(range=[-r_, r_], zeroline=True, zerolinecolor=INK_PRIMARY, showticklabels=False, row=1, col=j)
+    for an in fig.layout.annotations:
+        an.font = dict(size=12, color=INK_PRIMARY)
+    return fig
+
+
+def factor_bars(fac: pd.DataFrame) -> go.Figure:
+    """KPI 1.1, factores candidatos: correlación (Pearson) de cada factor con la cobertura de las 16 regiones. fac = filas elegidas de
+    kpi_cobertura_factores.csv (nombre, pearson_r, pearson_p). Un solo color; el signo se lee por el lado de la barra (eje de -1 a 1)."""
+    d = fac.reindex(fac.pearson_r.abs().sort_values().index)
+    fig = go.Figure(go.Bar(y=d.nombre, x=d.pearson_r, orientation="h", marker_color=BLUE,
+                           text=[f"{v:+.2f}" + ("" if p < 0.05 else " (no significativa)") for v, p in zip(d.pearson_r, d.pearson_p)],
+                           textposition="outside", cliponaxis=False, hovertemplate="%{y}<br>r = %{x:.2f}<extra></extra>"))
+    top = d.iloc[-1]
+    sentido = "más" if top.pearson_r > 0 else "menos"
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
+                      title=_titulo(f"Las regiones con más {top.nombre.lower().split(' (')[0]} tienen {sentido} cobertura previsional (r = {top.pearson_r:.2f})",
+                                    "Correlación de cada factor con la cobertura de las 16 regiones; asociación, no causa", ancho=70))
+    fig.update_xaxes(range=[-1, 1], title="Correlación con la cobertura previsional (de -1 a +1)", zeroline=True, zerolinecolor=INK_PRIMARY)
+    fig.update_yaxes(title="")
+    return fig
+
+
 def risk_quadrant(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> pd.Series:
     """Nombre del cuadrante de cada región (mismo corte que coverage_risk_matrix)."""
     return pd.Series([CUADRANTES[(c >= nac_cobertura, e > nac_65)][0]
@@ -1040,9 +1168,11 @@ def colores_legibles(fig: go.Figure) -> go.Figure:
         en_sup = en_sup or "<sup>" in l
         alto += 20 if en_sup else 26
         en_sup = en_sup and "</sup>" not in l
-    for an in fig.layout.annotations:
-        if an.yref == "paper" and an.y is not None and an.y >= 1 and an.text and not an.showarrow:
-            alto = max(alto, 20 * (an.text.count("<br>") + 1) + 28)
+    subtitulos = [an for an in fig.layout.annotations if an.yref == "paper" and an.y is not None and an.y >= 1 and an.text and not an.showarrow]
+    for an in subtitulos:
+        alto = max(alto, 20 * (an.text.count("<br>") + 1) + 28)
+    if subtitulos and lineas:  # título general y títulos de los subgráficos: que no se pisen
+        alto += 20 + 24 * len(subtitulos[0].text.split("<br>"))
     if alto:
         fig.update_layout(margin_t=max(fig.layout.margin.t or 0, alto + 8))
     # automargin: los nombres de región y los ticks no se cortan (el margen fijo de 10 px era muy chico)

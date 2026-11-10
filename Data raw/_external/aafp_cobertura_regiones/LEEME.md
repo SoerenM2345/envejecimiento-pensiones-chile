@@ -1,0 +1,3 @@
+# `aafp_cobertura_regiones/`
+
+`Estudio-AAFP-cotizacion-previsional-por-regiones.pdf`: Asociación de AFP, Informe Previsional Económico N° 135. Desocupación, ocupación, informalidad y cobertura previsional (cotizantes del mes ÷ ocupados) por región, diciembre 2019 y 2024, más el anexo con población en edad de trabajar, fuerza de trabajo, ocupados, desocupados e informales. Las cifras del anexo y de los gráficos están transcritas en `Scripts/25_explorar_causas.py` (`AAFP`) y se contrastan con las propias (`Data processed/kpi_cobertura_contraste_aafp.csv`). Es el gremio de las AFP: las cifras se recalculan, las interpretaciones no.

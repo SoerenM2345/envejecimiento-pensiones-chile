@@ -15,6 +15,8 @@ originales en `../Data raw/` — esta carpeta se puede borrar y reconstruir.
 | `04_procesar_pensiones_pagadas.py` | Tidy de los informes c1/c2/c3 (pago de pensiones, corte julio 2026). |
 | `05_graficos_exploratorios.py` | Gráficos de validación (no es el dashboard final) en `../Outputs/figures/`. |
 | `17_procesar_series_superintendencia_extra.py` | Tidy de `cotizantes_tipo_sexo.xls`, `cotizantes_region_afp.xls` y `cotizaciones_totales.xls` (`development sources/`). |
+| `24_cobertura_tendencia_causas.py` | Tendencia de la cobertura (cotizantes ÷ población 15-64) por región 2002-2025 con el INE base 2017 llevado al nivel del Censo 2024, regiones prioritarias (brecha de cotizantes) y factores del Censo 2024 que pueden explicar la cobertura (KPI 1.1). Ver `docs/EXPLORACION_COBERTURA.md`. |
+| `25_explorar_causas.py` | Descomposición de la cobertura en participación × empleo × cotización de los ocupados, series regionales de la ENE (INE) y PIB regional (Banco Central) de `Data raw/_external/ine_ene_regional/` y `bcentral_pib_regional/`, contraste con el estudio de la AAFP y prueba de asignación regional (KPI 1.1). Se ejecuta después del 24. Ver `docs/EXPLORACION_COBERTURA.md` y `docs/supuestos_y_limitaciones.md`. |
 | `19_descargar_sp_ingreso_imponible.py` | Descarga de `spensiones.cl` los meses que faltan del cuadro 04A (cotizantes e ingreso imponible promedio, mensual desde 2002) a `Data raw/import_KPI1.2/04A_descargas/`. Solo biblioteca estándar. |
 | `18_kpi_punto_critico.py` | Tidy de los cuadros SP (04A, 32C, 19B), ESI/ENE del INE e IPC, y construcción de las tablas `kpi_pc_*` del análisis «punto crítico» del KPI 1.2. |
 | `16_procesar_dipres_activos_bonos.py` | Tidy de las hojas de pasivos/activos del Gobierno Central y Bonos de Reconocimiento de DIPRES. |
@@ -97,3 +99,15 @@ Definiciones formales, fórmulas e interpretación de cada KPI: `../config/kpis.
 - Reemplazar la proyección regional por reparto de tasas cuando el INE publique proyecciones sub-nacionales en base 2024.
 - Cruzar con DEIS/MINSAL (egresos hospitalarios, defunciones) cuando se consiga ese archivo, para pasar del índice de demanda de salud (proxy demográfico) a uso real de servicios.
 - Dashboard interactivo: `../Dashboards/` (Streamlit, `streamlit run Inicio.py`) — ya cubre mapas, pirámides, presión previsional/salud, socioeconómico y propuestas de política. `Outputs/figures/` son solo 3 PNGs de validación previos al dashboard.
+
+### Tendencia y causas de la cobertura (script 24, KPI 1.1)
+- **`kpi_cobertura_tendencia.csv`** — `anio` 2002-2025, `territorio_id` (0 = Chile, 1-16 regiones, 801 = Tarapacá y Arica y Parinacota, 810 = Los Lagos y Los Ríos, 816 = Biobío y Ñuble: series fusionadas), `cotizantes`, `pob_15_64` (al nivel del Censo 2024), `cobertura_pct`, y `pob_15_64_proy` / `cobertura_sin_ajuste_pct` (proyección del INE sin ajustar). Arica y Los Ríos solo desde 2007, Tarapacá y Los Lagos solos desde 2007, Biobío (8) y Ñuble (16) solo desde 2018.
+- **`kpi_cobertura_regiones.csv`** — una fila por región más la fila 0 (Chile): cobertura 2010/2019/2022/2024/2025, cambios en puntos, `peso_cotizantes_pct`, `brecha_cotizantes`, `prioridad` (1-5), los factores oficiales de la ENE y del PIB agregados por el script 25 (`*_ene`, `pib_*`; fila 0 = Chile salvo PIB) y los factores del Censo 2024 (desocupación, participación, independientes, ramas de actividad, migración, escolaridad) más ingreso, pobreza 65+, urbano y 65+.
+- **`kpi_cobertura_factores.csv`** — los 37 factores probados (34 sobre el nivel de la cobertura 2024, 3 sobre su cambio 2019-2023; `objetivo`) con correlación de Pearson y de rangos, `n` y `elegido` = los 6 que muestra el dashboard (la medida oficial de desempleo, informalidad y migración, la rama con más asociación y las 2 mejores de las demás).
+- **`ene_region_anual.csv`** — diciembre (trimestre nov-ene) de cada año por región (0 = Total país): ocupados, desocupados, informales (personas) y tasas de informalidad y de tiempo parcial involuntario (%). Fuente: ENE, INE, base 2017; 2010-2023 (+2017-2018).
+- **`kpi_cobertura_factores_anual.csv`** — por territorio y año 2010-2023: cotizantes, ocupados y población al nivel del Censo y los tres factores que multiplicados dan la cobertura (`participacion`, `empleo`, `cotizacion`).
+- **`kpi_cobertura_descomposicion.csv`** — aporte en puntos de cada factor a la diferencia con Chile en 2023 y a los cambios 2019-2023 y 2010-2019 (media logarítmica; suman exacto).
+- **`kpi_cobertura_contraste_aafp.csv`** — las cifras de 2019 y 2024 del estudio de la Asociación de AFP junto a las calculadas aquí.
+- **`kpi_cobertura_test_asignacion.csv`** — participación de la Región Metropolitana en los cotizantes, ocupados y población (2010, 2015, 2019, 2023 y Censo 2024).
+- **`pib_regional_anual.csv`** — PIB anual por región (miles de millones de pesos encadenados, ref. 2018), 15 regiones, 2013-2025.
+
