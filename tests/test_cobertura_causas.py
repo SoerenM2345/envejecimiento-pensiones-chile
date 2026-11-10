@@ -258,8 +258,9 @@ def test_filas_de_la_descomposicion_se_ordenan_por_cada_columna():
 def test_resumen_de_razones_una_por_una():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
     subt = [m.value for m in at.markdown if m.value.startswith("##### ")]
-    assert subt[-3:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
-                        "##### 3. ¿Qué características de las regiones se asocian con la cobertura? (estadística, no causa)"]
+    assert subt[-4:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
+                        "##### 3. ¿Qué características de las regiones se asocian con la cobertura? (estadística, no causa)",
+                        "##### 4. En síntesis: dos palancas explican casi todo"]
 
 
 def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
@@ -283,3 +284,17 @@ def test_escenarios_fijos_son_seis_paneles_con_costo_y_capacidad():
     anios = sorted(a["text"] for a in sp["layout"]["annotations"] if a["text"].startswith("<b>"))
     assert anios == sorted(f"<b>{a}</b>" for a in (2038, 2044, 2048, 2036, 2048, 2055))  # el año, fuera del gráfico
     assert not any(t.get("mode") and "text" in t.get("mode", "") for t in sp["data"])  # sin puntos con rótulo dentro del gráfico
+
+
+def test_dos_palancas_explican_la_cobertura():
+    """Scripts/26: informalidad + participación explican la mayor parte de la cobertura entre regiones; los demás factores no agregan."""
+    d = pd.read_csv(DP / "kpi_cobertura_dos_palancas.csv")
+    m = pd.read_csv(DP / "kpi_cobertura_dos_palancas_modelo.csv").set_index("indicador").valor
+    assert len(d) == 16 and d.region_id.is_unique
+    assert m["r2_dos_palancas"] > m["r2_solo_informalidad"] > 0.5
+    assert m["coef_informalidad_ene"] < 0 < m["coef_participacion_ene"]
+    assert abs(m["r_parcial_independientes"]) < 0.2 and abs(m["r_parcial_rama_A"]) < 0.2
+    assert np.allclose(d.cobertura_2024 - d.cobertura_esperada, d.residuo, atol=0.02)
+    assert abs(d.residuo.sum()) < 0.2  # MCO con constante: los residuos suman 0
+    assert (d.afiliados_sin_cotizar == d.afiliados_menores_65 - d.cotizantes).all() and (d.afiliados_sin_cotizar > 0).all()
+    assert set(d.palanca) <= {"Ambas", "Informalidad", "Participación", "Ninguna"}

@@ -1016,6 +1016,30 @@ def coverage_correlation_scatter(df: pd.DataFrame, var: str, etiqueta: str, unid
     return con_coma(fig)
 
 
+def two_levers_scatter(df: pd.DataFrame, r2: float, prio_ids) -> go.Figure:
+    """KPI 1.1, síntesis: cobertura esperada por las dos palancas (informalidad y participación) vs. cobertura real, una burbuja por
+    región (tamaño = afiliados de menos de 65 que no cotizan), diagonal = el modelo acierta. Naranja = regiones prioritarias.
+    df: kpi_cobertura_dos_palancas.csv; r2: R² del modelo con las dos palancas."""
+    d = df.copy()
+    d["share_sin_cotizar_pct"] = 100 * d.afiliados_sin_cotizar / d.afiliados_sin_cotizar.sum()
+    tope = float(max(d.cobertura_2024.max(), d.cobertura_esperada.max())) * 1.12
+    rango = (0.0, tope)
+    fig = go.Figure()
+    fig.add_scatter(x=[0, tope], y=[0, tope], mode="lines", line=dict(color=INK_PRIMARY, width=1.5, dash="dash"),
+                    hoverinfo="skip", showlegend=False)
+    colores = [ORANGE if int(i) in set(int(p) for p in prio_ids) else lighten(BLUE, 0.35) for i in d.region_id]
+    _burbujas(fig, d, "cobertura_esperada", "cobertura_2024",
+              "Esperada por las dos palancas: %{x:.1f}%<br>Real: %{y:.1f}%", colores, rango, rango,
+              tam="afiliados_sin_cotizar", tam_nombre="Afiliados de menos de 65 que no cotizan", tam_pct="share_sin_cotizar_pct")
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=560, showlegend=False,
+                      title=_titulo(f"Informalidad y participación laboral explican {100 * r2:.0f} % de las diferencias de cobertura entre regiones",
+                                    "Cobertura esperada con las dos palancas frente a la real; burbuja = afiliados de menos de 65 que no cotizan; "
+                                    "naranja = regiones prioritarias", ancho=60))
+    fig.update_xaxes(title="Cobertura esperada por las dos palancas (%)", ticksuffix="%", range=list(rango), **_EJE_CLARO)
+    fig.update_yaxes(title="Cobertura real 2024 (% de 15-64 que cotiza)", ticksuffix="%", range=list(rango), **_EJE_CLARO)
+    return con_coma(fig)
+
+
 CUADRANTES = {  # (cobertura alta, envejecimiento alto) -> (nombre, color de fondo, color del rótulo); tonos apagados
     (False, True): ("Riesgo doble", "#d9695f", "#9c2f27"),
     (False, False): ("Potencial de captación", "#e0a44a", "#8a5a0c"),

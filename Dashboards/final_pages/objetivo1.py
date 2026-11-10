@@ -4,12 +4,12 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
-from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, supuestos_escenario, es_cl, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from utils import subtitulo_visible as _subtitulo_visible
 from components.kpi_card import kpi_card
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
+                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -332,6 +332,53 @@ def render_1_1_causas():
             "Con estas cifras no se puede decir si es porque se cuenta por la región de la empresa o porque allí hay más empleo formal. "
             "Ni la Superintendencia ni el estudio de la Asociación de AFP indican la regla; hay que preguntarla a la Superintendencia."))
         st.caption("Fuente: Superintendencia de Pensiones, INE (Encuesta Nacional de Empleo, trimestre nov-ene), Censo 2024.")
+    render_1_1_dos_palancas(prio)
+
+
+def render_1_1_dos_palancas(prio: pd.DataFrame):
+    """Síntesis de las causas (Scripts/26): dos palancas explican casi toda la diferencia de cobertura entre regiones."""
+    d = load_csv("kpi_cobertura_dos_palancas.csv")
+    m = load_csv("kpi_cobertura_dos_palancas_modelo.csv").set_index("indicador").valor
+    st.markdown("##### 4. En síntesis: dos palancas explican casi todo")
+    st.markdown(es_cl(
+        f"Con solo dos datos de cada región, **informalidad** y **participación laboral**, se explica el {100 * m['r2_dos_palancas']:.0f} % de las diferencias "
+        f"de cobertura entre las 16 regiones (la informalidad sola explica el {100 * m['r2_solo_informalidad']:.0f} %). Las dos casi no se relacionan entre sí "
+        f"(r = {m['corr_entre_palancas']:.2f}): miden problemas distintos. Cada punto más de informalidad va con {abs(m['coef_informalidad_ene']):.1f} puntos menos "
+        f"de cobertura, y cada punto más de participación, con {m['coef_participacion_ene']:.2f} puntos más."))
+    ids = prio.region_id.astype(int).tolist()
+    mostrar(estilo_kpi(two_levers_scatter(d, m["r2_dos_palancas"], ids), 600))
+    st.caption("Fuente: Superintendencia de Pensiones (cotizantes y afiliados, diciembre 2024), INE (Encuesta Nacional de Empleo, nov-ene 2023-24), Censo 2024. "
+               "Sobre la diagonal, la región tiene más cobertura de la que esperan las dos palancas; bajo ella, menos. Mínimos cuadrados con n = 16 regiones: asociación, no causa.")
+    p = d[d.region_id.isin(ids)].set_index("region_id").loc[ids]
+    nac = load_csv("kpi_cobertura_regiones.csv").set_index("region_id").loc[0]
+    tabla = pd.DataFrame({
+        "Región prioritaria": p.region_nombre.values,
+        "Palanca desfavorable": p.palanca.values,
+        f"Informalidad (Chile {nac.informalidad_ene:.1f} %)": [f"{v:.1f} %" for v in p.informalidad_ene],
+        f"Participación laboral (Chile {nac.participacion_ene:.1f} %)": [f"{v:.1f} %" for v in p.participacion_ene],
+        "Cobertura real": [f"{v:.1f} %" for v in p.cobertura_2024],
+        "Esperada por las dos palancas": [f"{v:.1f} %" for v in p.cobertura_esperada],
+        "Afiliados de menos de 65 que no cotizan": [f"{v:,.0f}" for v in p.afiliados_sin_cotizar],
+    })
+    st.dataframe(tabla.map(es_cl), hide_index=True, use_container_width=True)
+    total, peor = p.afiliados_sin_cotizar.sum(), p.loc[p.residuo.abs().idxmax()]
+    explicado = abs(peor.residuo) < 2
+    st.markdown(es_cl(
+        (f"**Lectura:** las regiones prioritarias no tienen una causa propia: su cobertura es la que corresponde a su informalidad y su participación "
+         f"(la mayor diferencia es {peor.region_nombre}, {peor.residuo:+.1f} puntos). " if explicado else
+         f"**Lectura:** las dos palancas explican casi todas las regiones prioritarias, salvo {peor.region_nombre} ({peor.residuo:+.1f} puntos frente a lo esperado): "
+         f"ahí hay algo más que las dos palancas. ") +
+        f"Los demás factores no agregan información una vez considerada la informalidad: "
+        f"ocupados independientes (correlación parcial {m['r_parcial_independientes']:+.2f}) y agricultura y pesca ({m['r_parcial_rama_A']:+.2f}) son la razón "
+        f"de que haya informalidad, no una causa aparte; la relación cotizantes ÷ afiliados es su consecuencia ({m['r_parcial_cotizantes_sobre_afiliados']:+.2f}), "
+        f"y el ingreso imponible no se asocia de forma significativa con la cobertura. "
+        f"**Para las administradoras:** en estas {len(p)} regiones hay {total:,.0f} afiliados de menos de 65 años que no cotizan. Ya son clientes: "
+        f"donde la palanca es la informalidad, la meta es que vuelvan a cotizar (formalización, cotización de independientes); donde es la participación, "
+        f"que entren al empleo."))
+    st.caption(es_cl("Palanca desfavorable = al menos 1 punto peor que Chile. Afiliados que no cotizan = afiliados de menos de 65 años − cotizantes de diciembre 2024 "
+               "(los cotizantes incluyen algunos de 65+, así que es un mínimo). Con 16 regiones y dos factores el ajuste es alto, pero sensible a regiones atípicas; "
+               "la participación por sexo de la encuesta permitiría ver si la brecha de participación es de las mujeres (Censo: correlación parcial "
+               f"{m['r_parcial_participacion_mujeres_censo']:+.2f}, menor que la de la participación total)."))
 
 
 def render_1_1_matriz():
