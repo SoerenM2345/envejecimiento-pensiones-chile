@@ -42,3 +42,18 @@ def test_cuadros_por_administradora():
     assert (q[(2022, "Habitat")], q[(2025, "Habitat")], q[(2022, "Modelo")], q[(2025, "Modelo")], q[(2025, "Sistema")]) == (36.1, 37.8, 52.9, 41.7, 43.6)
     roe = a[a.anio == 2025].set_index("afp").roe_pct
     assert (roe["Uno"], roe["Provida"], roe["Sistema"]) == (64.84, 11.53, 23.21)
+
+
+def test_motor_economia_administradoras():
+    import sys
+    sys.path.insert(0, str(DP.parent / "Dashboards"))
+    from components import afp_economia as afe
+    d = afe.serie_sistema(pd.read_csv(DP / "afp_resultados_sistema.csv"), pd.read_csv(DP / "afp_resultados_por_afp.csv"))
+    pasos = afe.cascada(d, 2025)
+    ingresos = sum(v for _, v, t in pasos[:3])
+    gastos = -sum(v for _, v, t in pasos[3:7])
+    assert abs(ingresos - gastos - pasos[7][1]) < 2 and abs(pasos[7][1] + pasos[8][1] - pasos[9][1]) < 2   # cuadra con el cuadro N° 1
+    eq = afe.equilibrio(d, 2025, 5974428, 1294398.91)
+    assert round(eq["comision_equilibrio_pct"], 2) == 0.65 and round(eq["comision_implicita_pct"], 2) == 1.28
+    e = afe.estres_comision(d, 2025)
+    assert e.resultado_mm.iloc[0] > 0 > e.resultado_mm.iloc[-1] and round(eq["baja_max_pct"]) == 49

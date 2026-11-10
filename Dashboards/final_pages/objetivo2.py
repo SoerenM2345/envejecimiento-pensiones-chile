@@ -15,6 +15,8 @@ st.markdown("La carga del envejecimiento sobre el Estado crece y sus reservas so
 
 
 from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart, total_cost_chart
+from components.charts import afp_cost_ratio_chart, afp_waterfall_chart, afp_sales_it_chart, afp_by_firm_chart, afp_stress_chart
+from components import afp_economia as afe
 
 ANIO_BASE_COSTO = 2025
 ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
@@ -704,6 +706,88 @@ def render_2_3():
 kpi_card("2.1", render_2_1)
 kpi_card("2.2", render_2_2)
 kpi_card("2.3", render_2_3)
+
+
+@st.cache_data
+def datos_afp():
+    """Serie del sistema y cuadros por administradora (Scripts/27) y los insumos de la comisión de equilibrio."""
+    por_afp = load_csv("afp_resultados_por_afp.csv")
+    d = afe.serie_sistema(load_csv("afp_resultados_sistema.csv"), por_afp)
+    ult = int(d.index.max())
+    cot = load_csv("cotizantes_por_region.csv")
+    cotizantes = float(cot[(cot.region_label == "Total") & (cot.anio == ult)].cotizantes.iloc[0])
+    f = load_csv("fichas_previsionales_mensual.csv")
+    ingreso = float(f[f.mes_ref_ingreso.str[:4].astype(int) == ult].ingreso_promedio.mean())
+    return d, por_afp, cotizantes, ingreso
+
+
+def render_afp_economia():
+    """Costos y economía de las administradoras: el negocio que pierde o gana con la base cotizante (no es costo del Estado)."""
+    d, por_afp, cotizantes, ingreso = datos_afp()
+    a0, a1 = int(d.index.min()), int(d.index.max())
+    u, p0, prev = d.loc[a1], d.loc[a0], d.loc[a1 - 1]
+    eq = afe.equilibrio(d, a1, cotizantes, ingreso)
+    st.divider()
+    st.header("Costos y economía de las administradoras de fondos de pensiones")
+    st.markdown("Hasta aquí, el costo del **Estado**. Esta sección mira el negocio de las **administradoras**: lo que cobran (comisiones) y lo que les cuesta "
+                "administrar las cuentas. No se mezclan: el Pilar Solidario no pasa por sus resultados.")
+    st.caption("🟢 Calculado con datos reales · el escenario de la comisión de equilibrio es un escenario, no un pronóstico")
+    kpi_card_row([
+        (f"Comisiones {a1}", f"${u.comisiones_mm / 1e6:.2f} billones", f"{u.comision_sobre_ingresos:.1f}% de los ingresos de las administradoras",
+         ["Incluye comisiones de cotizantes, pensionados en retiro programado y renta temporal, ahorro voluntario y Cuenta 2", "Millones de pesos del año"]),
+        (f"Costos ÷ comisiones {a1}", f"{u.costo_sobre_comision:.1f}%", f"{p0.costo_sobre_comision:.1f}% en {a0}",
+         ["Gasto de administración total del sistema ÷ ingresos por comisiones"]),
+        (f"Ganancia {a1}", f"${u.ganancia_mm / 1e6:.2f} billones", f"Rentabilidad sobre patrimonio {u.roe_pct:.1f}%",
+         ["Después de impuesto", f"Encaje: {u.encaje_sobre_ingresos:.1f}% de los ingresos"]),
+        ("Comisión de equilibrio (escenario)", f"{eq['comision_equilibrio_pct']:.2f}% del sueldo", f"Implícita: {eq['comision_implicita_pct']:.2f}%",
+         ["Costo por cotizante ÷ sueldo imponible anual", "Promedio del sistema, no costo marginal"]),
+    ])
+    c1, c2 = st.columns(2)
+    with c1:
+        mostrar(estilo_kpi(afp_cost_ratio_chart(d), 460))
+        subtitulo_visible(f"Qué muestra: cuánto de cada peso de comisión se va en costos de administración. {a0}-{a1}, sistema completo.")
+    with c2:
+        mostrar(estilo_kpi(afp_waterfall_chart(afe.cascada(d, a1), a1, u.encaje_sobre_ingresos, prev.encaje_sobre_ingresos), 460))
+        subtitulo_visible(f"Qué muestra: del ingreso a la ganancia de {a1}, en miles de millones de pesos.")
+    real_c = 100 * (u.gastos_mm_2025 / p0.gastos_mm_2025 - 1)
+    real_k = 100 * (u.comisiones_mm_2025 / p0.comisiones_mm_2025 - 1)
+    sin_enc = 100 * (u.resultado_sin_encaje_mm / prev.resultado_sin_encaje_mm - 1)
+    _texto(f"**Lectura:** entre {a0} y {a1}, en pesos de {a1}, los costos subieron {real_c:.1f}% y las comisiones {real_k:.1f}%: la eficiencia no mejora a nivel sistema. "
+           f"La ganancia de {a1} sube sobre todo por el encaje ({u.encaje_sobre_ingresos:.1f}% de los ingresos, frente a {prev.encaje_sobre_ingresos:.1f}% en {a1 - 1}); "
+           f"sin encaje, el resultado antes de impuesto crece solo {sin_enc:.1f}% nominal. **Para la administradora:** el negocio que se puede gestionar "
+           "es comisión menos costo; el encaje no se controla.")
+    c3, c4 = st.columns(2)
+    with c3:
+        mostrar(estilo_kpi(afp_sales_it_chart(d), 460))
+        subtitulo_visible("Qué muestra: dos partidas del gasto, medidas contra lo que se cobra.")
+    with c4:
+        a_comp = max(a for a in por_afp.anio.unique() if a <= a1 - 3)
+        mostrar(estilo_kpi(afp_by_firm_chart(afe.por_administradora(por_afp, a_comp, a1), a_comp, a1), 460))
+        subtitulo_visible(f"Qué muestra: el costo de cada administradora sobre sus ingresos, {a_comp} y {a1}.")
+    _texto("**Lectura:** el gasto se desplaza de la venta a la computación; que sea digitalización no está demostrado con estos datos. Entre administradoras, las que más "
+           "crecieron no siempre bajaron su costo (n = 7: no se puede afirmar un efecto de escala).")
+    mostrar(estilo_kpi(afp_stress_chart(afe.estres_comision(d, a1), eq["baja_max_pct"], a1), 440))
+    subtitulo_visible(f"Qué muestra: escenario de una baja de la comisión con los costos de {a1} fijos. Costo por cotizante: ${eq['costo_por_cotizante']:,.0f} al año; "
+                      f"cubrirlo exige {eq['comision_equilibrio_pct']:.2f}% de un sueldo imponible de ${eq['sueldo_mensual']:,.0f} al mes.")
+    _texto(f"**Lectura:** hay margen ante la presión de precio de la Ley 21.735 (licitación de stock: cada 24 meses el 10% de los afiliados no pensionados, "
+           f"solo pueden postular administradoras con menos de 25% de ellos), pero el margen depende del costo por cuenta: quien tenga un costo por cotizante "
+           f"mayor que el promedio (${eq['costo_por_cotizante']:,.0f}) tiene menos espacio para bajar su comisión.")
+    _nota(f"\\* Fuente: Superintendencia de Pensiones, «Costos de administración de los Fondos de Pensiones» {a0}-{a1} (estados financieros de las administradoras); "
+          f"cotizantes de diciembre y sueldo imponible promedio {a1} (fichas previsionales); Nota Técnica de la Ley 21.735. Millones de pesos de cada año; pesos de {a1} con el IPC anual. "
+          "Quiebre de serie 2020/21 (franja gris): no comparar crecimientos que lo crucen.")
+    with st.expander("Método y fuentes (costos de las administradoras)"):
+        _texto(
+            "- **Comisiones:** ingresos por comisiones del sistema; incluyen pensionados en retiro programado y renta temporal, ahorro voluntario y Cuenta 2. Por eso la comisión implícita "
+            f"({eq['comision_implicita_pct']:.2f}% del sueldo) está sobreestimada.\n"
+            "- **Costos:** gasto total de administración (personal, operación, depreciación y otros). En 2019 y 2021 el total del informe incluye además la prima del seguro de invalidez "
+            "y sobrevivencia (~330 millones).\n"
+            "- **Venta y computación:** el informe publica el reparto del gasto en % con una decimal; las razones sobre la comisión se derivan de ese reparto.\n"
+            "- **Por administradora:** el cuadro N° 1 no separa la comisión, se usan los ingresos ordinarios (incluyen otros ingresos operacionales); costo sin depreciación.\n"
+            f"- **Comisión de equilibrio (escenario):** gasto {a1} ÷ cotizantes de diciembre ÷ (12 × sueldo imponible promedio {a1}). Es un costo promedio: el costo de un cotizante adicional es menor.\n"
+            "- **Falta:** comisiones vigentes por administradora y cotizantes por administradora (costo por cuenta y cuota de mercado). Hallazgos: docs/COSTOS_AFP_HALLAZGOS.md.")
+
+
+render_afp_economia()
 
 st.info("**Mensaje clave:** el costo por adulto mayor está controlado, pero el número de adultos mayores no: la carga fiscal sube con "
         "reservas mínimas y sin margen para recortar sin aumentar la pobreza. La salida sostenible es ampliar la base cotizante, justo "

@@ -1492,3 +1492,117 @@ def mostrar(fig: go.Figure, config: dict = None, **kwargs):
     import streamlit as st
     from utils import PLOTLY_DL_CONFIG
     st.plotly_chart(colores_legibles(fig), use_container_width=True, config=config or PLOTLY_DL_CONFIG, theme=None, **kwargs)
+
+
+# ---------------------------------------------------------------- costos y economía de las administradoras (no es costo del Estado)
+def _zona_quiebre(fig: go.Figure, a0: int = 2020, a1: int = 2021) -> None:
+    """Franja gris del quiebre de serie 2020/21 de la Superintendencia (reexpresión de Habitat)."""
+    fig.add_vrect(x0=a0 - 0.5, x1=a1 + 0.5, fillcolor=INK_MUTED, opacity=0.08, line_width=0, layer="below")
+    fig.add_annotation(x=(a0 + a1) / 2, y=1, yref="paper", text="Quiebre de serie", showarrow=False, yanchor="top",
+                       font=dict(color=INK_SECONDARY, size=11))
+
+
+def afp_cost_ratio_chart(d: pd.DataFrame) -> go.Figure:
+    """Costo de administración ÷ comisiones del sistema (%), una línea; d = afp_economia.serie_sistema."""
+    a0, a1 = int(d.index[0]), int(d.index[-1])
+    y = d.costo_sobre_comision
+    pico = int(y.idxmax())
+    fig = go.Figure(go.Scatter(x=d.index, y=y, mode="lines+markers+text", line=dict(color=ORANGE, width=3), marker=dict(size=7),
+                               text=[f"{v:.1f}%" if a in (a0, pico, a1) else "" for a, v in y.items()], textposition="top center",
+                               hovertemplate="%{x}: %{y:.1f}% de las comisiones<extra></extra>", showlegend=False))
+    _zona_quiebre(fig)
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False, title=_titulo(
+        f"Los costos de las administradoras equivalen a la mitad de lo que cobran: {y[a0]:.1f} % de las comisiones en {a0} y {y[a1]:.1f} % en {a1}",
+        f"Gasto de administración del sistema ÷ ingresos por comisiones, % (máximo {y[pico]:.1f} % en {pico}); ambos en pesos del mismo año", ancho=60))
+    fig.update_xaxes(dtick=1, title="")
+    fig.update_yaxes(range=[0, float(y.max()) * 1.2], ticksuffix=" %", title="% de las comisiones")
+    return con_coma(fig)
+
+
+def afp_waterfall_chart(pasos: list, anio: int, encaje_pct: float, encaje_prev_pct: float) -> go.Figure:
+    """Cascada del resultado del sistema en un año: comisiones + encaje + otros − gastos = antes de impuesto − impuesto = ganancia.
+    pasos = afp_economia.cascada (millones de pesos del año); se muestra en miles de millones."""
+    B = 1e3   # millones -> miles de millones
+    x = [p[0] for p in pasos]
+    y = [p[1] / B for p in pasos]
+    medida = ["absolute" if p[2] == "abs" else "total" if p[2] == "total" else "relative" for p in pasos]
+    fig = go.Figure(go.Waterfall(
+        x=x, y=y, measure=medida, orientation="v", textposition="outside", cliponaxis=False,
+        text=[f"{v:,.0f}" if m != "relative" else f"{v:+,.0f}" for v, m in zip(y, medida)],
+        increasing=dict(marker=dict(color=BLUE)), decreasing=dict(marker=dict(color=ORANGE)),
+        totals=dict(marker=dict(color=INK_SECONDARY)), connector=dict(line=dict(color=INK_MUTED, width=1)),
+        hovertemplate="%{x}: %{y:,.0f} miles de millones<extra></extra>"))
+    gan = pasos[-1][1] / B
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False, title=_titulo(
+        f"En {anio} las administradoras ganaron {gan:,.0f} mil millones de pesos; la rentabilidad del encaje pesó {encaje_pct:.1f} % de sus ingresos ({encaje_prev_pct:.1f} % el año anterior)",
+        f"Del ingreso a la ganancia del sistema, miles de millones de pesos de {anio}; azul suma, naranja resta, gris = subtotal", ancho=62))
+    fig.update_yaxes(title="Miles de millones de pesos", rangemode="tozero")
+    fig.update_xaxes(title="")
+    return con_coma(fig)
+
+
+def afp_sales_it_chart(d: pd.DataFrame) -> go.Figure:
+    """Venta (personal de ventas + comercialización) y computación, en % de las comisiones del sistema; dos líneas con rótulo directo."""
+    a0, a1 = int(d.index[0]), int(d.index[-1])
+    fig = go.Figure()
+    puntos = []
+    for col, nombre, color in (("venta_sobre_comision", "Venta (personal de ventas y comercialización)", ORANGE),
+                               ("computacion_sobre_comision", "Computación", BLUE)):
+        fig.add_scatter(x=d.index, y=d[col], mode="lines+markers", line=dict(color=color, width=3), marker=dict(size=6), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}% de las comisiones<extra>" + nombre + "</extra>")
+        puntos.append((a1, float(d[col].iloc[-1]), f"{nombre}: {d[col].iloc[-1]:.1f} %", color))
+    ymax = float(d[["venta_sobre_comision", "computacion_sobre_comision"]].max().max()) * 1.2
+    rotular_final(fig, puntos, rango_y=(0, ymax), alto_px=330, ancho_texto=26)
+    ampliar_derecha(fig, a0, a1, 0.35)
+    _zona_quiebre(fig)
+    v, c = d.venta_sobre_comision, d.computacion_sobre_comision
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False, title=_titulo(
+        f"El gasto pasa del vendedor al computador: la venta baja de {v[a0]:.1f} % a {v[a1]:.1f} % de las comisiones y la computación sube de {c[a0]:.1f} % a {c[a1]:.1f} %",
+        f"Gasto del sistema en cada partida ÷ comisiones, %, {a0}-{a1}; reparto del gasto con una decimal, tal como lo publica el informe", ancho=62))
+    fig.update_xaxes(dtick=1, title="")
+    fig.update_yaxes(range=[0, ymax], ticksuffix=" %", title="% de las comisiones")
+    return con_coma(fig)
+
+
+def afp_by_firm_chart(t: pd.DataFrame, a0: int, a1: int) -> go.Figure:
+    """Una fila por administradora (y el sistema): costo sin depreciación ÷ ingresos ordinarios en a0 (punto vacío) y a1 (punto lleno),
+    unidos por una línea; al lado, crecimiento de los ingresos y rentabilidad sobre patrimonio de a1. t = afp_economia.por_administradora."""
+    t = t.sort_values("razon_1", ascending=False)
+    nombres = list(t.index)
+    fig = go.Figure()
+    for afp, r in t.iterrows():
+        color = INK_PRIMARY if afp == "Sistema" else (BLUE if r.razon_1 < r.razon_0 else ORANGE)
+        fig.add_scatter(x=[r.razon_0, r.razon_1], y=[afp, afp], mode="lines", line=dict(color=color, width=3), showlegend=False, hoverinfo="skip")
+    for col, nombre, simbolo in (("razon_0", str(a0), "circle-open"), ("razon_1", str(a1), "circle")):
+        fig.add_scatter(x=t[col], y=nombres, mode="markers", name=nombre, marker=dict(symbol=simbolo, size=12, color=INK_PRIMARY, line=dict(width=2)),
+                        hovertemplate="%{y} " + nombre + ": %{x:.1f}%<extra></extra>")
+    xmax = float(t[["razon_0", "razon_1"]].max().max()) * 1.45
+    for afp, r in t.iterrows():
+        fig.add_annotation(x=xmax, y=afp, xanchor="right", showarrow=False, font=dict(size=11, color=INK_SECONDARY),
+                           text=f"ingresos {r.crec_ingresos_pct:+.0f} % · rentabilidad {r.roe_1:.0f} %")
+    baja = t.drop(index="Sistema", errors="ignore")
+    mejor = (baja.razon_0 - baja.razon_1).idxmax()
+    fig.update_layout(**{**PLOTLY_LAYOUT, "legend": dict(orientation="h", y=-0.15)}, title=_titulo(
+        f"Entre {a0} y {a1} la mayor baja del costo es de {mejor}: de {t.loc[mejor, 'razon_0']:.1f} % a {t.loc[mejor, 'razon_1']:.1f} % de sus ingresos",
+        f"Costo sin depreciación ÷ ingresos ordinarios, %; azul = baja, naranja = sube; derecha: ingresos {a0}-{a1} y rentabilidad {a1}", ancho=62))
+    fig.update_xaxes(range=[0, xmax], ticksuffix=" %", title="Costo sin depreciación, % de los ingresos ordinarios")
+    fig.update_yaxes(title="", categoryorder="array", categoryarray=nombres[::-1], range=[-0.6, len(nombres) - 0.1])  # aire bajo el subtítulo
+    return con_coma(fig)
+
+
+def afp_stress_chart(e: pd.DataFrame, baja_max: float, anio: int) -> go.Figure:
+    """Escenario: resultado del negocio principal (comisiones − gastos, sin encaje ni impuesto) si la comisión baja x %, gastos fijos."""
+    fig = go.Figure(go.Scatter(x=e.baja_pct, y=e.resultado_mm / 1e3, mode="lines", line=dict(color=ORANGE, width=3, dash="dash"),
+                               hovertemplate="Comisión −%{x:.0f}%: %{y:,.0f} miles de millones<extra></extra>", showlegend=False))
+    fig.add_hline(y=0, line=dict(color=INK_PRIMARY, width=1))
+    fig.add_vline(x=baja_max, line=dict(color=INK_MUTED, width=1, dash="dot"))
+    fig.add_annotation(x=baja_max, y=0, text=f"Equilibrio: −{baja_max:.0f} %", showarrow=True, arrowhead=0, ax=40, ay=-40,
+                       font=dict(color=INK_PRIMARY, size=12))
+    fig.add_annotation(xref="paper", yref="paper", x=1, y=1, xanchor="right", yanchor="bottom", showarrow=False,
+                       text="<b>Escenario, no es un pronóstico</b>", font=dict(color=INK_SECONDARY, size=12))
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False, title=_titulo(
+        f"Con los costos de {anio}, la comisión podría bajar hasta {baja_max:.0f} % antes de que el negocio principal tenga pérdida",
+        f"Comisiones − gastos de administración, miles de millones de pesos de {anio}, si la comisión baja y los gastos no cambian; sin encaje, otros ingresos ni impuesto", ancho=62))
+    fig.update_xaxes(range=[0, float(e.baja_pct.max())], ticksuffix=" %", title="Baja de la comisión")
+    fig.update_yaxes(title="Miles de millones de pesos")
+    return con_coma(fig)
