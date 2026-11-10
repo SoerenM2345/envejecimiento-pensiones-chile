@@ -258,9 +258,32 @@ def test_filas_de_la_descomposicion_se_ordenan_por_cada_columna():
 def test_resumen_de_razones_una_por_una():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
     subt = [m.value for m in at.markdown if m.value.startswith("##### ")]
-    assert subt[-4:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
+    assert subt[-5:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
                         "##### 3. ¿Qué características de las regiones se asocian con la cobertura? (estadística, no causa)",
+                        "##### 3b. ¿Cambia algo por sexo? Un descarte",
                         "##### 4. En síntesis: dos palancas explican casi todo"]
+
+
+def test_definiciones_diferencian_las_tres_piezas_antes_de_los_graficos():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert [e.label for e in at.expander if e.label.startswith("Definiciones y fórmulas")] == ["Definiciones y fórmulas: qué es cada pieza de la cobertura"]
+    formulas = [l.value for l in at.get("latex")]
+    assert any("underbrace" in f and "Participación" in f and "Empleo" in f and "Ocupados que cotizan" in f for f in formulas)
+    assert not any("tasa de desocupación" in f for f in formulas)  # esa igualdad va en el texto: dentro de la tarjeta se cortaba
+    # el ejemplo es el de la descomposición oficial: las tres razones multiplicadas dan la razón de la cobertura
+    ejemplo = next(t.value for t in at.get("table") if t.value.index.name == "Pieza")
+    razon = [c for c in ejemplo.columns if c.endswith("(veces)")][0]
+    veces = [float(v.replace(",", ".")) for v in ejemplo[razon]]
+    assert veces[0] * veces[1] * veces[2] == pytest.approx(veces[3], abs=0.02)
+    aportes = [float(v.replace(",", ".").replace("−", "-")) for v in ejemplo.iloc[:, -1]]
+    assert sum(aportes[:3]) == pytest.approx(aportes[3], abs=0.15)  # los aportes en puntos suman la diferencia total
+    confusiones = next(t.value for t in at.get("table") if t.value.index.name == "Término parecido")
+    assert any("informalidad" in i.lower() for i in confusiones.index) and any("Asociación de AFP" in i for i in confusiones.index)
+    textos = [m.value for m in at.markdown]
+    ini = next(i for i, t in enumerate(textos) if t.startswith("##### 1. ¿De dónde viene la diferencia?"))
+    fin = next(i for i, t in enumerate(textos) if t.startswith("##### 2. Las razones una por una"))
+    assert any(t.startswith("**1. Participación laboral**") for t in textos[ini:fin])  # las definiciones abren el apartado 1, antes de sus gráficos
 
 
 def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
@@ -334,3 +357,27 @@ def test_siete_vs_chile_son_agregados_consistentes():
     assert piezas == pytest.approx(v("Diferencia con Chile", "Diferencia total"), abs=1e-3)
     assert v("Diferencia con Chile", "Diferencia total") == pytest.approx(v("Cobertura", "Cobertura 2024") - chile24, abs=0.05)
     assert (ROOT / "docs" / "SIETE_VS_CHILE.md").read_text().startswith("# Las 7 regiones prioritarias frente al promedio de Chile")
+
+
+def test_brecha_de_informalidad_por_sexo_no_se_relaciona_con_la_cobertura():
+    """Scripts/27: el total coincide con la informalidad del KPI, y ni la brecha mujeres-hombres ni su diferencia con las prioritarias explican la cobertura."""
+    d = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo.csv")
+    m = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo_resumen.csv").set_index("indicador").valor
+    reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id")
+    assert len(d) == 16 and d.region_id.is_unique and d.prioritaria.sum() == 7
+    assert np.allclose(d.informalidad, reg.loc[d.region_id, "informalidad_ene"].values, atol=0.001)
+    assert np.allclose(d.brecha_mujeres_hombres, d.informalidad_mujeres - d.informalidad_hombres, atol=0.001)
+    assert m["p_brecha_mujeres_hombres"] > 0.05 and abs(m["r_brecha_sin_las_2_mayores"]) < 0.2
+    assert abs(m["brecha_mujeres_hombres_prioritarias"] - m["brecha_mujeres_hombres_otras"]) < 0.5
+    assert m["r_informalidad_hombres"] < -0.7 and m["r_informalidad_mujeres"] < -0.7  # por sexo, la informalidad sigue asociándose con menos cobertura
+
+
+def test_pagina_muestra_la_dispersion_de_la_brecha_por_sexo():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    sp = _spec_con_titulo(at, "entre mujeres y hombres")
+    assert sp is not None
+    burbujas = [t for t in sp["data"] if t.get("marker", {}).get("sizemode") == "area"]
+    assert len(burbujas) == 1 and len(_vals(burbujas[0]["x"])) == 16
+    assert sp["layout"]["yaxis"]["range"][0] == 0 and sp["layout"]["xaxis"]["range"][0] < 0 < sp["layout"]["xaxis"]["range"][1]  # la brecha puede ser negativa
+    assert sum(c == "#eb6834" for c in burbujas[0]["marker"]["color"]) == 7  # las regiones prioritarias van en naranja

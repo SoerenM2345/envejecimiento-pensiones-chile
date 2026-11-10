@@ -420,7 +420,7 @@ def cost_drivers_chart(descs: list) -> go.Figure:
     """KPI 2.1: de dónde viene el alza del costo del Pilar. Una barra apilada (100 % del aumento) por período con las tres piezas del costo:
     personas de 65+ (demografía, azul), beneficios por persona de 65+ (cobertura, naranja claro) y monto por beneficio (naranja); el color
     naranja es lo que decide la política. descs = lista de (etiqueta del período, resultado de cost_analysis.descomponer_pilar)."""
-    estilo = {"pob_65": ("Personas de 65+", BLUE, "white"), "cobertura": ("Cobertura", lighten(ORANGE), INK_PRIMARY), "monto": ("Monto", ORANGE, "white")}
+    estilo = {"pob_65": ("Personas de 65+", BLUE, "white"), "cobertura": ("Alcance", lighten(ORANGE), INK_PRIMARY), "monto": ("Monto", ORANGE, "white")}
     filas = [(et, d) for et, d in descs][::-1]  # el primero, arriba
     nombres_y = [es_cl(f"{et}<br>+${(d['costo1'] - d['costo0']) / 1e12:.1f} billones") for et, d in filas]
     fig = go.Figure()
@@ -431,7 +431,7 @@ def cost_drivers_chart(descs: list) -> go.Figure:
                     text=[f"{nombre} {v:.0f} %" if v >= 9 else "" for v in pct], textposition="inside", insidetextanchor="middle",
                     textfont=dict(color=texto, size=12), hovertemplate="%{y}<br>" + nombre + ": %{x:.0f} % del aumento<extra></extra>")
     principal = {d["a0"]: max(d["partes"], key=lambda p: p["parte"])["clave"] for _, d in descs}
-    frase = {"pob_65": "el número de personas de 65+", "cobertura": "la cobertura", "monto": "el monto por beneficio"}
+    frase = {"pob_65": "el número de personas de 65+", "cobertura": "el alcance de los beneficios", "monto": "el monto por beneficio"}
     (e0, d0), (e1, d1), (e2, d2) = descs[0], descs[1], descs[2]
     msg = (f"El alza del costo cambia de motor: hasta {d0['a1']} la empuja {frase[principal[d0['a0']]]}, con la Pensión Garantizada Universal {frase[principal[d1['a0']]]} "
            f"y hasta {d2['a1']} la empujará {frase[principal[d2['a0']]]}")
@@ -1127,6 +1127,31 @@ def two_levers_scatter(df: pd.DataFrame, r2: float, prio_ids) -> go.Figure:
                                     "naranja = regiones prioritarias", ancho=60))
     fig.update_xaxes(title="Cobertura esperada por las dos palancas (%)", ticksuffix="%", range=list(rango), **_EJE_CLARO)
     fig.update_yaxes(title="Cobertura real 2024 (% de 15-64 que cotiza)", ticksuffix="%", range=list(rango), **_EJE_CLARO)
+    return con_coma(fig)
+
+
+def gender_gap_scatter(df: pd.DataFrame, r: float, p: float, prio_ids) -> go.Figure:
+    """KPI 1.1, descarte: brecha de informalidad entre mujeres y hombres (puntos) vs. cobertura, una burbuja por región (tamaño = cotizantes),
+    recta MCO plana. Naranja = regiones prioritarias. El eje x incluye el 0 pero no parte en él: la brecha puede ser negativa.
+    df: kpi_cobertura_informalidad_sexo.csv; r, p: correlación de Pearson y su valor p."""
+    x, y = "brecha_mujeres_hombres", "cobertura_2024"
+    rx = (float(np.floor(df[x].min() - 1.5)), float(np.ceil(df[x].max() + 1.5)))
+    ry = _rango(df[y], 0.12)
+    fig = go.Figure()
+    fig.add_vline(x=0, line=dict(color=GRIDLINE, width=1.5))
+    pendiente, intercepto = np.polyfit(df[x], df[y], 1)
+    xs = np.linspace(df[x].min(), df[x].max(), 50)
+    fig.add_scatter(x=xs, y=intercepto + pendiente * xs, mode="lines", line=dict(color=INK_PRIMARY, width=2, dash="dash"), hoverinfo="skip", showlegend=False)
+    ids = set(int(i) for i in prio_ids)
+    colores = [ORANGE if int(i) in ids else lighten(BLUE, 0.35) for i in df.region_id]
+    _burbujas(fig, df, x, y, "Informalidad de las mujeres menos la de los hombres: %{x:+.1f} puntos<br>Cobertura: %{y:.1f}%", colores, rx, ry)
+    fig.add_annotation(xref="paper", yref="paper", x=0.01, y=0.99, xanchor="left", yanchor="top", showarrow=False,
+                       text=f"r = {num_cl(r)}, valor p = {num_cl(p)}, n = {len(df)}", font=dict(color=INK_PRIMARY, size=13), bgcolor="rgba(255,255,255,0.8)")
+    fig.update_layout(**{**PLOTLY_LAYOUT, **_MARGEN}, **_TEXTO_CLARO, height=520, showlegend=False,
+                      title=_titulo(f"La diferencia de informalidad entre mujeres y hombres no se relaciona con la cobertura (r = {r:.2f}, no significativa)",
+                                    "Una burbuja por región (tamaño = cotizantes); naranja = prioritarias", ancho=60))
+    fig.update_xaxes(title="Informalidad de las mujeres menos la de los hombres (puntos)", range=list(rx), zeroline=False, **_EJE_CLARO)
+    fig.update_yaxes(title="Cobertura previsional (% de 15-64 que cotiza)", ticksuffix="%", range=list(ry), **_EJE_CLARO)
     return con_coma(fig)
 
 

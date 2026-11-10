@@ -29,3 +29,7 @@ Faltan, para ser útiles: los mismos conjuntos con **todas** las ramas y categor
 | `ene_regional_tasa_informal_sin_agro.xls` | `f1981bf1-099d-410e-9518-bd61c4f3bfbe.xls` |
 | `ene_regional_tasa_parcial_involuntario.xls` | `a9a08433-090d-4307-ba36-ffbd15909d67.xls` |
 | `ene_regional_tasa_sector_informal.xls` | `0cb83c21-3c7c-4c45-ba12-ba2b708867a4.xls` |
+
+## Tasa de informalidad por sexo (CSV, no XML)
+
+`ene_regional_tasa_informal_por_sexo.csv` (nombre original `INF_TOI_10112026141536651.csv`, descargado el 2026-11-10): tasa de ocupación informal por trimestre móvil, región y sexo (total, hombres, mujeres). Trae dos series: `INF_TOI_P2017` (proyecciones base 2017, jul-sep 2017 a mar-may 2024, la misma de `ene_regional_tasa_informal.xls`: coincide con `ene_region_anual.csv` hasta 5×10⁻⁵ puntos) e `INF_TOI` (base 2002, hasta nov-ene 2019, obsoleta). Solo se usa la primera, en `Scripts/28_informalidad_por_sexo.py`; el script 25 no la lee (solo lee `*.xls`).

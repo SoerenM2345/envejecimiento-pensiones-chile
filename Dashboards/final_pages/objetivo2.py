@@ -3,7 +3,8 @@ import pandas as pd
 import streamlit as st
 from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG, subtitulo_visible
 from components.kpi_card import kpi_card
-from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo, gasto_total_vejez
+from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo, gasto_total_vejez, _piezas_pilar
+from components.definiciones import bloque_definiciones
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
 from components.charts import mostrar, cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
 from components.charts import cost_index_chart, cost_drivers_chart, num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
@@ -114,9 +115,9 @@ def render_2_1():
     with t3:
         _g21(beneficiaries_chart(h))
         p0 = h.iloc[0]
-        _texto(f"**Lectura:** la cobertura sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
+        _texto(f"**Lectura:** el alcance sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} beneficios por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
                     f"a ${ult.monto_por_beneficio / 1e6:.2f} millones (≈ ${ult.monto_por_beneficio / 12:,.0f} al mes), casi quieto desde {ANIO_PGU + 1}.")
-        st.caption("\\* Solo Pilar Solidario y PGU de vejez; una persona puede tener más de un beneficio, así que la cobertura es un tope.")
+        st.caption("\\* Solo Pilar Solidario y PGU de vejez; una persona puede tener más de un beneficio, así que el alcance es un tope y no el porcentaje de personas con pensión.")
     with t4:
         base = st.radio("Ingreso típico de los ocupados", ["mediana", "promedio"], horizontal=True,
                         help="Mediana: la mitad de los ocupados gana menos. Promedio: total de ingresos ÷ ocupados (más alto por los ingresos muy altos).")
@@ -152,7 +153,7 @@ def render_2_1():
             f"- **Resto:** lo que queda de 'Edad avanzada' al restar PGU y PBS/APS; incluye el sistema antiguo. "
             f"El IPS paga ≈ ${ips / 1e12:.1f} billones al año a {f'{n_ips:,}'.replace(',', '.')} pensionados (julio 2026), solo una parte del resto, y solo {ips_men65:.0f}% de ese pago va a menores de 65; "
             f"Capredena y Dipreca no se pueden ver con estos datos.\n"
-            f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. La cobertura cuenta beneficios, no personas.\n"
+            f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. El alcance cuenta beneficios, no personas.\n"
             f"- **Proyección:** población INE; ocupados proporcionales a la población 15-64; el ingreso crece como el PIB per cápita; con la base «promedio» el pago por ocupado pesa menos porque el ingreso promedio es mayor que la mediana."
         )
 
@@ -253,6 +254,68 @@ def render_2_1_total(h: pd.DataFrame):
 PERIODOS_COSTO = (("2016 → 2021", 2016, 2021), ("2021 → 2025", 2021, 2025), ("2025 → 2050 (escenario)", 2025, 2050))
 
 
+def _definiciones_2_1(h: pd.DataFrame, pr: pd.DataFrame):
+    """Antes de los gráficos: qué es cada una de las tres piezas del costo del Pilar, con su fórmula, un ejemplo con cifras reales y los términos parecidos."""
+    a0, a1 = int(h.index[0]), int(h.index[-1])
+    d = descomponer_pilar(h, pr, a0, a1)
+    p0, pob0, cob0, m0 = _piezas_pilar(h, pr, a0)
+    p1, pob1, cob1, m1 = _piezas_pilar(h, pr, a1)
+    pp = {x["clave"]: x for x in d["partes"]}
+    f = lambda v, dec=2: es_cl(f"{v:.{dec}f}")  # noqa: E731
+    u = h.iloc[-1]
+    ejemplo = pd.DataFrame({
+        "Pieza": ["1. Personas de 65+ (millones)", "2. Alcance: beneficios por persona de 65+", "3. Monto por beneficio (millones de $ al año)", "Costo del Pilar (billones de $)"],
+        str(a0): [f(pob0 / 1e6), f(cob0), f(m0 / 1e6), f(p0 / 1e12)],
+        str(a1): [f(pob1 / 1e6), f(cob1), f(m1 / 1e6), f(p1 / 1e12)],
+        "Veces": [f(pp["pob_65"]["razon"]), f(pp["cobertura"]["razon"]), f(pp["monto"]["razon"]), f(p1 / p0)],
+        "Aporte al alza (billones de $)": [f(pp[k]["aporte"] / 1e12, 1) for k in ("pob_65", "cobertura", "monto")] + [f((p1 - p0) / 1e12, 1)],
+        "Parte del alza": [f"{100 * pp[k]['parte']:.0f} %" for k in ("pob_65", "cobertura", "monto")] + ["100 %"],
+    }).set_index("Pieza")
+    confusiones = pd.DataFrame([
+        ("Costo público por persona de 65+ (tarjeta de arriba)", "Todo el gasto en «Edad avanzada» (DIPRES) ÷ personas de 65+",
+         f"Incluye el sistema antiguo: ${f(u.costo_65 / 1e6)} millones en {a1}. El Pilar por persona de 65+ es solo ${f(u.pilar_65 / 1e6)} millones y es el producto de las piezas 2 y 3."),
+        ("Cobertura previsional (KPI 1.1)", "Cotizantes ÷ población de 15 a 64 años",
+         "Otra cosa con nombre parecido. Por eso la pieza 2 de aquí se llama «alcance»: cuenta beneficios por persona de 65+, no cotizantes."),
+        ("Personas con pensión del Estado", "Número de personas que reciben algún beneficio",
+         "El alcance cuenta beneficios, no personas: quien recibe la PGU y un aporte solidario cuenta dos veces. Es un tope, no un porcentaje de personas."),
+        ("Pago mensual a una persona", "Lo que recibe una persona al mes",
+         f"El monto por beneficio es el gasto anual ÷ el número promedio de beneficios: ${f(m1 / 1e6)} millones al año, unos ${f'{m1 / 12:,.0f}'.replace(',', '.')} al mes en {a1}. "
+         "Mezcla la PGU, la pensión básica y el aporte solidario con sus reajustes; no es el monto de ninguna prestación."),
+        ("«Total» del Pilar del KPI 2.2", "PGU + pensiones solidarias de vejez e invalidez",
+         "Aquí solo vejez: PGU + pensión básica solidaria de vejez + aporte previsional solidario de vejez; por eso las cifras no coinciden con las del KPI 2.2."),
+    ], columns=["Término parecido", "Qué es", "En qué se diferencia"]).set_index("Término parecido")
+    bloque_definiciones(
+        "Definiciones y fórmulas: qué es cada pieza del costo",
+        "El **costo anual del Pilar Solidario de vejez** (la Pensión Garantizada Universal y las pensiones solidarias de vejez, que paga el Estado con impuestos) se descompone en "
+        "**tres preguntas encadenadas**; los términos de en medio se cancelan al multiplicar, por eso la descomposición es exacta:",
+        r"\underbrace{G}_{\text{Costo del Pilar}}=\underbrace{P_{65+}}_{(1)\ \text{Personas de 65+}}\times\underbrace{\frac{B}{P_{65+}}}_{(2)\ \text{Alcance}}\times\underbrace{\frac{G}{B}}_{(3)\ \text{Monto por beneficio}}",
+        [dict(numero=1, nombre="Personas de 65+", pregunta="¿Cuántas personas podrían recibir un beneficio de vejez?",
+              formula=r"P_{65+}",
+              terminos=["**P₆₅₊** = población de 65 años o más, promedio del año (INE, proyecciones base 2024).",
+                        "Es la única pieza que no depende de ninguna decisión: solo de la demografía."],
+              no_mide="cuántas de esas personas reciben algo ni cuánto.",
+              razones="el envejecimiento."),
+         dict(numero=2, nombre="Alcance de los beneficios", pregunta="¿Cuántos beneficios paga el Pilar por cada persona de 65+?",
+              formula=r"\frac{B}{P_{65+}}",
+              terminos=["**B** = número promedio del año de beneficios de vejez: PGU + pensión básica solidaria (PBS) de vejez + aporte previsional solidario (APS) de vejez.",
+                        "Sube cuando el beneficio llega a más gente (la PGU, desde febrero de 2022, Ley 21.419)."],
+              no_mide="el porcentaje de personas con pensión: una persona con dos beneficios cuenta dos veces (es un tope). Tampoco incluye invalidez, el sistema antiguo ni las pensiones de las AFP.",
+              razones="ampliar o focalizar el beneficio (decisiones de política)."),
+         dict(numero=3, nombre="Monto por beneficio", pregunta="¿Cuánto gasta el Estado, en promedio, por cada beneficio al año?",
+              formula=r"\frac{G}{B}",
+              terminos=["**G** = gasto anual del Pilar de vejez (PGU + PBS de vejez + APS de vejez), en pesos reales de 2025 (DIPRES y Subsecretaría de Previsión Social).",
+                        "Mezcla prestaciones de distinto monto: sube con los reajustes por IPC, con el monto de cada prestación y con la mezcla entre ellas."],
+              no_mide="lo que recibe una persona al mes ni el monto de ninguna prestación en particular.",
+              razones="reajustes por IPC, el monto mayor de la PGU, la PGU de $250.000 (Ley 21.735).")],
+        confusiones,
+        ejemplo_titulo=f"Un ejemplo con cifras reales: {a0} frente a {a1}",
+        ejemplo=ejemplo,
+        ejemplo_nota=("**Cómo se leen los aportes.** Las «veces» de las tres piezas, multiplicadas, dan las veces que crece el costo. El alza en billones de pesos se reparte entre las piezas "
+                      "en proporción al logaritmo de esas veces (media logarítmica): **los tres aportes suman exactamente el alza** y la «parte del alza» es cada aporte dividido por el alza total. "
+                      f"Aquí el costo del Pilar se multiplica por {f(p1 / p0, 1)} entre {a0} y {a1}: el monto por beneficio explica el {100 * pp['monto']['parte']:.0f} % del alza."),
+        clave="costo")
+
+
 def render_2_1_por_que(h: pd.DataFrame):
     """Costos como problema nacional (punto 3 del profesor): qué sube más rápido y por qué, con las tres piezas exactas del costo del Pilar."""
     cfg = cargar_escenarios()
@@ -262,6 +325,7 @@ def render_2_1_por_que(h: pd.DataFrame):
     st.markdown("El Pilar Solidario de vejez (la Pensión Garantizada Universal y las pensiones solidarias, que paga el Estado con impuestos) cuesta "
                 "**personas de 65+ × cuántas reciben beneficio × cuánto recibe cada beneficio**. Es una multiplicación exacta, así que se puede ver cuál de las tres "
                 "piezas explica el alza: la demografía (las personas de 65+) o las decisiones de política (a cuántas se llega y con cuánto).")
+    _definiciones_2_1(h, pr)
     st.markdown("##### 1. ¿Qué sube más rápido?")
     per = st.radio("Período", [f"{h.index[0]}-{ult} (observado)", f"{ult}-{ANIO_FIN_2_1} (escenario)"], horizontal=True, key="c21_periodo")
     futuro = "escenario" in per
@@ -278,8 +342,8 @@ def render_2_1_por_que(h: pd.DataFrame):
     pp = lambda d, k: 100 * next(p["parte"] for p in d["partes"] if p["clave"] == k)  # noqa: E731
     d0, d1, d2 = (d for _, d in descs)
     subtitulo_visible(f"Qué muestra: de cada 100 pesos que sube el costo del Pilar, cuántos vienen de cada pieza. Hasta 2021 el monto por beneficio explica {pp(d0, 'monto'):.0f}; "
-                      f"con la PGU (2022) la cobertura pasa a {pp(d1, 'cobertura'):.0f} y el monto a {pp(d1, 'monto'):.0f}; hacia 2050 las personas de 65+ explican {pp(d2, 'pob_65'):.0f} "
-                      f"(escenario con la cobertura de {ult} constante). El motor pasa de la política a la demografía.")
+                      f"con la PGU (2022) el alcance de los beneficios pasa a {pp(d1, 'cobertura'):.0f} y el monto a {pp(d1, 'monto'):.0f}; hacia 2050 las personas de 65+ explican {pp(d2, 'pob_65'):.0f} "
+                      f"(escenario con el alcance de {ult} constante). El motor pasa de la política a la demografía.")
     st.markdown("##### 3. Las razones una por una (resumen)")
     par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
     anio28 = int(par.index[par.factor_costo_pgu >= par.factor_costo_pgu.max() - 1e-9][0])
@@ -290,7 +354,7 @@ def render_2_1_por_que(h: pd.DataFrame):
     filas = [
         ("Más personas de 65+ (envejecimiento)", "Personas de 65+", pc(d0, "pob_65"), pc(d1, "pob_65"), pc(d2, "pob_65"),
          f"De {p0.pob_65 / 1e6:.1f} a {pf.pob_65 / 1e6:.1f} millones entre {h.index[0]} y {ult}, y a {pr.loc[ANIO_FIN_2_1].pob_65 / 1e6:.1f} millones en {ANIO_FIN_2_1} (INE). Es la pieza que no depende de decisiones."),
-        ("Más personas reciben el beneficio", "Beneficios por persona de 65+", pc(d0, "cobertura"), pc(d1, "cobertura"), pc(d2, "cobertura"),
+        ("Más personas reciben el beneficio", "Alcance: beneficios por persona de 65+", pc(d0, "cobertura"), pc(d1, "cobertura"), pc(d2, "cobertura"),
          f"De {100 * p0.cobertura:.0f} a {100 * pf.cobertura:.0f} beneficios por cada 100 personas de 65+. La Pensión Garantizada Universal (Ley 21.419, desde febrero de {ANIO_PGU}) llegó a más gente. "
          f"En el escenario se supone constante."),
         ("Cada beneficio paga más", "Monto por beneficio", pc(d0, "monto"), pc(d1, "monto"), pc(d2, "monto"),
@@ -306,8 +370,8 @@ def render_2_1_por_que(h: pd.DataFrame):
     st.table(tabla.set_index("Posible razón"))
     _nota("Las tres columnas de períodos son el % del aumento del costo del Pilar que aporta cada pieza (los gráficos de arriba). "
           f"Fuente: DIPRES (Estadísticas de las Finanzas Públicas), Subsecretaría de Previsión Social (PGU, PBS y APS), INE (población base 2024), pesos reales de {ANIO_BASE_COSTO}. "
-          f"Escenario hasta {ANIO_FIN_2_1}: PIB +{cfg['crecimiento_pib_real']:.0%} al año, PGU de $250.000 y cobertura constante; no es un pronóstico. "
-          "La cobertura cuenta beneficios, no personas (una persona puede tener más de uno), y el «Total» del Pilar incluye invalidez además de vejez. "
+          f"Escenario hasta {ANIO_FIN_2_1}: PIB +{cfg['crecimiento_pib_real']:.0%} al año, PGU de $250.000 y alcance constante; no es un pronóstico. "
+          "El alcance cuenta beneficios, no personas (una persona puede tener más de uno); el Pilar es PGU + pensión básica y aporte solidario de **vejez** (sin invalidez). "
           "El gasto en «Edad avanzada» incluye el sistema antiguo, que DIPRES no abre: por eso la descomposición es del Pilar y no de todo el gasto. "
           "Cuánto pesa en el PIB: KPI 2.2. Hasta cuándo alcanza lo que aportan los cotizantes: KPI 1.2.")
 

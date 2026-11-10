@@ -258,7 +258,11 @@ def test_dispersiones_con_eje_desde_cero():
                                                     for t in s["data"])]
     assert len(dispersiones) >= 2
     for s in dispersiones:
-        assert s["layout"]["xaxis"]["range"][0] == 0 and s["layout"]["yaxis"]["range"][0] == 0
+        assert s["layout"]["yaxis"]["range"][0] == 0
+        if "entre mujeres y hombres" in s["layout"]["title"]["text"]:  # la brecha puede ser negativa: el eje x incluye el 0 pero no parte en él
+            assert s["layout"]["xaxis"]["range"][0] < 0 < s["layout"]["xaxis"]["range"][1]
+        else:
+            assert s["layout"]["xaxis"]["range"][0] == 0
 
 
 def test_grafico_del_kpi_1_3_tiene_como_maximo_4_lineas():

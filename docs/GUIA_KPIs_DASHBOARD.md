@@ -187,6 +187,8 @@ Receta prevista, **sin probar** hasta que exista el dato: tras crear `Scripts/15
 
 Fórmula: `(Costo público total ÷ Población 65+) ÷ PIB per cápita` (indicador principal) y, como apoyo, el costo real por persona 65+ en pesos de 2025.
 
+**Bloque «¿Por qué suben los costos?»:** abre con un recuadro «Definiciones y fórmulas» (costo del Pilar de vejez = personas de 65+ × alcance × monto por beneficio, ejemplo 2016-2025 y «No confundir con»); después vienen el índice 2016 = 100, la descomposición y las razones una por una. «Alcance» = beneficios por persona de 65+; no es la cobertura del KPI 1.1.
+
 **Fuentes:** DIPRES, *Estadísticas de las Finanzas Públicas 2016-2025* (`Data raw/_external/dipres/articles-416514_doc_xls.xlsx`, hoja `CFEGCT$25`, línea «7102 Edad avanzada», pesos de 2025) y Banco Central, PIB (`Data raw/_external/macro/CCNN2018_P0_V2.xlsx`) → `Scripts/13` → `gasto_proteccion_social.csv` y `macro_pib_anual.csv`; población: `proyeccion_envejecimiento_pais.csv`.
 
 **Receta, costo público por persona 65+**

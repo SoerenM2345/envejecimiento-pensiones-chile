@@ -19,13 +19,13 @@ Pedido del profesor: ver los **costos como problema nacional**, no regional, y, 
 |---|---|---|
 | Pilar Solidario (PGU + pensiones solidarias), costo total | ×4,43 | +18,0 % |
 | Monto real por beneficio | ×2,10 | +8,6 % |
-| Beneficios del Pilar por persona de 65+ (cobertura) | ×1,47 | +4,4 % |
+| Beneficios del Pilar por persona de 65+ (alcance) | ×1,47 | +4,4 % |
 | Población de 65+ | ×1,44 | +4,1 % |
 | Gasto total en «Edad avanzada» | ×1,60 | +5,3 % |
 | «Resto» (sistema antiguo y otros) | ×1,09 | +1,0 % |
 | PIB real | ×1,20 | +2,0 % |
 
-El costo del Pilar se descompone exactamente en población × cobertura × monto: la población explica el 24 % del aumento, la cobertura el 26 % y el **monto por beneficio el 50 %**. Es decir, hasta hoy lo empujó la **política** (la Pensión Garantizada Universal de 2022, Ley 21.419, y sus reajustes), no el envejecimiento.
+El costo del Pilar se descompone exactamente en población × alcance × monto: la población explica el 24 % del aumento, el alcance el 26 % y el **monto por beneficio el 50 %**. Es decir, hasta hoy lo empujó la **política** (la Pensión Garantizada Universal de 2022, Ley 21.419, y sus reajustes), no el envejecimiento.
 
 **Futuro, 2025 a 2050 (PGU de $250.000, PIB +2 %, «resto» constante):**
 
@@ -40,7 +40,7 @@ Ahora el 87 % del aumento viene de la **demografía** (población 65+) y solo el
 
 ## 3. Recomendación: profundizar 2.1 y 1.2
 
-1. **KPI 2.1 (el principal): el porqué del pasado.** Es el único con la historia del costo en sus piezas (beneficiarios, monto, cobertura, «resto») con datos oficiales y nacionales; ahí está la respuesta a «por qué unos factores suben más rápido»: monto y cobertura se multiplicaron, la población no.
+1. **KPI 2.1 (el principal): el porqué del pasado.** Es el único con la historia del costo en sus piezas (beneficiarios, monto, alcance, «resto») con datos oficiales y nacionales; ahí está la respuesta a «por qué unos factores suben más rápido»: monto y alcance se multiplicaron, la población no.
 2. **KPI 1.2 (el complementario): el porqué del futuro y qué significa.** Su cascada ya separa población, costo, trabajadores e ingreso y su punto crítico traduce el costo a «hasta cuándo se puede pagar»; con los seis escenarios fijos cubre «qué pasa si…».
 3. **KPI 2.2 queda como cierre, no como profundización:** da la cifra para el público (2,07 % → 2,62 % del PIB) y quién paga, pero depende de supuestos (PIB, rentabilidad) y no explica por qué suben los factores. Se cita, no se desarma.
 
@@ -51,16 +51,20 @@ Descartados: 1.3 y 2.3 (no son costos).
 Un bloque nacional «¿Por qué suben los costos?» al comienzo del KPI 2.1 (las pestañas de detalle siguen debajo), con el mismo molde del KPI 1.1:
 
 1. **Índice 2016 = 100, cuatro líneas:** costo del Pilar, monto por beneficio, población de 65+ y PIB real. Muestra de un vistazo qué factor sube más rápido.
-2. **Descomposición exacta** (media logarítmica, como en el 1.1): el aumento del Pilar en población × cobertura × monto, para 2016-2025 y 2025-2050, en dos paneles comparables.
+2. **Descomposición exacta** (media logarítmica, como en el 1.1): el aumento del Pilar en población × alcance × monto, para 2016-2025 y 2025-2050, en dos paneles comparables.
 3. **«Las razones una por una»:** tabla con cada razón (la PGU de 2022, el reajuste por IPC, el envejecimiento, menos trabajadores por persona de 65+), la pieza en que cae, cuánto aporta y la lectura, con la ley y el año como trasfondo.
 4. **Conexión con 1.2 y 2.2:** una línea que lleve del costo a «hasta cuándo» (punto crítico) y «cuánto del PIB» (2.2).
 
-Sin descargas nuevas. Código: `descomponer_pilar` e `indices_costo` en `Dashboards/components/cost_analysis.py`, gráficos `cost_index_chart` y `cost_drivers_chart`, pruebas en `tests/test_costo_65.py`. Resultado: hasta 2021 manda el monto por beneficio (64 % del alza), con la PGU la cobertura (43 %) y hacia 2050 las personas de 65+ (87 %).
+Sin descargas nuevas. Código: `descomponer_pilar` e `indices_costo` en `Dashboards/components/cost_analysis.py`, gráficos `cost_index_chart` y `cost_drivers_chart`, pruebas en `tests/test_costo_65.py`. Resultado: hasta 2021 manda el monto por beneficio (64 % del alza), con la PGU el alcance (43 %) y hacia 2050 las personas de 65+ (87 %).
 
 ## 5. Límites que hay que decir
 
 - «Edad avanzada» (DIPRES) incluye el sistema antiguo: el «resto» es el 58 % del gasto y no se puede abrir. La descomposición se hace sobre el **Pilar**, no sobre todo el gasto.
-- La «cobertura» (beneficios por persona de 65+) es un tope: una persona puede tener más de un beneficio, y el «Total» del Pilar incluye invalidez además de vejez.
+- El «alcance» (beneficios por persona de 65+) es un tope: una persona puede tener más de un beneficio. Se llama «alcance» y no «cobertura» para no confundirlo con la cobertura previsional del KPI 1.1 (cotizantes ÷ población de 15 a 64). El Pilar de este análisis es solo de **vejez** (PGU + pensión básica solidaria y aporte previsional solidario de vejez); el «Total» del KPI 2.2 incluye además invalidez, por eso las cifras no coinciden.
 - El monto por beneficio mezcla PGU, pensión básica y aporte solidario y sus reajustes: separarlos requiere abrir el monto por tipo, que sí está en `pgu_pbs_aps_nacional_anual.csv`.
 - Todo lo posterior a 2025 es escenario (PIB +2 %, «resto» constante, PGU de $250.000), no pronóstico.
 - El tope de 10 % del KPI 1.2 es un criterio, no un dato: la PGU se paga con impuestos generales.
+
+## 6. Definiciones y fórmulas en el dashboard
+
+Antes de los gráficos del bloque «¿Por qué suben los costos?» hay un recuadro «Definiciones y fórmulas» (`_definiciones_2_1` en `objetivo2.py`, componente `components/definiciones.py`): la fórmula general, una tarjeta por pieza (pregunta, fórmula, términos, qué no mide, qué razones caen aquí), un ejemplo con cifras reales (2016 frente a 2025, con la parte del alza de cada pieza) y una tabla «No confundir con» (costo por persona de 65+ del KPI 2.1, cobertura del KPI 1.1, personas con pensión, pago mensual, «Total» del KPI 2.2). El KPI 1.1 tiene el equivalente para participación × empleo × ocupados que cotizan.

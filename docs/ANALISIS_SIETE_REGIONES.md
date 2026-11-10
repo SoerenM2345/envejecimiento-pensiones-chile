@@ -40,7 +40,7 @@ Entonces el ajuste es exacto para **seis** regiones (Valparaíso, Biobío, La Ar
 
 18 de las 48 variables salen con p < 0,05; por azar se esperarían 2,4. Hay estructura, pero las variables se parecen entre sí (envejecimiento, participación y desocupación van juntas), así que no son 18 pruebas independientes. **Solo dos sobreviven al ajuste:** participación laboral baja y desocupación alta, es decir, un **mercado laboral débil**.
 
-**Sin relación con el grupo:** pueblos originarios (17,9 % en ambos grupos, r con la cobertura −0,15), independientes (35,2 % frente a 34,0 %; en la ENE, 25,6 % frente a 25,0 %), sectores de alta informalidad, escolaridad, ingreso imponible, agricultura, pobreza 65+. Descartarlas es un resultado útil.
+**Sin relación con el grupo:** pueblos originarios (17,9 % en ambos grupos, r con la cobertura −0,15), independientes (35,2 % frente a 34,0 %; en la ENE, 25,6 % frente a 25,0 %), sectores de alta informalidad, escolaridad, ingreso imponible, agricultura, pobreza 65+. Descartarlas es un resultado útil. **Informalidad por sexo** (INE, nov-ene 2023-24, `Scripts/28_informalidad_por_sexo.py`): la brecha mujeres − hombres es de 3,2 puntos en las siete y de 3,1 en las demás; su correlación con la cobertura es r = +0,32 (p = 0,23) y con Antofagasta y Atacama fuera, +0,08. Por separado, la informalidad de los hombres (r = −0,82) y la de las mujeres (r = −0,73) se asocian con la cobertura casi igual que el total: separar por sexo no agrega una razón (gráfico 3b del KPI 1.1).
 
 ## 4. Candidatos, uno por uno
 

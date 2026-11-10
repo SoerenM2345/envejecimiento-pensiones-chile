@@ -150,7 +150,7 @@ def test_pagina_2_1_explica_por_que_suben_los_costos():
     assert not at.exception and any("se multiplicaría" in t for t in titulos())
     sub = [m.value for m in at.markdown if m.value.startswith("##### ")]
     assert sub[:3] == ["##### 1. ¿Qué sube más rápido?", "##### 2. ¿De dónde viene el aumento?", "##### 3. Las razones una por una (resumen)"]
-    assert at.get("table") and "Posible razón" in at.get("table")[0].value.index.name
+    assert any(t.value.index.name == "Posible razón" for t in at.get("table"))
 
 
 # ---------------------------------------------------------------- costo total del Estado en la vejez (Pilar + «Edad avanzada»)
@@ -190,3 +190,24 @@ def test_aumentos_de_la_descomposicion_y_producto_del_indice(h):
     i = indices_costo(h, pr, 2016, 2025).iloc[-1] / 100
     assert i.pilar == pytest.approx(i.monto * i.pob_65 * i.cobertura, rel=1e-9)
     assert (round(i.pilar, 1), round(i.monto, 1), round(i.pob_65, 2), round(100 * h.loc[2016].cobertura), round(100 * h.loc[2025].cobertura)) == (4.4, 2.1, 1.44, 55, 80)
+
+
+def test_pagina_2_1_define_las_tres_piezas_antes_de_los_graficos(pilar):
+    import json
+    from streamlit.testing.v1 import AppTest
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo2.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert [e.label for e in at.expander if e.label.startswith("Definiciones y fórmulas")] == ["Definiciones y fórmulas: qué es cada pieza del costo"]
+    formulas = [l.value for l in at.get("latex")]
+    assert any("underbrace" in f and "Alcance" in f and "Monto por beneficio" in f for f in formulas)
+    ejemplo = next(t.value for t in at.get("table") if t.value.index.name == "Pieza")
+    assert ejemplo.index[-1].startswith("Costo del Pilar")
+    veces = [float(v.replace(",", ".")) for v in ejemplo["Veces"]]
+    assert veces[0] * veces[1] * veces[2] == pytest.approx(veces[3], rel=0.02)  # las tres piezas multiplicadas dan el alza del costo
+    confusiones = next(t.value for t in at.get("table") if t.value.index.name == "Término parecido")
+    assert any("KPI 1.1" in i for i in confusiones.index) and any("KPI 2.2" in i for i in confusiones.index)
+    assert not any("cobertura" in n.lower() for n in ejemplo.index)  # «alcance»: «cobertura» es del KPI 1.1
+    assert not any("$" in str(v) for v in confusiones.to_numpy().ravel())  # st.table lee markdown: dos «$» abren una fórmula; van como entidad
+    textos = [m.value for m in at.markdown]
+    primero_grafico = next(i for i, t in enumerate(textos) if t.startswith("##### 1. ¿Qué sube más rápido?"))
+    assert any(t.startswith("**1. Personas de 65+**") for t in textos[:primero_grafico])  # las definiciones van antes

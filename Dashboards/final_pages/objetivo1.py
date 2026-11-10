@@ -7,9 +7,10 @@ import streamlit as st
 from utils import cargar_escenarios, supuestos_escenario, es_cl, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
 from utils import subtitulo_visible as _subtitulo_visible
 from components.kpi_card import kpi_card
+from components.definiciones import bloque_definiciones
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter)
+                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, gender_gap_scatter)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -194,14 +195,71 @@ COMPARACIONES = {  # comparación del CSV -> etiqueta del selector
 ORDEN_PANELES = {"total": "Diferencia total", "participacion": "Participación laboral", "empleo": "Empleo (1 − desocupación)", "cotizacion": "Ocupados que cotizan"}
 
 
+def _definiciones_1_1(prio: pd.DataFrame, d: pd.DataFrame):
+    """Antes de los gráficos: qué es cada una de las tres piezas de la cobertura, con su fórmula, un ejemplo con cifras reales y los términos parecidos."""
+    fa = load_csv("kpi_cobertura_factores_anual.csv")
+    ref = int(load_csv("kpi_cobertura_regiones.csv").anio_ref.iloc[0])
+    r0 = prio.iloc[0]
+    ch = fa[(fa.territorio_id == 0) & (fa.anio == ref)].iloc[0]
+    rg = fa[(fa.territorio_id == int(r0.region_id)) & (fa.anio == ref)].iloc[0]
+    ap = d[(d.comparacion == f"Nivel frente a Chile en {ref}") & (d.territorio_id == int(r0.region_id))].set_index("factor").aporte_pp
+    pct = lambda v: es_cl(f"{100 * v:.1f} %")  # noqa: E731
+    sg = lambda v: es_cl(f"{v:+.1f}".replace("-", "−"))  # noqa: E731
+    ejemplo = pd.DataFrame({
+        "Pieza": ["1. Participación laboral", "2. Empleo", "3. Ocupados que cotizan", "Cobertura (las tres multiplicadas)"],
+        "Chile": [pct(ch.participacion), pct(ch.empleo), pct(ch.cotizacion), es_cl(f"{ch.cobertura_pct:.1f} %")],
+        r0.region_nombre: [pct(rg.participacion), pct(rg.empleo), pct(rg.cotizacion), es_cl(f"{rg.cobertura_pct:.1f} %")],
+        f"{r0.region_nombre} ÷ Chile (veces)": [es_cl(f"{rg[k] / ch[k]:.2f}") for k in ("participacion", "empleo", "cotizacion")] + [es_cl(f"{rg.cobertura_pct / ch.cobertura_pct:.2f}")],
+        "Aporte a la diferencia (puntos de cobertura)": [sg(ap["participacion"]), sg(ap["empleo"]), sg(ap["cotizacion"]), sg(ap.sum())],
+    }).set_index("Pieza")
+    confusiones = pd.DataFrame([
+        ("Tasa de participación del INE", "Fuerza de trabajo ÷ población de 15 años o más", "La pieza 1 divide por la población de 15 a 64 años, que es la misma base de la cobertura."),
+        ("Tasa de ocupación del INE", "Ocupados ÷ población de 15 años o más", "Se parece a 1 × 2, pero sobre 15+ y no sobre 15-64. La pieza 2 divide por la fuerza de trabajo, no por la población."),
+        ("Tasa de desocupación", "Desocupados ÷ fuerza de trabajo", "Es lo que resta la pieza 2: empleo = 1 − tasa de desocupación."),
+        ("Informalidad (ENE)", "Ocupados informales ÷ ocupados", "Se parece a 1 − pieza 3, pero no es lo mismo: puede haber ocupados formales que no están en la estadística de cotizantes (honorarios, otros regímenes) y la encuesta mide el empleo, no el pago."),
+        ("«Cobertura» de la Asociación de AFP", "Cotizantes ÷ ocupados, con los ocupados tal como los publica el INE",
+         f"Es la pieza 3 sin llevar los ocupados al nivel del Censo: 63,0 % en el estudio (diciembre 2024) frente a {pct(ch.cotizacion)} aquí. La «cobertura» de este tablero divide por la población de 15 a 64 años."),
+    ], columns=["Término parecido", "Qué es", "En qué se diferencia"]).set_index("Término parecido")
+    bloque_definiciones(
+        "Definiciones y fórmulas: qué es cada pieza de la cobertura",
+        "La **cobertura previsional** es la parte de las personas de 15 a 64 años que cotiza. Se descompone en **tres preguntas encadenadas**, cada una con su propio "
+        "denominador; los términos de en medio se cancelan al multiplicar, por eso el producto es exacto y nada queda fuera:",
+        r"\text{Cobertura}=\frac{\text{Cotizantes}}{\text{Población 15-64}}=\underbrace{\frac{\text{Fuerza de trabajo}}{\text{Población 15-64}}}_{(1)\ \text{Participación}}"
+        r"\times\underbrace{\frac{\text{Ocupados}}{\text{Fuerza de trabajo}}}_{(2)\ \text{Empleo}}\times\underbrace{\frac{\text{Cotizantes}}{\text{Ocupados}}}_{(3)\ \text{Ocupados que cotizan}}",
+        [dict(numero=1, nombre="Participación laboral", pregunta="¿Cuántas personas en edad de trabajar están en el mercado laboral, es decir, trabajan o buscan trabajo?",
+              formula=r"\frac{\text{Fuerza de trabajo}}{\text{Población 15-64}}",
+              terminos=["**Fuerza de trabajo** = ocupados + desocupados (los que buscan empleo y están disponibles). Incluye a quienes trabajan y tienen 65 años o más: la encuesta mide desde los 15.",
+                        "**Población 15-64**: Censo 2024 (antes, proyección del INE llevada al nivel del Censo)."],
+              no_mide="si tienen empleo ni si cotizan. Baja cuando mucha gente ni trabaja ni busca (estudia, cuida a la familia, se desalentó).",
+              razones="participación de las mujeres, desaliento, estudiantes, envejecimiento."),
+         dict(numero=2, nombre="Empleo", pregunta="De los que quieren trabajar, ¿cuántos tienen empleo?",
+              formula=r"\frac{\text{Ocupados}}{\text{Fuerza de trabajo}}",
+              terminos=["Equivale a **1 − tasa de desocupación**.",
+                        "**Ocupado**: trabajó al menos una hora por un pago, o tiene un empleo del que estuvo ausente; formal o informal, con o sin cotización.",
+                        "**Desocupado**: sin empleo, buscó trabajo activamente y está disponible."],
+              no_mide="la calidad del empleo: un ocupado informal cuenta igual que uno con contrato.",
+              razones="el desempleo."),
+         dict(numero=3, nombre="Ocupados que cotizan", pregunta="De los que tienen empleo, ¿cuántos aparecen cotizando en las AFP?",
+              formula=r"\frac{\text{Cotizantes}}{\text{Ocupados}}",
+              terminos=["**Cotizantes**: afiliados con cotización pagada en una AFP en diciembre, por las remuneraciones del mes anterior (Superintendencia de Pensiones). "
+                        "No incluye a los independientes a honorarios ni otros regímenes (Capredena, Dipreca).",
+                        "**Ocupados**: los de la pieza 2, llevados al nivel del Censo con el mismo factor que la población."],
+              no_mide="por qué no cotiza: aquí cae todo lo que separa «tener empleo» de «aparecer cotizando». No es lo mismo que la informalidad (ver abajo).",
+              razones="informalidad, trabajo por cuenta propia y honorarios sin cotizar, regímenes fuera de las AFP, evasión, la rama de actividad y la región en que se cuenta a cada cotizante.")],
+        confusiones,
+        ejemplo_titulo=f"Un ejemplo con cifras de {ref}: {r0.region_nombre} frente a Chile",
+        ejemplo=ejemplo,
+        ejemplo_nota=("**Cómo se leen los aportes.** Se compara cada pieza de la región con la de Chile en **veces** (columna «÷ Chile»); las tres veces multiplicadas dan la "
+                      "razón entre las dos coberturas. La diferencia de cobertura, en puntos, se reparte entre las piezas en proporción al logaritmo de esas veces (media logarítmica): "
+                      "**los tres aportes suman exactamente la diferencia** y un aporte negativo significa que esa pieza deja a la región bajo Chile. "
+                      f"Aquí, {r0.region_nombre} está {abs(ap.sum()):.1f} puntos bajo Chile y la pieza 3 explica {abs(ap['cotizacion']):.1f} de ellos."),
+        clave="cob")
+
+
 def render_1_1_descomposicion(prio: pd.DataFrame):
     st.markdown("##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza")
-    st.markdown(
-        "La cobertura es exactamente el producto de tres cosas: **(1)** cuántas personas de 15 a 64 años trabajan o buscan trabajo, "
-        "**(2)** cuántas de ellas tienen empleo (1 − desocupación) y **(3)** cuántos de los ocupados cotizan. Cada posible causa cae en una: "
-        "desempleo en la (2), informalidad y rama de actividad en la (3), y participación laboral en la (1). Es aritmética exacta, no una estimación: "
-        "dice **de dónde sale** la diferencia, no por qué ocurre.")
     d = load_csv("kpi_cobertura_descomposicion.csv")
+    _definiciones_1_1(prio, d)
     c1, c2 = st.columns(2)
     comp = c1.radio("Comparar", list(COMPARACIONES), horizontal=True, key="cob_desc_comp", format_func=COMPARACIONES.get)
     alcance = c2.radio("Regiones", ["Solo las prioritarias", "Las 16 regiones (las prioritarias en naranja)"], horizontal=True, key="cob_desc_alcance")
@@ -351,7 +409,28 @@ def render_1_1_causas():
                            f"Las tres de menor cobertura ({', '.join(peor3.region_nombre)}) cambian menos de {peor3.diferencia_puntos.abs().max() + 0.05:.1f} punto: su problema no depende de la regla.")
         st.caption("Sensibilidad, no corrección: se supone que los pendulares del Censo (abril de 2024) valen para los cotizantes de diciembre y que cuentan en la población de 15 a 64 años de la región de trabajo; "
                    "la codificación del lugar de trabajo del Censo (p44) se infiere, no hay diccionario en el proyecto. Datos: Data processed/kpi_cobertura_pendularidad.csv.")
+    render_1_1_sexo(prio)
     render_1_1_dos_palancas(prio)
+
+
+def render_1_1_sexo(prio: pd.DataFrame):
+    """Un descarte (Scripts/27): la informalidad por sexo no agrega una razón; la brecha mujeres-hombres no se relaciona con la cobertura."""
+    d = load_csv("kpi_cobertura_informalidad_sexo.csv")
+    m = load_csv("kpi_cobertura_informalidad_sexo_resumen.csv").set_index("indicador").valor
+    ids = prio.region_id.astype(int).tolist()
+    st.markdown("##### 3b. ¿Cambia algo por sexo? Un descarte")
+    mostrar(estilo_kpi(gender_gap_scatter(d, m["r_brecha_mujeres_hombres"], m["p_brecha_mujeres_hombres"], ids), 560))
+    en, fuera = d[d.region_id.isin(ids)], d[~d.region_id.isin(ids)]
+    st.markdown(es_cl(
+        f"**Lectura:** en las {len(en)} regiones prioritarias las mujeres tienen {en.brecha_mujeres_hombres.mean():.1f} puntos más de informalidad que los hombres, "
+        f"y en las demás, {fuera.brecha_mujeres_hombres.mean():.1f}: la diferencia entre sexos es la misma. Lo que distingue a las prioritarias es que la informalidad es mayor "
+        f"en ambos sexos (hombres {en.informalidad_hombres.mean():.1f} % frente a {fuera.informalidad_hombres.mean():.1f} %; mujeres {en.informalidad_mujeres.mean():.1f} % frente a "
+        f"{fuera.informalidad_mujeres.mean():.1f} %), es decir, la razón ya vista y no una nueva. Separar por sexo no agrega una causa."))
+    st.caption(es_cl(
+        "Fuente: INE, Encuesta Nacional de Empleo (nov-ene 2023-24), Superintendencia de Pensiones (cobertura 2024). n = 16 regiones. La leve pendiente positiva depende de "
+        f"Antofagasta y Atacama, las dos mayores brechas y de alta cobertura: sin ellas r = {m['r_brecha_sin_las_2_mayores']:.2f}. "
+        f"Por separado, la informalidad de los hombres (r = {m['r_informalidad_hombres']:.2f}) y la de las mujeres (r = {m['r_informalidad_mujeres']:.2f}) "
+        "se asocian con la cobertura casi igual que el total."))
 
 
 def render_1_1_dos_palancas(prio: pd.DataFrame):
