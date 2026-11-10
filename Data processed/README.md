@@ -109,5 +109,6 @@ Definiciones formales, fórmulas e interpretación de cada KPI: `../config/kpis.
 - **`kpi_cobertura_descomposicion.csv`** — aporte en puntos de cada factor a la diferencia con Chile en 2023 y a los cambios 2019-2023 y 2010-2019 (media logarítmica; suman exacto).
 - **`kpi_cobertura_contraste_aafp.csv`** — las cifras de 2019 y 2024 del estudio de la Asociación de AFP junto a las calculadas aquí.
 - **`kpi_cobertura_test_asignacion.csv`** — participación de la Región Metropolitana en los cotizantes, ocupados y población (2010, 2015, 2019, 2023 y Censo 2024).
+- **`kpi_pc_escenarios_fijos.csv`** — los 6 escenarios fijos del KPI 1.2 (`carga_max`, `cobertura_2050`, `cobertura_salto`, descripción, pendiente de la cobertura 2022-2025 e informales al nivel del Censo); los calcula el dashboard con el motor `critical_point.py`.
 - **`pib_regional_anual.csv`** — PIB anual por región (miles de millones de pesos encadenados, ref. 2018), 15 regiones, 2013-2025.
 

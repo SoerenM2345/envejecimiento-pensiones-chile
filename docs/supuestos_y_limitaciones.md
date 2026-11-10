@@ -83,7 +83,28 @@ Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que
 
 La Asociación de AFP es el gremio de las administradoras. Sus cifras salen de la Superintendencia y del INE y se pueden recalcular (se hizo: coinciden); sus interpretaciones («los independientes explican...») no tienen por qué compartirse. Se usa solo como contraste.
 
-## 6. Pendiente (datos que faltan)
+## 6. Escenarios fijos del KPI 1.2 (país)
+
+Seis escenarios con supuestos fijos, además del simulador (que sigue igual). Definidos en `Scripts/25_explorar_causas.py` (`kpi_pc_escenarios_fijos.csv`) y calculados con el motor de `Dashboards/components/critical_point.py`; todo lo demás como en `config/escenarios.yaml` (sueldo real +1 % anual, PGU de $250.000, pesos reales de 2025).
+
+| Escenario | Qué cambia | Punto crítico |
+|---|---|---|
+| Tope de carga 10 % (base) | nada | 2038 |
+| Tope de carga 11 % | el sistema tolera 11 % del sueldo | 2044 |
+| Tope de carga 12 % | el sistema tolera 12 % del sueldo | 2048 |
+| Cobertura sigue cayendo | cobertura −0.18 puntos por año hasta 2050, de 46,9 % a 42,4 % | 2036 |
+| Sin informalidad | todos los informales de hoy cotizan desde 2026 (+41 % de cotizantes) | 2055 |
+| Mitad del camino | la mitad de los informales cotiza (+21 %) | 2048 |
+
+| # | Supuesto o límite | Efecto |
+|---|---|---|
+| 6.1 | **«Cobertura sigue cayendo» = tendencia 2022-2025** (ajuste lineal de 4 puntos, −0,18 puntos por año), prolongada hasta 2050 y constante después (así es el motor). La serie cayó de 47,6 % (2022) a 46,0 % (2023) y se recuperó a 46,9 % (2025): la pendiente depende de la ventana (con 2021-2025 sería −0,30). | Con −0,30 el punto crítico sería 2035 en vez de 2036; con la cobertura de 2025 constante, 2038. |
+| 6.2 | **«Sin informalidad» es un techo teórico, no una proyección.** Suma a los cotizantes todos los ocupados informales de hoy (ENE, diciembre 2023, llevados al nivel del Censo con el factor de la población: 2.36 millones). Supone que (a) ninguno está hoy entre los cotizantes, (b) cotizan desde 2026 de golpe y (c) con el **mismo ingreso imponible promedio** que los cotizantes de hoy. | Los informales ganan menos, así que la masa real sería menor y el punto crítico, antes de 2055. La ENE tiene ingresos; no se usaron. |
+| 6.3 | Los cotizantes no son todos los formales: en 2023 el 67 % de los ocupados cotiza y el 72 % no es informal (la diferencia son honorarios y regímenes fuera de la estadística). Sumar todos los informales lleva la razón cotizantes ÷ ocupados a 95 %. | Otra razón para leerlo como límite superior. |
+| 6.4 | Solo país: las regiones y comunas del simulador no tienen escenarios fijos (su horizonte llega a 2050 y no hay informalidad regional proyectada). | — |
+| 6.5 | Los topes de 11 y 12 % son criterio, no dato: la PGU se paga con impuestos generales. Aquí solo muestran cuánto se atrasa el cruce. | — |
+
+## 7. Pendiente (datos que faltan)
 
 | Dato | Para qué | Estado |
 |---|---|---|

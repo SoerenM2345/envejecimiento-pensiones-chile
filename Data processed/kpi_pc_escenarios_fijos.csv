@@ -1,0 +1,7 @@
+clave,nombre,grupo,carga_max,cobertura_2050,cobertura_salto,descripcion,orden,pendiente_pp_anio,informales_censo
+tope_10,Tope de carga 10 % (base),Tope de carga,0.1,1.0,1.0,La cotización obligatoria para pensión; la cobertura queda como hoy,1,-0.178153,2362787.268694
+tope_11,Tope de carga 11 %,Tope de carga,0.11,1.0,1.0,El sistema tolera 11 % del sueldo; la cobertura queda como hoy,2,-0.178153,2362787.268694
+tope_12,Tope de carga 12 %,Tope de carga,0.12,1.0,1.0,El sistema tolera 12 % del sueldo; la cobertura queda como hoy,3,-0.178153,2362787.268694
+cobertura_cae,Cobertura sigue cayendo,Cobertura,0.1,0.905014,1.0,"La cobertura baja 0.18 puntos por año (tendencia 2022-2025, ajuste lineal) hasta 2050, de 46.9 % a 42.4 %",4,-0.178153,2362787.268694
+sin_informalidad,Sin informalidad,Cobertura,0.1,1.0,1.410444,Todos los informales de hoy cotizan desde 2026: 2.36 millones más sobre 5.76 millones de cotizantes (+41 %),5,-0.178153,2362787.268694
+mitad_informalidad,Mitad del camino,Cobertura,0.1,1.0,1.205222,La mitad de los informales de hoy cotiza desde 2026 (+21 % de cotizantes),6,-0.178153,2362787.268694

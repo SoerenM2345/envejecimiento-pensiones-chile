@@ -998,6 +998,71 @@ def coverage_risk_matrix(df: pd.DataFrame, nac_cobertura: float, nac_65: float, 
     return con_coma(fig)
 
 
+def region_change_bars(df: pd.DataFrame, ids_sel: list, cambio_pais: float, desde: int = 2022, hasta: int = 2025) -> go.Figure:
+    """KPI 1.1: cuánto cambió la cobertura de cada región entre `desde` y `hasta` (puntos), con el mismo diseño de las barras de
+    cobertura por región (barras horizontales y línea punteada del país). La región que más perdió, arriba; las regiones prioritarias
+    en naranja y las demás en azul. df = filas de región de kpi_cobertura_regiones.csv (region_id, region_nombre, cambio_2022_2025)."""
+    d = df.sort_values("cambio_2022_2025")
+    sel = d.region_id.isin(ids_sel)
+    fig = go.Figure(go.Bar(y=d.region_nombre, x=d.cambio_2022_2025, orientation="h", marker_color=[ORANGE if v else BLUE for v in sel],
+                           text=[f"{v:+.1f}" for v in d.cambio_2022_2025], textposition="outside", cliponaxis=False,
+                           hovertemplate="%{y}: %{x:+.2f} puntos<extra></extra>"))
+    fig.add_vline(x=cambio_pais, line_dash="dash", line_color="#52514e", annotation_text=f"Chile: {cambio_pais:+.1f}", annotation_position="top")
+    peor, mejor = d.iloc[0], d.iloc[-1]
+    n_baja = int((d.cambio_2022_2025 < 0).sum())
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
+                      title=_titulo(f"{peor.region_nombre} perdió la mayor cobertura desde {desde} ({peor.cambio_2022_2025:+.1f} puntos); {n_baja} de {len(d)} regiones bajaron",
+                                    f"Puntos de cobertura entre {desde} y {hasta}; naranja = prioritarias", ancho=60))
+    fig.update_yaxes(categoryorder="total descending", title="")
+    lim = float(d.cambio_2022_2025.abs().max()) * 1.25
+    fig.update_xaxes(range=[-lim, lim], zeroline=True, zerolinecolor=INK_PRIMARY, title=f"Puntos de cobertura ({hasta} menos {desde})")
+    return fig
+
+
+SERIE_LARGA = {1: 801, 15: 801, 10: 810, 14: 810, 8: 816, 16: 816}  # región -> serie fusionada de 2002 (ver Scripts/24)
+
+
+def extremos_largo(reg: pd.DataFrame, ids_sel: list, modo: str = "nivel"):
+    """(región prioritaria que se dibuja, mejor región del país) del gráfico largo: entre las prioritarias, la de menor cobertura hoy
+    («nivel») o la que más cayó desde 2022 («caida»); la mejor es la de mayor cobertura hoy entre las 16."""
+    sel = reg[reg.region_id.isin(ids_sel)]
+    peor = sel.loc[sel.cobertura_2025.idxmin() if modo == "nivel" else sel.cambio_2022_2025.idxmin()]
+    return peor, reg.loc[reg.cobertura_2025.idxmax()]
+
+
+def coverage_long_chart(t: pd.DataFrame, reg: pd.DataFrame, ids_sel: list, modo: str = "nivel") -> go.Figure:
+    """KPI 1.1: la cobertura de 2002 a hoy con tres líneas (pauta de la clase: máximo 4): Chile, la región prioritaria que hoy está peor
+    y la mejor región del país. modo «nivel» = la prioritaria con la cobertura más baja hoy; «caida» = la que más cayó desde 2022.
+    Las regiones que antes de 2007 (o 2018) iban dentro de otra se dibujan como la serie fusionada. t = kpi_cobertura_tendencia.csv;
+    reg = filas de región de kpi_cobertura_regiones.csv. Gris claro = 2020 y 2021."""
+    peor, mejor = extremos_largo(reg, ids_sel, modo)
+    serie = lambda rid: t[t.territorio_id == SERIE_LARGA.get(int(rid), int(rid))].sort_values("anio")  # noqa: E731
+    lineas = [(t[t.territorio_id == 0].sort_values("anio"), "Chile", INK_PRIMARY, 3.5),
+              (serie(peor.region_id), peor.region_nombre if int(peor.region_id) not in SERIE_LARGA else serie(peor.region_id).territorio.iloc[0], ORANGE, 3),
+              (serie(mejor.region_id), mejor.region_nombre, BLUE, 3)]
+    fig = go.Figure()
+    fig.add_vrect(x0=2019.5, x1=2021.5, fillcolor=GRIDLINE, opacity=0.6, line_width=0, layer="below")
+    puntos = []
+    for d, nombre, color, ancho in lineas:
+        fig.add_scatter(x=d.anio, y=d.cobertura_pct, mode="lines", line=dict(color=color, width=ancho), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}%<extra>" + nombre + "</extra>")
+        puntos.append((int(d.anio.max()), float(d.cobertura_pct.iloc[-1]), f"{nombre}: {d.cobertura_pct.iloc[-1]:.1f}%", color))
+    a0, a1 = int(lineas[0][0].anio.min()), int(lineas[0][0].anio.max())
+    rotular_final(fig, puntos, rango_y=(0, 65), alto_px=380, ancho_texto=26)
+    ampliar_derecha(fig, a0, a1, 0.26)
+    fig.add_annotation(x=2020.5, y=3, text="2020-2021", showarrow=False, font=dict(color=INK_PRIMARY, size=11))
+    brecha0 = float(lineas[2][0].cobertura_pct.iloc[0] - lineas[1][0].cobertura_pct.iloc[0])
+    brecha1 = float(lineas[2][0].cobertura_pct.iloc[-1] - lineas[1][0].cobertura_pct.iloc[-1])
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=110, b=50)}, showlegend=False,
+                      title=_titulo((f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} no se ha cerrado: {brecha0:.0f} puntos en {a0} y {brecha1:.0f} en {a1}"
+                                    if abs(brecha1 - brecha0) < 1 else
+                                    f"La distancia entre {mejor.region_nombre} y {lineas[1][1]} {'creció' if brecha1 > brecha0 else 'se achicó'} de {brecha0:.0f} puntos en {a0} a {brecha1:.0f} en {a1}"),
+                                    f"Cobertura previsional (cotizantes ÷ población de 15 a 64 años): Chile, la región prioritaria {'con la cobertura más baja' if modo == 'nivel' else 'que más cayó desde 2022'} y la mejor región", ancho=70))
+    fig.update_yaxes(range=[0, 65], ticksuffix="%", title="")
+    fig.update_xaxes(title="", dtick=2)
+    return fig
+
+
 VENTANAS_TENDENCIA = {  # nombre -> (primer año, territorios)
     "Desde 2019, las 16 regiones": (2019, [1, 15, 2, 3, 4, 5, 13, 6, 7, 16, 8, 9, 14, 10, 11, 12]),
     "Desde 2002, con regiones fusionadas": (2002, [801, 2, 3, 4, 5, 6, 7, 816, 9, 810, 11, 12, 13]),
@@ -1072,39 +1137,110 @@ FRASE_FACTOR = {  # (frase para la brecha con Chile, frase para el cambio en el 
 }
 
 
-def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombre_prio: dict) -> go.Figure:
+def decomposition_panels(d: pd.DataFrame, comparacion: str, ids: list, nombres: dict, todas: bool = False) -> go.Figure:
     """KPI 1.1, de dónde viene la diferencia de cobertura: cobertura = participación × empleo × cotización de los ocupados; el aporte
     de cada factor, en puntos, suma exacto la diferencia (media logarítmica). d = kpi_cobertura_descomposicion.csv; comparacion =
-    «Nivel frente a Chile en 2023» o «Cambio 2019-2023»; ids = regiones prioritarias (Chile se agrega, en gris, solo en los cambios)."""
-    d = d[(d.comparacion == comparacion) & d.territorio_id.isin(ids + ([0] if comparacion.startswith("Cambio") else []))]
-    ancho = d.pivot(index="territorio_id", columns="factor", values="aporte_pp")
+    «Nivel frente a Chile en 2023» o «Cambio 2019-2023»; ids = regiones prioritarias; nombres = id -> nombre de las 16 regiones.
+    todas=True muestra las 16 regiones, ordenadas por gravedad (la que más pierde, arriba) y con las prioritarias en naranja; si no,
+    solo las prioritarias. La línea punteada es Chile: el 0 en la diferencia con Chile y su propio valor en el cambio."""
+    nivel = comparacion.startswith("Nivel")
+    ver = list(nombres) if todas else list(ids)
+    dd = d[d.comparacion == comparacion]
+    ancho = dd[dd.territorio_id.isin(ver)].pivot(index="territorio_id", columns="factor", values="aporte_pp")
     ancho["total"] = ancho.sum(axis=1)
-    ancho = ancho.sort_values("total", ascending=False)  # la mayor brecha (o el mayor cambio negativo) arriba
-    nombres = [nombre_prio.get(i, "Chile") for i in ancho.index]
-    es_chile = [i == 0 for i in ancho.index]
+    ancho = ancho.sort_values("total", ascending=False)  # la que más pierde (o la que menos gana), arriba
+    chile = {} if nivel else dd[dd.territorio_id == 0].set_index("factor").aporte_pp.to_dict()
+    chile = {k: chile.get(k, 0.0) for k in ("participacion", "empleo", "cotizacion")} if not nivel else {"participacion": 0.0, "empleo": 0.0, "cotizacion": 0.0}
+    chile["total"] = sum(chile.values())
+    marcas = [i in ids for i in ancho.index]
+    nom = [nombres[i] for i in ancho.index]
     paneles = [("participacion", "Participación laboral"), ("empleo", "Empleo (1 − desocupación)"), ("cotizacion", "Ocupados que cotizan"), ("total", "Diferencia total")]
     fig = make_subplots(rows=1, cols=4, shared_yaxes=True, horizontal_spacing=0.03, subplot_titles=[n for _, n in paneles])
-    for j, (k, _) in enumerate(paneles, start=1):
-        base = INK_PRIMARY if k == "total" else BLUE
-        fig.add_bar(y=nombres, x=ancho[k], orientation="h", marker_color=[INK_MUTED if c else base for c in es_chile], showlegend=False,
+    for j, (k, titulo_panel) in enumerate(paneles, start=1):
+        fig.add_bar(y=nom, x=ancho[k], orientation="h", marker_color=[ORANGE if m else BLUE for m in marcas], showlegend=False,
                     text=[f"{v:+.1f}" for v in ancho[k]], textposition="outside", cliponaxis=False, textfont=dict(size=11, color=INK_PRIMARY),
-                    hovertemplate="%{y}: %{x:+.1f} puntos<extra>" + dict(paneles)[k] + "</extra>", row=1, col=j)
-    prio = ancho.drop(index=0, errors="ignore")
-    mayor = prio[["participacion", "empleo", "cotizacion"]].abs().idxmax(axis=1) if comparacion.startswith("Cambio") else \
-        prio[["participacion", "empleo", "cotizacion"]].idxmin(axis=1)
+                    hovertemplate="%{y}: %{x:+.1f} puntos<extra>" + titulo_panel + "</extra>", row=1, col=j)
+        fig.add_vline(x=chile[k], line_dash="dash", line_color="#52514e", line_width=1.2, row=1, col=j)
+    prio = ancho.loc[[i for i in ancho.index if i in ids]]
+    fac3 = ["participacion", "empleo", "cotizacion"]
+    mayor = prio[fac3].abs().idxmax(axis=1) if not nivel else prio[fac3].idxmin(axis=1)
     f_top, n_top = mayor.value_counts().index[0], int(mayor.value_counts().iloc[0])
-    if comparacion.startswith("Nivel"):
+    if nivel:
         msg = f"En {n_top} de las {len(prio)} regiones prioritarias, la brecha con Chile viene sobre todo de {FRASE_FACTOR[f_top][0]}"
     else:
         msg = f"Entre {comparacion[7:11]} y {comparacion[12:]}, en {n_top} de las {len(prio)} regiones prioritarias el mayor cambio vino de {FRASE_FACTOR[f_top][1]}"
-    detalle = ("Puntos de cobertura frente a Chile; los tres primeros paneles suman el cuarto" if comparacion.startswith("Nivel") else
-               "Puntos de cobertura que cambiaron; los tres primeros paneles suman el cuarto")
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=110, r=30, t=150, b=50)}, **BARRAS, showlegend=False, title=_titulo(msg, detalle, ancho=80))
-    lim = float(np.abs(ancho.drop(columns="total").to_numpy()).max()) * 1.25
+    alto_margen = 120
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=110, r=30, t=alto_margen, b=40)}, **BARRAS, showlegend=False, title=_titulo(msg, "", ancho=80))
+    lim = float(np.abs(ancho.drop(columns="total").to_numpy()).max()) * 1.3
     for j, (k, _) in enumerate(paneles, start=1):
-        r_ = float(np.abs(ancho[k]).max()) * 1.35 if k == "total" else lim
+        r_ = float(np.abs(ancho[k]).max()) * 1.4 if k == "total" else lim
         fig.update_xaxes(range=[-r_, r_], zeroline=True, zerolinecolor=INK_PRIMARY, showticklabels=False, row=1, col=j)
+    fig.update_yaxes(categoryorder="array", categoryarray=nom)  # la primera categoría va abajo: la que más pierde (la última) queda arriba
     for an in fig.layout.annotations:
+        an.font = dict(size=12, color=INK_PRIMARY)
+    return fig
+
+
+COLOR_ESCENARIO = {  # clave de kpi_pc_escenarios_fijos.csv -> color (cuatro colores que se distinguen con daltonismo, ΔE ≥ 25)
+    "tope_10": INK_PRIMARY, "cobertura_cae": ORANGE, "mitad_informalidad": lighten(BLUE), "sin_informalidad": BLUE,
+}
+
+
+def fixed_scenarios_chart(esc: pd.DataFrame, series: dict, hasta: int = 2065) -> go.Figure:
+    """KPI 1.2, escenarios fijos: la carga requerida (% del sueldo de los cotizantes) de cada escenario frente al tope de carga.
+    Izquierda: la carga de hoy con los topes de 10, 11 y 12 %. Derecha: cómo cambia la carga si cambia la cobertura (tendencia que
+    sigue, mitad de los informales, todos los informales), con el tope de 10 %. El punto crítico es donde la curva cruza al tope.
+    esc = kpi_pc_escenarios_fijos.csv; series = {clave: (serie del motor, punto_critico)}. Máximo 4 líneas por panel."""
+    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, horizontal_spacing=0.05,
+                        subplot_titles=["Si el sistema tolera más (tope de carga)", "Si cambia la cobertura (tope de 10 %)"])
+    fila = esc.set_index("clave")
+
+    def curva(clave, col, nombre, color, ancho=3, pos="top left"):
+        d, pc = series[clave]
+        d = d[(d.anio >= 2025) & (d.anio <= hasta)]
+        fig.add_scatter(x=d.anio, y=100 * d.carga_requerida, mode="lines", line=dict(color=color, width=ancho), showlegend=False,
+                        hovertemplate="%{x}: %{y:.1f}% del sueldo<extra>" + nombre + "</extra>", row=1, col=col)
+        if pc["estado"] == "cruza":
+            tope = 100 * fila.loc[clave, "carga_max"]
+            fig.add_scatter(x=[pc["anio_exacto"]], y=[tope], mode="markers+text", text=[f"{pc['anio']}"], textposition=pos, showlegend=False,
+                            marker=dict(color=color, size=10, line=dict(color="white", width=1.5)), textfont=dict(size=12, color=INK_PRIMARY),
+                            hovertemplate=f"Punto crítico {pc['anio']}<extra>{nombre}</extra>", row=1, col=col)
+        return d
+
+    # izquierda: una curva y tres topes
+    d0 = curva("tope_10", 1, "Carga requerida de hoy", INK_PRIMARY)
+    puntos_i = [(hasta, float(100 * d0.carga_requerida.iloc[-1]), "Carga requerida", INK_PRIMARY)]
+    for clave in ("tope_10", "tope_11", "tope_12"):
+        tope = 100 * float(fila.loc[clave, "carga_max"])
+        fig.add_hline(y=tope, line_dash="dash", line_color=INK_MUTED, line_width=1.2, row=1, col=1)
+        puntos_i.append((hasta, tope, f"Tope {tope:.0f} %", INK_MUTED))
+        if clave != "tope_10":
+            d, pc = series[clave]
+            fig.add_scatter(x=[pc["anio_exacto"]], y=[tope], mode="markers+text", text=[f"{pc['anio']}"], textposition="top left", showlegend=False,
+                            marker=dict(color=INK_PRIMARY, size=10, line=dict(color="white", width=1.5)), textfont=dict(size=12, color=INK_PRIMARY),
+                            hovertemplate=f"Punto crítico {pc['anio']}<extra>Tope {tope:.0f} %</extra>", row=1, col=1)
+    # derecha: cuatro curvas y el tope de 10 %
+    puntos_d = []
+    for clave, nombre, pos in (("cobertura_cae", "Sigue cayendo", "top left"), ("tope_10", "Como hoy", "bottom right"), ("mitad_informalidad", "Mitad de los informales", "bottom right"),
+                               ("sin_informalidad", "Todos los informales", "bottom right")):
+        d = curva(clave, 2, nombre, COLOR_ESCENARIO[clave], pos=pos)
+        anio = series[clave][1]["anio"]
+        puntos_d.append((hasta, float(100 * d.carga_requerida.iloc[-1]), f"{nombre} ({anio})", COLOR_ESCENARIO[clave]))
+    fig.add_hline(y=10, line_dash="dash", line_color=INK_MUTED, line_width=1.2, row=1, col=2)
+    puntos_d.append((hasta, 10.0, "Tope 10 %", INK_MUTED))
+    rotular_final(fig, puntos_i, row=1, col=1, rango_y=(0, 22), alto_px=400, ancho_texto=18)
+    rotular_final(fig, puntos_d, row=1, col=2, rango_y=(0, 22), alto_px=400, ancho_texto=24)
+    for c in (1, 2):
+        ampliar_derecha(fig, 2025, hasta, 0.42, row=1, col=c)
+    anios = {c: series[c][1]["anio"] for c in series if series[c][1]["estado"] == "cruza"}
+    lo, hi = min(anios, key=anios.get), max(anios, key=anios.get)
+    nombre = lambda c: fila.loc[c, "nombre"].lower().split(" (")[0]  # noqa: E731
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=20, t=110, b=50)}, showlegend=False,
+                      title=_titulo(f"El punto crítico va de {anios[lo]} a {anios[hi]} según el escenario: de «{nombre(lo)}» a «{nombre(hi)}»",
+                                    "Carga requerida del Pilar Solidario de vejez, % del sueldo de los cotizantes; el punto crítico es donde la curva cruza el tope", ancho=80))
+    fig.update_xaxes(dtick=10, tickvals=[2025, 2035, 2045, 2055, 2065], range=[2025, hasta + 0.42 * (hasta - 2025)])
+    fig.update_yaxes(range=[0, 22], ticksuffix="%", title="")
+    for an in fig.layout.annotations[:2]:
         an.font = dict(size=12, color=INK_PRIMARY)
     return fig
 

@@ -8,7 +8,7 @@ from utils import cargar_escenarios, supuestos_escenario, load_csv, load_geojson
 from components.kpi_card import kpi_card
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
+                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi)
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -51,6 +51,11 @@ def render_1_1():
     st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
 
 
+def _subtitulo_visible(texto: str):
+    """Qué muestra el gráfico de arriba, en letra más grande que un pie de figura (el pie es para fuentes y límites)."""
+    st.markdown(f"<div style='font-size:1.05rem;font-weight:600;line-height:1.45;margin:-0.2rem 0 1.1rem 0'>{_coma(texto)}</div>", unsafe_allow_html=True)
+
+
 CRITERIOS = {  # etiqueta -> (columna de kpi_cobertura_regiones.csv, definición para el pie de la tabla)
     "Bajo el promedio y en caída (recomendado)": ("prioridad_brecha_caida", "las 5 regiones con cobertura bajo la de Chile que además perdieron cobertura desde 2022, ordenadas por brecha de cotizantes"),
     "Mayor brecha de cotizantes": ("prioridad_brecha", "las 5 regiones con mayor brecha de cotizantes: (cobertura de Chile − cobertura de la región) × población de 15 a 64 años de la región; pesa el nivel y el tamaño"),
@@ -75,6 +80,24 @@ def render_1_1_tendencia():
     criterio = st.radio("Regiones prioritarias (las 5 de cada criterio)", list(CRITERIOS), horizontal=True, key="cob_criterio",
                         help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista de 5; la recomendada es: cobertura bajo la de Chile y en caída desde 2022.")
     prio = _prioritarias(reg)
+    ids_sel = [int(i) for i in prio.region_id]
+    pais = t[t.territorio_id == 0].set_index("anio").cobertura_pct
+    cambio_pais = float(pais[2025] - pais[2022])
+    mostrar(estilo_kpi(region_change_bars(reg16, ids_sel, cambio_pais), 640))
+    sel16 = reg16.region_id.isin(ids_sel)
+    n_sel, n_otras = int((reg16[sel16].cambio_2022_2025 < 0).sum()), int((reg16[~sel16].cambio_2022_2025 < 0).sum())
+    _subtitulo_visible(f"Qué muestra: cuántos puntos de cobertura ganó o perdió cada región entre 2022 y 2025; la que más perdió, arriba. Naranja = las 5 regiones "
+                       f"prioritarias, azul = las otras 11, línea punteada = Chile ({cambio_pais:+.1f} puntos). Bajaron {n_sel} de las 5 prioritarias y {n_otras} de las otras 11.")
+    st.markdown("##### Chile, la región prioritaria más rezagada y la mejor región, desde 2002")
+    modo_txt = st.radio("Región prioritaria que se dibuja", ["Cobertura más baja hoy", "Mayor caída desde 2022"], horizontal=True, key="cob_largo_modo")
+    modo = "nivel" if modo_txt.startswith("Cobertura") else "caida"
+    peor, mejor = extremos_largo(reg16, ids_sel, modo)
+    mostrar(estilo_kpi(coverage_long_chart(t, reg16, ids_sel, modo), 560))
+    _subtitulo_visible(f"Qué muestra: la cobertura de Chile, la de {peor.region_nombre} (la prioritaria con {'la cobertura más baja hoy' if modo == 'nivel' else 'la mayor caída desde 2022'}, "
+                       f"{peor.cobertura_2025:.1f}%) y la de {mejor.region_nombre} (la mejor, {mejor.cobertura_2025:.1f}%) desde 2002. Franja gris = 2020 y 2021. "
+                       "Si las líneas de la prioritaria y la mejor no se acercan, la brecha entre regiones no se está cerrando.")
+    st.caption("Fuente: Superintendencia de Pensiones (cotizantes de diciembre) e INE (proyección de población base 2017, llevada al nivel del Censo 2024). Antes de 2007 y de 2018 algunas regiones van fusionadas (ver nota al pie).")
+    st.markdown("##### Región por región")
     c1, c2 = st.columns([3, 2])
     with c1:
         ventana = st.radio("Período", list(VENTANAS_TENDENCIA), horizontal=True, key="cob_ventana")
@@ -83,7 +106,7 @@ def render_1_1_tendencia():
                                   help="Por defecto la población de cada región por año es la proyección del INE (base 2017) llevada al nivel del Censo 2024. "
                                        "Marcada, se usa la proyección tal como la publicó el INE y el Censo 2024 aparece como un punto aparte (rombo). "
                                        "La tendencia es la misma; cambia el nivel.")
-    mostrar(estilo_kpi(coverage_trend_panels(t, [int(i) for i in prio.region_id], ventana, sin_ajustar), 720))
+    mostrar(estilo_kpi(coverage_trend_panels(t, ids_sel, ventana, sin_ajustar), 720))
     st.caption("Paneles de la cobertura más baja a la más alta en el último año. Fuente: Superintendencia de Pensiones (cotizantes de diciembre, 1985-2025), INE (proyección de población base 2017) y Censo 2024.")
     bajan = reg16[reg16.cambio_2022_2025 < 0]
     nac = reg[reg.region_id == 0].iloc[0]
@@ -171,7 +194,15 @@ def render_1_1_descomposicion(prio: pd.DataFrame):
     opciones = ["Nivel frente a Chile en 2023", "Cambio 2019-2023"]
     comp = st.radio("Comparar", opciones, horizontal=True, key="cob_desc_comp", format_func=lambda c: "Diferencia con Chile en 2023" if c.startswith("Nivel") else "Cambio entre 2019 y 2023")
     nombres = dict(zip(prio.region_id.astype(int), prio.region_nombre))
-    mostrar(estilo_kpi(decomposition_panels(d, comp, list(nombres), nombres), 460))
+    reg_todas = load_csv("kpi_cobertura_regiones.csv")
+    todas_ = {int(i): n for i, n in zip(reg_todas[reg_todas.region_id > 0].region_id, reg_todas[reg_todas.region_id > 0].region_nombre)}
+    alcance = st.radio("Regiones", ["Solo las 5 prioritarias", "Las 16 regiones (las prioritarias en naranja)"], horizontal=True, key="cob_desc_alcance")
+    ver_todas = alcance.startswith("Las 16")
+    mostrar(estilo_kpi(decomposition_panels(d, comp, list(nombres), todas_, ver_todas), 780 if ver_todas else 460))
+    cambio_ = comp.startswith("Cambio")
+    _subtitulo_visible("Qué muestra: lo que cada región suma o resta, en puntos de cobertura, a " + ("su cambio entre 2019 y 2023" if cambio_ else "su diferencia con Chile en 2023") +
+                       f", según cada pieza (participación, empleo, cotización de los ocupados); las tres primeras columnas suman la cuarta. Línea punteada = Chile"
+                       f"{' (su propio cambio)' if cambio_ else ' (0 por definición)'}. Naranja = prioritarias; ordenadas de la que más pierde (arriba) a la que menos.")
     st.markdown(_bullets_descomposicion(d, comp, prio))
     st.caption(_coma(
         "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), INE Encuesta Nacional de Empleo (trimestre nov-ene = «diciembre», proyecciones base 2017) y Censo 2024. "
@@ -555,6 +586,50 @@ def render_1_2_punto_critico():
                        "no sus cotizantes reales. Ordenadas de mayor a menor presión.")
 
 
+def render_1_2_escenarios_fijos():
+    """Seis escenarios con supuestos fijos (país), además del simulador de arriba, que se mueve con los deslizadores."""
+    st.divider()
+    st.markdown("#### Seis escenarios fijos para comparar")
+    st.markdown("El simulador de arriba cambia con los deslizadores. Estos seis no: tienen supuestos fijos para poder compararlos siempre igual. "
+                "Los tres primeros cambian cuánto del sueldo tolera el sistema (tope de 10, 11 y 12 %); los otros tres, cuántos cotizantes hay: "
+                "si la cobertura sigue cayendo, si la mitad de los informales de hoy cotiza y si todos cotizan.")
+    cfg = cargar_escenarios()
+    esc = load_csv("kpi_pc_escenarios_fijos.csv")
+    series = {}
+    for r in esc.itertuples():
+        e = cp.Escenario(crec_salarial=cfg["crecimiento_salario_real"]["base"], pgu_250=cfg["pgu_250"], carga_max=float(r.carga_max),
+                         cobertura_2050=float(r.cobertura_2050), cobertura_salto=float(r.cobertura_salto))
+        series[r.clave] = pc_serie("pais", 0, 0, e)
+    mostrar(estilo_kpi(fixed_scenarios_chart(esc, series), 500))
+    anio = {c: series[c][1]["anio"] for c in series}
+    _subtitulo_visible(f"Qué muestra: la carga que el Pilar Solidario de vejez le exige al sueldo de los cotizantes; el punto crítico es el año en que la curva cruza el tope "
+                       f"(línea punteada). Con el tope en 11 % y 12 % el cruce se atrasa de {anio['tope_10']} a {anio['tope_11']} y {anio['tope_12']}; si la cobertura siguiera cayendo se adelanta "
+                       f"a {anio['cobertura_cae']}; si la mitad de los informales cotizara, llega a {anio['mitad_informalidad']}, y si todos cotizaran, a {anio['sin_informalidad']}.")
+    filas = []
+    for r in esc.itertuples():
+        d, pc = series[r.clave]
+        f50 = cp.fila_anio(d, 2050)
+        filas.append({"Escenario": r.nombre, "Qué supone": r.descripcion,
+                      "Punto crítico": str(pc["anio"]) if pc["estado"] == "cruza" else f"no antes de {int(d.anio.max())}",
+                      "Frente a la base (años)": 0 if r.clave == "tope_10" else pc["anio"] - series["tope_10"][1]["anio"],
+                      "Carga requerida en 2050 (% del sueldo)": 100 * f50.carga_requerida,
+                      "Cotizantes por persona de 65+ en 2050": f50.razon_soporte})
+    tabla = pd.DataFrame(filas)
+    tabla["Qué supone"] = tabla["Qué supone"].map(_coma)
+    tabla["Frente a la base (años)"] = ["base" if v == 0 else f"{v:+d}" for v in tabla["Frente a la base (años)"]]
+    tabla["Carga requerida en 2050 (% del sueldo)"] = [_coma(f"{v:.1f}") + " %" for v in tabla["Carga requerida en 2050 (% del sueldo)"]]
+    tabla["Cotizantes por persona de 65+ en 2050"] = [_coma(f"{v:.2f}") for v in tabla["Cotizantes por persona de 65+ en 2050"]]
+    st.table(tabla.set_index("Escenario"))
+    pend = float(esc.pendiente_pp_anio.iloc[0])
+    st.caption(_coma(
+        "Fuente: mismo motor del simulador (país, base cotizantes, ingreso promedio, sueldo real +1 % anual, PGU de $250.000, pesos reales de 2025); población: proyecciones INE llevadas al nivel del Censo 2024. "
+        f"**Cobertura sigue cayendo:** la pendiente de la cobertura de Chile entre 2022 y 2025 ({pend:+.2f} puntos por año, ajuste lineal de 4 años) se prolonga hasta 2050 y después queda constante. "
+        "La serie se recuperó entre 2023 y 2025, así que la pendiente es suave; con 2021-2025 sería de unos −0,3 puntos por año. "
+        "**Informalidad:** los ocupados informales de hoy (Encuesta Nacional de Empleo, diciembre 2023, al nivel del Censo) pasan a cotizar desde 2026, con el mismo ingreso imponible promedio "
+        "que los cotizantes de hoy y sin estar hoy entre ellos. Es un techo teórico, no una proyección: sus ingresos suelen ser menores, así que el efecto real sería menor. "
+        "Detalle y supuestos en docs/supuestos_y_limitaciones.md."))
+
+
 def render_1_2():
     kpi_card_row([
         ("Cotizantes por adulto mayor (país)", f"{nac_soporte:.2f}", "Cotizantes 2024 / población 65+ (Censo 2024)",
@@ -600,6 +675,7 @@ def render_1_2():
                "escenario con la cobertura previsional constante (país: la de 2025; región: la de 2024). Cotizantes: diciembre, con región; "
                "población: Censo 2024 y proyecciones INE.")
     render_1_2_punto_critico()
+    render_1_2_escenarios_fijos()
 
 
 def render_1_3():

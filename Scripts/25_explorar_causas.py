@@ -34,6 +34,8 @@ Salidas (Data processed/):
   - kpi_cobertura_descomposicion.csv       aporte de cada factor en puntos: nivel frente a Chile y cambios entre años
   - kpi_cobertura_contraste_aafp.csv       nuestras cifras de diciembre 2019 y 2024 junto a las del estudio de la AAFP
   - kpi_cobertura_test_asignacion.csv      participación de la Metropolitana en cotizantes, ocupados y población
+  - kpi_pc_escenarios_fijos.csv            los 6 escenarios fijos del KPI 1.2 (tope 10/11/12 %, cobertura que sigue cayendo, sin informalidad
+                                           y mitad del camino); los calcula el dashboard con el motor de components/critical_point.py
   - kpi_cobertura_factores.csv y kpi_cobertura_regiones.csv: se les agregan los factores de la ENE y del PIB (idempotente)
 """
 import importlib.util
@@ -396,6 +398,36 @@ def actualizar_factores(nuevos: pd.DataFrame, cobertura_2024: pd.Series):
     return fac
 
 
+def escenarios_fijos_kpi12(ene: pd.DataFrame) -> pd.DataFrame:
+    """Parámetros de los 6 escenarios fijos del KPI 1.2 (país). Todo lo demás, como en config/escenarios.yaml.
+      - Tope de carga 10, 11 y 12 %: la cobertura queda como hoy.
+      - Cobertura que sigue cayendo: la pendiente de la cobertura de Chile 2022-2025 (ajuste lineal, 4 años) se prolonga hasta 2050 y después
+        queda constante (así es el motor: tramo lineal hasta `cobertura_2050`).
+      - Sin informalidad: los ocupados informales de hoy (ENE, diciembre 2023, llevados al nivel del Censo con el factor de la población)
+        pasan a cotizar desde 2026: cotizantes × (1 + informales ÷ cotizantes). Supone el mismo ingreso imponible promedio y que los informales no
+        están hoy entre los cotizantes; es el techo teórico, no una proyección.
+      - Mitad del camino: la mitad de ese aumento."""
+    n = pd.read_csv(DP / "kpi_pc_nacional.csv").set_index("anio")
+    cob = 100 * n.cotizantes_dic_con_region / (n.pob_15_64_ine * n.factor_censo_15_64)
+    pend = float(np.polyfit(np.arange(2022, 2026), cob.loc[2022:2025].to_numpy(), 1)[0])  # puntos de cobertura por año
+    cob_2050 = 1 + pend * (2050 - 2025) / float(cob[2025])
+    inf = float(ene[(ene.territorio_id == 0) & (ene.anio == 2023)].informales.iloc[0]) * float(n.loc[2023, "factor_censo_15_64"])
+    salto = 1 + inf / float(n.loc[2023, "cotizantes_dic_con_region"])
+    filas = [
+        ("tope_10", "Tope de carga 10 % (base)", "Tope de carga", 0.10, 1.0, 1.0, "La cotización obligatoria para pensión; la cobertura queda como hoy"),
+        ("tope_11", "Tope de carga 11 %", "Tope de carga", 0.11, 1.0, 1.0, "El sistema tolera 11 % del sueldo; la cobertura queda como hoy"),
+        ("tope_12", "Tope de carga 12 %", "Tope de carga", 0.12, 1.0, 1.0, "El sistema tolera 12 % del sueldo; la cobertura queda como hoy"),
+        ("cobertura_cae", "Cobertura sigue cayendo", "Cobertura", 0.10, cob_2050, 1.0,
+         f"La cobertura baja {abs(pend):.2f} puntos por año (tendencia 2022-2025, ajuste lineal) hasta 2050, de {cob[2025]:.1f} % a {cob[2025] + pend * 25:.1f} %"),
+        ("sin_informalidad", "Sin informalidad", "Cobertura", 0.10, 1.0, salto,
+         f"Todos los informales de hoy cotizan desde 2026: {inf / 1e6:.2f} millones más sobre {n.loc[2023, 'cotizantes_dic_con_region'] / 1e6:.2f} millones de cotizantes (+{100 * (salto - 1):.0f} %)"),
+        ("mitad_informalidad", "Mitad del camino", "Cobertura", 0.10, 1.0, 1 + (salto - 1) / 2,
+         f"La mitad de los informales de hoy cotiza desde 2026 (+{50 * (salto - 1):.0f} % de cotizantes)"),
+    ]
+    return pd.DataFrame(filas, columns=["clave", "nombre", "grupo", "carga_max", "cobertura_2050", "cobertura_salto", "descripcion"]).assign(
+        orden=lambda d: range(1, len(d) + 1), pendiente_pp_anio=pend, informales_censo=inf)
+
+
 def main():
     s24 = cargar_modulo("24_cobertura_tendencia_causas.py")
     s24.asegurar_ine17()
@@ -416,12 +448,15 @@ def main():
     contr.round(2).to_csv(DP / "kpi_cobertura_contraste_aafp.csv", index=False)
     ta = test_asignacion(f, ene, ind)
     ta.round(2).to_csv(DP / "kpi_cobertura_test_asignacion.csv", index=False)
+    esc = escenarios_fijos_kpi12(ene)
+    esc.round(6).to_csv(DP / "kpi_pc_escenarios_fijos.csv", index=False)
 
     nuevos = factores_ene_pib(ene, pib, pob, ind, f, participacion_mujeres())
     reg24 = pd.read_csv(DP / "kpi_cobertura_correlaciones_region.csv").set_index("region_id")
     fac = actualizar_factores(nuevos, reg24.cobertura_previsional_pct.reindex(range(1, 17)))
     pib.round(3).to_csv(DP / "pib_regional_anual.csv", index=False)
 
+    print("escenarios fijos del KPI 1.2:"); print(esc[["clave", "carga_max", "cobertura_2050", "cobertura_salto"]].round(3).to_string(index=False))
     print("test de asignación regional (participación de la Metropolitana, %):")
     print(ta.round(1).to_string(index=False))
     print("contraste con la AAFP (ocupados INE vs AAFP dic. 2019, diferencia %):", contr.dif_ocupados_pct.abs().max().round(2), "máx.")

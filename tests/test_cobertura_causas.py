@@ -135,3 +135,88 @@ def test_el_selector_de_criterio_cambia_las_regiones_analizadas():
     assert not at.exception and regiones_descomposicion() == {"Metropolitana", "Valparaíso", "Biobío", "Maule", "O'Higgins"}
     at.radio(key="cob_criterio").set_value("Mayor brecha de cotizantes").run()
     assert not at.exception and regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"}
+
+
+def _vals(a):
+    """Plotly serializa los arreglos numéricos en binario ({dtype, bdata}); aquí se vuelven lista."""
+    import base64
+    if isinstance(a, dict) and "bdata" in a:
+        return np.frombuffer(base64.b64decode(a["bdata"]), dtype=np.dtype(a["dtype"])).tolist()
+    return list(a)
+
+
+def _spec_con_titulo(at, fragmento):
+    for el in at.get("plotly_chart"):
+        sp = json.loads(el.proto.spec)
+        if fragmento in sp.get("layout", {}).get("title", {}).get("text", ""):
+            return sp
+
+
+def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    sp = _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")
+    barra = sp["data"][0]
+    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 5  # las 5 prioritarias, en naranja
+    assert barra["y"][0] == "Arica y Parinacota" or min(barra["x"]) == barra["x"][list(barra["y"]).index("Arica y Parinacota")]
+    assert any(s.get("x0") is not None and s["x0"] == s["x1"] for s in sp["layout"]["shapes"])  # línea punteada de Chile
+    # al elegir otra lista cambian los colores pero siguen siendo 5
+    at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
+    assert _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")["data"][0]["marker"]["color"].count("#eb6834") == 5
+
+
+def test_grafico_largo_tiene_tres_lineas_desde_2002():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    sp = _spec_con_titulo(at, "La distancia entre Magallanes y La Araucanía")
+    lineas = [t for t in sp["data"] if t.get("mode") == "lines"]
+    assert len(lineas) == 3 and all(_vals(t["x"])[0] == 2002 and _vals(t["x"])[-1] == 2025 for t in lineas)
+    assert sp["layout"]["yaxis"]["range"][0] == 0
+    at.radio(key="cob_largo_modo").set_value("Mayor caída desde 2022").run()
+    assert _spec_con_titulo(at, "Magallanes y Valparaíso") is not None  # la prioritaria que más cayó
+
+
+def test_descomposicion_permite_ver_las_16_regiones_con_las_5_marcadas():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    clave = "la brecha con Chile viene sobre todo de"
+    assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 5
+    at.radio(key="cob_desc_alcance").set_value("Las 16 regiones (las prioritarias en naranja)").run()
+    assert not at.exception, [e.value for e in at.exception]
+    sp = _spec_con_titulo(at, clave)
+    barras = [t for t in sp["data"] if t["type"] == "bar"]
+    assert len(barras) == 4 and all(len(b["y"]) == 16 for b in barras) and barras[0]["marker"]["color"].count("#eb6834") == 5
+    assert len([s for s in sp["layout"]["shapes"] if s["x0"] == s["x1"]]) == 4  # la línea de Chile en cada panel
+    total = _vals(barras[3]["x"])
+    peor = barras[3]["y"][total.index(min(total))]
+    assert sp["layout"]["yaxis"]["categoryarray"][-1] == peor  # la primera categoría va abajo: la que más pierde queda arriba
+
+
+def test_escenarios_fijos_del_kpi_1_2():
+    import sys
+    sys.path.insert(0, str(ROOT / "Dashboards"))
+    from components import critical_point as cp
+    n, proy, par = (pd.read_csv(DP / f) for f in ("kpi_pc_nacional.csv", "proyeccion_envejecimiento_pais.csv", "kpi_pc_parametros_reforma.csv"))
+    # el parámetro nuevo no cambia nada por defecto: la base sigue en 2038
+    assert cp.punto_critico(cp.serie_pais(n, proy, par, cp.Escenario()))["anio"] == 2038
+    esc = pd.read_csv(DP / "kpi_pc_escenarios_fijos.csv").set_index("clave")
+    assert list(esc.index) == ["tope_10", "tope_11", "tope_12", "cobertura_cae", "sin_informalidad", "mitad_informalidad"]
+    assert list(esc.carga_max[:3]) == [0.10, 0.11, 0.12]
+    assert esc.loc["cobertura_cae", "cobertura_2050"] < 1 and esc.loc["cobertura_cae", "cobertura_salto"] == 1
+    salto = esc.loc["sin_informalidad", "cobertura_salto"]
+    assert 1.3 < salto < 1.5 and esc.loc["mitad_informalidad", "cobertura_salto"] == pytest.approx(1 + (salto - 1) / 2, abs=1e-5)
+    anios = {}
+    for k, r in esc.iterrows():
+        d = cp.serie_pais(n, proy, par, cp.Escenario(carga_max=r.carga_max, cobertura_2050=r.cobertura_2050, cobertura_salto=r.cobertura_salto))
+        anios[k] = cp.punto_critico(d)["anio"]
+    assert anios == {"tope_10": 2038, "tope_11": 2044, "tope_12": 2048, "cobertura_cae": 2036, "sin_informalidad": 2055, "mitad_informalidad": 2048}
+
+
+def test_pagina_muestra_los_escenarios_fijos_sin_cambiar_el_simulador():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    assert not at.exception, [e.value for e in at.exception]
+    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
+    assert sp is not None
+    for panel in ("xaxis", "xaxis2"):
+        assert sp["layout"][panel]["range"][0] == 2025
+    assert sp["layout"]["yaxis"]["range"][0] == 0
+    # el simulador de arriba sigue igual: sus deslizadores y su resultado base
+    assert at.slider(key="pc_carga").value == 10.0 and at.slider(key="pc_cobertura").value == 100

@@ -40,6 +40,7 @@ class Escenario:
     crec_costo: float = 0.0         # crecimiento real anual del costo por persona de 65+
     carga_max: float = 0.10         # carga máxima tolerable: fracción del sueldo (10 % = la cotización obligatoria para pensión)
     cobertura_2050: float = 1.0     # trabajadores / población 15-64 en 2050 relativo a hoy (solo base A); 1 = constante
+    cobertura_salto: float = 1.0    # multiplica la cobertura desde el primer año proyectado (solo base A): p. ej. 1,41 = todos los informales cotizan
     pgu_250: bool = True            # incluir el aumento de la PGU a $250.000 (Ley 21.735)
     poblacion: str = "censo"        # "censo": población INE llevada al nivel del Censo 2024 (el Censo manda) | "ine": nivel INE
 
@@ -58,7 +59,8 @@ def _factor_cobertura(anio, esc: Escenario, anio0):
     """Cobertura relativa a la del año base: lineal hasta `cobertura_2050` en 2050 y constante después. Solo base A."""
     if esc.base != "A":
         return 1.0
-    return 1 + (esc.cobertura_2050 - 1) * np.clip((anio - anio0) / (2050 - anio0), 0, 1)
+    rampa = 1 + (esc.cobertura_2050 - 1) * np.clip((anio - anio0) / (2050 - anio0), 0, 1)
+    return rampa * np.where(np.asarray(anio) > anio0, esc.cobertura_salto, 1.0)
 
 
 def _factor_pgu(anio, esc: Escenario, params: pd.DataFrame):
