@@ -133,7 +133,7 @@ def test_indices_del_costo_parten_en_100_y_el_pib_del_escenario_crece_2_por_cien
     from components.cost_analysis import indices_costo
     h, pr = pilar
     pasado, futuro = indices_costo(h, pr, 2016, 2025), indices_costo(h, pr, 2025, 2050)
-    assert (pasado.iloc[0] == 100).all() and (futuro.iloc[0] == 100).all()
+    assert np.allclose(pasado.iloc[0], 100) and np.allclose(futuro.iloc[0], 100)
     assert pasado.pilar.iloc[-1] > pasado.monto.iloc[-1] > pasado.pob_65.iloc[-1] > pasado.pib.iloc[-1]
     assert futuro.pib.iloc[-1] == pytest.approx(100 * 1.02 ** 25, rel=1e-3)  # sin saltos de base entre el observado y el escenario
 
@@ -151,3 +151,42 @@ def test_pagina_2_1_explica_por_que_suben_los_costos():
     sub = [m.value for m in at.markdown if m.value.startswith("##### ")]
     assert sub[:3] == ["##### 1. ¿Qué sube más rápido?", "##### 2. ¿De dónde viene el aumento?", "##### 3. Las razones una por una (resumen)"]
     assert at.get("table") and "Posible razón" in at.get("table")[0].value.index.name
+
+
+# ---------------------------------------------------------------- costo total del Estado en la vejez (Pilar + «Edad avanzada»)
+def _total(h, resto="no", con_fapp=True):
+    from components.cost_analysis import gasto_total_vejez
+    from components.financiamiento import proyeccion_carga
+    carga = proyeccion_carga(h, _csv("pgu_pbs_aps_nacional_anual"), _csv("macro_pib_anual"), _csv("proyeccion_envejecimiento_pais"),
+                             _csv("kpi_pc_parametros_reforma"), _csv("fapp_aporte_fiscal"), 0.02, True, con_fapp, 2050)
+    return gasto_total_vejez(h, carga, _csv("pgu_pbs_aps_nacional_anual"), _csv("macro_pib_anual"), _csv("kpi_pc_nacional"), resto), carga
+
+
+def test_costo_total_cuadra_con_el_pilar_y_edad_avanzada(h):
+    """Chequeo a: la base de la descomposición (vejez, 6,25 billones) + invalidez = el Pilar total del KPI 2.2 (7,04 billones; 2,07 % del PIB)."""
+    d, carga = _total(h)
+    u = d.loc[2025]
+    assert u.pilar_vejez / 1e12 == pytest.approx(6.25, abs=0.01)
+    assert (u.pilar_vejez + u.pilar_invalidez) / 1e12 == pytest.approx(7.04, abs=0.01)
+    assert u.pilar_pct == pytest.approx(2.07, abs=0.005) and u.total_pct == pytest.approx(4.39, abs=0.005)
+    o = d[~d.escenario]
+    assert ((o.pilar_vejez + o.resto - o.total).abs() < 1).all()                 # observado: vejez + resto = «Edad avanzada»
+    assert ((o.pilar_vejez_pct + o.resto_pct - o.total_pct).abs() < 1e-9).all()
+    e = d[d.escenario]
+    assert np.allclose(e.pilar_pct, carga.loc[e.index, "pilar_pct_pib"]) and np.allclose(e.carga_pct, carga.loc[e.index, "carga_pct_pib"])
+    assert e.resto.isna().all()                                                  # el resto no se proyecta salvo supuesto explícito
+    d2, _ = _total(h, "constante")
+    assert (d2[d2.escenario].resto == h.loc[2025].resto).all()
+
+
+def test_aumentos_de_la_descomposicion_y_producto_del_indice(h):
+    """Chequeo b: +1,8 y +3,0 billones (2016-2021, 2021-2025) y costo ×4,4 = monto ×2,1 × personas 65+ ×1,44 × cobertura ×1,47."""
+    from components.cost_analysis import descomponer_pilar, indices_costo
+    pr = proyeccion(h, _csv("proyeccion_envejecimiento_pais"), _csv("kpi_pc_parametros_reforma"), 0.02, "constante", True)
+    a = descomponer_pilar(h, pr, 2016, 2021)
+    b = descomponer_pilar(h, pr, 2021, 2025)
+    assert (a["costo1"] - a["costo0"]) / 1e12 == pytest.approx(1.84, abs=0.01)
+    assert (b["costo1"] - b["costo0"]) / 1e12 == pytest.approx(3.00, abs=0.01)
+    i = indices_costo(h, pr, 2016, 2025).iloc[-1] / 100
+    assert i.pilar == pytest.approx(i.monto * i.pob_65 * i.cobertura, rel=1e-9)
+    assert (round(i.pilar, 1), round(i.monto, 1), round(i.pob_65, 2), round(100 * h.loc[2016].cobertura), round(100 * h.loc[2025].cobertura)) == (4.4, 2.1, 1.44, 55, 80)

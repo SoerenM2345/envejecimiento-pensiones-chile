@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG, subtitulo_visible
 from components.kpi_card import kpi_card
-from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo
+from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo, gasto_total_vejez
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
 from components.charts import mostrar, cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
 from components.charts import cost_index_chart, cost_drivers_chart, num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
@@ -14,7 +14,7 @@ st.markdown("La carga del envejecimiento sobre el Estado crece y sus reservas so
             "de las cuentas individuales (KPI 1.3). Medimos cuánto cuesta, quién lo financia y dónde está el límite social.")
 
 
-from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart
+from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart, total_cost_chart
 
 ANIO_BASE_COSTO = 2025
 ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
@@ -76,6 +76,7 @@ def render_2_1():
          [f"Gasto real: {cagr('gasto'):+.1f}% al año", f"Población 65+: {cagr('pob_65'):+.1f}% al año",
           "Cada año hay más personas 65+ entre las que repartir el gasto"]),
     ])
+    render_2_1_total(h)
     render_2_1_por_que(h)
     st.divider()
     st.markdown("#### Detalle del costo por persona de 65+")
@@ -152,6 +153,99 @@ def render_2_1():
             f"- **PGU 2022:** residual del total del Pilar (Total − PBS − APS); parte en febrero. La cobertura cuenta beneficios, no personas.\n"
             f"- **Proyección:** población INE; ocupados proporcionales a la población 15-64; el ingreso crece como el PIB per cápita; con la base «promedio» el pago por ocupado pesa menos porque el ingreso promedio es mayor que la mediana."
         )
+
+
+RESTO_OPCIONES = {"No mostrar (no se proyecta)": "no", "Supuesto: total constante": "constante", "Supuesto: crece con la población 65+": "crece"}
+
+
+def render_2_1_total(h: pd.DataFrame):
+    """Costo total del Estado en la vejez: une el Pilar Solidario (KPI 2.1 y 2.2) y el gasto en «Edad avanzada» (DIPRES)."""
+    cfg = cargar_escenarios()
+    ult = int(h.index[-1])
+    st.markdown("#### ¿Cuánto cuesta en total la vejez al Estado?")
+    c1, c2, c3 = st.columns([2, 2, 2])
+    per = c1.radio("Período", [f"{h.index[0]}-{ult} (observado)", f"{ult}-{ANIO_FIN_2_1} (escenario)"], horizontal=True, key="c21_total_periodo")
+    futuro = "escenario" in per
+    con_fapp = c2.checkbox("Con aporte al FAPP (Ley 21.735)", value=cfg["aporte_fapp"], key="c21_total_fapp", disabled=not futuro,
+                           help="El mismo aporte del Estado al Fondo Autónomo de Protección Previsional que el KPI 2.2 (desde 2028).")
+    resto = RESTO_OPCIONES[c3.radio("Resto de «Edad avanzada» en el escenario", list(RESTO_OPCIONES), key="c21_total_resto", disabled=not futuro,
+                                    help="DIPRES no abre el resto (sistema antiguo y otros) y el modelo no lo proyecta: se omite o se agrega con un supuesto explícito.")]
+    carga = proyeccion_2_2(h, cfg["crecimiento_pib_real"], cfg["pgu_250"], con_fapp)
+    d = gasto_total_vejez(h, carga, load_csv("pgu_pbs_aps_nacional_anual.csv"), load_csv("macro_pib_anual.csv"), load_csv("kpi_pc_nacional.csv"),
+                          resto if futuro else "no")
+    par = load_csv("kpi_pc_parametros_reforma.csv").set_index("anio")
+    anio_pgu = int(par.index[par.factor_costo_pgu >= par.factor_costo_pgu.max() - 1e-9][0])
+    anio_fapp = int(load_csv("fapp_aporte_fiscal.csv").anio.min())
+    frp0 = load_csv("frp_reserva_anual.csv").set_index("anio").loc[ult, "cartera_propia_mm"] * 1e6
+    _, res = trayectoria_reserva(carga, frp0, cfg["rentabilidad_real_reservas"]["base"], "incremento")
+    hitos = [(ANIO_PGU, "PGU (Ley 21.419, feb. 2022)"), (ult, "Ley 21.735")]
+    hitos += ([(anio_pgu, "PGU de $250.000 para todos y aporte al FAPP")] if anio_pgu == anio_fapp else
+              [(anio_pgu, "PGU de $250.000 para todos"), (anio_fapp, "Aporte al FAPP")])
+    if res["anio_agotamiento"]:
+        hitos.append((res["anio_agotamiento"], "Se agota el FRP (KPI 2.2)"))
+    dv = d[d.escenario] if futuro else d[~d.escenario]
+    if futuro:
+        dv = pd.concat([d.loc[[ult]].assign(resto=d.loc[ult, "resto"] if resto != "no" else float("nan"),
+                                            resto_pct=d.loc[ult, "resto_pct"] if resto != "no" else float("nan"),
+                                            carga_pct=d.loc[ult, "pilar_pct"]), dv])
+    mostrar(estilo_kpi(total_cost_chart(dv, futuro, hitos), 680))
+    o = d[~d.escenario]
+    p0, u = o.iloc[0], o.iloc[-1]
+    a0 = int(o.index[0])
+    k = lambda a, b: 100 * (b / a - 1)  # noqa: E731
+    kpi_card_row([
+        (f"Gasto del Estado en la vejez ({ult})", f"${u.total / 1e12:.1f} billones", f"{u.total_pct:.2f}% del PIB; {k(p0.total, u.total):+.0f}% real desde {a0}",
+         ["Gasto del Gobierno Central en «Edad avanzada» (DIPRES, COFOG 7102), pesos de 2025",
+          f"Pilar Solidario de vejez: ${u.pilar_vejez / 1e12:.2f} billones; resto (sistema antiguo y otros): ${u.resto / 1e12:.2f} billones",
+          f"Aparte, Pilar de invalidez: ${u.pilar_invalidez / 1e12:.2f} billones (no sumado)"]),
+        (f"Costo por persona 65+ ({ult})", f"${u.costo_65 / 1e6:.2f} millones", f"{k(p0.costo_65, u.costo_65):+.0f}% real desde {a0}",
+         ["El mismo indicador de la tarjeta de arriba", "Gasto en «Edad avanzada» ÷ personas de 65+ (INE)"]),
+        (f"Personas de 65+ ({ult})", f"{u.pob_65 / 1e6:.2f} millones", f"{k(p0.pob_65, u.pob_65):+.0f}% desde {a0}",
+         ["Proyecciones de población del INE, base 2024"]),
+    ])
+    g, pob, cpp = u.total / p0.total, u.pob_65 / p0.pob_65, u.costo_65 / p0.costo_65
+    h22 = o.loc[ANIO_PGU]
+    if not futuro:
+        subtitulo_visible(f"Qué muestra: el gasto total del Estado en la vejez ({a0}-{ult}), separado en el Pilar Solidario de vejez y el resto de «Edad avanzada» "
+                          f"(sobre todo el sistema antiguo, calculado como residual); abajo, lo mismo en % del PIB. El Pilar de invalidez va aparte.")
+        _texto(f"**Lectura:** el gasto total se multiplicó por {g:.2f} entre {a0} y {ult}: las personas de 65+ por {pob:.2f} y el costo por persona por {cpp:.2f} "
+               f"({pob:.2f} × {cpp:.2f} = {g:.2f}). Desde {ANIO_PGU} el costo por persona cambió {k(h22.costo_65, u.costo_65):+.0f}% y las personas de 65+ "
+               f"{k(h22.pob_65, u.pob_65):+.0f}%: **el alza del total viene de cuántas personas mayores hay, no de que cada una cueste más**. "
+               f"Dentro del total sí hay un cambio: el Pilar Solidario sube de {100 * p0.pilar_vejez / p0.total:.0f}% a {100 * u.pilar_vejez / u.total:.0f}% del gasto "
+               f"(su monto por beneficio se duplicó, ver abajo) mientras el sistema antiguo se achica.")
+    else:
+        f, b = carga.loc[ANIO_FIN_2_1], carga.loc[ult]
+        cg = "carga_pct_pib" if con_fapp else "pilar_pct_pib"
+        pico = int(carga[cg].idxmax())
+        subtitulo_visible(f"Qué muestra: el escenario {ult}-{ANIO_FIN_2_1} de lo que el modelo proyecta, el Pilar Solidario de vejez"
+                          + (" y el aporte al FAPP" if con_fapp else "") + "; el Pilar de invalidez queda constante en pesos reales. "
+                          + ("El resto de «Edad avanzada» no se proyecta: se omite." if resto == "no" else
+                             f"El resto de «Edad avanzada» es un supuesto ({'total constante' if resto == 'constante' else 'mismo gasto por persona de 65+ que hoy'}), no una proyección."))
+        _texto(f"**Lectura:** el Pilar (vejez + invalidez{' + aporte al FAPP' if con_fapp else ''}) pasa de {b[cg]:.2f}% del PIB en {ult} a {carga.loc[pico, cg]:.2f}% en {pico} "
+               f"y {f[cg]:.2f}% en {ANIO_FIN_2_1}, las mismas cifras del KPI 2.2. Las personas de 65+ se multiplican por {f.pob_65 / b.pob_65:.2f} y el costo del Pilar de vejez "
+               f"por persona de 65+ por {(f.pilar_vejez / f.pob_65) / (b.pilar_vejez / b.pob_65):.2f} (solo la PGU de $250.000): otra vez, el motor es la demografía."
+               + (f" Con el supuesto para el resto, «Edad avanzada» llegaría a {d.loc[ANIO_FIN_2_1, 'pilar_vejez_pct'] + d.loc[ANIO_FIN_2_1, 'resto_pct']:.2f}% del PIB en {ANIO_FIN_2_1}." if resto != "no" else ""))
+    _nota(f"\\* «Resto» = «Edad avanzada» − Pilar Solidario de vejez: es un residual, DIPRES no lo abre (sistema antiguo del IPS, Capredena, Dipreca y otros). "
+          f"El Pilar total ({u.pilar_pct:.2f}% del PIB en {ult}, KPI 2.2) incluye invalidez; la descomposición del KPI 2.1 usa solo vejez (${u.pilar_vejez / 1e12:.2f} billones). "
+          f"Escenario: PIB +{cfg['crecimiento_pib_real']:.0%} real al año, PGU de $250.000 y cobertura constante (config/escenarios.yaml); no es un pronóstico.")
+    gps = load_csv("gasto_proteccion_social.csv")
+    ei = float(gps[(gps.categoria == "Enfermedad e incapacidad") & (gps.anio == ult)].gasto_mm_2025.iloc[0]) * 1e6
+    with st.expander("Método y fuentes del costo total"):
+        _texto(
+            f"- **Series:** «Edad avanzada» del Gobierno Central (DIPRES, Estadísticas de las Finanzas Públicas, clasificación funcional COFOG 7102), en pesos de 2025 de la propia DIPRES y en % del PIB; "
+            f"PGU, PBS y APS de vejez e invalidez (Subsecretaría de Previsión Social, cierre anual), en pesos nominales llevados a pesos de 2025 con el IPC; personas de 65+ (INE, proyecciones base 2024); "
+            f"PIB a precios corrientes (Banco Central).\n"
+            f"- **Pilar de vejez vs. Pilar total:** en {ult} el Pilar de vejez (PGU + PBS/APS de vejez) cuesta ${u.pilar_vejez / 1e12:.2f} billones y el de invalidez ${u.pilar_invalidez / 1e12:.2f} billones; "
+            f"juntos, ${(u.pilar_vejez + u.pilar_invalidez) / 1e12:.2f} billones = {u.pilar_pct:.2f}% del PIB (ratio 1 del KPI 2.2). La descomposición «¿por qué suben los costos?» usa solo vejez.\n"
+            f"- **Invalidez aparte:** no se suma al total porque no se sabe si DIPRES la registra en «Edad avanzada» (7102) o en «Enfermedad e incapacidad» (7101); "
+            f"esta última suma ${ei / 1e12:.2f} billones en {ult}, menos que el Pilar de invalidez, así que no puede estar entero ahí. Hay que preguntarlo a DIPRES.\n"
+            f"- **Resto:** residual de «Edad avanzada» menos el Pilar de vejez. DIPRES usa su propio deflactor y el Pilar el IPC; difieren a lo más 0,4% (en {a0}), "
+            f"así que el residual en pesos reales tiene ese margen. Los % del PIB no dependen del deflactor (nominal ÷ PIB corriente).\n"
+            f"- **Escenario:** el mismo motor del KPI 2.2 (costo del Pilar de vejez por persona de 65+ constante en términos reales, más la PGU de $250.000 por la población 65+ del INE; "
+            f"invalidez constante; aporte al FAPP según la ley). El resto no se proyecta; si se elige un supuesto, se dibuja como tal.\n"
+            f"- **Agotamiento del FRP:** {res['anio_agotamiento'] or 'no antes de ' + str(ANIO_FIN_2_1 + 1)}, con la reserva cubriendo solo el alza sobre el peso de {ult} y "
+            f"{100 * cfg['rentabilidad_real_reservas']['base']:.1f}% real (KPI 2.2).\n"
+            f"- **Precios en otros gráficos:** el costo por persona 65+ frente al PIB per cápita usa precios corrientes a ambos lados; no se mezcla con estas series reales.")
 
 
 PERIODOS_COSTO = (("2016 → 2021", 2016, 2021), ("2021 → 2025", 2021, 2025), ("2025 → 2050 (escenario)", 2025, 2050))

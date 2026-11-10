@@ -298,13 +298,14 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str,
 
 LINEAS_INDICE_COSTO = (  # (columna de indices_costo, nombre, color, grosor)
     ("pilar", "Costo del Pilar", INK_PRIMARY, 3.5), ("monto", "Monto por beneficio", ORANGE, 2.5), ("pob_65", "Personas de 65+", BLUE, 2.5),
-    ("pib", "Economía real", INK_MUTED, 2.5),
-)
+    ("cobertura", "Cobertura (beneficios por persona de 65+)", AQUA, 2.5),
+)  # cuatro líneas (pauta de la clase): el costo y sus tres piezas; la economía real va como un punto al final
 
 
 def cost_index_chart(idx: pd.DataFrame, futuro: bool = False) -> go.Figure:
-    """KPI 2.1: qué sube más rápido. Índice (primer año = 100) del costo del Pilar Solidario de vejez, el monto por beneficio, las personas de 65+
-    y el PIB real; cuatro líneas con la etiqueta directa al final (pauta de la clase), eje desde 0. futuro=True es el escenario (línea punteada).
+    """KPI 2.1: qué sube más rápido. Índice (primer año = 100) del costo del Pilar Solidario de vejez y sus tres piezas (monto por beneficio,
+    personas de 65+ y cobertura; el índice del costo es el producto de las tres), con el PIB real como punto al final; cuatro líneas con la
+    etiqueta directa al final (pauta de la clase), eje desde 0. futuro=True es el escenario (línea punteada).
     idx = components.cost_analysis.indices_costo."""
     fig = go.Figure()
     puntos = []
@@ -313,17 +314,106 @@ def cost_index_chart(idx: pd.DataFrame, futuro: bool = False) -> go.Figure:
         fig.add_scatter(x=idx.index, y=idx[col], mode="lines", showlegend=False, line=dict(color=color, width=ancho, dash="dash" if futuro else "solid"),
                         hovertemplate="%{x}: %{y:.0f}<extra>" + nombre + "</extra>")
         puntos.append((a1, float(idx[col].iloc[-1]), f"{nombre}: {idx[col].iloc[-1]:.0f}", color))
+    fig.add_scatter(x=[a1], y=[float(idx.pib.iloc[-1])], mode="markers", showlegend=False, marker=dict(symbol="diamond", size=11, color=INK_MUTED),
+                    hovertemplate=f"{a1}: %{{y:.0f}}<extra>Economía real (PIB)</extra>")
+    puntos.append((a1, float(idx.pib.iloc[-1]), f"Economía real (PIB): {idx.pib.iloc[-1]:.0f}", INK_MUTED))
     ymax = float(idx.max().max()) * 1.08
     rotular_final(fig, puntos, rango_y=(0, ymax), alto_px=330, ancho_texto=22)
     ampliar_derecha(fig, a0, a1, 0.3)
     v = lambda c: idx[c].iloc[-1] / 100  # noqa: E731
-    msg = (f"Hasta {a1} el costo del Pilar se {'multiplicaría' if futuro else 'multiplicó'} por {v('pilar'):.1f}: el monto por beneficio sube ×{v('monto'):.1f}, "
-           f"las personas de 65+ ×{v('pob_65'):.1f} y la economía real ×{v('pib'):.1f}")
+    msg = (f"Hasta {a1} el costo del Pilar se {'multiplicaría' if futuro else 'multiplicó'} por {v('pilar'):.1f} = monto ×{v('monto'):.1f} × "
+           f"personas de 65+ ×{v('pob_65'):.2f} × cobertura ×{v('cobertura'):.2f}; la economía real, ×{v('pib'):.1f}")
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=110, b=50)}, showlegend=False,
                       title=_titulo(msg, f"Índice con {a0} = 100; Pilar Solidario de vejez (Pensión Garantizada Universal y pensiones solidarias), pesos reales de 2025" + ("; escenario" if futuro else ""), ancho=70))
     fig.update_xaxes(title="", dtick=1 if a1 - a0 <= 10 else 5)
     fig.update_yaxes(range=[0, ymax], title="")
     return fig
+
+
+def total_cost_chart(d: pd.DataFrame, futuro: bool, hitos: list) -> go.Figure:
+    """KPI 2.1: costo total del Estado en la vejez. Arriba, billones de pesos de 2025 (observado: barras apiladas Pilar de vejez + resto =
+    «Edad avanzada»; escenario: áreas apiladas punteadas Pilar de vejez + aporte al FAPP + resto solo si se supone). El Pilar de invalidez va
+    como línea aparte (no se suma: no se sabe en qué función lo cuenta DIPRES). Abajo, las mismas cosas en % del PIB.
+    d = cost_analysis.gasto_total_vejez recortado al período (en el escenario, con el último año observado como punto de partida).
+    hitos = [(año, texto)] para las líneas verticales (leyes, agotamiento del FRP)."""
+    B = 1e12
+    a0, a1 = int(d.index[0]), int(d.index[-1])
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.6, 0.4], vertical_spacing=0.1,
+                        subplot_titles=("Billones de pesos de 2025", "% del producto interno bruto"))
+    c_vej, c_resto, c_fapp, c_inv = ORANGE, lighten(BLUE, 0.35), VIOLET, RED
+    hay_resto = d.resto.notna().all()
+    hay_fapp = bool((d.aporte_fapp > 0).any())
+    if not futuro:
+        for col, nombre, color in (("pilar_vejez", "Pilar Solidario de vejez (PGU y pensiones solidarias)", c_vej),
+                                   ("resto", "Resto de «Edad avanzada»: sistema antiguo y otros (residual)", c_resto)):
+            fig.add_bar(x=d.index, y=d[col] / B, name=nombre, marker_color=color, row=1, col=1,
+                        hovertemplate="%{x}: %{y:.2f} billones<extra>" + nombre + "</extra>")
+        fig.add_scatter(x=d.index, y=d.total / B, mode="text", text=[f"{v / B:.1f}" for v in d.total], textposition="top center",
+                        showlegend=False, hoverinfo="skip", textfont=dict(color=INK_PRIMARY, size=11), row=1, col=1)
+        fig.update_layout(barmode="stack", **BARRAS)
+    else:
+        capas = [("pilar_vejez", "Pilar Solidario de vejez (escenario)", c_vej)]
+        if hay_fapp:
+            capas.append(("aporte_fapp", "Aporte del Estado al FAPP (Ley 21.735)", c_fapp))
+        if hay_resto:
+            capas.append(("resto", "Resto de «Edad avanzada» (supuesto, no proyectado)", c_resto))
+        for col, nombre, color in capas:
+            fig.add_scatter(x=d.index, y=d[col] / B, name=nombre, mode="lines", stackgroup="uno", line=dict(color=color, width=2, dash="dash"),
+                            fillcolor=lighten(color, 0.45), row=1, col=1, hovertemplate="%{x}: %{y:.2f} billones<extra>" + nombre + "</extra>")
+    fig.add_scatter(x=d.index, y=d.pilar_invalidez / B, name="Pilar Solidario de invalidez (aparte, no sumado)", mode="lines+markers",
+                    line=dict(color=c_inv, width=2, dash="dot"), marker=dict(size=5), row=1, col=1,
+                    hovertemplate="%{x}: %{y:.2f} billones<extra>Pilar de invalidez</extra>")
+    lineas_pct = [("pilar_pct", "Pilar total (vejez + invalidez)", c_vej, "solid"), ("pilar_vejez_pct", "Pilar de vejez", lighten(c_vej, 0.4), "solid")]
+    if not futuro:
+        lineas_pct.insert(0, ("total_pct", "«Edad avanzada» (total)", INK_PRIMARY, "solid"))
+    else:
+        if hay_fapp:
+            lineas_pct.insert(0, ("carga_pct", "Pilar total + aporte al FAPP", c_fapp, "solid"))
+        if hay_resto:
+            d = d.assign(ea_pct=d.pilar_vejez_pct + d.resto_pct)
+            lineas_pct.insert(0, ("ea_pct", "«Edad avanzada» con el supuesto del resto", INK_PRIMARY, "solid"))
+    for col, nombre, color, _ in lineas_pct:
+        fig.add_scatter(x=d.index, y=d[col], name=nombre, mode="lines", showlegend=False, row=2, col=1,
+                        line=dict(color=color, width=2.5, dash="dash" if futuro else "solid"),
+                        hovertemplate="%{x}: %{y:.2f} % del PIB<extra>" + nombre + "</extra>")
+    puntos = [(a1, float(d[c].iloc[-1]), f"{n}: {d[c].iloc[-1]:.2f} %", col) for c, n, col, _ in lineas_pct]
+    ymax_pct = max(float(d[c].max()) for c, *_ in lineas_pct) * 1.15
+    rotular_final(fig, puntos, row=2, col=1, rango_y=(0, ymax_pct), alto_px=150, ancho_texto=30)
+    ampliar_derecha(fig, a0 - 0.6, a1 + 0.6, 0.32, row=1, col=1)
+    ampliar_derecha(fig, a0 - 0.6, a1 + 0.6, 0.32, row=2, col=1)
+    if futuro:
+        fig.add_vrect(x0=a0, x1=a1 + 0.6, fillcolor=INK_MUTED, opacity=0.08, line_width=0, layer="below")
+        fig.add_annotation(x=a1, xref="x", y=1.0, yref="paper", text="<b>Escenario, no es un pronóstico</b>", showarrow=False, xanchor="right",
+                           yanchor="bottom", font=dict(color=INK_SECONDARY, size=12))
+    nivel, previo = 0, None
+    for anio, texto in sorted(h for h in hitos if a0 <= h[0] <= a1):
+        nivel = nivel + 1 if previo is not None and anio - previo < 6 else 0   # escalona solo los hitos cercanos
+        previo = anio
+        derecha = anio >= a1 - 0.5                                             # el último año: rótulo hacia la izquierda
+        fig.add_shape(type="line", x0=anio, x1=anio, xref="x", y0=0, y1=1, yref="paper", line=dict(color=INK_MUTED, width=1, dash="dot"))
+        fig.add_annotation(x=anio, xref="x", y=0.995 - 0.06 * nivel, yref="paper", text=texto, showarrow=False, xanchor="right" if derecha else "left",
+                           yanchor="top", xshift=-3 if derecha else 3, bgcolor="rgba(255,255,255,0.85)", font=dict(color=INK_SECONDARY, size=11))
+    top = d[["pilar_vejez", "aporte_fapp", "resto"]].fillna(0).sum(axis=1).max() if futuro else d.total.max()
+    fig.update_yaxes(range=[0, float(max(top, d.pilar_invalidez.max())) / B * 1.35], title="", row=1, col=1)
+    fig.update_yaxes(range=[0, ymax_pct], ticksuffix=" %", title="", row=2, col=1)
+    fig.update_xaxes(dtick=1 if a1 - a0 <= 10 else 5, row=2, col=1)
+    p, u = d.iloc[0], d.iloc[-1]
+    if not futuro:
+        msg = (f"El gasto del Estado en la vejez pasó de {p.total / B:.1f} a {u.total / B:.1f} billones de pesos entre {a0} y {a1} "
+               f"({p.total_pct:.1f} % a {u.total_pct:.1f} % del producto interno bruto)")
+        det = "Gasto del Gobierno Central en «Edad avanzada» (DIPRES), pesos reales de 2025; el resto es un residual"
+    else:
+        cg = "carga_pct" if hay_fapp else "pilar_pct"
+        msg = (f"En el escenario, el Pilar Solidario{' con el aporte al Fondo Autónomo de Protección Previsional' if hay_fapp else ''} pasaría de {p[cg]:.1f} % del producto interno bruto en {a0} "
+               f"a {d[cg].max():.1f} % en {int(d[cg].idxmax())}")
+        det = "Pilar de vejez + invalidez" + (" + aporte al fondo" if hay_fapp else "") + " (igual que el KPI 2.2); el resto no se proyecta" + (
+            ": área con supuesto" if hay_resto else "")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=120, b=40),
+                         "legend": dict(orientation="h", y=-0.12, x=0, bgcolor="rgba(0,0,0,0)")},
+                      title=_titulo(msg, det, ancho=75))
+    for a in fig.layout.annotations[:2]:   # títulos de los dos paneles, a la izquierda y pequeños
+        a.update(x=0, xanchor="left", font=dict(size=12, color=INK_SECONDARY))
+    return con_coma(fig)
 
 
 def cost_drivers_chart(descs: list) -> go.Figure:

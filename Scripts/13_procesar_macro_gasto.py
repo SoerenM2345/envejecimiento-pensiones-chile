@@ -11,13 +11,14 @@ Fuentes (Data raw/_external/):
 Salidas (Data processed/):
   - macro_pib_anual.csv        anio, pib_corriente_mm, pib_real_mm_2018, pib_real_var_pct
                                (mm = millones de pesos; real = volumen encadenado, referencia 2018)
-  - gasto_proteccion_social.csv  anio, categoria (Gasto total / Protección social / Edad avanzada),
+  - gasto_proteccion_social.csv  anio, categoria (Gasto total / Protección social / Edad avanzada / Enfermedad e incapacidad),
                                gasto_corriente_mm, gasto_mm_2025, pct_pib
 
 Notas:
   - 'Edad avanzada' (código COFOG 7102) incluye las pensiones del sistema antiguo, la PGU y los aportes solidarios que
     paga el Estado; es el costo público en vejez que usa el KPI 2.1. 2021 es atípico en 'Protección social' total por los
     bonos COVID, pero no afecta 'Edad avanzada'.
+  - 'Enfermedad e incapacidad' (COFOG 7101) sirve solo para acotar dónde registra DIPRES el Pilar Solidario de invalidez (KPI 2.1, costo total).
   - El PIB real encadenado (referencia 2018) NO es comparable por nivel con pesos de 2025: para los índices se usa base 2016 = 100.
 """
 from pathlib import Path
@@ -47,7 +48,8 @@ def lee_funcional(hoja):
     d = pd.read_excel(EXT / "dipres" / "articles-416514_doc_xls.xlsx", sheet_name=hoja, header=None)
     hdr = next(i for i in range(15) if str(d.iloc[i, 2]).replace(".0", "") == "2016")
     anios = [int(float(a)) for a in d.iloc[hdr, 2:12]]
-    quiero = {"Gasto total": "gasto total", "Protección social": "protección social", "Edad avanzada": "edad avanzada"}
+    quiero = {"Gasto total": "gasto total", "Protección social": "protección social", "Edad avanzada": "edad avanzada",
+              "Enfermedad e incapacidad": "enfermedad e incapacidad"}
     out = {}
     for i in range(hdr + 1, len(d)):
         etiqueta = " ".join(str(x) for x in d.iloc[i, :2].tolist() if pd.notna(x)).lower()
@@ -80,7 +82,7 @@ if __name__ == "__main__":
     print(f"\ngasto_proteccion_social.csv: {len(g)} filas")
     print(g[g.categoria == "Edad avanzada"].round(2).to_string(index=False))
     # chequeos
-    assert set(g.categoria) == {"Gasto total", "Protección social", "Edad avanzada"}, g.categoria.unique()
+    assert set(g.categoria) == {"Gasto total", "Protección social", "Edad avanzada", "Enfermedad e incapacidad"}, g.categoria.unique()
     assert g.groupby("categoria").anio.nunique().eq(10).all()
     ea = g[g.categoria == "Edad avanzada"].set_index("anio")
     m = p.set_index("anio")

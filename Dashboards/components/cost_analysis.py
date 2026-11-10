@@ -133,15 +133,69 @@ def descomponer_pilar(h: pd.DataFrame, pr: pd.DataFrame, a0: int, a1: int) -> di
 
 
 def indices_costo(h: pd.DataFrame, pr: pd.DataFrame, a0: int, a1: int) -> pd.DataFrame:
-    """Índice (a0 = 100) de lo que se compara en «qué sube más rápido»: costo del Pilar, monto por beneficio, personas de 65+ y PIB real.
+    """Índice (a0 = 100) de lo que se compara en «qué sube más rápido»: costo del Pilar y sus tres piezas (monto por beneficio, personas de 65+ y
+    cobertura = beneficios por persona de 65+; índice del costo = producto de los tres / 100², exacto) y el PIB real.
     Un período observado (a1 <= último año de `h`) usa el PIB real encadenado de `h`; uno futuro (a0 >= último año) usa solo el escenario `pr`,
     porque sus PIB están en precios distintos y no se pueden empalmar."""
     ult = int(h.index.max())
     futuro = a0 >= ult
     filas = {}
     for a in range(a0, a1 + 1):
-        p, pob, _, m = _piezas_pilar(h, pr, a)
+        p, pob, cob, m = _piezas_pilar(h, pr, a)
         pib = float(pr.loc[a].gasto / (pr.loc[a].pct_pib / 100)) if futuro else float(h.loc[a].pib_pc_real * h.loc[a].pob_total)
-        filas[a] = dict(pilar=p, monto=m, pob_65=pob, pib=pib)
+        filas[a] = dict(pilar=p, monto=m, pob_65=pob, cobertura=cob, pib=pib)
     d = pd.DataFrame(filas).T
     return 100 * d / d.iloc[0]
+
+
+RESTO_ESCENARIO = ("no", "constante", "crece")   # el «resto» no se proyecta: se omite o se agrega con un supuesto explícito
+
+
+def gasto_total_vejez(h: pd.DataFrame, carga: pd.DataFrame, pilar: pd.DataFrame, pib: pd.DataFrame, nac: pd.DataFrame,
+                      resto: str = "no") -> pd.DataFrame:
+    """Costo total del Estado en la vejez: une el Pilar Solidario (KPI 2.1 y 2.2) con el gasto del Gobierno Central en «Edad avanzada».
+    Una fila por año: observado (h, 2016-2025) y escenario (carga = financiamiento.proyeccion_carga, 2026 en adelante). Pesos reales de 2025.
+      - pilar_vejez:      PGU + PBS/APS de vejez (la base de la descomposición del KPI 2.1; 6,25 billones en 2025).
+      - pilar_invalidez:  PBS/APS de invalidez. No se suma al total: no se sabe si DIPRES lo cuenta en «Edad avanzada» (COFOG 7102) o en
+                          «Enfermedad e incapacidad» (7101). Pilar total = vejez + invalidez = el 2,07 % del PIB del KPI 2.2.
+      - resto:            «Edad avanzada» − Pilar de vejez (residual: sistema antiguo y otros, DIPRES no lo abre). En el escenario solo si
+                          `resto` = 'constante' (total fijo) o 'crece' (con la población 65+), que son supuestos, no proyecciones.
+      - aporte_fapp:      aporte del Estado al FAPP (Ley 21.735), solo escenario, lo que traiga `carga` (casilla del KPI 2.2).
+      - total:            observado = «Edad avanzada» (DIPRES); escenario = Pilar de vejez + aporte FAPP (+ resto si se supone).
+      - *_pct:            % del PIB. Observado: montos nominales / PIB corriente; escenario: monto real / PIB real de `carga` (mismo método del KPI 2.2).
+    Precios: el gasto de DIPRES viene en pesos de 2025 de la propia DIPRES; el Pilar se deflacta con el IPC (kpi_pc_nacional). Los deflactores
+    difieren a lo más 0,4 % (2016), así que el residual mezcla ambos dentro de ese margen; los % del PIB no dependen del deflactor."""
+    assert resto in RESTO_ESCENARIO
+    nom = pilar.pivot(index="anio", columns="tipo_beneficio", values="monto_nominal_mm")
+    pibc = pib.set_index("anio").pib_corriente_mm
+    dfl = nac.set_index("anio").deflactor_2025
+    anios = list(h.index)
+    o = pd.DataFrame(index=pd.Index(anios, name="anio"))
+    o["pob_65"] = h.pob_65
+    o["pilar_vejez"] = h.pgu + h.pbs_aps
+    o["pilar_invalidez"] = (nom["PBS invalidez"] + nom["APS invalidez"]).reindex(anios) * dfl.reindex(anios) * 1e6
+    o["resto"] = h.resto
+    o["aporte_fapp"] = 0.0
+    o["total"] = h.gasto
+    o["total_pct"] = h.pct_pib
+    vej_nom = h.pgu / h.defl_ipc + h.pbs_aps / h.defl_ipc            # pesos corrientes
+    o["pilar_vejez_pct"] = 100 * vej_nom / (pibc.reindex(anios) * 1e6)
+    o["pilar_invalidez_pct"] = 100 * (nom["PBS invalidez"] + nom["APS invalidez"]).reindex(anios) / pibc.reindex(anios)
+    o["pilar_pct"] = o.pilar_vejez_pct + o.pilar_invalidez_pct
+    o["resto_pct"] = o.total_pct - o.pilar_vejez_pct
+    o["carga_pct"] = o.pilar_pct
+    o["escenario"] = False
+    b = h.loc[ANIO_BASE]
+    c = carga[carga.index > ANIO_BASE]
+    e = pd.DataFrame(index=c.index)
+    e["pob_65"] = c.pob_65
+    e["pilar_vejez"], e["pilar_invalidez"], e["aporte_fapp"] = c.pilar_vejez, c.pilar_invalidez, c.aporte_fapp
+    e["resto"] = {"no": np.nan, "constante": b.resto, "crece": b.resto_65}[resto] * (c.pob_65 if resto == "crece" else 1.0)
+    e["total"] = e.pilar_vejez + e.aporte_fapp + e.resto.fillna(0.0)
+    for col in ("pilar_vejez", "pilar_invalidez", "resto", "aporte_fapp", "total"):
+        e[f"{col}_pct"] = 100 * e[col] / c.pib_real25
+    e["pilar_pct"], e["carga_pct"] = c.pilar_pct_pib, c.carga_pct_pib
+    e["escenario"] = True
+    d = pd.concat([o, e])
+    d["costo_65"] = d.total / d.pob_65
+    return d
