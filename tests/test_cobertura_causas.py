@@ -94,7 +94,7 @@ def test_regiones_trae_chile_y_las_columnas_de_la_ene():
 def test_pagina_muestra_tendencia_descomposicion_y_cambia_de_ventana():
     import re
     from test_dashboard_smoke import SIGLAS_PROHIBIDAS
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     specs = lambda: [json.loads(el.proto.spec) for el in at.get("plotly_chart")]  # noqa: E731
     titulos = lambda: [s.get("layout", {}).get("title", {}).get("text", "") for s in specs()]  # noqa: E731
@@ -121,7 +121,7 @@ def test_pagina_muestra_tendencia_descomposicion_y_cambia_de_ventana():
 
 
 def test_el_selector_de_criterio_cambia_las_regiones_analizadas():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
 
     def regiones_descomposicion():
@@ -153,7 +153,7 @@ def _spec_con_titulo(at, fragmento):
 
 
 def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")
     barra = sp["data"][0]
@@ -166,7 +166,7 @@ def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
 
 
 def test_grafico_largo_tiene_tres_lineas_desde_2002():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     sp = _spec_con_titulo(at, "La distancia entre Magallanes y La Araucanía")
     lineas = [t for t in sp["data"] if t.get("mode") == "lines"]
     assert len(lineas) == 3 and all(_vals(t["x"])[0] == 2002 and _vals(t["x"])[-1] == 2024 for t in lineas)  # hasta el año de referencia
@@ -176,7 +176,7 @@ def test_grafico_largo_tiene_tres_lineas_desde_2002():
 
 
 def test_descomposicion_permite_ver_las_16_regiones_con_las_5_marcadas():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     clave = "la brecha con Chile viene sobre todo de"
     assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 7
     at.radio(key="cob_desc_alcance").set_value("Las 16 regiones (las prioritarias en naranja)").run()
@@ -211,7 +211,7 @@ def test_escenarios_fijos_del_kpi_1_2():
 
 
 def test_pagina_muestra_los_escenarios_fijos_sin_cambiar_el_simulador():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
     assert sp is not None
@@ -235,7 +235,7 @@ def test_cambios_de_la_descomposicion_llegan_hasta_hoy():
 
 
 def test_filas_de_la_descomposicion_se_ordenan_por_cada_columna():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     clave = "la brecha con Chile viene sobre todo de"
 
@@ -256,7 +256,7 @@ def test_filas_de_la_descomposicion_se_ordenan_por_cada_columna():
 
 
 def test_resumen_de_razones_una_por_una():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     subt = [m.value for m in at.markdown if m.value.startswith("##### ")]
     assert subt[-5:] == ["##### 1. ¿De dónde viene la diferencia? Cuánto aporta cada pieza", "##### 2. Las razones una por una (resumen)",
                         "##### 3. ¿Qué características de las regiones se asocian con la cobertura? (estadística, no causa)",
@@ -265,7 +265,7 @@ def test_resumen_de_razones_una_por_una():
 
 
 def test_definiciones_diferencian_las_tres_piezas_antes_de_los_graficos():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     assert [e.label for e in at.expander if e.label.startswith("Definiciones y fórmulas")] == ["Definiciones y fórmulas: qué es cada pieza de la cobertura"]
     formulas = [l.value for l in at.get("latex")]
@@ -287,7 +287,7 @@ def test_definiciones_diferencian_las_tres_piezas_antes_de_los_graficos():
 
 
 def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     sp = _spec_con_titulo(at, "regiones combinan") or next(json.loads(el.proto.spec) for el in at.get("plotly_chart")
                                                          if any(t.get("type") == "scatter" and t.get("mode") == "markers" and t.get("marker", {}).get("sizemode") == "area"
                                                                 for t in json.loads(el.proto.spec)["data"]))
@@ -297,7 +297,7 @@ def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
 
 
 def test_escenarios_fijos_son_seis_paneles_con_costo_y_capacidad():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
     assert len([t for t in sp["data"] if t["type"] == "scatter"]) == 12  # costo y capacidad en cada uno de los 6 paneles
     costo = [_vals(t["y"]) for t in sp["data"] if "Costo" in t["hovertemplate"]]
@@ -373,7 +373,7 @@ def test_brecha_de_informalidad_por_sexo_no_se_relaciona_con_la_cobertura():
 
 
 def test_pagina_muestra_la_dispersion_de_la_brecha_por_sexo():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, "entre mujeres y hombres")
     assert sp is not None

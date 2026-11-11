@@ -4,13 +4,13 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
-from utils import cargar_escenarios, supuestos_escenario, es_cl, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE, PLOTLY_DL_CONFIG
+from utils import cargar_escenarios, supuestos_escenario, es_cl, load_csv, load_geojson, kpi_card_row, BLUE, ORANGE
 from utils import subtitulo_visible as _subtitulo_visible
 from components.kpi_card import kpi_card
 from components.definiciones import bloque_definiciones
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
-                               coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, gender_gap_scatter)
+                               coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, )
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -47,7 +47,6 @@ def render_1_1():
             fig_reg = region_coverage_people_bars(pres, nac_cobertura)
         mostrar(estilo_kpi(fig_reg, 640))
     render_1_1_tendencia()
-    render_1_1_correlaciones()
     render_1_1_matriz()
     render_1_1_causas()
     st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
@@ -141,33 +140,6 @@ VARS_COBERTURA = {
     "pct_pobreza_65": ("Pobreza 65+", "% de personas 65+, CASEN 2022", "pobreza_65"),
     "pct_urbano": ("Población urbana", "% del total, Censo 2024", "urbano"),
 }
-
-
-def _fuerza(r: float) -> str:
-    return "fuerte" if abs(r) >= 0.7 else "moderada" if abs(r) >= 0.4 else "débil"
-
-
-def render_1_1_correlaciones():
-    st.markdown("#### ¿Por qué cotizan más en unas regiones?")
-    reg = load_csv("kpi_cobertura_correlaciones_region.csv")
-    res = load_csv("kpi_cobertura_correlaciones_resumen.csv").set_index("variable")
-    var = st.radio("Variable del eje x", list(VARS_COBERTURA), horizontal=True, key="cob_var_x",
-                   format_func=lambda v: VARS_COBERTURA[v][0])
-    etiqueta, unidad, clave = VARS_COBERTURA[var]
-    corr = res.loc[clave]
-    mostrar(coverage_correlation_scatter(reg, var, etiqueta, unidad, corr))
-
-    # interpretación generada de los datos: dirección, fuerza, significancia y la región más lejos de la recta
-    pendiente, intercepto = np.polyfit(reg[var], reg.cobertura_previsional_pct, 1)
-    residuo = reg.cobertura_previsional_pct - (intercepto + pendiente * reg[var])
-    arriba, abajo = reg.loc[residuo.idxmax()], reg.loc[residuo.idxmin()]
-    signif = "estadísticamente significativa" if corr.pearson_p < 0.05 else "no significativa al 5%"
-    st.markdown(
-        f"Las regiones con mayor {etiqueta.lower()} tienen **{'mayor' if corr.pearson_r > 0 else 'menor'} cobertura** "
-        f"(r = {num_cl(corr.pearson_r)}, relación {_fuerza(corr.pearson_r)} y {signif}, p = {num_cl(corr.pearson_p, 3)}). "
-        f"Más por sobre lo esperado está {arriba.region_nombre} ({num_cl(residuo.max(), 1)} pp); "
-        f"más por debajo, {abajo.region_nombre} ({num_cl(residuo.min(), 1)} pp)."
-    )
 
 
 def _bullets_descomposicion(d: pd.DataFrame, comparacion: str, prio: pd.DataFrame) -> str:
@@ -359,78 +331,9 @@ def render_1_1_causas():
         "Para desempleo e informalidad se muestra la medida oficial de la encuesta aunque no sea la que mejor calza; para la industria, la rama con mayor asociación entre 12; "
         "las dos últimas son las mejores de las demás. La informalidad oficial es en parte la misma información que «no cotiza» (se cuentan como informales los dependientes sin "
         "cotizaciones previsionales por su empleo), por eso la asociación con la cobertura es alta. Migración interna neta = llegados desde otras regiones menos salidos en los últimos 5 años, por 1.000 habitantes. "
+        "La Superintendencia no publica con qué regla asigna cada cotizante a una región (empleador o domicilio); la prueba de sensibilidad, el contraste con el estudio de la Asociación de AFP y el descarte por sexo están en la versión extendida. "
         "Falta: PIB por rama de actividad, cotizantes por rama, participación por sexo de la encuesta y la encuesta después de mayo de 2024 (docs/EXPLORACION_COBERTURA.md)."))
-    with st.expander("Exploración: todos los factores probados"):
-        todo = fac[["objetivo", "ranking", "nombre", "hipotesis", "fuente", "ambito", "n", "pearson_r", "pearson_p", "spearman_rho", "elegido"]].rename(columns={
-            "objetivo": "Se compara con", "ranking": "Orden", "nombre": "Factor", "hipotesis": "Hipótesis", "fuente": "Fuente", "ambito": "Ámbito", "n": "n",
-            "pearson_r": "Correlación (r)", "pearson_p": "Valor p", "spearman_rho": "Correlación de rangos", "elegido": "Mostrado arriba"})
-        todo["Se compara con"] = todo["Se compara con"].map({"nivel": "Cobertura 2024", "cambio": "Cambio de la cobertura 2019-2023"})
-        st.dataframe(todo.style.format({"Correlación (r)": "{:+.2f}", "Valor p": "{:.3f}", "Correlación de rangos": "{:+.2f}"}, decimal=","),
-                     hide_index=True, use_container_width=True)
-    with st.expander("Contraste con el estudio de la Asociación de AFP (diciembre 2019 y 2024)"):
-        c = load_csv("kpi_cobertura_contraste_aafp.csv").merge(load_csv("indicadores_region.csv")[["region", "region_nombre"]], left_on="region_id", right_on="region")
-        dif = (c.cot_sobre_ocupados_2019 - c.cobertura_ocupados_aafp_2019).abs().max()
-        st.markdown(_coma(
-            f"Reproduje las cifras del estudio de la Asociación de AFP con los datos del INE y de la Superintendencia: la diferencia máxima en los ocupados de 2019 es de {c.dif_ocupados_pct.abs().max():.2f}% "
-            f"y en la cobertura sobre ocupados, de {dif:.1f} puntos, en las 16 regiones. Eso confirma la lectura de los archivos y que los cotizantes son la misma estadística. "
-            "El estudio mide cotizantes ÷ ocupados; este tablero, cotizantes ÷ población de 15 a 64 años: los niveles no son comparables, el orden sí."))
-        t = c[["region_nombre", "desocupacion_ine_2019", "desocupacion_aafp_2019", "informalidad_ine_2019", "informalidad_aafp_2019", "cot_sobre_ocupados_2019",
-               "cobertura_ocupados_aafp_2019", "cot_sobre_ocupados_2024_con_aafp", "cobertura_ocupados_aafp_2024"]].rename(columns={
-            "region_nombre": "Región", "desocupacion_ine_2019": "Desocupación 2019, aquí (%)", "desocupacion_aafp_2019": "Desocupación 2019, estudio (%)",
-            "informalidad_ine_2019": "Informalidad 2019, aquí (%)", "informalidad_aafp_2019": "Informalidad 2019, estudio (%)",
-            "cot_sobre_ocupados_2019": "Cotizantes ÷ ocupados 2019, aquí (%)", "cobertura_ocupados_aafp_2019": "Cotizantes ÷ ocupados 2019, estudio (%)",
-            "cot_sobre_ocupados_2024_con_aafp": "Cotizantes ÷ ocupados 2024, aquí con los ocupados del estudio (%)", "cobertura_ocupados_aafp_2024": "Cotizantes ÷ ocupados 2024, estudio (%)"})
-        st.dataframe(t.style.format({k: "{:.1f}" for k in t.columns[1:]}, decimal=","), hide_index=True, use_container_width=True)
-        st.caption("Fuente: estudio de la Asociación de AFP (Informe Previsional Económico N° 135), INE y Superintendencia de Pensiones. La Asociación de AFP es el gremio de las administradoras: sus cifras se pueden recalcular, sus interpretaciones no.")
-    with st.expander("Prueba: ¿en qué región se cuenta a cada cotizante?"):
-        ta = load_csv("kpi_cobertura_test_asignacion.csv").rename(columns={
-            "fuente": "Fecha", "cotizantes_pct": "Metropolitana en los cotizantes (%)", "ocupados_ene_pct": "Metropolitana en los ocupados (%)",
-            "pob_15_64_pct": "Metropolitana en la población de 15 a 64 años (%)"})
-        st.dataframe(ta.style.format({k: "{:.1f}" for k in ta.columns[1:]}, decimal=","), hide_index=True, use_container_width=True)
-        dif_ = ta["Metropolitana en los cotizantes (%)"] - ta["Metropolitana en los ocupados (%)"]
-        st.markdown(_coma(
-            f"La Metropolitana pesa más en los cotizantes que en los ocupados, y la diferencia se achicó ({dif_.iloc[0]:.1f} puntos en {ta.Fecha.iloc[0][-4:]}, {dif_.iloc[3]:.1f} en {ta.Fecha.iloc[3][-4:]}). "
-            "Con estas cifras no se puede decir si es porque se cuenta por la región de la empresa o porque allí hay más empleo formal. "
-            "Ni la Superintendencia ni el estudio de la Asociación de AFP indican la regla. La pregunta para la Superintendencia cabe en una línea: "
-            "¿cada cotizante se cuenta en la comuna de su empleador o en el domicilio del afiliado?"))
-        st.caption("Fuente: Superintendencia de Pensiones, INE (Encuesta Nacional de Empleo, trimestre nov-ene), Censo 2024.")
-        st.markdown("**¿Cuánto importaría la regla?** El Censo 2024 pregunta dónde trabaja cada ocupado: hay regiones que «exportan» trabajadores (viven allí y trabajan en otra) "
-                    "y otras que los «importan». Si los cotizantes se contaran por lugar de trabajo, la cobertura de cada región cambiaría así:")
-        pe = load_csv("kpi_cobertura_pendularidad.csv").sort_values("diferencia_puntos")
-        cv = lambda s: 100 * s.std() / s.mean()  # noqa: E731
-        orden_pe = pe.rename(columns={"region_nombre": "Región", "salen_pct": "Ocupados que trabajan en otra región (%)", "neto_pct": "Saldo de pendulares (% de los ocupados que viven allí)",
-                                      "cobertura_ref": "Cobertura actual (%)", "cobertura_si_lugar_de_trabajo": "Cobertura si se contara por lugar de trabajo (%)", "diferencia_puntos": "Diferencia (puntos)"})
-        cols_pe = ["Región", "Ocupados que trabajan en otra región (%)", "Saldo de pendulares (% de los ocupados que viven allí)", "Cobertura actual (%)",
-                   "Cobertura si se contara por lugar de trabajo (%)", "Diferencia (puntos)"]
-        st.dataframe(orden_pe[cols_pe].style.format({c: "{:.1f}" for c in cols_pe[1:5]} | {"Diferencia (puntos)": "{:+.1f}"}, decimal=","), hide_index=True, use_container_width=True)
-        peor3 = pe.sort_values("cobertura_ref").head(3)
-        _subtitulo_visible(f"Qué muestra: la regla importa mucho para unas regiones y casi nada para otras. {pe.iloc[0].region_nombre} bajaría {abs(pe.iloc[0].diferencia_puntos):.1f} puntos y "
-                           f"{pe.iloc[-1].region_nombre} subiría {pe.iloc[-1].diferencia_puntos:.1f}; la dispersión entre regiones pasaría de {cv(pe.cobertura_ref):.1f} % a {cv(pe.cobertura_si_lugar_de_trabajo):.1f} %. "
-                           f"Las tres de menor cobertura ({', '.join(peor3.region_nombre)}) cambian menos de {peor3.diferencia_puntos.abs().max() + 0.05:.1f} punto: su problema no depende de la regla.")
-        st.caption("Sensibilidad, no corrección: se supone que los pendulares del Censo (abril de 2024) valen para los cotizantes de diciembre y que cuentan en la población de 15 a 64 años de la región de trabajo; "
-                   "la codificación del lugar de trabajo del Censo (p44) se infiere, no hay diccionario en el proyecto. Datos: Data processed/kpi_cobertura_pendularidad.csv.")
-    render_1_1_sexo(prio)
     render_1_1_dos_palancas(prio)
-
-
-def render_1_1_sexo(prio: pd.DataFrame):
-    """Un descarte (Scripts/27): la informalidad por sexo no agrega una razón; la brecha mujeres-hombres no se relaciona con la cobertura."""
-    d = load_csv("kpi_cobertura_informalidad_sexo.csv")
-    m = load_csv("kpi_cobertura_informalidad_sexo_resumen.csv").set_index("indicador").valor
-    ids = prio.region_id.astype(int).tolist()
-    st.markdown("##### 3b. ¿Cambia algo por sexo? Un descarte")
-    mostrar(estilo_kpi(gender_gap_scatter(d, m["r_brecha_mujeres_hombres"], m["p_brecha_mujeres_hombres"], ids), 560))
-    en, fuera = d[d.region_id.isin(ids)], d[~d.region_id.isin(ids)]
-    st.markdown(es_cl(
-        f"**Lectura:** en las {len(en)} regiones prioritarias las mujeres tienen {en.brecha_mujeres_hombres.mean():.1f} puntos más de informalidad que los hombres, "
-        f"y en las demás, {fuera.brecha_mujeres_hombres.mean():.1f}: la diferencia entre sexos es la misma. Lo que distingue a las prioritarias es que la informalidad es mayor "
-        f"en ambos sexos (hombres {en.informalidad_hombres.mean():.1f} % frente a {fuera.informalidad_hombres.mean():.1f} %; mujeres {en.informalidad_mujeres.mean():.1f} % frente a "
-        f"{fuera.informalidad_mujeres.mean():.1f} %), es decir, la razón ya vista y no una nueva. Separar por sexo no agrega una causa."))
-    st.caption(es_cl(
-        "Fuente: INE, Encuesta Nacional de Empleo (nov-ene 2023-24), Superintendencia de Pensiones (cobertura 2024). n = 16 regiones. La leve pendiente positiva depende de "
-        f"Antofagasta y Atacama, las dos mayores brechas y de alta cobertura: sin ellas r = {m['r_brecha_sin_las_2_mayores']:.2f}. "
-        f"Por separado, la informalidad de los hombres (r = {m['r_informalidad_hombres']:.2f}) y la de las mujeres (r = {m['r_informalidad_mujeres']:.2f}) "
-        "se asocian con la cobertura casi igual que el total."))
 
 
 def render_1_1_dos_palancas(prio: pd.DataFrame):
@@ -598,25 +501,6 @@ def panel_lineas(f0: pd.Series, a0: int, esc: cp.Escenario, trab: str, vista: st
     return tuple(out)
 
 
-@st.cache_data
-def pc_tabla_comunas(region_id: int, esc: cp.Escenario) -> pd.DataFrame:
-    """Cifras de todas las comunas de una región (aproximación: heredan cobertura, ingreso y costo por 65+ de su región)."""
-    params = load_csv("kpi_pc_parametros_reforma.csv")
-    dt = cp.datos_territorio(region_id, load_csv("kpi_pc_region.csv"), load_csv("kpi_pc_nacional.csv"),
-                             load_csv("indicadores_region.csv"), load_csv("kpi_proyeccion_regional.csv"))
-    com = load_csv("indicadores_comuna.csv")
-    filas = []
-    for c in com[com.region == region_id].itertuples():
-        d = cp.serie_territorio(cp.comuna_desde_region(dt, float(c.pob_65_mas), float(c.pob_15_64)), params, esc)
-        pc = cp.punto_critico(d)
-        f0, f1 = cp.fila_anio(d, cp.ANIO_BASE_REGION), cp.fila_anio(d, 2050)
-        filas.append({"Comuna": c.comuna_nombre, "Personas 65+ (Censo 2024)": int(round(f0.pob_65)), "Trabajadores (aprox.)": int(round(f0.trabajadores)),
-                      "Razón de soporte 2024": round(f0.razon_soporte, 2), "Carga requerida 2024 (%)": round(100 * f0.carga_requerida, 1),
-                      "Carga requerida 2050 (%)": round(100 * f1.carga_requerida, 1),
-                      "Punto crítico": str(pc["anio"]) if pc["estado"] == "cruza" else ("ya superado" if pc["estado"] == "ya_superado" else "no antes de 2050")})
-    return pd.DataFrame(filas).sort_values("Razón de soporte 2024").reset_index(drop=True)
-
-
 def render_1_2_punto_critico():
     st.divider()
     st.markdown("#### ¿Dónde está el punto crítico?")
@@ -734,20 +618,6 @@ def render_1_2_punto_critico():
         dec = cp.descomponer_carga(d, a0, a1)
         mostrar(estilo_kpi(carga_waterfall(dec, nombre, a0, a1), 440))
         st.markdown(_coma(pc_lectura_cascada(dec, a0, a1)))
-    with st.expander("Sensibilidad del punto crítico (país, cotizantes, promedio)"):
-        sens = load_csv("kpi_punto_critico_sensibilidad.csv")
-        tabla = sens.assign(
-            fila=lambda x: x.crecimiento_salario_real.map(lambda g: f"Salario real {g:+.1%}".replace(".", ",")),
-            col=lambda x: x.tope_carga.map(lambda t: f"Tope {t:.0%}"),
-            valor=lambda x: [str(int(a)) + (" (base)" if b else "") if e == "cruza" else ("ya superado" if e == "ya_superado" else "no cruza")
-                             for a, e, b in zip(x.punto_critico, x.estado, x.es_base)],
-        ).pivot(index="fila", columns="col", values="valor")
-        orden = sens.sort_values("tope_carga").tope_carga.map(lambda t: f"Tope {t:.0%}").unique()
-        filas = sens.sort_values("crecimiento_salario_real").crecimiento_salario_real.map(
-            lambda g: f"Salario real {g:+.1%}".replace(".", ",")).unique()
-        st.dataframe(tabla.reindex(index=filas, columns=orden), use_container_width=True)
-        st.caption("Año del punto crítico según el crecimiento real del sueldo (filas) y el tope de carga (columnas); los demás "
-                   "supuestos como en config/escenarios.yaml. Lo calcula Scripts/22_punto_critico_sensibilidad.py.")
     st.caption("\\* Solo los años con marca (punto o rombo) son datos; el resto es interpolación o escenario. ★ = punto crítico. Pesos reales de 2025.  \n"
                "\\*\\* El tope τ es un criterio, no un dato: la PGU se paga con impuestos generales, no con cotizaciones. "
                "El punto crítico mide cuándo el Pilar pesaría más de τ sobre el sueldo de los trabajadores, no cuándo falta financiamiento.")
@@ -771,13 +641,6 @@ def render_1_2_punto_critico():
               "una focalización mayor lo bajaría, un reajuste real de la PGU lo subiría); el costo no incluye pensiones del sistema antiguo, "
               "salud ni sobrevivencia; con la mediana el ingreso total de los trabajadores queda subestimado (la media es mayor); "
               "el ingreso imponible tiene tope y excluye el trabajo informal (la base «ocupados» lo incluye).")
-    if sel != "País":
-        with st.expander(f"Cifras de todas las comunas de {sel} (aproximación, con los supuestos de arriba)"):
-            tabla = pc_tabla_comunas(reg_ids[sel], esc)
-            st.dataframe(tabla, hide_index=True, use_container_width=True)
-            st.caption("Cada comuna hereda de su región la cobertura (trabajadores / población 15-64), el ingreso por trabajador y el costo por persona "
-                       "de 65+; solo su población por edad (Censo 2024) es propia, así que la razón de soporte mide su estructura de edad, "
-                       "no sus cotizantes reales. Ordenadas de mayor a menor presión.")
 
 
 def render_1_2_escenarios_fijos():

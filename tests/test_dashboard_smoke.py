@@ -10,6 +10,7 @@ DASH = Path(__file__).resolve().parent.parent / "Dashboards"
 sys.path.insert(0, str(DASH))  # para importar utils / components en los tests de lógica
 
 FINAL_PAGES = sorted(p.relative_to(DASH).as_posix() for p in (DASH / "final_pages").glob("*.py"))
+EXTENDED_PAGES = sorted(p.relative_to(DASH).as_posix() for p in (DASH / "extended_pages").glob("*.py"))
 DEV_PAGES = sorted(p.relative_to(DASH).as_posix() for p in (DASH / "pages").glob("*.py"))
 
 
@@ -19,7 +20,7 @@ def run_page(rel: str) -> AppTest:
     return at.run()
 
 
-@pytest.mark.parametrize("page", FINAL_PAGES + DEV_PAGES)
+@pytest.mark.parametrize("page", FINAL_PAGES + EXTENDED_PAGES + DEV_PAGES)
 def test_page_runs_without_exception(page):
     # AppTest no reporta errores de sintaxis como excepción (la página queda vacía): compilar antes
     compile((DASH / page).read_text(encoding="utf-8"), page, "exec")
@@ -142,8 +143,8 @@ def test_kpis_1_2_1_3_2_2_leen_la_misma_config_de_escenarios():
     usan = {
         "KPI 1.3 (Scripts/15)": raiz / "Scripts" / "15_kpi_participacion_partes.py",
         "KPI 1.2 sensibilidad (Scripts/22)": raiz / "Scripts" / "22_punto_critico_sensibilidad.py",
-        "KPI 1.2 y 1.3 (Objetivo 1)": DASH / "final_pages" / "objetivo1.py",
-        "KPI 2.2 (Objetivo 2)": DASH / "final_pages" / "objetivo2.py",
+        "KPI 1.2 y 1.3 (Objetivo 1)": DASH / "extended_pages" / "objetivo1.py",
+        "KPI 2.2 (Objetivo 2)": DASH / "extended_pages" / "objetivo2.py",
     }
     for kpi, archivo in usan.items():
         texto = archivo.read_text(encoding="utf-8")
@@ -185,7 +186,7 @@ def test_objetivo_2_titulo_igual_en_config_y_dashboard():
     objetivos = {k["objetivo"] for k in cfg["kpis_presentacion"] if k["id"].startswith("2.")}
     assert len(objetivos) == 1
     titulo = objetivos.pop()
-    pagina = (DASH / "final_pages" / "objetivo2.py").read_text(encoding="utf-8")
+    pagina = (DASH / "extended_pages" / "objetivo2.py").read_text(encoding="utf-8")
     assert re.search(r'TITULO_OBJETIVO_2 = "([^"]+)"', pagina).group(1) == titulo
     assert f'title="{titulo}"' in (DASH / "Inicio.py").read_text(encoding="utf-8")
 
@@ -214,7 +215,8 @@ def test_graficos_finales_pasan_por_mostrar():
         assert "st.plotly_chart(" not in f.read_text(encoding="utf-8"), f"{f.name} dibuja un gráfico sin charts.mostrar"
 
 
-@pytest.mark.parametrize("page, clave", [("final_pages/objetivo1.py", "s11_vista_region"), ("final_pages/objetivo2.py", "s23_vista_region")])
+@pytest.mark.parametrize("page, clave", [("final_pages/objetivo1.py", "s11_vista_region"), ("final_pages/objetivo2.py", "s23_vista_region"),
+                                         ("extended_pages/objetivo1.py", "s11_vista_region"), ("extended_pages/objetivo2.py", "s23_vista_region")])
 def test_vista_en_personas_de_las_barras_por_region(page, clave):
     """KPI 1.1 y 2.3: la vista «Personas (mismo orden)» de las barras por región se dibuja sin errores."""
     at = run_page(page)
@@ -239,7 +241,8 @@ def _textos_de_titulo(spec):
     return [t for t in textos if t]
 
 
-@pytest.mark.parametrize("page", ["final_pages/problema.py", "final_pages/objetivo1.py", "final_pages/objetivo2.py"])
+@pytest.mark.parametrize("page", ["final_pages/problema.py", "final_pages/objetivo1.py", "final_pages/objetivo2.py",
+                                  "extended_pages/objetivo1.py", "extended_pages/objetivo2.py"])
 def test_titulos_de_graficos_sin_siglas(page):
     """Los títulos dicen el mensaje y no llevan siglas (decisión del usuario, 2026-11-09, incluida AFP)."""
     import re
@@ -253,7 +256,7 @@ def test_titulos_de_graficos_sin_siglas(page):
 
 def test_dispersiones_con_eje_desde_cero():
     """Pauta de la clase: los ejes de las dispersiones parten en 0, sin excepción."""
-    at = run_page("final_pages/objetivo1.py")
+    at = run_page("extended_pages/objetivo1.py")
     dispersiones = [s for s in _graficos(at) if any(t.get("type") == "scatter" and t.get("mode") == "markers" and t.get("marker", {}).get("sizemode") == "area"
                                                     for t in s["data"])]
     assert len(dispersiones) >= 2
@@ -267,7 +270,38 @@ def test_dispersiones_con_eje_desde_cero():
 
 def test_grafico_del_kpi_1_3_tiene_como_maximo_4_lineas():
     """Pauta de la clase: no más de 4 líneas por gráfico (la variante con el seguro de invalidez es opcional)."""
-    at = run_page("final_pages/objetivo1.py")
+    at = run_page("extended_pages/objetivo1.py")
     lineas = [s for s in _graficos(at) if s["layout"].get("title", {}).get("text", "").startswith("La parte del flujo")]
     assert len(lineas) == 1
     assert len([t for t in lineas[0]["data"] if t.get("type") == "scatter"]) <= 4
+
+
+# ───────────── versión final recortada y versión extendida completa (2026-11-10) ─────────────
+def test_entrypoint_versiones_extendida_y_dev_combinables():
+    for ext, dev in ((True, False), (True, True)):
+        at = AppTest.from_file(str(DASH / "Inicio.py"), default_timeout=60)
+        at.session_state["ext_mode"], at.session_state["dev_mode"] = ext, dev
+        at.run()
+        assert not at.exception, [e.value for e in at.exception]
+        assert any("EXTENDIDA" in i.value for i in at.sidebar.info)
+
+
+def test_la_version_final_deja_fuera_lo_que_solo_esta_en_la_extendida():
+    """Lo recortado de la final se borró de su código y sigue en `extended_pages/` (misma app, otro menú)."""
+    def marcas(rel):
+        at = run_page(rel)
+        assert not at.exception, [e.value for e in at.exception]
+        return ([e.label for e in at.expander], [m.value for m in at.markdown] + [h.value for h in at.header], [t.label for t in at.tabs], len(at.get("plotly_chart")))
+    f1, e1 = marcas("final_pages/objetivo1.py"), marcas("extended_pages/objetivo1.py")
+    for rotulo in ("Exploración: todos los factores probados", "Contraste con el estudio de la Asociación de AFP", "Prueba: ¿en qué región se cuenta a cada cotizante?",
+                   "Sensibilidad del punto crítico"):
+        assert not any(x.startswith(rotulo) for x in f1[0]) and any(x.startswith(rotulo) for x in e1[0]), rotulo
+    for titulo in ("##### 3b. ¿Cambia algo por sexo? Un descarte", "#### ¿Por qué cotizan más en unas regiones?"):
+        assert titulo not in f1[1] and titulo in e1[1], titulo
+    f2, e2 = marcas("final_pages/objetivo2.py"), marcas("extended_pages/objetivo2.py")
+    assert f2[2] == ["Evolución", "Frente al ingreso", "Qué hacer", "Peso fiscal 2050", "Quién lo financia", "Reservas", "Dónde"]
+    assert e2[2][:6] == ["Evolución", "Qué lo explica", "Por beneficiario", "Frente al ingreso", "Proyección 2050", "Qué hacer"] and "FAPP hoy" in e2[2]
+    assert not any("Costos y economía de las administradoras" in m for m in f2[1]) and any("Costos y economía de las administradoras" in m for m in e2[1])
+    assert f1[3] < e1[3] and f2[3] < e2[3]
+    src = (DASH / "final_pages").glob("*.py")
+    assert not any("render_afp_economia" in f.read_text(encoding="utf-8") or "render_1_1_sexo" in f.read_text(encoding="utf-8") for f in src)

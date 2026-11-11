@@ -130,3 +130,8 @@ La carpeta de paso `import razones/` ya no existe.
 - **KPI 2.1:** el mismo molde para costo del Pilar = personas de 65+ × alcance × monto por beneficio (ejemplo 2016 frente a 2025: ×1,44 × 1,47 × 2,10 = ×4,43), con la tabla «No confundir con» (costo por persona de 65+, cobertura del KPI 1.1, personas con pensión, pago mensual, «Total» del KPI 2.2). La pieza 2 se llama **alcance** (no «cobertura») para no chocar con el KPI 1.1; el Pilar es solo de vejez.
 - Código: `Dashboards/components/definiciones.py` (`bloque_definiciones`), `_definiciones_1_1` y `_definiciones_2_1`. Las tablas escapan el «$» (st.table lee markdown). Pruebas: `test_definiciones_diferencian_las_tres_piezas_antes_de_los_graficos` y `test_pagina_2_1_define_las_tres_piezas_antes_de_los_graficos`.
 - Corregido en `docs/KPIS_DE_COSTO_COMPARACION.md`: el Pilar del KPI 2.1 no incluye invalidez (sí el «Total» del KPI 2.2).
+
+## Actualización 2026-11-10, quinta parte: versión final recortada y versión extendida
+
+- Nueva **versión extendida** (`Dashboards/extended_pages/`, interruptor «Versión extendida» o `?mode=extended`) con todo el análisis; la **final** se recortó de verdad (código borrado). Detalle y lista de lo recortado: `docs/VERSION_FINAL_VS_EXTENDIDA.md`.
+- Descartes por sexo (INE `INF_TOI`) quedan en la extendida; script renombrado a `Scripts/28_informalidad_por_sexo.py` (Fabi ya tenía el 27).

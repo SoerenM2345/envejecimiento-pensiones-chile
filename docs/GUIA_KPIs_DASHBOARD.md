@@ -78,6 +78,8 @@ El análisis del problema (pirámides, Chile vs Alemania, 14% → 43%, pico de p
 | 📋 Políticas | Segmentación de comunas y propuestas |
 | 🧪 Estado de datos y KPIs | Estado de los 6 KPIs e inventario de archivos (filas, columnas, fecha) de `Data processed/` y `Data raw/` |
 
+Hay además una **versión extendida** (interruptor del menú lateral; qué contiene y qué dejó fuera la final: `docs/VERSION_FINAL_VS_EXTENDIDA.md`).
+
 Los KPIs 1.3, 2.1, 2.2 y 2.3 **solo** se ven en el modo final y en el Explorador; no tienen página propia en el modo desarrollador.
 
 ---

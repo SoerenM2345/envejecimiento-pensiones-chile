@@ -141,7 +141,7 @@ def test_indices_del_costo_parten_en_100_y_el_pib_del_escenario_crece_2_por_cien
 def test_pagina_2_1_explica_por_que_suben_los_costos():
     import json
     from streamlit.testing.v1 import AppTest
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo2.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo2.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     titulos = lambda: [json.loads(el.proto.spec).get("layout", {}).get("title", {}).get("text", "") for el in at.get("plotly_chart")]  # noqa: E731
     assert any(t.startswith("Hasta 2025 el costo del Pilar se multiplicó") for t in titulos())
@@ -195,7 +195,7 @@ def test_aumentos_de_la_descomposicion_y_producto_del_indice(h):
 def test_pagina_2_1_define_las_tres_piezas_antes_de_los_graficos(pilar):
     import json
     from streamlit.testing.v1 import AppTest
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo2.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo2.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     assert [e.label for e in at.expander if e.label.startswith("Definiciones y fórmulas")] == ["Definiciones y fórmulas: qué es cada pieza del costo"]
     formulas = [l.value for l in at.get("latex")]

@@ -121,7 +121,7 @@ def test_codigos_del_censo_coinciden_con_las_cifras_oficiales_agregadas_del_ine(
 
 
 def test_pagina_muestra_la_tendencia_entre_el_primer_bloque_y_las_correlaciones():
-    at = AppTest.from_file(str(ROOT / "Dashboards" / "final_pages" / "objetivo1.py"), default_timeout=180).run()
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
     titulos = [json.loads(el.proto.spec).get("layout", {}).get("title", {}).get("text", "") for el in at.get("plotly_chart")]
     i_tendencia = next(i for i, t in enumerate(titulos) if t.startswith("Desde 2019 la cobertura de Chile"))

@@ -137,20 +137,32 @@ def get_mode() -> str:
     return "dev" if st.session_state.get("dev_mode") else "final"
 
 
+def es_extendida() -> bool:
+    """True si está activa la versión extendida (copia completa del análisis, `extended_pages/`)."""
+    return bool(st.session_state.get("ext_mode"))
+
+
 def mode_toggle() -> str:
-    """Toggle 'Modo desarrollador' en el sidebar, sincronizado con ?mode=dev en la URL.
-    Una URL con ?mode=dev abre directamente en modo dev (solo se lee al iniciar la sesión)."""
-    if "dev_mode" not in st.session_state:
-        st.session_state["dev_mode"] = st.query_params.get("mode") == "dev"
+    """Toggles 'Versión extendida' y 'Modo desarrollador' en el sidebar, sincronizados con ?mode= en la URL
+    (valores separados por coma: ?mode=extended, ?mode=dev, ?mode=extended,dev). La URL solo se lee al iniciar la sesión."""
+    modos = set(st.query_params.get("mode", "").split(","))
+    for clave, nombre in (("dev_mode", "dev"), ("ext_mode", "extended")):
+        if clave not in st.session_state:
+            st.session_state[clave] = nombre in modos
 
     def _sync_url():
-        if st.session_state["dev_mode"]:
-            st.query_params["mode"] = "dev"
+        activos = [n for c, n in (("ext_mode", "extended"), ("dev_mode", "dev")) if st.session_state[c]]
+        if activos:
+            st.query_params["mode"] = ",".join(activos)
         elif "mode" in st.query_params:
             del st.query_params["mode"]
 
+    st.sidebar.toggle("Versión extendida", key="ext_mode", on_change=_sync_url,
+                      help="Muestra la versión completa del análisis (todos los gráficos, pruebas y descartes). Equivale a abrir la app con ?mode=extended.")
     st.sidebar.toggle("Modo desarrollador", key="dev_mode", on_change=_sync_url,
                       help="Muestra todas las páginas de análisis y exploración. Equivale a abrir la app con ?mode=dev.")
+    if es_extendida():
+        st.sidebar.info("EXTENDIDA: versión completa, con lo que la versión final dejó fuera")
     mode = get_mode()
     if mode == "dev":
         st.sidebar.warning("DEV: vista con todo el análisis")

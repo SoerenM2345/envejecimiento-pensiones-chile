@@ -1,11 +1,12 @@
 """Entry point del dashboard: `cd Dashboards && streamlit run Inicio.py`.
 
-Dos modos (ver utils.mode_toggle):
-  - final (por defecto): problema + los 6 KPIs de la presentación, en final_pages/.
-  - dev (toggle del sidebar o ?mode=dev): además, todas las páginas de análisis en pages/.
+Modos (ver utils.mode_toggle; se pueden combinar):
+  - final (por defecto): problema + los 6 KPIs de la presentación, solo lo esencial, en final_pages/.
+  - extendida (toggle del sidebar o ?mode=extended): la versión completa de esas páginas (todo lo que la final dejó fuera), en extended_pages/.
+  - dev (toggle del sidebar o ?mode=dev): además, todas las páginas de análisis y exploración en pages/.
 """
 import streamlit as st
-from utils import mode_toggle
+from utils import mode_toggle, es_extendida
 
 st.set_page_config(
     page_title="Envejecimiento demográfico y pensiones — Chile",
@@ -24,7 +25,14 @@ final_pages = [
     st.Page("final_pages/objetivo2.py", title="Objetivo 2: anticipar la presión fiscal del envejecimiento", icon="💰", url_path="objetivo-2"),
     st.Page("final_pages/fuentes.py", title="Fuentes y método", icon="📚", url_path="fuentes"),
 ]
-nav = {"Dashboard": final_pages}
+extended_pages = [
+    st.Page("extended_pages/resumen.py", title="Resumen", icon="📌", url_path="ext-resumen", default=True),
+    st.Page("extended_pages/problema.py", title="Problema", icon="🔎", url_path="ext-problema"),
+    st.Page("extended_pages/objetivo1.py", title="Objetivo 1: base activa", icon="🎯", url_path="ext-objetivo-1"),
+    st.Page("extended_pages/objetivo2.py", title="Objetivo 2: anticipar la presión fiscal del envejecimiento", icon="💰", url_path="ext-objetivo-2"),
+    st.Page("extended_pages/fuentes.py", title="Fuentes y método", icon="📚", url_path="ext-fuentes"),
+]
+nav = {"Versión extendida": extended_pages} if es_extendida() else {"Dashboard": final_pages}
 
 if mode == "final":
     # Entrada siempre visible: si solo existiera el interruptor del sidebar, el modo dev pasa desapercibido.

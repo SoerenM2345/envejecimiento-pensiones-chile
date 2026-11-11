@@ -171,7 +171,7 @@ def test_dependencia_regional():
 
 
 def _run():
-    at = AppTest.from_file(str(DASH / "final_pages" / "objetivo2.py"), default_timeout=120)
+    at = AppTest.from_file(str(DASH / "extended_pages" / "objetivo2.py"), default_timeout=120)
     at.session_state["_nav_active"] = True
     return at.run()
 

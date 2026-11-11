@@ -1,13 +1,13 @@
 """Objetivo 2: anticipar la presión fiscal del envejecimiento. KPIs 2.1, 2.2 y 2.3."""
 import pandas as pd
 import streamlit as st
-from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG, subtitulo_visible
+from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, subtitulo_visible
 from components.kpi_card import kpi_card
 from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo, gasto_total_vejez, _piezas_pilar
 from components.definiciones import bloque_definiciones
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
-from components.charts import mostrar, cost_components_chart, beneficiaries_chart, cost_projection_chart, cost_per_person_chart, spending_vs_population_growth, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
-from components.charts import cost_index_chart, cost_drivers_chart, num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_flow_chart, fapp_schedule_chart, dependence_regions_chart
+from components.charts import mostrar, cost_per_person_chart, spending_pct_pib, poverty_bars, poverty_people_bars, region_choropleth
+from components.charts import cost_index_chart, cost_drivers_chart, num_cl, estilo_kpi, poverty_coverage_scatter, fiscal_weight_chart, financing_sources_chart, reserve_chart, fapp_schedule_chart, dependence_regions_chart
 
 TITULO_OBJETIVO_2 = "Objetivo 2: anticipar la presión fiscal del envejecimiento"  # igual que config/kpis.yaml e Inicio.py
 st.title(TITULO_OBJETIVO_2)
@@ -16,8 +16,6 @@ st.markdown("La carga del envejecimiento sobre el Estado crece y sus reservas so
 
 
 from components.charts import estilo_kpi as _estilo_2_1, cost_pct_pibpc_chart, burden_chart, total_cost_chart
-from components.charts import afp_cost_ratio_chart, afp_waterfall_chart, afp_sales_it_chart, afp_by_firm_chart, afp_stress_chart
-from components import afp_economia as afe
 
 ANIO_BASE_COSTO = 2025
 ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.419, feb-2022)
@@ -83,7 +81,7 @@ def render_2_1():
     render_2_1_por_que(h)
     st.divider()
     st.markdown("#### Detalle del costo por persona de 65+")
-    t1, t2, t3, t4, t5, t6 = st.tabs(["Evolución", "Qué lo explica", "Por beneficiario", "Frente al ingreso", "Proyección 2050", "Qué hacer"])
+    t1, t4, t6 = st.tabs(["Evolución", "Frente al ingreso", "Qué hacer"])
     with t1:
         c1, c2 = st.columns(2)
         with c1:
@@ -103,21 +101,6 @@ def render_2_1():
             _texto(f"**Lectura:** en pesos reales el costo por adulto mayor cambia {var_total:+.0f}% ({a0}-{a1}) y {desde_hito:+.0f}% desde {ANIO_PGU} (PGU); "
                    f"frente al PIB per cápita pasa de {pri.costo_pct_pib_pc:.1f}% a {ult.costo_pct_pib_pc:.1f}%; las personas 65+ crecen {crece_65:.0f}% desde {ANIO_PGU}.")
         st.caption("\\* Derecha: precios corrientes a ambos lados, porque el costo real (IPC) y el PIB real (deflactor del PIB) no son comparables; detalle en «Método y fuentes».")
-    with t2:
-        c1, c2 = st.columns(2)
-        with c1:
-            _g21(cost_components_chart(h))
-        with c2:
-            _g21(spending_vs_population_growth(h.reset_index()))
-        _texto(f"**Lectura:** el Pilar y la PGU suben de ${pri.pilar_65 / 1e6:.2f} a ${ult.pilar_65 / 1e6:.2f} millones por persona 65+, pero el resto de 'Edad avanzada' "
-                    f"({100 * ult.resto / ult.gasto:.0f}% del gasto) baja ${(pri.resto_65 - ult.resto_65) / 1e6:.2f} millones: su gasto total casi no crece y la población 65+ sí.")
-        st.caption("\\* Resto = Edad avanzada − PGU − PBS/APS de vejez; DIPRES no lo abre, así que no se sabe si su caída es cierre del sistema antiguo o recorte.")
-    with t3:
-        _g21(beneficiaries_chart(h))
-        p0 = h.iloc[0]
-        _texto(f"**Lectura:** el alcance sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} beneficios por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
-                    f"a ${ult.monto_por_beneficio / 1e6:.2f} millones (≈ ${ult.monto_por_beneficio / 12:,.0f} al mes), casi quieto desde {ANIO_PGU + 1}.")
-        st.caption("\\* Solo Pilar Solidario y PGU de vejez; una persona puede tener más de un beneficio, así que el alcance es un tope y no el porcentaje de personas con pensión.")
     with t4:
         base = st.radio("Ingreso típico de los ocupados", ["mediana", "promedio"], horizontal=True,
                         help="Mediana: la mitad de los ocupados gana menos. Promedio: total de ingresos ÷ ocupados (más alto por los ingresos muy altos).")
@@ -127,18 +110,6 @@ def render_2_1():
         _texto(f"**Lectura:** repartido por igual, el gasto sería ${u.pago_plano:,.0f} al mes por ocupado: **{100 * u.carga_requerida:.0f}% del ingreso ({base})** frente al 10% de la cotización "
                     f"({100 * p0.carga_requerida:.0f}% en {a0}); harían falta {u.razon_necesaria:.1f} ocupados por persona 65+ y hay {u.ocupados_por_65:.1f}.")
         st.caption("\\* Escala de comparación, no un financiamiento real: el 10% va a cuentas individuales y estos gastos se pagan con impuestos generales.")
-    with t5:
-        c1, c2 = st.columns([2, 1])
-        crec = c1.slider("Crecimiento real anual del PIB", 0.0, 4.0, 100 * cargar_escenarios()["crecimiento_pib_real"], 0.5,
-                         format="%.1f%%") / 100
-        resto = c2.radio("Resto de 'Edad avanzada'", ["Total constante", "Crece con la población 65+"],
-                         help="Total constante: el sistema antiguo no crece. Crece: mismo gasto por persona 65+ que hoy.")
-        pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=cargar_escenarios()["pgu_250"])
-        pr = proyeccion_2_1(hb, crec, "constante" if resto.startswith("Total") else "crece", pgu250, base)
-        _g21(cost_projection_chart(hb, pr, base))
-        f = pr.loc[ANIO_FIN_2_1]
-        _texto(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
-                    f"y un pago por ocupado de **{100 * f.carga_requerida:.0f}% del ingreso ({base})** (hoy {100 * hb.iloc[-1].carga_requerida:.0f}%).")
     with t6:
         _recomendaciones_2_1(h)
     ips, n_ips, ips_men65 = ips_sistema_antiguo()
@@ -498,7 +469,7 @@ def _profundizacion_2_2():
                            help="Desde 2028 la ley obliga al Estado a aportar al Fondo Autónomo de Protección Previsional (Seguro Social): "
                                 "2,2 millones de UTM al año, hasta 15 millones desde 2037.")
     p = proyeccion_2_2(h, crec, pgu250, con_fapp)
-    t1, t2, t3, t4, t5 = st.tabs(["Peso fiscal 2050", "Quién lo financia", "Reservas", "FAPP hoy", "Dónde"])
+    t1, t2, t3, t5 = st.tabs(["Peso fiscal 2050", "Quién lo financia", "Reservas", "Dónde"])
 
     with t1:
         hist = peso_historico(load_csv("pgu_pbs_aps_nacional_anual.csv"), load_csv("macro_pib_anual.csv"), load_csv("gasto_proteccion_social.csv"))
@@ -592,21 +563,6 @@ def _profundizacion_2_2():
             _nota("Más rentabilidad baja el valor presente del gasto y sube la cobertura, pero el año de agotamiento casi no se mueve: "
                   "el alza del gasto crece más rápido que lo que rinde la reserva. Lo calcula Scripts/23_kpi_2_2_sensibilidad.py.")
 
-    with t4:
-        b6 = fb[fb.cierre == "2026-06-30"].reset_index(drop=True)
-        b5 = fb[fb.cierre == "2025-12-31"].iloc[0]
-        r6 = b6.iloc[0]
-        quema = (r6.beneficios_periodo_mm - r6.cotizaciones_periodo_mm) / 6
-        g1, g2 = st.columns([3, 2])
-        with g1:
-            _grafico(fapp_flow_chart(b6), 420)
-        with g2:
-            st.metric("Patrimonio del FAPP, 31-dic-2025", es_cl(f"${b5.patrimonio_mm / 1e6:.2f} billones"))
-            st.metric("Patrimonio del FAPP, 30-jun-2026", es_cl(f"${num_cl(r6.patrimonio_mm / 1e6, 3)} billones"), help="Activos menos lo que el FAPP debe al FRP")
-            st.metric("Cotizaciones / beneficios, ene-jun 2026", es_cl(f"{100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}%"))
-        _texto(f"**Lectura:** en ene-jun 2026 las cotizaciones cubrieron {100 * r6.cotizaciones_periodo_mm / r6.beneficios_periodo_mm:.0f}% de los beneficios y el patrimonio quedó en "
-                    f"{r6.patrimonio_mm / quema:.1f} meses de ese déficit; quedan hasta US$700 millones autorizados del FRP.")
-        _nota("\\* Último dato disponible: 30-jun-2026, seis meses después del resto del KPI. Detalle de la brecha en «Método y fuentes».")
 
     with t5:
         reg = dependencia_regional(load_csv("pgu_pbs_aps_region_trimestral.csv"), load_csv("pgu_pbs_aps_nacional_anual.csv"),
@@ -634,10 +590,9 @@ def _profundizacion_2_2():
 
     with st.expander("Método y fuentes"):
         _nota("**Fechas.** Todo se ancla en 2025: Pilar y PIB son flujos de 2025; las reservas son saldos al 31-dic-2025; el retiro del FRP usa el dólar promedio del año y los saldos el dólar del último día hábil "
-                   "(30-dic-2025, SII; coincide con el que implica la tabla de activos en dólares de DIPRES). La pestaña «FAPP hoy» usa junio de 2026. Lo regional va con el Censo 2024 (4.º trimestre de 2024).")
+                   "(30-dic-2025, SII; coincide con el que implica la tabla de activos en dólares de DIPRES). Lo regional va con el Censo 2024 (4.º trimestre de 2024).")
         _nota("**Observado y escenario.** 2009-2025: monto nominal pagado del Pilar (incluye invalidez) / PIB corriente del mismo año. Escenario: población 65+ INE base 2024; costo por persona 65+ constante en términos reales "
                    "salvo la PGU de $250.000; invalidez constante en términos reales; el aporte al FAPP está en UTM y se pasa a pesos de 2025 con la UTM promedio de 2025 ($68.640). No incluye el sistema antiguo.")
-        _nota("**FAPP, brecha del primer semestre de 2026.** Es transitoria por diseño: según el calendario de DIPRES la cotización al Seguro Social sube de 0,9% a 3,4% de la masa imponible en septiembre de 2026 y llega a 4,0% en septiembre de 2027; el patrimonio es los activos menos lo que el FAPP debe al FRP.")
         _nota("**Reservas.** Cartera propia del FRP (US$ 10.313 M de valor de mercado menos US$ 222 M ya transferidos al FAPP) a la rentabilidad real elegida; cubre el gasto elegido desde 2026. "
                    "Ratio 2 «cobertura de reservas» = reserva / valor presente de ese gasto a la misma tasa (alternativa al valor presente oficial del déficit, no publicado); supuestos en config/escenarios.yaml. El FRP es para pensiones garantizadas; los activos del FAPP son del Seguro Social. No se modelan las reglas de retiro ni de reposición.")
         _nota("**Sensibilidad.** El primer aporte al FAPP es 2028 en la tabla de la Subsecretaría y 2027 en el texto de DIPRES: adelantarlo mueve el agotamiento de 2033 a 2032. "
@@ -772,86 +727,6 @@ kpi_card("2.2", render_2_2)
 kpi_card("2.3", render_2_3)
 
 
-@st.cache_data
-def datos_afp():
-    """Serie del sistema y cuadros por administradora (Scripts/27) y los insumos de la comisión de equilibrio."""
-    por_afp = load_csv("afp_resultados_por_afp.csv")
-    d = afe.serie_sistema(load_csv("afp_resultados_sistema.csv"), por_afp)
-    ult = int(d.index.max())
-    cot = load_csv("cotizantes_por_region.csv")
-    cotizantes = float(cot[(cot.region_label == "Total") & (cot.anio == ult)].cotizantes.iloc[0])
-    f = load_csv("fichas_previsionales_mensual.csv")
-    ingreso = float(f[f.mes_ref_ingreso.str[:4].astype(int) == ult].ingreso_promedio.mean())
-    return d, por_afp, cotizantes, ingreso
-
-
-def render_afp_economia():
-    """Costos y economía de las administradoras: el negocio que pierde o gana con la base cotizante (no es costo del Estado)."""
-    d, por_afp, cotizantes, ingreso = datos_afp()
-    a0, a1 = int(d.index.min()), int(d.index.max())
-    u, p0, prev = d.loc[a1], d.loc[a0], d.loc[a1 - 1]
-    eq = afe.equilibrio(d, a1, cotizantes, ingreso)
-    st.divider()
-    st.header("Costos y economía de las administradoras de fondos de pensiones")
-    st.markdown("Hasta aquí, el costo del **Estado**. Esta sección mira el negocio de las **administradoras**: lo que cobran (comisiones) y lo que les cuesta "
-                "administrar las cuentas. No se mezclan: el Pilar Solidario no pasa por sus resultados.")
-    st.caption("🟢 Calculado con datos reales · el escenario de la comisión de equilibrio es un escenario, no un pronóstico")
-    kpi_card_row([
-        (f"Comisiones {a1}", f"${u.comisiones_mm / 1e6:.2f} billones", f"{u.comision_sobre_ingresos:.1f}% de los ingresos de las administradoras",
-         ["Incluye comisiones de cotizantes, pensionados en retiro programado y renta temporal, ahorro voluntario y Cuenta 2", "Millones de pesos del año"]),
-        (f"Costos ÷ comisiones {a1}", f"{u.costo_sobre_comision:.1f}%", f"{p0.costo_sobre_comision:.1f}% en {a0}",
-         ["Gasto de administración total del sistema ÷ ingresos por comisiones"]),
-        (f"Ganancia {a1}", f"${u.ganancia_mm / 1e6:.2f} billones", f"Rentabilidad sobre patrimonio {u.roe_pct:.1f}%",
-         ["Después de impuesto", f"Encaje: {u.encaje_sobre_ingresos:.1f}% de los ingresos"]),
-        ("Comisión de equilibrio (escenario)", f"{eq['comision_equilibrio_pct']:.2f}% del sueldo", f"Implícita: {eq['comision_implicita_pct']:.2f}%",
-         ["Costo por cotizante ÷ sueldo imponible anual", "Promedio del sistema, no costo marginal"]),
-    ])
-    c1, c2 = st.columns(2)
-    with c1:
-        mostrar(estilo_kpi(afp_cost_ratio_chart(d), 460))
-        subtitulo_visible(f"Qué muestra: cuánto de cada peso de comisión se va en costos de administración. {a0}-{a1}, sistema completo.")
-    with c2:
-        mostrar(estilo_kpi(afp_waterfall_chart(afe.cascada(d, a1), a1, u.encaje_sobre_ingresos, prev.encaje_sobre_ingresos), 460))
-        subtitulo_visible(f"Qué muestra: del ingreso a la ganancia de {a1}, en miles de millones de pesos.")
-    real_c = 100 * (u.gastos_mm_2025 / p0.gastos_mm_2025 - 1)
-    real_k = 100 * (u.comisiones_mm_2025 / p0.comisiones_mm_2025 - 1)
-    sin_enc = 100 * (u.resultado_sin_encaje_mm / prev.resultado_sin_encaje_mm - 1)
-    _texto(f"**Lectura:** entre {a0} y {a1}, en pesos de {a1}, los costos subieron {real_c:.1f}% y las comisiones {real_k:.1f}%: la eficiencia no mejora a nivel sistema. "
-           f"La ganancia de {a1} sube sobre todo por el encaje ({u.encaje_sobre_ingresos:.1f}% de los ingresos, frente a {prev.encaje_sobre_ingresos:.1f}% en {a1 - 1}); "
-           f"sin encaje, el resultado antes de impuesto crece solo {sin_enc:.1f}% nominal. **Para la administradora:** el negocio que se puede gestionar "
-           "es comisión menos costo; el encaje no se controla.")
-    c3, c4 = st.columns(2)
-    with c3:
-        mostrar(estilo_kpi(afp_sales_it_chart(d), 460))
-        subtitulo_visible("Qué muestra: dos partidas del gasto, medidas contra lo que se cobra.")
-    with c4:
-        a_comp = max(a for a in por_afp.anio.unique() if a <= a1 - 3)
-        mostrar(estilo_kpi(afp_by_firm_chart(afe.por_administradora(por_afp, a_comp, a1), a_comp, a1), 460))
-        subtitulo_visible(f"Qué muestra: el costo de cada administradora sobre sus ingresos, {a_comp} y {a1}.")
-    _texto("**Lectura:** el gasto se desplaza de la venta a la computación; que sea digitalización no está demostrado con estos datos. Entre administradoras, las que más "
-           "crecieron no siempre bajaron su costo (n = 7: no se puede afirmar un efecto de escala).")
-    mostrar(estilo_kpi(afp_stress_chart(afe.estres_comision(d, a1), eq["baja_max_pct"], a1), 440))
-    subtitulo_visible(f"Qué muestra: escenario de una baja de la comisión con los costos de {a1} fijos. Costo por cotizante: ${eq['costo_por_cotizante']:,.0f} al año; "
-                      f"cubrirlo exige {eq['comision_equilibrio_pct']:.2f}% de un sueldo imponible de ${eq['sueldo_mensual']:,.0f} al mes.")
-    _texto(f"**Lectura:** hay margen ante la presión de precio de la Ley 21.735 (licitación de stock: cada 24 meses el 10% de los afiliados no pensionados, "
-           f"solo pueden postular administradoras con menos de 25% de ellos), pero el margen depende del costo por cuenta: quien tenga un costo por cotizante "
-           f"mayor que el promedio (${eq['costo_por_cotizante']:,.0f}) tiene menos espacio para bajar su comisión.")
-    _nota(f"\\* Fuente: Superintendencia de Pensiones, «Costos de administración de los Fondos de Pensiones» {a0}-{a1} (estados financieros de las administradoras); "
-          f"cotizantes de diciembre y sueldo imponible promedio {a1} (fichas previsionales); Nota Técnica de la Ley 21.735. Millones de pesos de cada año; pesos de {a1} con el IPC anual. "
-          "Quiebre de serie 2020/21 (franja gris): no comparar crecimientos que lo crucen.")
-    with st.expander("Método y fuentes (costos de las administradoras)"):
-        _texto(
-            "- **Comisiones:** ingresos por comisiones del sistema; incluyen pensionados en retiro programado y renta temporal, ahorro voluntario y Cuenta 2. Por eso la comisión implícita "
-            f"({eq['comision_implicita_pct']:.2f}% del sueldo) está sobreestimada.\n"
-            "- **Costos:** gasto total de administración (personal, operación, depreciación y otros). En 2019 y 2021 el total del informe incluye además la prima del seguro de invalidez "
-            "y sobrevivencia (~330 millones).\n"
-            "- **Venta y computación:** el informe publica el reparto del gasto en % con una decimal; las razones sobre la comisión se derivan de ese reparto.\n"
-            "- **Por administradora:** el cuadro N° 1 no separa la comisión, se usan los ingresos ordinarios (incluyen otros ingresos operacionales); costo sin depreciación.\n"
-            f"- **Comisión de equilibrio (escenario):** gasto {a1} ÷ cotizantes de diciembre ÷ (12 × sueldo imponible promedio {a1}). Es un costo promedio: el costo de un cotizante adicional es menor.\n"
-            "- **Falta:** comisiones vigentes por administradora y cotizantes por administradora (costo por cuenta y cuota de mercado). Hallazgos: docs/COSTOS_AFP_HALLAZGOS.md.")
-
-
-render_afp_economia()
 
 st.info("**Mensaje clave:** el costo por adulto mayor está controlado, pero el número de adultos mayores no: la carga fiscal sube con "
         "reservas mínimas y sin margen para recortar sin aumentar la pobreza. La salida sostenible es ampliar la base cotizante, justo "

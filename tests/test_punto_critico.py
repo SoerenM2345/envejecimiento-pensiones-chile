@@ -176,7 +176,7 @@ def test_comuna_hereda_de_la_region_y_conserva_su_estructura_de_edad(datos):
 
 # ───────────── página ─────────────
 def correr(cambios):
-    at = AppTest.from_file(str(DASH / "final_pages" / "objetivo1.py"), default_timeout=120)
+    at = AppTest.from_file(str(DASH / "extended_pages" / "objetivo1.py"), default_timeout=120)
     at.session_state["_nav_active"] = True
     at.run()
     for tipo, clave, valor in cambios:

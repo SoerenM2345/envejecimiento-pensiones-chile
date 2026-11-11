@@ -42,5 +42,6 @@ with col2:
         "- **Problema:** pirámides, Chile vs. Alemania, envejecimiento 1992-2070 y pico de la población activa.\n"
         "- **Objetivo 1, retener y ampliar la base activa:** KPIs 1.1, 1.2 y 1.3.\n"
         "- **Objetivo 2, anticipar la presión fiscal del envejecimiento:** KPIs 2.1, 2.2 y 2.3.\n"
-        "- **Fuentes y método:** de dónde sale cada cifra y sus límites."
+        "- **Fuentes y método:** de dónde sale cada cifra y sus límites.\n"
+        "- **Versión extendida** (interruptor del menú lateral): el análisis completo, con las pruebas, los descartes y los detalles que esta versión dejó fuera."
     )

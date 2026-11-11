@@ -322,7 +322,7 @@ def cost_index_chart(idx: pd.DataFrame, futuro: bool = False) -> go.Figure:
     ampliar_derecha(fig, a0, a1, 0.3)
     v = lambda c: idx[c].iloc[-1] / 100  # noqa: E731
     msg = (f"Hasta {a1} el costo del Pilar se {'multiplicaría' if futuro else 'multiplicó'} por {v('pilar'):.1f} = monto ×{v('monto'):.1f} × "
-           f"personas de 65+ ×{v('pob_65'):.2f} × cobertura ×{v('cobertura'):.2f}; la economía real, ×{v('pib'):.1f}")
+           f"personas de 65+ ×{v('pob_65'):.2f} × alcance ×{v('cobertura'):.2f}; la economía real, ×{v('pib'):.1f}")
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=30, t=110, b=50)}, showlegend=False,
                       title=_titulo(msg, f"Índice con {a0} = 100; Pilar Solidario de vejez (Pensión Garantizada Universal y pensiones solidarias), pesos reales de 2025" + ("; escenario" if futuro else ""), ancho=70))
     fig.update_xaxes(title="", dtick=1 if a1 - a0 <= 10 else 5)
