@@ -193,7 +193,7 @@ kpis_presentacion:
     visualizacion: mapa
     status: live
     archivo: [kpi_presion_previsional_region.csv]
-    fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024]
+    fuente: [Superintendencia de Pensiones (cotizantes por región), INE Censo 2024, INE proyecciones base 2017 (población regional 2002-2025), INE Encuesta Nacional de Empleo regional, Asociación de AFP (estudio 135), CASEN 2022 (ingreso per cápita)]
     caveat: "Cotizantes 2024 contra población Censo 2024 (mismo año); 56.094 cotizantes sin región informada quedan fuera del cálculo regional."
     analisis:
       - nombre: "¿Por qué cotizan más en unas regiones? (correlaciones) y matriz de riesgo cobertura × envejecimiento"
