@@ -1449,6 +1449,72 @@ def factor_bars(fac: pd.DataFrame) -> go.Figure:
     return fig
 
 
+COLORES_COMPOSICION = {  # grupo de kpi_cobertura_composicion.csv -> color: azules = cotizan, naranjas = ocupados que no cotizan, amarillo = buscan trabajo, gris = fuera
+    "Cotizan: dependientes": BLUE,
+    "Cotizan: independientes y voluntarios": "#184f95",
+    "No cotizan: ocupados informales": ORANGE,
+    "No cotizan: ocupados formales fuera de la estadística": lighten(ORANGE, 0.45),
+    "Buscan trabajo (desocupados)": "#eda100",
+    "Ni trabajan ni buscan": "#c9c8c2",
+}
+PIEZAS_COMPOSICION = {3: "Ocupados que cotizan", 2: "Empleo", 1: "Participación laboral"}  # mismas piezas de la descomposición de la cobertura
+
+
+def coverage_composition_chart(d: pd.DataFrame) -> go.Figure:
+    """KPI 1.1, estado actual: las personas de 15 a 64 años en una sola barra, por si cotizan o no y, si no, por qué. d =
+    kpi_cobertura_composicion.csv (pieza, grupo, personas, pct_15_64). Los grupos son las piezas de la cobertura (participación × empleo ×
+    ocupados que cotizan): arriba de la barra, una llave por pieza."""
+    fig = go.Figure()
+    x0, tramos = 0.0, {}
+    for r in d.itertuples():
+        pct = float(r.pct_15_64)
+        grande = pct >= 3
+        fig.add_bar(y=[""], x=[pct], orientation="h", name=r.grupo, marker=dict(color=COLORES_COMPOSICION[r.grupo], line=dict(color="white", width=1.5)),
+                    text=[f"{r.personas / 1e6:.2f} M<br>{pct:.1f} %"] if grande else [""], textposition="inside", insidetextanchor="middle",
+                    textfont=dict(size=12, color="white" if r.grupo in list(COLORES_COMPOSICION)[:3] else INK_PRIMARY),
+                    hovertemplate=f"{r.grupo}<br>{r.personas:,.0f} personas ({pct:.1f} % de 15 a 64 años)<extra></extra>")
+        a, b = tramos.get(r.pieza, (x0, x0))
+        tramos[r.pieza] = (min(a, x0), x0 + pct)
+        x0 += pct
+    for pieza, (a, b) in tramos.items():  # llave sobre la barra con el nombre de la pieza
+        fig.add_shape(type="line", xref="x", yref="paper", x0=a + 0.4, x1=b - 0.4, y0=1.04, y1=1.04, line=dict(color=INK_PRIMARY, width=1.5))
+        fig.add_annotation(xref="x", yref="paper", x=(a + b) / 2, y=1.07, yanchor="bottom", showarrow=False, font=dict(size=12, color=INK_PRIMARY),
+                           text=f"<b>Pieza {pieza}: {PIEZAS_COMPOSICION[pieza]}</b>")
+    cotizan = d[d.grupo.str.startswith("Cotizan")].pct_15_64.sum()
+    sin = d[d.grupo.str.startswith("No cotizan")].pct_15_64.sum()
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=30, r=30, t=150, b=140), "legend": dict(orientation="h", y=-0.5, x=0, bgcolor="rgba(0,0,0,0)", traceorder="normal")},
+                      barmode="stack", bargap=0.25, height=430,
+                      title=_titulo(f"Cotizan {cotizan:.0f} de cada 100 personas de 15 a 64 años; otras {sin:.0f} trabajan y no cotizan",
+                                    "Personas de 15 a 64 años según si cotizan o no, diciembre 2024 (Censo 2024: 12,6 millones)", ancho=70))
+    fig.update_xaxes(range=[0, 100], ticksuffix=" %", title="% de las personas de 15 a 64 años", dtick=10)
+    fig.update_yaxes(visible=False)
+    return con_coma(fig)
+
+
+def worker_type_chart(c: pd.DataFrame) -> go.Figure:
+    """KPI 1.1, otra mirada: los independientes entre los ocupados (Censo) frente a entre los cotizantes (Superintendencia). c =
+    kpi_cobertura_composicion_categoria.csv (universo, tipo, personas, pct). Mismos dos colores en las dos barras; un color por tipo."""
+    colores = {"Independientes": AQUA, "Dependientes y otros": "#c9c8c2"}
+    fig = go.Figure()
+    for tipo, color in colores.items():
+        s = c[c.tipo == tipo].set_index("universo").loc[list(c.universo.unique())[::-1]]
+        fig.add_bar(y=list(s.index), x=s.pct, orientation="h", name=tipo, marker=dict(color=color, line=dict(color="white", width=1.5)),
+                    text=[f"{p:.1f} %" if p >= 5 else "" for p in s.pct], textposition="inside", insidetextanchor="middle",
+                    textfont=dict(size=12, color=INK_PRIMARY), hovertemplate="%{y}<br>" + tipo + ": %{x:.1f} % (%{customdata:,.0f} personas)<extra></extra>",
+                    customdata=s.personas)
+    ind = c[c.tipo == "Independientes"].set_index("universo").pct
+    u_ocu, u_cot = c.universo.unique()[:2]
+    fig.add_annotation(xref="x", yref="y", x=100, y=u_cot, xanchor="left", showarrow=False, font=dict(size=12, color=INK_PRIMARY),
+                       text=f"<b>{ind[u_cot]:.1f} %</b> independientes")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=30, r=150, t=110, b=120), "legend": dict(orientation="h", y=-0.6, x=0, bgcolor="rgba(0,0,0,0)")},
+                      barmode="stack", bargap=0.33, height=340,
+                      title=_titulo(f"Los independientes son {ind[u_ocu]:.0f} de cada 100 ocupados, pero menos de {max(1, round(ind[u_cot] + 0.5)):.0f} de cada 100 cotizantes",
+                                    "Ocupados según el Censo 2024 y cotizantes de diciembre 2024 según la Superintendencia de Pensiones, por tipo de trabajo", ancho=70))
+    fig.update_xaxes(range=[0, 100], ticksuffix=" %", dtick=20, title="% del total de cada grupo")
+    fig.update_yaxes(title="", automargin=True)
+    return con_coma(fig)
+
+
 def risk_quadrant(df: pd.DataFrame, nac_cobertura: float, nac_65: float) -> pd.Series:
     """Nombre del cuadrante de cada región (mismo corte que coverage_risk_matrix)."""
     return pd.Series([CUADRANTES[(c >= nac_cobertura, e > nac_65)][0]

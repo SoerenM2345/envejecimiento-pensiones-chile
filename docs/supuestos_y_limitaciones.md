@@ -106,7 +106,30 @@ Seis escenarios con supuestos fijos, además del simulador (que sigue igual). De
 | 6.4 | Solo país: las regiones y comunas del simulador no tienen escenarios fijos (su horizonte llega a 2050 y no hay informalidad regional proyectada). | — |
 | 6.5 | Los topes de 11 y 12 % son criterio, no dato: la PGU se paga con impuestos generales. Aquí solo muestran cuánto se atrasa el cruce. | — |
 
-## 7. Pendiente (datos que faltan)
+## 7. Composición actual de los cotizantes y de los que no cotizan (KPI 1.1, `Scripts/29_composicion_cotizantes.py`)
+
+Gráfico «¿Quién cotiza hoy y por qué no cotiza el resto?»: las 12,6 millones de personas de 15 a 64 años (Censo 2024) en seis grupos que suman el total. **Los grupos son las piezas de la descomposición de la cobertura** (participación × empleo × ocupados que cotizan), no una clasificación nueva: lo que cotiza es la cobertura de la tarjeta (46,5 %) y cada razón de la tabla «Las razones una por una» cae en el mismo grupo.
+
+| Grupo | Pieza | Personas (dic-2024) | % de 15-64 |
+|---|---|---|---|
+| Cotizan: dependientes | Ocupados que cotizan | 5.814.037 | 46,1 |
+| Cotizan: independientes y voluntarios | Ocupados que cotizan | 48.846 | 0,4 |
+| No cotizan: ocupados informales (ENE) | Ocupados que cotizan | 2.283.299 | 18,1 |
+| No cotizan: ocupados formales fuera de la estadística | Ocupados que cotizan | 547.148 | 4,3 |
+| Buscan trabajo (desocupados) | Empleo | 755.707 | 6,0 |
+| Ni trabajan ni buscan | Participación laboral | 3.169.508 | 25,1 |
+
+| # | Supuesto o límite | Efecto |
+|---|---|---|
+| 7.1 | Los cotizantes con región (5.862.883, los de la cobertura) se reparten entre dependientes, independientes y voluntarios con la proporción del total país de la Superintendencia (5.918.977). | Los 56 mil «sin información» pesan igual en los tres tipos; el efecto en los porcentajes es menor a 0,01 puntos. |
+| 7.2 | Ocupados, desocupados y personas de 65 años o más: la fuerza de trabajo incluye a los mayores de 65 que trabajan, igual que la cobertura. | «Ni trabajan ni buscan» es un **resto** (población 15-64 − ocupados − desocupados), unos 0,7 millones menos de los que realmente no participan entre 15 y 64. |
+| 7.3 | **Se supone que ningún informal figura entre los cotizantes.** Los informales de la ENE (2.467.359, nov-ene 2023-24) se llevan al nivel del Censo con el factor de los ocupados (× 0,925). | Si algunos informales cotizan (por ejemplo un independiente con negocio no registrado que cotiza), «formales fuera de la estadística» sube y los informales bajan en lo mismo. Sin cambio en los que cotizan ni en el total de los que no. |
+| 7.4 | **«Formales fuera de la estadística» es una resta**: ocupados − cotizantes − informales. Se interpreta como honorarios, regímenes fuera de las administradoras (Capredena, Dipreca) y cotizaciones declaradas y no pagadas, pero eso no se puede comprobar con estos datos. | Coincide con lo dicho en 6.3 (67 % de los ocupados cotiza y 72 % no es informal en 2023). |
+| 7.5 | Segundo gráfico («independientes entre los ocupados y entre los cotizantes»): el Censo clasifica la categoría ocupacional (`p40_cise_rec`; el código 1 se toma como independiente, igual que el script 24; **no se encontró el libro de códigos del INE para confirmarlo**) distinto de la ENE (en las regiones sale 28-40 % en el Censo y 30-32 % en la Asociación de AFP). | Muestra el orden de magnitud (1 de cada 3 ocupados frente a menos de 1 de cada 100 cotizantes), no una brecha exacta. |
+| 7.6 | **Los dependientes no cuadran entre fuentes**: con el Censo, los ocupados que no son independientes son unos 5,5 millones y los cotizantes dependientes de la Superintendencia 5,9 millones. | Por eso no se muestra cuántos dependientes no cotizan: con estas fuentes saldría cero o negativo, lo que contradice la informalidad de los dependientes de la ENE. La informalidad de la ENE no se separa por tipo de trabajo (los archivos descargados traen la categoría ocupacional en «Total»). Pendiente en la sección 8. |
+| 7.7 | Los independientes que cotizan caen de 135 mil (2017) a 84 mil (2019) y 48 mil (2024). | Posible cambio de definición con la Ley 21.133 (honorarios); no se pudo comprobar, es el mismo quiebre posible de 0.1. |
+
+## 8. Pendiente (datos que faltan)
 
 | Dato | Para qué | Estado |
 |---|---|---|

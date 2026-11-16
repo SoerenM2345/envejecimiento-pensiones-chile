@@ -118,6 +118,24 @@ def test_kpi_1_1_correlaciones():
     assert res.loc["urbano", "pearson_r"] > 0.4 and res.loc["pct_65_mas", "pearson_r"] < 0
 
 
+def test_kpi_1_1_composicion_usa_las_piezas_de_la_cobertura():
+    """KPI 1.1, estado actual: los seis grupos suman la población de 15-64, los que cotizan son la cobertura del KPI y las tres piezas
+    (participación, empleo, ocupados que cotizan) dan los mismos porcentajes que la descomposición."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    d = pd.read_csv(dp / "kpi_cobertura_composicion.csv")
+    f = pd.read_csv(dp / "kpi_cobertura_factores_anual.csv")
+    f = f[(f.territorio_id == 0) & (f.anio == 2024)].iloc[0]
+    assert len(d) == 6 and (d.personas > 0).all() and abs(d.personas.sum() - f.p1564) < 1
+    assert abs(d[d.grupo.str.startswith("Cotizan")].pct_15_64.sum() - f.cobertura_pct) < 1e-3
+    por_pieza = d.groupby("pieza").pct_15_64.sum()
+    assert abs(por_pieza[1] - 100 * (1 - f.participacion)) < 1e-3  # ni trabajan ni buscan
+    assert abs(por_pieza[2] - 100 * f.participacion * (1 - f.empleo)) < 1e-3  # buscan trabajo
+    assert abs(por_pieza[3] - 100 * f.participacion * f.empleo) < 1e-3  # ocupados: cotizan o no
+    c = pd.read_csv(dp / "kpi_cobertura_composicion_categoria.csv")
+    assert (c.groupby("universo").pct.sum().round(6) == 100).all()
+
+
 def test_kpi_1_2_razon_y_sensibilidad():
     """KPI 1.2: razón de soporte 2024 del país = 2,27 y tabla de sensibilidad 3 × 3 del punto crítico."""
     import pandas as pd

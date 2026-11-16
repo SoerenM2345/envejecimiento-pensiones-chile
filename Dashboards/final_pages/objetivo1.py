@@ -11,6 +11,7 @@ from components.definiciones import bloque_definiciones
 from components.charts import (mostrar, region_choropleth, region_bars, support_ratio_projection, commissionable_flow_bars,
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
                                coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, )
+from components.charts import coverage_composition_chart, worker_type_chart
 from components import critical_point as cp
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -46,6 +47,7 @@ def render_1_1():
         else:
             fig_reg = region_coverage_people_bars(pres, nac_cobertura)
         mostrar(estilo_kpi(fig_reg, 640))
+    render_1_1_composicion()
     render_1_1_tendencia()
     render_1_1_matriz()
     render_1_1_causas()
@@ -65,6 +67,42 @@ def _prioritarias(reg: pd.DataFrame) -> pd.DataFrame:
     col = CRITERIOS[st.session_state.get("cob_criterio", next(iter(CRITERIOS)))][0]
     r16 = reg[reg.region_id > 0]
     return r16[r16[col].notna()].sort_values(col)
+
+
+def render_1_1_composicion():
+    """Estado actual: quién cotiza y quién no, con los mismos grupos (piezas) de la descomposición de la cobertura (Scripts/29)."""
+    st.markdown("#### ¿Quién cotiza hoy y por qué no cotiza el resto?")
+    d = load_csv("kpi_cobertura_composicion.csv")
+    c = load_csv("kpi_cobertura_composicion_categoria.csv")
+    g = d.set_index("grupo")
+    p = lambda k: g.loc[k, "pct_15_64"]  # noqa: E731
+    mostrar(coverage_composition_chart(d))
+    _subtitulo_visible(
+        f"Qué muestra: las personas de 15 a 64 años en una sola barra. Cotizan {p('Cotizan: dependientes') + p('Cotizan: independientes y voluntarios'):.1f} %; "
+        f"el resto no, por tres razones que son las piezas de la cobertura: no participan en el mercado laboral ({p('Ni trabajan ni buscan'):.1f} %), buscan trabajo "
+        f"({p('Buscan trabajo (desocupados)'):.1f} %) o trabajan sin cotizar ({p('No cotizan: ocupados informales') + p('No cotizan: ocupados formales fuera de la estadística'):.1f} %).")
+    tabla = pd.DataFrame([
+        ("Cotizan: dependientes", "Ocupados que cotizan", "Trabajadores con contrato que cotizan en una administradora de fondos de pensiones"),
+        ("Cotizan: independientes y voluntarios", "Ocupados que cotizan", "Independientes que cotizan por su cuenta (la Tesorería paga a algunos) y afiliados voluntarios: casi no aparecen"),
+        ("No cotizan: ocupados informales", "Ocupados que cotizan", "Informalidad: la encuesta de empleo (INE) cuenta como informal al dependiente sin cotizaciones y al independiente con negocio no registrado"),
+        ("No cotizan: ocupados formales fuera de la estadística", "Ocupados que cotizan",
+         "Honorarios, regímenes fuera de las administradoras (Capredena, Dipreca) y cotizaciones declaradas y no pagadas; es lo que queda al restar la informalidad"),
+        ("Buscan trabajo (desocupados)", "Empleo (1 − desocupación)", "Desempleo"),
+        ("Ni trabajan ni buscan", "Participación laboral", "Estudian, cuidan a la familia, se desalentaron, y los mayores de 65 que trabajan restan de este grupo"),
+    ], columns=["Grupo del gráfico", "Pieza de la cobertura", "Razones que ya vimos"]).set_index("Grupo del gráfico")
+    tabla.insert(1, "Personas", [es_cl(f"{x:,.0f}") for x in d.personas])
+    st.table(tabla)
+    mostrar(worker_type_chart(c))
+    ind = c[c.tipo == "Independientes"].set_index("universo").pct
+    u_ocu, u_cot = c.universo.unique()[:2]
+    _subtitulo_visible(f"Qué muestra: otra forma de partir lo mismo, por tipo de trabajo y no por razón. Según el Censo, {ind[u_ocu]:.1f} % de los ocupados son independientes "
+                       f"(cuenta propia y empleadores); entre los cotizantes son {ind[u_cot]:.1f} %: casi ninguno aparece en la estadística de cotizantes.")
+    st.caption(_coma(
+        "Fuente: Superintendencia de Pensiones (cotizantes de diciembre 2024, por tipo), INE (Encuesta Nacional de Empleo: ocupados, desocupados e informales de nov-ene 2023-24, "
+        "llevados al nivel del Censo con el mismo factor que la población) y Censo 2024. Es la misma cobertura de arriba (cotizantes con región ÷ población de 15 a 64 años). "
+        "Límites: los ocupados y desocupados incluyen a los de 65 años o más, por eso «ni trabajan ni buscan» es un resto; se supone que ningún informal figura entre los cotizantes; "
+        "la partición entre informales y formales fuera de la estadística es una resta, no un dato; el Censo y la encuesta de empleo clasifican distinto el tipo de trabajo, "
+        "así que la segunda barra muestra el orden de magnitud, no una brecha exacta. Detalle en docs/supuestos_y_limitaciones.md, sección 7."))
 
 
 def render_1_1_tendencia():
