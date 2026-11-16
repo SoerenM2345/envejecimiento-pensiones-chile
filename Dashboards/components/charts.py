@@ -945,11 +945,14 @@ def commissionable_flow_bars(df: pd.DataFrame) -> go.Figure:
     return con_coma(fig)
 
 
-def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01, con_sis: bool = False) -> go.Figure:
+def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01, con_sis: bool = False, variantes_de: str = "salario",
+                              elasticidades: dict = None) -> go.Figure:
     """KPI 1.3: % del flujo que pasa por cuentas individuales, real (línea continua) y escenarios (punteados), variante
     sin SIS. Pauta de la clase: máximo 4 líneas, así que la variante con SIS (línea gris delgada, real + escenario base) solo se
     dibuja con con_sis=True.
-    df: anio, tipo (real / escenario / escenario_crec_1_5), variante (sin_sis / con_sis), kpi_1_3_pct."""
+    df: anio, tipo (real / escenario / escenario_crec_1_5 / escenario_reforma_baja / escenario_reforma_alta), variante (sin_sis / con_sis), kpi_1_3_pct.
+    variantes_de = "salario" dibuja las variantes del crecimiento del salario real; "reforma", las dos del efecto de la reforma en el empleo formal
+    (elasticidades = {"baja": -0.1, "alta": -0.3} para el rótulo): nunca las dos a la vez, para respetar el máximo de 4 líneas."""
     sens = df[(df.variante == "con_sis") & df.tipo.isin(["real", "escenario"])].sort_values("anio")
     df = df[df.variante == "sin_sis"]
     real = df[df.tipo == "real"].sort_values("anio")
@@ -967,9 +970,14 @@ def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01, con_sis
                     line=dict(color=BLUE, width=3), text=[f"{v:.1f}%" for v in real.kpi_1_3_pct],
                     textposition="top center", textfont_color=INK_PRIMARY)
     base_e = ancla
-    variantes = sorted(t for t in df.tipo.unique() if t.startswith("escenario_crec_"))
-    for tipo, nombre, color, dash in [("escenario", f"Escenario base (salario real {crec_base:+.1%} anual)".replace(".", ","), RED, "dash")] + [
-            (t, f"Variante: salario real +{t.removeprefix('escenario_crec_').replace('_', ',')}% anual", INK_MUTED, "dot") for t in variantes]:
+    if variantes_de == "reforma":
+        el = elasticidades or {}
+        extras = [(f"escenario_reforma_{k}", f"Reforma con efecto {adj} en el empleo (elasticidad {el.get(k, float('nan')):+.1f})".replace(".", ",").replace("-", "−"),
+                   INK_MUTED, "dot") for k, adj in (("baja", "bajo"), ("alta", "alto")) if f"escenario_reforma_{k}" in set(df.tipo)]
+    else:
+        extras = [(t, f"Variante: salario real +{t.removeprefix('escenario_crec_').replace('_', ',')}% anual", INK_MUTED, "dot")
+                  for t in sorted(t for t in df.tipo.unique() if t.startswith("escenario_crec_"))]
+    for tipo, nombre, color, dash in [("escenario", f"Escenario base (salario real {crec_base:+.1%} anual)".replace(".", ","), RED, "dash")] + extras:
         e = pd.concat([ancla, df[df.tipo == tipo]]).sort_values("anio")
         if len(e) == 1:
             continue
@@ -1006,6 +1014,44 @@ def commissionable_share_line(df: pd.DataFrame, crec_base: float = 0.01, con_sis
 
 
 # KPI 1.1 (diagnóstico): dispersión de cobertura y matriz de riesgo
+def _pct_exacto(x: float) -> str:
+    """Hasta dos decimales sin ceros de sobra, con al menos uno: 4.25 -> '4.25', 8.5 -> '8.5', 5 -> '5.0' (los escalones de la ley llevan 2 decimales)."""
+    t = f"{x:.2f}".rstrip("0")
+    return t + "0" if t.endswith(".") else t
+
+
+def employer_destination_chart(d: pd.DataFrame) -> go.Figure:
+    """KPI 1.3: adónde va la cotización del empleador en cada escalón de la Ley 21.735 (puntos porcentuales de la remuneración imponible).
+    d = kpi_reforma_empleador.csv (una fila por escalón: cuenta_individual, seguro_social_sin_sis, sis, total_empleador, anio, mes). Mismos colores
+    que el flujo del KPI 1.3: azul = cuenta individual, naranja = Seguro Social; el seguro de invalidez y sobrevivencia va en naranja claro porque
+    desde agosto de 2026 está dentro del Seguro Social. Entre 2033 y 2045 no hay escalones: la última barra de cada tramo se mantiene."""
+    d = d.sort_values("anio").reset_index(drop=True)
+    etiquetas = ["Antes"] + [str(int(a)) for a in d.anio[1:]]
+    fig = go.Figure()
+    for col, nombre, corto, color, texto_claro in [
+            ("cuenta_individual", "Cuenta individual (la administra la Administradora de Fondos de Pensiones)", "Cuenta individual", BLUE, True),
+            ("seguro_social_sin_sis", "Seguro Social: Beneficio por Años Cotizados y compensación a las mujeres", "Seguro Social", ORANGE, False),
+            ("sis", "Seguro de Invalidez y Sobrevivencia (aparte hasta julio de 2026, después dentro del Seguro Social)", "Seguro de Invalidez y Sobrevivencia",
+             lighten(ORANGE, 0.55), False)]:
+        v = 100 * d[col]
+        fig.add_bar(x=etiquetas, y=v, name=nombre, marker=dict(color=color, line=dict(color="white", width=1)),
+                    text=[_pct_exacto(x) if x >= 0.9 else "" for x in v], textposition="inside", insidetextanchor="middle",
+                    textfont=dict(size=11, color="white" if texto_claro else INK_PRIMARY),
+                    hovertemplate="%{x}: " + corto + " %{y:.2f} puntos<extra></extra>")
+    fig.add_scatter(x=etiquetas, y=100 * d.total_empleador, mode="text", text=[f"{_pct_exacto(100 * t)} %" for t in d.total_empleador],
+                    textposition="top center", textfont=dict(size=12, color=INK_PRIMARY), showlegend=False, hoverinfo="skip")
+    fin = d[d.anio == 2033].iloc[0]
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=70, r=30, t=110, b=190), "legend": dict(orientation="h", y=-0.28, bgcolor="rgba(0,0,0,0)")},
+                      **_TEXTO_CLARO, barmode="stack", **BARRAS, height=520,
+                      title=_titulo(f"Del {100 * fin.total_empleador:.1f} % que pagará el empleador desde 2033, {100 * fin.cuenta_individual:.1f} puntos van a la cuenta "
+                                    f"individual y {100 * (fin.seguro_social_sin_sis + fin.sis):.1f} al Seguro Social",
+                                    "Cotización del empleador por destino, puntos porcentuales de la remuneración imponible; cada barra es el escalón que parte "
+                                    "en agosto de ese año (en septiembre desde 2045)", ancho=70))
+    fig.update_xaxes(type="category", title="Año en que parte el escalón", **_EJE_CLARO)
+    fig.update_yaxes(title="% de la remuneración imponible", rangemode="tozero", range=[0, 10], ticksuffix=" %", **_EJE_CLARO)
+    return con_coma(fig)
+
+
 _TAM_MAX_PX = 55  # diámetro de la burbuja más grande (Metropolitana)
 _AREA_PX = (900, 400)  # área de trazado aproximada en el dashboard (ancho, alto), para ubicar los rótulos
 _POSICIONES = [  # (dirección x, dirección y) alrededor de la burbuja, en el orden en que se prueban
@@ -1388,23 +1434,30 @@ PANELES_ESCENARIOS = (  # (clave de kpi_pc_escenarios_fijos.csv, título del pan
 )
 
 
-def fixed_scenarios_chart(esc: pd.DataFrame, series: dict, hasta: int = 2065) -> go.Figure:
+PANELES_REFORMA = (  # (clave de kpi_pc_escenarios_reforma.csv, título del panel): la base y los dos efectos de la reforma del empleador en el empleo formal
+    ("base", "Base: cotizantes como hoy"), ("reforma_baja", "Reforma, efecto bajo en el empleo"), ("reforma_alta", "Reforma, efecto alto en el empleo"),
+)
+
+
+def fixed_scenarios_chart(esc: pd.DataFrame, series: dict, hasta: int = 2065, paneles: tuple = PANELES_ESCENARIOS, columnas: int = 3,
+                          titulo: str = None, detalle: str = None) -> go.Figure:
     """KPI 1.2, escenarios fijos: un panel por escenario con las dos curvas del punto crítico, el costo del Pilar Solidario de vejez (la misma
     en los seis, en rojo) y la capacidad (tope de carga × masa de ingreso de los cotizantes, en azul). El punto crítico es donde se cruzan: una
     línea punteada baja del cruce al eje y el año se escribe fuera del gráfico, bajo el eje. Fila de arriba: el tope cambia (10, 11, 12 %);
     fila de abajo: cambia la cobertura (tope de 10 %). Mismo eje vertical en los seis. esc = kpi_pc_escenarios_fijos.csv;
-    series = {clave: (serie del motor, punto_critico)}."""
+    series = {clave: (serie del motor, punto_critico)}. Con `paneles` = PANELES_REFORMA (una fila de tres) se comparan la base y la reforma del empleador;
+    `titulo` y `detalle` reemplazan el título automático."""
     unidades = {}
-    for clave, _ in PANELES_ESCENARIOS:
+    for clave, _ in paneles:
         d = series[clave][0]
         d = d[(d.anio >= 2025) & (d.anio <= hasta)]
         unidades[clave] = d
     div, unidad = _unidad_dinero(max(max(d.costo_total.max(), d.capacidad.max()) for d in unidades.values()))
     ymax = max(max(d.costo_total.max(), d.capacidad.max()) for d in unidades.values()) / div * 1.08
-    fig = make_subplots(rows=2, cols=3, shared_yaxes=True, horizontal_spacing=0.04, vertical_spacing=0.2,
-                        subplot_titles=[t for _, t in PANELES_ESCENARIOS])
-    for i, (clave, _) in enumerate(PANELES_ESCENARIOS):
-        r, c = i // 3 + 1, i % 3 + 1
+    fig = make_subplots(rows=-(-len(paneles) // columnas), cols=columnas, shared_yaxes=True, horizontal_spacing=0.04, vertical_spacing=0.2,
+                        subplot_titles=[t for _, t in paneles])
+    for i, (clave, _) in enumerate(paneles):
+        r, c = i // columnas + 1, i % columnas + 1
         d, pc = unidades[clave], series[clave][1]
         fig.add_scatter(x=d.anio, y=d.costo_total / div, mode="lines", line=dict(color=RED, width=2.5), showlegend=False,
                         hovertemplate="%{x}: %{y:.1f}<extra>Costo</extra>", row=r, col=c)
@@ -1419,15 +1472,15 @@ def fixed_scenarios_chart(esc: pd.DataFrame, series: dict, hasta: int = 2065) ->
             eje = "" if i == 0 else str(i + 1)  # make_subplots numera los ejes x, x2, x3... en orden de panel
             fig.add_annotation(x=pc["anio_exacto"], y=0, xref=f"x{eje}", yref=f"y{eje}", text=f"<b>{pc['anio']}</b>", showarrow=False,
                                yshift=-34, yanchor="top", font=dict(size=12, color=INK_PRIMARY))
-    anios = {c: series[c][1]["anio"] for c, _ in PANELES_ESCENARIOS if series[c][1]["estado"] == "cruza"}
+    anios = {c: series[c][1]["anio"] for c, _ in paneles if series[c][1]["estado"] == "cruza"}
     lo, hi = min(anios, key=anios.get), max(anios, key=anios.get)
-    nombre = dict(PANELES_ESCENARIOS)
+    nombre = dict(paneles)
     fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=60, r=20, t=110, b=60)}, showlegend=False,
-                      title=_titulo(f"El punto crítico va de {anios[lo]} a {anios[hi]}: de «{nombre[lo].lower()}» a «{nombre[hi].lower()}»",
-                                    f"Costo y capacidad del Pilar Solidario de vejez, {unidad}; el punto crítico es donde se cruzan (año bajo el eje)", ancho=80))
+                      title=_titulo(titulo or f"El punto crítico va de {anios[lo]} a {anios[hi]}: de «{nombre[lo].lower()}» a «{nombre[hi].lower()}»",
+                                    detalle or f"Costo y capacidad del Pilar Solidario de vejez, {unidad}; el punto crítico es donde se cruzan (año bajo el eje)", ancho=80))
     fig.update_xaxes(tickvals=[2025, 2045, 2065], range=[2025, hasta + 0.38 * (hasta - 2025)])
     fig.update_yaxes(range=[0, ymax])
-    for an in fig.layout.annotations[:6]:
+    for an in fig.layout.annotations[:len(paneles)]:
         an.font = dict(size=12, color=INK_PRIMARY)
     return fig
 

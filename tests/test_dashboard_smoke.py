@@ -170,7 +170,8 @@ def test_kpis_1_2_1_3_2_2_leen_la_misma_config_de_escenarios():
     import pandas as pd
     f = pd.read_csv(raiz / "Data processed" / "kpi_flujo_comisionable.csv")
     # KPI 1.3: el escenario base y las variantes salen de la config
-    assert set(f.tipo) == {"real", "escenario", "escenario_crec_0", "escenario_crec_1_5"}
+    assert set(f.tipo) == {"real", "escenario", "escenario_crec_0", "escenario_crec_1_5", "escenario_reforma_baja", "escenario_reforma_alta"}
+    assert sorted(cfg["reforma_empleador"]["elasticidad_empleo_formal"]["variantes"]) == [-0.3, -0.1]  # efecto alto y bajo de la reforma
 
 
 def test_kpi_2_2_sensibilidad_y_gasto_2025():

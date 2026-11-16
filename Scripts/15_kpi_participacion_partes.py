@@ -61,7 +61,9 @@ Salidas (Data processed/):
                                       ingreso_promedio, aporte_trabajadores_mes, gasto_pgu_pbs_aps_12m_mm
   - kpi_participacion_partes.csv      base real por pagador: anio, aporte_trabajadores, aporte_empleador, aporte_estado,
                                       financiamiento_total, n_meses, fuente (montos en pesos)
-  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_0 / escenario_crec_1_5), variante (sin_sis / con_sis),
+  - kpi_reforma_empleador.csv         Tabla 1 de la Nota Técnica por escalón: cuenta individual, Seguro Social sin SIS, SIS y total del empleador (en fracción)
+  - kpi_reforma_empleo_factor.csv     factor de cotizantes de cada escenario de la reforma frente a 2025 (elasticidad del empleo formal: config/escenarios.yaml)
+  - kpi_flujo_comisionable.csv        anio, tipo (real / escenario / escenario_crec_0 / escenario_crec_1_5 / escenario_reforma_baja / escenario_reforma_alta), variante (sin_sis / con_sis),
                                       trabajadores, empleador_ci, cuentas_individuales, seguro_social_fapp (sin SIS), sis,
                                       estado, flujo_total, kpi_1_3_pct, n_meses, supuestos
 """
@@ -85,6 +87,10 @@ ANIOS_ESCENARIO = range(2026, 2036)
 ESCENARIOS = yaml.safe_load((ROOT / "config" / "escenarios.yaml").read_text(encoding="utf-8"))
 CRECIMIENTO_BASE = ESCENARIOS["crecimiento_salario_real"]["base"]          # salario real, escenario base
 CRECIMIENTO_VARIANTES = ESCENARIOS["crecimiento_salario_real"]["variantes"]
+ELASTICIDAD = ESCENARIOS["reforma_empleador"]["elasticidad_empleo_formal"]   # cambio % de cotizantes dependientes por 1 % más de costo laboral
+assert ELASTICIDAD["base"] == 0.0 and len(ELASTICIDAD["variantes"]) == 2, "la base es el traspaso total (sin efecto) y hay un efecto bajo y uno alto"
+REFORMA = dict(zip(("baja", "alta"), sorted(ELASTICIDAD["variantes"], key=abs)))   # efecto bajo = el de menor elasticidad en valor absoluto
+ANIO_FIN_FACTOR = 2070   # último año de la serie del país del KPI 1.2
 
 
 def nombre_escenario(g):
@@ -162,6 +168,30 @@ def leer_nota_tecnica(path):
     tasa_sis = tasa_cl(re.sub(r"\s", "", nota.group(1)) + "%")
     assert sorted(tabla) == list(range(2025, 2034)), f"años leídos de la Tabla 1: {sorted(tabla)}"
     return tabla, tasa_sis
+
+
+def leer_destinos_empleador(path, tasa_sis):
+    """Tabla 1 completa (pág. 12 del PDF) para el gráfico «¿Adónde va la cotización del empleador?»: la fila «Antes de la Reforma», los escalones de
+    agosto 2025-2033 y los de septiembre 2045-2054 (cuando la cuenta individual sube a 6 % y el Seguro Social baja). Una fila por escalón con lo que
+    paga el empleador por destino: cuenta individual, Seguro Social sin SIS y SIS (aparte hasta jul-2026, dentro del 2,5 % del Seguro Social desde ago-2026)."""
+    texto = pypdf.PdfReader(path).pages[11].extract_text()
+    fila = re.compile(r"^(?:(Agosto|Septiembre)\s+)?(\d{4})\*{0,3}\s+(No existe\**|[\d,]+%)\s+([\d,]+%)\s+(No existe|[\d,]+%)\s+([\d,]+%)\s+"
+                      r"([\d,]+%)\s+([\d,]+%)", re.M)
+    filas = [dict(inicio="antes de la reforma", anio=2024, mes=None, sis_aparte=True, cuenta_individual=0.0, seguro_social_sin_sis=0.0,
+                  sis=tasa_sis, total_empleador=tasa_sis)]
+    for m in fila.finditer(texto.replace("Septiembre \n", "Septiembre ")):
+        sis_aparte, ci, crp, sis_cev, total_reforma, total = (tasa_cl(m.group(k)) for k in range(3, 9))
+        mes = m.group(1) or "Septiembre"  # la fila «Septiembre 2045» parte el rótulo en dos líneas
+        assert abs(ci + crp + sis_cev - total_reforma) < 1e-9, f"Tabla 1 no cuadra en {mes} {m.group(2)}"
+        dentro = sis_aparte == 0.0
+        ss = crp + sis_cev - (tasa_sis if dentro else 0.0)
+        assert abs(ci + ss + tasa_sis - total) < 1e-9, f"El total no cuadra en {mes} {m.group(2)}"
+        filas.append(dict(inicio=f"{mes.lower()} {m.group(2)}", anio=int(m.group(2)), mes=mes, sis_aparte=not dentro, cuenta_individual=ci,
+                          seguro_social_sin_sis=ss, sis=tasa_sis, total_empleador=total))
+    d = pd.DataFrame(filas)
+    assert d.anio.tolist() == [2024] + list(range(2025, 2034)) + list(range(2045, 2055)), f"filas leídas de la Tabla 1: {d.anio.tolist()}"
+    d["aumento_vs_antes"] = d.total_empleador - tasa_sis
+    return d
 
 
 def tasas_empleador(remuneracion):
@@ -246,6 +276,37 @@ print(f"   Nota Técnica Ley 21.735, Tabla 1 (leída del PDF), tasa SIS {TASA_SI
 for a, (ci, crp, sis_cev, dentro) in TABLA_LEY.items():
     print(f"     ago-{a}: cuenta individual {ci:.2%} | rentabilidad protegida {crp:.2%} | "
           f"SIS+CEV {sis_cev:.2%} {'(SIS dentro)' if dentro else '(SIS aparte)'}")
+destinos = leer_destinos_empleador(NOTA_TECNICA, TASA_SIS)
+destinos.round(6).to_csv(OUT / "kpi_reforma_empleador.csv", index=False)
+fin = destinos[destinos.anio == 2033].iloc[0]
+print(f"   kpi_reforma_empleador.csv: {len(destinos)} escalones; ago-2033: cuenta individual {fin.cuenta_individual:.2%} + Seguro Social "
+      f"{fin.seguro_social_sin_sis + fin.sis:.2%} (con el SIS) = {fin.total_empleador:.2%}; aumento frente a antes de la reforma {fin.aumento_vs_antes:.2%}")
+
+
+def factores_empleo(destinos, dependientes):
+    """Efecto de la reforma en los cotizantes (escenarios del KPI 1.2 y variantes del KPI 1.3). El costo laboral sube lo que sube la cotización del empleador
+    frente a antes de la reforma (escalón vigente desde agosto de cada año; después de 2033 se mantiene); solo los dependientes reaccionan:
+        factor_t = 1 + elasticidad × aumento_t × parte de dependientes entre los cotizantes, medido frente a 2025 (el año base de los escenarios,
+        cuando el escalón de agosto de 2025 ya está en los datos), de modo que el factor de 2025 es 1.
+    La elasticidad es un supuesto (config/escenarios.yaml): no hay una estimación para esta reforma."""
+    escalon = destinos[destinos.anio >= 2025].set_index("anio").aumento_vs_antes
+    anios = list(range(2025, ANIO_FIN_FACTOR + 1))
+    aumento = pd.Series([escalon.loc[max(a for a in escalon.index if a <= min(y, 2033))] for y in anios], index=anios)
+    filas = []
+    for nombre, e in REFORMA.items():
+        f = 1 + e * aumento * dependientes
+        filas += [dict(anio=a, escenario=f"reforma_{nombre}", elasticidad=e, aumento_costo_pp=100 * aumento[a], factor_vs_2025=f[a] / f[2025]) for a in anios]
+    return pd.DataFrame(filas)
+
+
+tipo_cot = pd.read_csv(OUT / "cotizantes_por_tipo_sexo.csv")
+tipo_cot = tipo_cot[(tipo_cot.anio == 2024) & (tipo_cot.sexo == "Total")].set_index("tipo").cotizantes
+assert tipo_cot["Dependientes"] + tipo_cot["Independientes"] + tipo_cot["Afiliados voluntarios"] == tipo_cot["Total"]
+DEPENDIENTES = tipo_cot["Dependientes"] / tipo_cot["Total"]   # parte de los cotizantes de dic-2024 que son dependientes
+empleo = factores_empleo(destinos, DEPENDIENTES)
+empleo.round(6).to_csv(OUT / "kpi_reforma_empleo_factor.csv", index=False)
+print(f"   kpi_reforma_empleo_factor.csv: dependientes = {DEPENDIENTES:.1%} de los cotizantes; factor de cotizantes en 2033 frente a 2025: "
+      + "; ".join(f"{k} (elasticidad {v:+.1f}) {empleo[(empleo.escenario == 'reforma_' + k) & (empleo.anio == 2033)].factor_vs_2025.iloc[0]:.4f}" for k, v in REFORMA.items()))
 fapp = leer_fapp(FAPP)
 empleador_2025 = (fapp["40.110"] + fapp["40.187"]) * 1000  # M$ -> pesos
 print(f"   FAPP 40.110 Cotizaciones: M$ {fapp['40.110']:,} ; 40.187 SSP por identificar: M$ {fapp['40.187']:,}")
@@ -326,10 +387,13 @@ for _, b in base.iterrows():
 # =============================================================================
 proy = pd.read_csv(OUT / "proyeccion_envejecimiento_pais.csv").set_index("anio")
 masa_mensual_2025 = fichas.loc[fichas.mes_ref_cotizantes.dt.year == 2025, "masa_imponible_mes"].mean()
-for tipo, g in [(nombre_escenario(g), g) for g in [CRECIMIENTO_BASE] + CRECIMIENTO_VARIANTES]:
+VARIANTES_FLUJO = ([(nombre_escenario(g), g, None) for g in [CRECIMIENTO_BASE] + CRECIMIENTO_VARIANTES]
+                   + [(f"escenario_reforma_{k}", CRECIMIENTO_BASE, k) for k in REFORMA])   # la reforma con efecto en el empleo: salario del escenario base
+for tipo, g, efecto in VARIANTES_FLUJO:
+    factor = empleo[empleo.escenario == f"reforma_{efecto}"].set_index("anio").factor_vs_2025 if efecto else None
     for anio in ANIOS_ESCENARIO:
         masa = (masa_mensual_2025 * proy.loc[anio, "pob_15_64"] / proy.loc[2025, "pob_15_64"]
-                * (1 + g) ** (anio - 2025))
+                * (1 + g) ** (anio - 2025) * (factor.loc[anio] if efecto else 1.0))
         suma_ci, suma_ss, suma_sis = tasas_pagadas_en(anio)
         filas.append({
             "anio": anio, "tipo": tipo,
@@ -340,6 +404,8 @@ for tipo, g in [(nombre_escenario(g), g) for g in [CRECIMIENTO_BASE] + CRECIMIEN
             "estado": round(estado.loc[2025] * proy.loc[anio, "pob_65_mas"] / proy.loc[2025, "pob_65_mas"]),
             "supuestos": ("Escenario, pesos de 2025: cobertura constante (masa 2025 × población 15-64 INE), "
                           + ("ingreso real constante" if g == 0 else f"ingreso real +{g:.1%} anual".replace(".", ","))
+                          + (f"; la reforma reduce los cotizantes dependientes (elasticidad del empleo formal {REFORMA[efecto]:+.1f}, supuesto)".replace(".", ",")
+                             if efecto else "")
                           + "; Estado = gasto 2025 × población 65+ INE (beneficio real constante); "
                           "tasas del empleador según Nota Técnica Ley 21.735, Tabla 1"),
         })

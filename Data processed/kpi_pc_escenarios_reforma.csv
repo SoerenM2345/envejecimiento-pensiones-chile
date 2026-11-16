@@ -1,0 +1,4 @@
+clave,nombre,grupo,carga_max,elasticidad,descripcion,orden,aumento_costo_2033_pp,cotizantes_2033_vs_2025_pct
+base,"Base: tope 10 %, cotizantes como hoy",Referencia,0.1,0.0,Referencia del KPI 1.2. Equivale a que el empleador traspase todo el costo de la reforma a los sueldos: el empleo formal no cambia,1,0.0,0.0
+reforma_baja,Reforma con efecto bajo en el empleo,Reforma del empleador,0.1,-0.1,"Por cada 1 % más de costo laboral, 0,1 % menos de cotizantes dependientes (supuesto); el costo sube 6,62 puntos hasta 2033 y los cotizantes quedan 0,6 % bajo los de 2025",2,6.62,-0.5579
+reforma_alta,Reforma con efecto alto en el empleo,Reforma del empleador,0.1,-0.3,"Por cada 1 % más de costo laboral, 0,3 % menos de cotizantes dependientes (supuesto); el costo sube 6,62 puntos hasta 2033 y los cotizantes quedan 1,7 % bajo los de 2025",3,6.62,-1.6769

@@ -17,6 +17,14 @@ tope_carga:                        # KPI 1.2: parte del sueldo que se acepta des
   base: 0.10                       # 10% = la cotización obligatoria para pensión
   variantes: [0.08, 0.12]          # columnas de la tabla de sensibilidad del punto crítico
 
+reforma_empleador:                 # KPI 1.2 (escenarios con la reforma) y KPI 1.3 (variantes del flujo): efecto de la cotización del empleador (Ley 21.735) en el empleo formal
+  elasticidad_empleo_formal:       # cambio % de los cotizantes dependientes por cada 1 % más de costo laboral (negativa = se pierde empleo formal)
+    base: 0.0                      # traspaso total a los sueldos: el empleador no contrata menos (Gruber 1997 encontró traspaso total y sin efecto en el empleo en Chile, al bajar cotizaciones)
+    variantes: [-0.1, -0.3]        # SUPUESTO sin respaldo directo: no hay estimación para esta reforma; son un efecto bajo y uno alto para ver el orden de magnitud
+  # El aumento del costo laboral de cada escalón es el aumento de la cotización del empleador frente a antes de la reforma (kpi_reforma_empleador.csv, en
+  # % del sueldo imponible; se ignora que el costo laboral incluye otras cargas, lo que sobrestima algo el aumento relativo). Solo los cotizantes
+  # dependientes reaccionan (los independientes no pagan cotización del empleador). El efecto se mide desde 2025 y se mantiene después de 2033.
+
 crecimiento_pib_real: 0.02         # KPI 2.1 y 2.2: crecimiento real anual del PIB (valor inicial del control deslizante)
 # OJO (revisado 2026-10-18): no es del todo consistente con crecimiento_salario_real. El KPI 2.1 hace crecer el ingreso de
 # los ocupados como el PIB per cápita (≈ +2,0% real al año, porque la población total casi no crece: -0,04% anual 2025-2050),

@@ -13,6 +13,7 @@ from components.charts import (mostrar, region_choropleth, region_bars, support_
                                coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, gender_gap_scatter)
 from components.charts import coverage_composition_chart, worker_type_chart
 from components import critical_point as cp
+from components.reforma_empleador import render_destinos_empleador, render_escenarios_reforma, render_flujo_con_variantes
 
 st.title("Objetivo 1: retener y ampliar la base activa")
 st.markdown("Aumentar y retener la base de cotizantes activos por región, para sostener el ingreso por comisión pese al envejecimiento.")
@@ -909,6 +910,7 @@ def render_1_2():
                "población: Censo 2024 y proyecciones INE.")
     render_1_2_punto_critico()
     render_1_2_escenarios_fijos()
+    render_escenarios_reforma(pc_serie)
 
 
 def render_1_3():
@@ -942,7 +944,7 @@ def render_1_3():
     with c2:
         ver_sis = st.checkbox("Agregar la sensibilidad que incluye el Seguro de Invalidez y Sobrevivencia", value=False, key="s13_con_sis",
                               help="El gráfico muestra como máximo 4 líneas; esta sensibilidad es la quinta.")
-        mostrar(commissionable_share_line(todo, cargar_escenarios()["crecimiento_salario_real"]["base"], ver_sis))
+        render_flujo_con_variantes(todo, ver_sis)
     # caída y recuperación: si la recuperación hasta 2033 cubre al menos 90% de la caída, no se dice «solo en parte»
     caida, recuperacion = r25.kpi_1_3_pct - v_min, e33.kpi_1_3_pct - v_min
     parte = recuperacion / caida if caida > 0 else 1.0
@@ -961,6 +963,7 @@ def render_1_3():
     if len(faltan):
         st.warning("Años reales con fichas incompletas (proyectados a 12 meses): "
                    + ", ".join(f"{int(r.anio)} ({int(r.n_meses)} meses)" for r in faltan.itertuples()))
+    render_destinos_empleador()
     # el caveat de kpis.yaml (SIS excluido, Nota Técnica) lo muestra kpi_card al final de la tarjeta
 
 

@@ -1,0 +1,21 @@
+inicio,anio,mes,sis_aparte,cuenta_individual,seguro_social_sin_sis,sis,total_empleador,aumento_vs_antes
+antes de la reforma,2024,,True,0.0,0.0,0.0188,0.0188,0.0
+agosto 2025,2025,Agosto,True,0.001,0.009,0.0188,0.0288,0.01
+agosto 2026,2026,Agosto,False,0.001,0.0152,0.0188,0.035,0.0162
+agosto 2027,2027,Agosto,False,0.0025,0.0212,0.0188,0.0425,0.0237
+agosto 2028,2028,Agosto,False,0.01,0.0212,0.0188,0.05,0.0312
+agosto 2029,2029,Agosto,False,0.017,0.0212,0.0188,0.057,0.0382
+agosto 2030,2030,Agosto,False,0.024,0.0212,0.0188,0.064,0.0452
+agosto 2031,2031,Agosto,False,0.031,0.0212,0.0188,0.071,0.0522
+agosto 2032,2032,Agosto,False,0.038,0.0212,0.0188,0.078,0.0592
+agosto 2033,2033,Agosto,False,0.045,0.0212,0.0188,0.085,0.0662
+septiembre 2045,2045,Septiembre,False,0.0465,0.0197,0.0188,0.085,0.0662
+septiembre 2046,2046,Septiembre,False,0.048,0.0182,0.0188,0.085,0.0662
+septiembre 2047,2047,Septiembre,False,0.0495,0.0167,0.0188,0.085,0.0662
+septiembre 2048,2048,Septiembre,False,0.051,0.0152,0.0188,0.085,0.0662
+septiembre 2049,2049,Septiembre,False,0.0525,0.0137,0.0188,0.085,0.0662
+septiembre 2050,2050,Septiembre,False,0.054,0.0122,0.0188,0.085,0.0662
+septiembre 2051,2051,Septiembre,False,0.0555,0.0107,0.0188,0.085,0.0662
+septiembre 2052,2052,Septiembre,False,0.057,0.0092,0.0188,0.085,0.0662
+septiembre 2053,2053,Septiembre,False,0.0585,0.0077,0.0188,0.085,0.0662
+septiembre 2054,2054,Septiembre,False,0.06,0.0062,0.0188,0.085,0.0662
