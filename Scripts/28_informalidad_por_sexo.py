@@ -6,7 +6,7 @@ Fuentes:
   - Data raw/_external/ine_ene_regional/ene_regional_tasa_informal_por_sexo.csv   tasa de informalidad por trimestre móvil, región y sexo
         (INE, Encuesta Nacional de Empleo, serie INF_TOI_P2017, proyecciones base 2017). Se toma el trimestre nov-ene 2023-24 (código 2023-V12),
         el mismo de la informalidad del resto del KPI; el total coincide con `informalidad_ene` de kpi_cobertura_regiones.csv (se verifica).
-  - Data processed/kpi_cobertura_regiones.csv   cobertura_2024, cotizantes, regiones prioritarias (prioridad_brecha_perdida)
+  - Data processed/kpi_cobertura_regiones.csv   cobertura_2024, cotizantes, regiones prioritarias (prioridad)
 
 Salidas (Data processed/):
   - kpi_cobertura_informalidad_sexo.csv          una fila por región (16): informalidad total, de hombres y de mujeres, brecha (mujeres − hombres,
@@ -35,11 +35,11 @@ def tabla() -> pd.DataFrame:
     reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id")
     # el total debe ser la misma cifra que ya usa el KPI (otra descarga del mismo explorador del INE)
     assert (inf["informalidad"] - reg.loc[inf.index, "informalidad_ene"]).abs().max() < 0.001
-    d = inf.loc[1:].join(reg[["region_nombre", "cobertura_2024", "cotizantes_ref", "peso_cotizantes_pct", "prioridad_brecha_perdida"]])
+    d = inf.loc[1:].join(reg[["region_nombre", "cobertura_2024", "cotizantes_ref", "peso_cotizantes_pct", "prioridad"]])
     d["brecha_mujeres_hombres"] = d.informalidad_mujeres - d.informalidad_hombres
-    d["prioritaria"] = d.prioridad_brecha_perdida.notna()
+    d["prioritaria"] = d.prioridad.notna()
     d = d.rename(columns={"cotizantes_ref": "cotizantes", "peso_cotizantes_pct": "share_cotizantes_pct"})
-    assert len(d) == 16 and not d.drop(columns="prioridad_brecha_perdida").isna().any().any()
+    assert len(d) == 16 and not d.drop(columns="prioridad").isna().any().any()
     return d.reset_index()[["region_id", "region_nombre", "informalidad", "informalidad_hombres", "informalidad_mujeres", "brecha_mujeres_hombres",
                             "cobertura_2024", "cotizantes", "share_cotizantes_pct", "prioritaria"]]
 

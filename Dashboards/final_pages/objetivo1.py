@@ -58,7 +58,8 @@ def render_1_1():
 
 
 CRITERIOS = {  # etiqueta -> (columna de kpi_cobertura_regiones.csv, definición para el pie de la tabla)
-    "Bajo el promedio, con brecha o pérdida (recomendado)": ("prioridad_brecha_perdida", "las regiones con cobertura bajo la de Chile que además están entre las 5 de mayor brecha de cotizantes o tienen menos cotizantes que en 2022 (personas); ordenadas por brecha"),
+    "Nivel, tendencia y brecha (recomendado)": ("prioridad_rangos", "las regiones con cobertura bajo la de Chile que están entre las 5 peores de al menos uno de tres factores, cada uno como rango de 1 a 16: nivel (puntos bajo Chile en 2024), tendencia (puntos ganados desde 2007 menos los que ganó Chile) y brecha (cotizantes que faltan para alcanzar a Chile, en personas); ordenadas por la suma de los tres rangos"),
+    "Brecha o pérdida de cotizantes desde 2022": ("prioridad_brecha_perdida", "las regiones con cobertura bajo la de Chile que además están entre las 5 de mayor brecha de cotizantes o tienen menos cotizantes que en 2022 (personas); ordenadas por brecha"),
     "Mayor brecha de cotizantes": ("prioridad_brecha", "las 5 regiones con mayor brecha de cotizantes: (cobertura de Chile − cobertura de la región) × población de 15 a 64 años de la región; pesa el nivel y el tamaño"),
     "Caída más fuerte desde 2022": ("prioridad_caida", "las 5 regiones cuya cobertura más cayó (en puntos) desde 2022, el año del máximo reciente del país"),
     "Mayor peso en los cotizantes": ("prioridad_peso", "las 5 regiones con más cotizantes: las que más pesan en el total del país, estén sobre o bajo el promedio"),
@@ -108,6 +109,46 @@ def render_1_1_composicion():
         "así que la segunda barra muestra el orden de magnitud, no una brecha exacta. Detalle en docs/supuestos_y_limitaciones.md, sección 7."))
 
 
+def _razones_rangos(reg16: pd.DataFrame, prio: pd.DataFrame, ref: int, nac: float):
+    """Por qué entra cada región de la lista recomendada, con sus tres rangos, y el ranking completo de las 16 (nivel, tendencia desde 2007 y brecha)."""
+    umbral = 5  # N_PRIORIDAD del script 24: «entre las 5 peores» de un factor
+    pt = lambda v: es_cl(f"{v:+.1f}".replace("-", "−"))  # noqa: E731
+    miles = lambda v: es_cl(f"{v:,.0f}")  # noqa: E731
+    lineas = []
+    for r in prio.itertuples():
+        partes = []
+        if r.rango_nivel <= umbral:
+            partes.append(f"**nivel** (rango {r.rango_nivel:g}: {es_cl(f'{nac - r.cobertura_ref:.1f}')} puntos bajo Chile)")
+        if r.rango_tendencia <= umbral:
+            partes.append(f"**tendencia** (rango {r.rango_tendencia:g}: {pt(r.vs_chile_2007)} puntos frente a Chile desde 2007)")
+        if r.rango_brecha <= umbral:
+            partes.append(f"**brecha** (rango {r.rango_brecha:g}: {miles(r.brecha_cotizantes)} cotizantes que faltan)")
+        resto = [f"{n} {r_:g}" for n, r_ in (("nivel", r.rango_nivel), ("tendencia", r.rango_tendencia), ("brecha", r.rango_brecha)) if r_ > umbral]
+        lineas.append(f"- **{r.region_nombre}** (suma {r.rango_suma:g}) entra por " + " y ".join(partes) + (f"; en los demás factores no está entre las {umbral} peores ({', '.join(resto)})." if resto else "."))
+    st.markdown("**Por qué entra cada una** (rango 1 = la peor de las 16 en ese factor):\n" + "\n".join(lineas))
+    fuera = reg16[reg16.prioridad_rangos.isna() & (reg16.cobertura_ref < nac)].sort_values("rango_suma")
+    cerca = fuera[fuera.rango_suma <= prio.rango_suma.max() + 1.5]
+    if len(cerca):
+        c = cerca.iloc[0]
+        st.caption(es_cl(f"La más cercana que queda fuera es {c.region_nombre} (suma {c.rango_suma:g}; nivel {c.rango_nivel:g}, tendencia {c.rango_tendencia:g}, brecha {c.rango_brecha:g}): "
+                         f"ninguno de sus tres rangos está entre los {umbral} peores. Biobío y Ñuble tienen la misma tendencia porque hasta 2017 son una sola serie."))
+    rob = load_csv("kpi_cobertura_prioridad_robustez.csv")
+    ok = rob[rob.coincide_con_la_lista]
+    with st.expander("Ranking de las 16 regiones en los tres factores y robustez de la lista"):
+        r16 = reg16.sort_values("rango_suma")
+        tab = pd.DataFrame({"Región": r16.region_nombre.values, f"Cobertura {ref} (%)": r16.cobertura_ref.values, "Rango nivel": r16.rango_nivel.values,
+                            "Tendencia desde 2007 frente a Chile (puntos)": r16.vs_chile_2007.values, "Rango tendencia": r16.rango_tendencia.values,
+                            "Brecha con signo (personas)": r16.brecha_con_signo.values, "Rango brecha": r16.rango_brecha.values, "Suma de rangos": r16.rango_suma.values,
+                            "En la lista": np.where(r16.prioridad_rangos.notna(), "Sí", "").tolist()})
+        st.dataframe(tab.style.format({f"Cobertura {ref} (%)": "{:.1f}", "Rango nivel": "{:g}", "Tendencia desde 2007 frente a Chile (puntos)": "{:+.1f}", "Rango tendencia": "{:g}",
+                                       "Brecha con signo (personas)": "{:,.0f}", "Rango brecha": "{:g}", "Suma de rangos": "{:g}"}, decimal=",", thousands="."),
+                     hide_index=True, use_container_width=True)
+        st.caption(es_cl(
+            f"La misma regla con cada año de inicio entre {int(rob.inicio.min())} y {int(rob.inicio.max())} elige exactamente estas {len(prio)} regiones en {len(ok)} de {len(rob)} casos "
+            f"(hasta {int(ok.inicio.max())}); desde 2020 la ventana es tan corta que se mezcla el rebote de 2021-2022 y la lista cambia en una o dos regiones. "
+            f"Brecha con signo: sobre el promedio de Chile es negativa. Detalle y límites en docs/SHORTLIST_REGIONES.md."))
+
+
 def render_1_1_tendencia():
     """Pedido del profesor: ¿la cobertura sube o baja?, ¿dónde es más baja y dónde pesa más? (Scripts/24)."""
     st.markdown("#### ¿Sube o baja la cobertura?")
@@ -117,7 +158,7 @@ def render_1_1_tendencia():
     t = t[t.anio <= ref]
     reg16 = reg[reg.region_id > 0]
     criterio = st.radio("Regiones prioritarias", list(CRITERIOS), horizontal=True, key="cob_criterio",
-                        help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista (5 regiones, salvo la recomendada, que es una regla: cobertura bajo la de Chile y, o bien entre las 5 de mayor brecha, o bien con menos cotizantes que en 2022).")
+                        help="Qué regiones se resaltan en el gráfico y se analizan abajo. Cada criterio da otra lista (5 regiones, salvo las dos primeras, que son reglas: la recomendada elige las regiones bajo la cobertura de Chile que están entre las 5 peores en nivel, tendencia desde 2007 o brecha).")
     prio = _prioritarias(reg)
     ids_sel = [int(i) for i in prio.region_id]
     pais = t[t.territorio_id == 0].set_index("anio").cobertura_pct
@@ -154,15 +195,24 @@ def render_1_1_tendencia():
         f"**Lectura:** {len(bajan)} de las 16 regiones tienen hoy menos cobertura que en 2022 "
         f"({', '.join(bajan.sort_values('cambio_2022_ref').region_nombre)}). Las {len(prio)} prioritarias suman una brecha de "
         f"{f'{prio.brecha_cotizantes.sum():,.0f}'.replace(',', '.')} cotizantes frente al promedio de Chile ({nac.cobertura_ref:.1f}% en {ref})."))
-    tabla = prio[["region_nombre", "peso_cotizantes_pct", "cobertura_ref", "cambio_2019_ref", "cambio_2022_ref", "dif_cotizantes_22_ref", "brecha_cotizantes", "motivo_prioridad"]].rename(columns={
+    col_crit = CRITERIOS[criterio][0]
+    por_rangos = col_crit == "prioridad_rangos"
+    motivo = "motivo_rangos" if por_rangos else "motivo_prioridad"
+    cols = ["region_nombre", "peso_cotizantes_pct", "cobertura_ref", *(["vs_chile_2007"] if por_rangos else []), "cambio_2019_ref", "cambio_2022_ref",
+            *([] if por_rangos else ["dif_cotizantes_22_ref"]), "brecha_cotizantes", *(["rango_nivel", "rango_tendencia", "rango_brecha", "rango_suma"] if por_rangos else []), motivo]
+    tabla = prio[cols].rename(columns={
         "region_nombre": "Región prioritaria", "peso_cotizantes_pct": "Peso (% de los cotizantes)", "cobertura_ref": f"Nivel: cobertura {ref} (%)",
-        "cambio_2019_ref": "Tendencia desde 2019 (puntos)", "cambio_2022_ref": "Tendencia desde 2022 (puntos)", "dif_cotizantes_22_ref": "Cotizantes desde 2022 (personas)",
-        "brecha_cotizantes": "Brecha (personas)", "motivo_prioridad": "Por qué entra"})
+        "vs_chile_2007": "Tendencia desde 2007 frente a Chile (puntos)", "cambio_2019_ref": "Tendencia desde 2019 (puntos)", "cambio_2022_ref": "Tendencia desde 2022 (puntos)",
+        "dif_cotizantes_22_ref": "Cotizantes desde 2022 (personas)", "brecha_cotizantes": "Brecha (personas)", "rango_nivel": "Rango nivel", "rango_tendencia": "Rango tendencia",
+        "rango_brecha": "Rango brecha", "rango_suma": "Suma de rangos", motivo: "Por qué entra"})
     if not tabla["Por qué entra"].fillna("").astype(str).str.len().gt(0).any():
-        tabla = tabla.drop(columns="Por qué entra")  # solo la lista recomendada tiene motivo
-    st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", f"Nivel: cobertura {ref} (%)": "{:.1f}", "Tendencia desde 2019 (puntos)": "{:+.1f}",
-                                     "Tendencia desde 2022 (puntos)": "{:+.1f}", "Cotizantes desde 2022 (personas)": "{:+,.0f}", "Brecha (personas)": "{:,.0f}"}, decimal=",", thousands="."),
-                 hide_index=True, use_container_width=True)
+        tabla = tabla.drop(columns="Por qué entra")  # solo las listas con regla tienen motivo
+    st.dataframe(tabla.style.format({"Peso (% de los cotizantes)": "{:.1f}", f"Nivel: cobertura {ref} (%)": "{:.1f}", "Tendencia desde 2007 frente a Chile (puntos)": "{:+.1f}",
+                                     "Tendencia desde 2019 (puntos)": "{:+.1f}", "Tendencia desde 2022 (puntos)": "{:+.1f}", "Cotizantes desde 2022 (personas)": "{:+,.0f}",
+                                     "Brecha (personas)": "{:,.0f}", "Rango nivel": "{:.0f}", "Rango tendencia": "{:g}", "Rango brecha": "{:.0f}", "Suma de rangos": "{:g}"},
+                                    decimal=",", thousands="."), hide_index=True, use_container_width=True)
+    if por_rangos:
+        _razones_rangos(reg16, prio, ref, float(nac.cobertura_ref))
     mayor = reg16.sort_values("pob_15_64").iloc[-1]
     fuera = "" if mayor.region_id in set(prio.region_id) else (
         f" {mayor.region_nombre}, la más grande, queda fuera: su cobertura ({mayor.cobertura_ref:.1f}%) está sobre el promedio.")

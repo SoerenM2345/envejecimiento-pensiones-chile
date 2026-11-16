@@ -1,5 +1,5 @@
 region_id,region_nombre,informalidad,informalidad_hombres,informalidad_mujeres,brecha_mujeres_hombres,cobertura_2024,cotizantes,share_cotizantes_pct,prioritaria
-1,Tarapacá,35.1829,33.9015,36.8027,2.9012,43.3391,110058.0,1.8772,False
+1,Tarapacá,35.1829,33.9015,36.8027,2.9012,43.3391,110058.0,1.8772,True
 2,Antofagasta,21.3159,17.6623,26.4823,8.82,51.907,233008.0,3.9743,False
 3,Atacama,29.3151,25.5608,34.6308,9.0701,49.2844,99766.0,1.7017,False
 4,Coquimbo,33.877,32.523,35.6814,3.1584,40.4941,226224.0,3.8586,True

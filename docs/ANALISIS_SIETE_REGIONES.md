@@ -1,5 +1,7 @@
 # Las siete regiones prioritarias: qué las une y qué hay que cuestionar
 
+> **Nota del 2026-11-16:** este análisis es de la lista de 7 («brecha o pérdida de cotizantes desde 2022»), que ya no es la recomendada. La lista recomendada es ahora de 8 regiones por nivel, tendencia desde 2007 y brecha (`docs/SHORTLIST_REGIONES.md`): contiene a las siete (Biobío entra solo por la brecha) y suma Tarapacá, que entra por la tendencia. Las pruebas de abajo se hicieron con la lista de 7; sus conclusiones sobre «mercado laboral débil» y los candidatos descartados no dependen de la lista, pero los valores p se calcularon para esos 7.
+
 Revisión crítica del 2026-11-10 (año de referencia 2024). Datos: `Data processed/kpi_cobertura_regiones.csv`, `kpi_cobertura_pendularidad.csv`, `kpi_cobertura_factores.csv`. Las pruebas de este documento se hicieron con permutación exacta (11.440 combinaciones de 7 regiones entre 16).
 
 ## 1. La observación y cómo queda precisa

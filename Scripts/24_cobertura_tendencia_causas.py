@@ -37,8 +37,10 @@ Salidas (Data processed/):
                                   pob_15_64 (al nivel del Censo), cobertura_pct, y la misma cobertura con la proyección del INE sin
                                   ajustar (pob_15_64_proy, cobertura_sin_ajuste_pct)
   - kpi_cobertura_regiones.csv    una fila por región: cobertura 2019/2022/2024/2025, cambios en puntos, y con el año de referencia (ANIO_REF = 2024)
-                                  cobertura_ref, cambio_2019_ref, cambio_2022_ref, peso en los cotizantes, brecha y las 4 listas prioritarias,
-                                  y los factores del Censo 2024 (desocupación, independientes, ramas, migración, escolaridad)
+                                  cobertura_ref, cambio_2019_ref, cambio_2022_ref, peso en los cotizantes, brecha, las 5 listas prioritarias (la recomendada
+                                  es `prioridad_rangos`: rangos 1-16 de nivel, tendencia desde 2007 frente a Chile y brecha) y los factores
+                                  del Censo 2024 (desocupación, independientes, ramas, migración, escolaridad)
+  - kpi_cobertura_prioridad_robustez.csv   la regla de la lista recomendada con cada año de inicio 2002-2022 y en qué difiere de la lista principal
   - kpi_cobertura_factores.csv    cada factor candidato con su correlación con la cobertura 2024 (16 regiones)
 """
 import sys
@@ -67,6 +69,9 @@ FUSIONES = {  # id de la serie fusionada -> (nombre, regiones, primer año en qu
 PARTICION = [2, 3, 4, 5, 6, 7, 9, 11, 12, 13, *FUSIONES]  # territorios sin solapamiento que suman el país en todos los años
 SEPARADAS_DESDE = {1: 2007, 10: 2007, 8: 2018}  # región «grande» que hasta ese año incluye a la nueva en su numerador
 N_PRIORIDAD = 5
+# Ventana de la tendencia de la lista recomendada: 2007 es el primer año después del salto sin explicar de 2006 a 2007 (supuestos 2.2) y deja
+# 15 territorios (Biobío y Ñuble siguen juntos hasta 2018). Los otros inicios (2002-2022) se prueban en kpi_cobertura_prioridad_robustez.csv.
+ANIO_TENDENCIA = 2007
 # Año de referencia de todas las comparaciones del KPI 1.1 (barras, listas de regiones prioritarias, tabla y descomposición). 2024 es el año
 # del Censo (la única población medida, no proyectada) y el último con ocupados por región; 2025 tiene cotizantes pero su población es una
 # proyección y no hay empleo regional. Si se consiguen la ENE de 2025 y la proyección regional base 2024, basta cambiar esta constante.
@@ -194,6 +199,46 @@ def factores_censo() -> pd.DataFrame:
     return f
 
 
+def serie_de(region_id: int, inicio: int) -> int:
+    """Id del territorio cuya serie se compara entre `inicio` y el año de referencia: la región misma o, si todavía no se publicaba por separado, la fusionada."""
+    for fid, (_, regs, desde) in FUSIONES.items():
+        if region_id in regs and inicio < desde:
+            return fid
+    return region_id
+
+
+def rangos_prioridad(r: pd.DataFrame, cob: pd.DataFrame, nac_ref: float, inicio: int) -> pd.DataFrame:
+    """Los tres factores de la lista recomendada, cada uno como un rango de 1 (peor) a 16 entre las 16 regiones:
+      - nivel: puntos de cobertura bajo la de Chile en el año de referencia;
+      - tendencia: puntos ganados desde `inicio` menos los que ganó Chile (negativo = la región perdió terreno frente al país);
+      - brecha: cotizantes que faltan para alcanzar a Chile, en personas y con signo (sobre el promedio es negativa).
+    Los empates reciben el rango promedio. Para Biobío y Ñuble antes de 2018 (y Arica y Los Ríos antes de 2007) se usa la serie fusionada."""
+    cambio = pd.Series({i: cob.loc[serie_de(i, inicio), ANIO_REF] - cob.loc[serie_de(i, inicio), inicio] for i in r.index})
+    d = pd.DataFrame({"cambio_inicio_ref": cambio, "vs_chile_inicio": cambio - (cob.loc[0, ANIO_REF] - cob.loc[0, inicio])})
+    d["brecha_con_signo"] = (nac_ref - r.cobertura_ref) / 100 * r.pob_15_64
+    d["rango_nivel"] = (nac_ref - r.cobertura_ref).rank(ascending=False)
+    d["rango_tendencia"] = d.vs_chile_inicio.rank()
+    d["rango_brecha"] = d.brecha_con_signo.rank(ascending=False)
+    d["rango_suma"] = d[["rango_nivel", "rango_tendencia", "rango_brecha"]].sum(axis=1)
+    # entra: bajo el promedio de Chile y entre los N_PRIORIDAD peores de al menos uno de los tres factores
+    d["elegida"] = (r.cobertura_ref < nac_ref) & (d[["rango_nivel", "rango_tendencia", "rango_brecha"]].min(axis=1) <= N_PRIORIDAD)
+    return d
+
+
+def robustez_prioridad(r: pd.DataFrame, cob: pd.DataFrame, nac_ref: float, elegidas: set) -> pd.DataFrame:
+    """La misma regla con cada año de inicio 2002-2022: cuántas regiones elige y en qué difiere de la lista principal; y cuántas de la lista
+    principal caen entre las 7 de menor suma de rangos (lo que se vería si se fijara un cupo de 7 en lugar de la regla)."""
+    filas = []
+    for ini in range(2002, 2023):
+        d = rangos_prioridad(r, cob, nac_ref, ini)
+        sel = set(d.index[d.elegida])
+        top7 = set(d.rango_suma.sort_values(kind="stable").index[:7])
+        nom = lambda ids: ", ".join(sorted(r.region_nombre[list(ids)]))  # noqa: E731
+        filas.append(dict(inicio=ini, n_regiones=len(sel), coincide_con_la_lista=sel == elegidas, faltan=nom(elegidas - sel), sobran=nom(sel - elegidas),
+                          de_las_7_de_menor_suma_en_la_lista=len(top7 & elegidas)))
+    return pd.DataFrame(filas)
+
+
 def main():
     asegurar_ine17()
     ind = pd.read_csv(DP / "indicadores_region.csv").set_index("region")
@@ -234,7 +279,18 @@ def main():
     elegida = bajo & (grande | pierde)
     r["prioridad_brecha_perdida"] = r.brecha_cotizantes.where(elegida).rank(ascending=False, method="first")
     r["motivo_prioridad"] = np.select([elegida & grande & pierde, elegida & grande, elegida & pierde], ["Brecha y pérdida", "Solo brecha", "Solo pérdida"], "")
-    r["prioridad"] = r.prioridad_brecha_perdida  # la que muestra el dashboard por defecto
+    # la recomendada: tres factores (nivel, tendencia desde 2007 frente a Chile, brecha en personas), cada uno como rango de 1 a 16; entran las regiones
+    # bajo el promedio que están entre las 5 peores de al menos un factor, ordenadas por la suma de los tres rangos (ver docs/SHORTLIST_REGIONES.md)
+    rg = rangos_prioridad(r, cob, nac_ref, ANIO_TENDENCIA)
+    r["cambio_2007_ref"], r["vs_chile_2007"], r["brecha_con_signo"] = rg.cambio_inicio_ref, rg.vs_chile_inicio, rg.brecha_con_signo
+    for k in ("rango_nivel", "rango_tendencia", "rango_brecha", "rango_suma"):
+        r[k] = rg[k]
+    orden = rg[rg.elegida].sort_values(["rango_suma", "brecha_con_signo"], ascending=[True, False]).index
+    r["prioridad_rangos"] = pd.Series(range(1, len(orden) + 1), index=orden).reindex(r.index)
+    razones = {"rango_nivel": "nivel", "rango_tendencia": "tendencia", "rango_brecha": "brecha"}
+    r["motivo_rangos"] = [" + ".join(v for k, v in razones.items() if rg.loc[i, k] <= N_PRIORIDAD).capitalize() if rg.loc[i, "elegida"] else "" for i in r.index]
+    r["prioridad"] = r.prioridad_rangos  # la que muestra el dashboard por defecto
+    robustez_prioridad(r, cob, nac_ref, set(orden)).to_csv(DP / "kpi_cobertura_prioridad_robustez.csv", index=False)
     f = factores_censo()
     cor = pd.read_csv(DP / "kpi_cobertura_correlaciones_region.csv").set_index("region_id")
     for c in ("ingreso_per_capita_prom", "pct_pobreza_65", "pct_urbano", "pct_65_mas"):
@@ -267,9 +323,9 @@ def main():
 
     p = lambda v: f"{v:.1f}".replace(".", ",")  # noqa: E731
     print(f"cobertura del país 2010 / 2019 / 2022 / 2025: {p(cob.loc[0, 2010])} / {p(cob.loc[0, 2019])} / {p(cob.loc[0, 2022])} / {p(cob.loc[0, 2025])}")
-    print("prioridad (bajo el promedio de Chile y con mayor brecha o pérdida de cotizantes desde 2022, por brecha):")
-    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_ref", "cambio_2022_ref", "dif_cotizantes_22_ref", "brecha_cotizantes", "motivo_prioridad"]]
-          .round(1).to_string())
+    print(f"prioridad (bajo el promedio de Chile y entre las {N_PRIORIDAD} peores de nivel, tendencia desde {ANIO_TENDENCIA} o brecha; por suma de rangos):")
+    print(r[r.prioridad.notna()].sort_values("prioridad")[["region_nombre", "cobertura_ref", "vs_chile_2007", "brecha_cotizantes", "rango_nivel", "rango_tendencia", "rango_brecha",
+                                                           "rango_suma", "motivo_rangos"]].round(1).to_string())
     print("factores con mayor correlación con la cobertura 2024:")
     print(fac[["nombre", "hipotesis", "pearson_r", "pearson_p", "elegido"]].head(12).round(2).to_string(index=False))
     print("factores elegidos:", list(fac[fac.elegido].nombre))

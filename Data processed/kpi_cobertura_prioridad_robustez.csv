@@ -1,0 +1,22 @@
+inicio,n_regiones,coincide_con_la_lista,faltan,sobran,de_las_7_de_menor_suma_en_la_lista
+2002,8,True,,,7
+2003,8,True,,,7
+2004,8,True,,,7
+2005,8,True,,,7
+2006,8,True,,,7
+2007,8,True,,,7
+2008,8,True,,,7
+2009,8,True,,,7
+2010,8,True,,,7
+2011,8,True,,,7
+2012,8,True,,,7
+2013,8,True,,,7
+2014,8,True,,,7
+2015,8,True,,,7
+2016,8,True,,,7
+2017,8,True,,,7
+2018,8,True,,,7
+2019,8,True,,,6
+2020,9,False,Tarapacá,"Los Lagos, Maule",6
+2021,7,False,Tarapacá,,7
+2022,7,False,Tarapacá,,7

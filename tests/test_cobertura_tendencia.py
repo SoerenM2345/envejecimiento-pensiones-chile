@@ -59,34 +59,58 @@ def test_biobio_y_nuble_no_se_rompen_en_2018(datos):
     assert b.index.min() == 2018 and t[t.territorio_id == 16].anio.min() == 2018
 
 
-SIETE = ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"]
+SIETE = ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"]  # la lista anterior (brecha o pérdida desde 2022)
+OCHO = [*SIETE[:1], "Valparaíso", "Arica y Parinacota", "Coquimbo", "Los Ríos", "Tarapacá", "Ñuble", "Biobío"]  # la recomendada, por suma de rangos
 
 
-def test_prioridad_recomendada_son_7_regiones_y_la_brecha_es_cotizantes_que_faltan(datos):
-    r = datos["r"][datos["r"].region_id > 0]
+def test_prioridad_recomendada_son_8_regiones_por_nivel_tendencia_y_brecha(datos):
+    r = datos["r"][datos["r"].region_id > 0].set_index("region_nombre")
     prio = r[r.prioridad.notna()]
-    assert sorted(prio.prioridad) == [1, 2, 3, 4, 5, 6, 7]
+    assert sorted(prio.prioridad) == list(range(1, 9))
+    assert list(prio.sort_values("prioridad").index) == ["Valparaíso", "La Araucanía", "Arica y Parinacota", "Coquimbo", "Los Ríos", "Tarapacá", "Ñuble", "Biobío"]
+    assert set(prio.index) == set(OCHO)
     nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
-    assert (prio.cobertura_ref < nac).all()  # solo regiones bajo el promedio tienen brecha
-    ejemplo = prio.iloc[0]
-    assert ejemplo.brecha_cotizantes == pytest.approx((nac - ejemplo.cobertura_ref) / 100 * ejemplo.pob_15_64, rel=1e-3)
-    assert set(prio.sort_values("prioridad").region_nombre.head(2)) == {"La Araucanía", "Valparaíso"}
-    assert set(prio.region_nombre) == set(SIETE)
+    assert (prio.cobertura_ref < nac).all()
+    # los tres rangos van de 1 a 16 (con empates en el promedio) y suman lo que dice la columna
+    for k in ("rango_nivel", "rango_tendencia", "rango_brecha"):
+        assert r[k].sum() == pytest.approx(16 * 17 / 2) and r[k].min() >= 1 and r[k].max() <= 16
+    assert (r.rango_suma - (r.rango_nivel + r.rango_tendencia + r.rango_brecha)).abs().max() < 1e-9
+    # regla: bajo el promedio y entre las 5 peores de al menos un factor
+    esperada = r[(r.cobertura_ref < nac) & (r[["rango_nivel", "rango_tendencia", "rango_brecha"]].min(axis=1) <= 5)]
+    assert set(esperada.index) == set(OCHO)
+    # la tendencia es de 2007 a 2024 menos lo que ganó Chile; Biobío y Ñuble comparten la serie fusionada
+    t = datos["t"]
+    c = t.pivot(index="territorio_id", columns="anio", values="cobertura_pct")
+    assert r.loc["Valparaíso", "vs_chile_2007"] == pytest.approx((c.loc[5, 2024] - c.loc[5, 2007]) - (c.loc[0, 2024] - c.loc[0, 2007]), abs=1e-3)
+    assert r.loc["Biobío", "vs_chile_2007"] == pytest.approx(r.loc["Ñuble", "vs_chile_2007"])
+    assert r.loc["Biobío", "vs_chile_2007"] == pytest.approx((c.loc[816, 2024] - c.loc[816, 2007]) - (c.loc[0, 2024] - c.loc[0, 2007]), abs=1e-3)
+    # los motivos: Tarapacá entra solo por la tendencia, Biobío solo por la brecha (sobre todo tamaño), Los Ríos solo por el nivel
+    assert r.loc["Tarapacá", "motivo_rangos"] == "Tendencia" and r.loc["Biobío", "motivo_rangos"] == "Brecha" and r.loc["Los Ríos", "motivo_rangos"] == "Nivel"
+    # Los Lagos queda justo fuera: tercera suma más cercana, pero ningún rango entre los 5 peores
+    assert pd.isna(r.loc["Los Lagos", "prioridad"]) and r.loc["Los Lagos", "rango_suma"] < r.loc["Biobío", "rango_suma"]
 
 
-def test_listas_de_regiones_y_la_recomendada_une_brecha_y_perdida_de_cotizantes(datos):
+def test_la_lista_recomendada_es_estable_con_cualquier_inicio_de_la_ventana_hasta_2019():
+    rob = pd.read_csv(DP / "kpi_cobertura_prioridad_robustez.csv")
+    assert list(rob.inicio) == list(range(2002, 2023))
+    assert rob[rob.inicio <= 2019].coincide_con_la_lista.all() and (rob[rob.inicio <= 2019].n_regiones == 8).all()
+    assert rob[rob.inicio <= 2018].de_las_7_de_menor_suma_en_la_lista.eq(7).all()  # las 7 de menor suma de rangos siempre están dentro
+    assert (rob.n_regiones >= 7).all()
+
+
+def test_listas_de_regiones_y_la_anterior_une_brecha_y_perdida_de_cotizantes(datos):
     r = datos["r"][datos["r"].region_id > 0].set_index("region_nombre")
     for col in ("prioridad_brecha", "prioridad_caida", "prioridad_peso"):
         assert sorted(r[col].dropna()) == [1, 2, 3, 4, 5], col
     assert list(r.prioridad_brecha.dropna().sort_values().index) == ["La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble"]
     assert list(r.prioridad_caida.dropna().sort_values().index)[:3] == ["Arica y Parinacota", "Valparaíso", "Metropolitana"]
     assert list(r.prioridad_peso.dropna().sort_values().index)[:2] == ["Metropolitana", "Valparaíso"]
-    # la recomendada = bajo el promedio Y (entre las 5 de mayor brecha O con menos cotizantes que en 2022)
+    # la anterior = bajo el promedio Y (entre las 5 de mayor brecha O con menos cotizantes que en 2022)
     nac = datos["r"].query("region_id == 0").cobertura_ref.iloc[0]
     esperada = r[(r.cobertura_ref < nac) & (r.prioridad_brecha.notna() | (r.dif_cotizantes_22_ref < 0))]
     assert set(r.prioridad_brecha_perdida.dropna().index) == set(esperada.index) == set(SIETE)
-    assert (r.prioridad.fillna(0) == r.prioridad_brecha_perdida.fillna(0)).all()  # la que muestra el dashboard por defecto
-    # los motivos: Coquimbo entra solo por brecha (ganó cotizantes), Los Ríos y Arica solo por pérdida
+    assert (r.prioridad.fillna(0) == r.prioridad_rangos.fillna(0)).all()  # la que muestra el dashboard por defecto
+    # los motivos de la anterior: Coquimbo entra solo por brecha (ganó cotizantes), Los Ríos y Arica solo por pérdida
     assert r.loc["Coquimbo", "motivo_prioridad"] == "Solo brecha" and r.loc["Coquimbo", "dif_cotizantes_22_ref"] > 0
     assert r.loc["Los Ríos", "motivo_prioridad"] == r.loc["Arica y Parinacota", "motivo_prioridad"] == "Solo pérdida"
     assert (r.loc[["La Araucanía", "Valparaíso", "Biobío", "Ñuble"], "motivo_prioridad"] == "Brecha y pérdida").all()

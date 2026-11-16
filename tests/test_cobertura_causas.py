@@ -130,7 +130,9 @@ def test_el_selector_de_criterio_cambia_las_regiones_analizadas():
             if "la brecha con Chile viene sobre todo de" in sp.get("layout", {}).get("title", {}).get("text", ""):
                 return set(sp["data"][0]["y"])
 
-    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"}  # recomendada (2024)
+    assert regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota", "Tarapacá"}  # recomendada (2024)
+    at.radio(key="cob_criterio").set_value("Brecha o pérdida de cotizantes desde 2022").run()
+    assert not at.exception and regiones_descomposicion() == {"La Araucanía", "Valparaíso", "Biobío", "Coquimbo", "Ñuble", "Los Ríos", "Arica y Parinacota"}  # la anterior
     at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
     assert not at.exception and regiones_descomposicion() == {"Metropolitana", "Valparaíso", "Biobío", "Maule", "O'Higgins"}
     at.radio(key="cob_criterio").set_value("Caída más fuerte desde 2022").run()
@@ -157,7 +159,7 @@ def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")
     barra = sp["data"][0]
-    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 7  # las 7 prioritarias, en naranja
+    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 8  # las 8 prioritarias, en naranja
     assert barra["y"][0] == "Arica y Parinacota" or min(barra["x"]) == barra["x"][list(barra["y"]).index("Arica y Parinacota")]
     assert any(s.get("x0") is not None and s["x0"] == s["x1"] for s in sp["layout"]["shapes"])  # línea punteada de Chile
     # al elegir otra lista cambian los colores pero siguen siendo 5
@@ -178,12 +180,12 @@ def test_grafico_largo_tiene_tres_lineas_desde_2002():
 def test_descomposicion_permite_ver_las_16_regiones_con_las_5_marcadas():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     clave = "la brecha con Chile viene sobre todo de"
-    assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 7
+    assert len(_spec_con_titulo(at, clave)["data"][0]["y"]) == 8
     at.radio(key="cob_desc_alcance").set_value("Las 16 regiones (las prioritarias en naranja)").run()
     assert not at.exception, [e.value for e in at.exception]
     sp = _spec_con_titulo(at, clave)
     barras = [t for t in sp["data"] if t["type"] == "bar"]
-    assert len(barras) == 4 and all(len(b["y"]) == 16 for b in barras) and barras[0]["marker"]["color"].count("#eb6834") == 7
+    assert len(barras) == 4 and all(len(b["y"]) == 16 for b in barras) and barras[0]["marker"]["color"].count("#eb6834") == 8
     assert len([s for s in sp["layout"]["shapes"] if s["x0"] == s["x1"]]) == 4  # la línea de Chile en cada panel
     total = _vals(barras[3]["x"])
     peor = barras[3]["y"][total.index(min(total))]
@@ -342,7 +344,7 @@ def test_siete_vs_chile_son_agregados_consistentes():
     v = lambda sec, ind, col="siete": float(r[(r.seccion == sec) & (r.indicador == ind)][col].iloc[0])  # noqa: E731
     reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv")
     n = int(reg[reg.region_id > 0].prioridad.notna().sum())
-    assert n == 7
+    assert n == 8
     t = pd.read_csv(DP / "kpi_cobertura_tendencia.csv")
     chile24 = t[(t.territorio_id == 0) & (t.anio == 2024)].cobertura_pct.iloc[0]
     assert v("Cobertura", "Cobertura 2024", "chile") == pytest.approx(chile24, abs=0.05)
@@ -356,7 +358,7 @@ def test_siete_vs_chile_son_agregados_consistentes():
     piezas = sum(v("Diferencia con Chile", i) for i in ("Participación laboral (de 15 a 64 años)", "Empleo (1 − desocupación)", "Ocupados que cotizan"))
     assert piezas == pytest.approx(v("Diferencia con Chile", "Diferencia total"), abs=1e-3)
     assert v("Diferencia con Chile", "Diferencia total") == pytest.approx(v("Cobertura", "Cobertura 2024") - chile24, abs=0.05)
-    assert (ROOT / "docs" / "SIETE_VS_CHILE.md").read_text().startswith("# Las 7 regiones prioritarias frente al promedio de Chile")
+    assert (ROOT / "docs" / "SIETE_VS_CHILE.md").read_text().startswith("# Las 8 regiones prioritarias frente al promedio de Chile")
 
 
 def test_brecha_de_informalidad_por_sexo_no_se_relaciona_con_la_cobertura():
@@ -364,7 +366,7 @@ def test_brecha_de_informalidad_por_sexo_no_se_relaciona_con_la_cobertura():
     d = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo.csv")
     m = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo_resumen.csv").set_index("indicador").valor
     reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id")
-    assert len(d) == 16 and d.region_id.is_unique and d.prioritaria.sum() == 7
+    assert len(d) == 16 and d.region_id.is_unique and d.prioritaria.sum() == 8
     assert np.allclose(d.informalidad, reg.loc[d.region_id, "informalidad_ene"].values, atol=0.001)
     assert np.allclose(d.brecha_mujeres_hombres, d.informalidad_mujeres - d.informalidad_hombres, atol=0.001)
     assert m["p_brecha_mujeres_hombres"] > 0.05 and abs(m["r_brecha_sin_las_2_mayores"]) < 0.2
@@ -380,4 +382,4 @@ def test_pagina_muestra_la_dispersion_de_la_brecha_por_sexo():
     burbujas = [t for t in sp["data"] if t.get("marker", {}).get("sizemode") == "area"]
     assert len(burbujas) == 1 and len(_vals(burbujas[0]["x"])) == 16
     assert sp["layout"]["yaxis"]["range"][0] == 0 and sp["layout"]["xaxis"]["range"][0] < 0 < sp["layout"]["xaxis"]["range"][1]  # la brecha puede ser negativa
-    assert sum(c == "#eb6834" for c in burbujas[0]["marker"]["color"]) == 7  # las regiones prioritarias van en naranja
+    assert sum(c == "#eb6834" for c in burbujas[0]["marker"]["color"]) == 8  # las regiones prioritarias van en naranja

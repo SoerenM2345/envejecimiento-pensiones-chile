@@ -17,7 +17,7 @@ Pedido del profesor (2026-11): ver dónde la cobertura (cotizantes ÷ población
 
 ## 2. «Las 5 regiones más importantes»
 
-Hay cuatro listas (bajo el promedio con brecha o pérdida de cotizantes, mayor brecha, caída más fuerte, mayor peso), en `docs/SHORTLIST_REGIONES.md`; el tablero deja elegir y **recomienda la primera**: cobertura bajo la de Chile y, o bien entre las 5 de mayor brecha, o bien con menos cotizantes (personas) que en 2022. Con 2024 como referencia son **7 regiones**: La Araucanía, Valparaíso, Biobío, Coquimbo, Ñuble, Los Ríos y Arica y Parinacota. Qué las une y qué hay que cuestionar: `docs/ANALISIS_SIETE_REGIONES.md`.
+Hay cinco listas (nivel, tendencia y brecha; brecha o pérdida de cotizantes desde 2022; mayor brecha; caída más fuerte; mayor peso), en `docs/SHORTLIST_REGIONES.md`; el tablero deja elegir y **recomienda la primera** (2026-11-16): cada región recibe un rango de 1 a 16 en nivel (puntos bajo Chile), tendencia (puntos ganados desde 2007 menos los de Chile) y brecha (cotizantes que faltan), y entran las regiones bajo la cobertura de Chile que están entre las 5 peores de al menos un factor. Con 2024 como referencia son **8 regiones**: Valparaíso, La Araucanía, Arica y Parinacota, Coquimbo, Los Ríos, Tarapacá, Ñuble y Biobío (Tarapacá entra por la tendencia y Biobío por la brecha). La lista anterior de 7 y qué hay que cuestionar de ella: `docs/ANALISIS_SIETE_REGIONES.md`.
 
 **Brecha:** prioridad = brecha de cotizantes = (cobertura de Chile − cobertura de la región) × población 15-64 de la región = cuántos cotizantes más habría si alcanzara el promedio. Pesa el nivel (qué tan baja es) y el tamaño (cuánta gente). Es la misma fórmula que propone el informe de Claude Desktop.
 
@@ -61,7 +61,7 @@ cotizantes / pob. 15-64  =  (fuerza de trabajo / pob. 15-64) × (ocupados / fuer
 
 Cada hipótesis del profesor cae en un factor: desempleo → empleo; informalidad y rama → ocupados que cotizan; participación (mujeres, desaliento) → participación. Los aportes se miden en puntos con la media logarítmica y **suman exacto** la diferencia de cobertura (test `test_aportes_suman_exacto_la_diferencia_de_cobertura`). «Hoy» es diciembre de 2024, el último con ocupados y desocupados por región (2010-2023: exportaciones del INE; 2024: anexo del estudio de la Asociación de AFP, la misma serie). Para 2025 no hay empleo regional.
 
-**Diferencia con Chile hoy, 2024 (puntos de cobertura; las 7 regiones prioritarias recomendadas):**
+**Diferencia con Chile hoy, 2024 (puntos de cobertura; las 8 regiones prioritarias recomendadas):**
 
 | Región | Participación | Empleo | Ocupados que cotizan | Total |
 |---|---|---|---|---|
@@ -71,11 +71,12 @@ Cada hipótesis del profesor cae en un factor: desempleo → empleo; informalida
 | Arica y Parinacota | −2,3 | −0,0 | **−3,9** | −6,3 |
 | Coquimbo | −2,1 | +0,1 | **−4,0** | −6,0 |
 | Valparaíso | −0,5 | −0,0 | **−3,7** | −4,2 |
+| Tarapacá | −0,7 | −0,0 | **−2,4** | −3,1 |
 | Biobío | **−2,8** | −0,3 | +0,1 | −3,1 |
 
-Lectura: en 6 de las 7 la diferencia viene sobre todo de que menos ocupados cotizan; en Biobío viene de la participación. **El desempleo casi no aporta** (entre −0,4 y +0,5 puntos). Promedio de las 7: cotización −5,0, participación −1,6, empleo −0,1.
+Lectura: en 7 de las 8 la diferencia viene sobre todo de que menos ocupados cotizan; en Biobío viene de la participación. **El desempleo casi no aporta** (entre −0,4 y +0,5 puntos). Promedio de las 8: cotización −4,7, participación −1,5, empleo −0,1.
 
-**Cambios hasta hoy:** entre 2019 y 2024 la cobertura sumó +1,2 puntos en promedio en las 7 (Coquimbo +2,4, Biobío +2,1, Ñuble +1,6, La Araucanía +1,5, Los Ríos +1,2, Valparaíso +0,3) y **bajó en Arica y Parinacota (−0,4)**; casi todo por «ocupados que cotizan» (+2,0 en promedio). Valparaíso es la excepción (−0,3 de cotización), en línea con el estudio de la Asociación de AFP, que le calcula −0,4. En el tablero se elige «Diferencia con Chile hoy», «Cambio entre 2023 y hoy» o «Cambio entre 2019 y hoy», y las filas se ordenan por cada columna.
+**Cambios hasta hoy:** entre 2019 y 2024 la cobertura sumó +1,2 puntos en promedio en las 8 (Coquimbo +2,4, Biobío +2,1, Ñuble +1,6, La Araucanía +1,5, Los Ríos +1,2, Tarapacá +1,0, Valparaíso +0,3) y **bajó en Arica y Parinacota (−0,4)**; casi todo por «ocupados que cotizan» (+1,6 en promedio). Valparaíso y Tarapacá son las excepciones (−0,3 y −1,0 de cotización; en Tarapacá la participación compensa con +2,1), en línea con el estudio de la Asociación de AFP, que le calcula −0,4. En el tablero se elige «Diferencia con Chile hoy», «Cambio entre 2023 y hoy» o «Cambio entre 2019 y hoy», y las filas se ordenan por cada columna.
 
 ## 5. Asociaciones con la cobertura 2024 (16 regiones, no causas)
 

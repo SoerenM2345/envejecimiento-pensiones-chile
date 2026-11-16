@@ -55,6 +55,7 @@ Resultado, sin concluir más: la Metropolitana pesa **más en los cotizantes que
 | 2.3 | Cotizantes «sin región informada» (56 mil en 2024) quedan fuera de los territorios; el país usa los que tienen región. | Subestima la cobertura nacional en 0,4 puntos. |
 | 2.4 | **Cotizantes es un registro de diciembre; ocupados, un trimestre móvil (nov-ene).** | La estacionalidad (cosecha, comercio de fin de año) puede mover el cociente en regiones agrícolas. |
 | 2.5 | 2020 es un año atípico: la cobertura cae en 13 de las 16 regiones y en 2021 rebota. En la descomposición, «ocupados que cotizan» **sube** en 2020 (de 66,0 % a 72,7 % en Chile) mientras baja la participación: una explicación posible, no verificada, es que perdieron el empleo sobre todo los informales. | Se marcan 2020-2021 en el gráfico. No usar 2020 como base de comparación. |
+| 2.6 | **La tendencia de las regiones prioritarias** (puntos ganados desde 2007 menos los de Chile) usa la serie fusionada de Biobío y Ñuble hasta 2017, así que las dos tienen la misma tendencia; Arica y Los Ríos están separadas desde 2007. Los tres rangos pesan igual y la brecha (nivel × tamaño) repite en parte el nivel. | Con 16 regiones, un rango de 1 a 16 por factor es una elección: con otro peso o con el cotizantes por región en lugar de la brecha (la Metropolitana pasa a rango 1) la lista cambia. La regla se probó con 21 años de inicio: igual con todos hasta 2019 (`kpi_cobertura_prioridad_robustez.csv`). |
 
 ## 3. Encuesta Nacional de Empleo (ENE) y descomposición
 
