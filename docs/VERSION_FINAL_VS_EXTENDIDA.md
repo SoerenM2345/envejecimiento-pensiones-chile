@@ -25,3 +25,7 @@ Lo recortado se **borró del código de la final** (funciones, expanders, import
 ## Qué se revisó contra las pautas de la clase
 
 Auditoría de todos los gráficos de la final (títulos con mensaje y sin siglas, máximo 4 líneas, ejes desde 0, una serie de color por barra, daltonismo): un hallazgo corregido (el título de la descomposición del costo decía «cobertura» en vez de «alcance»). Pendiente, solo en la extendida: el gráfico de costos por administradora tiene 8 líneas (la regla dice 4).
+
+## Reforma del empleador (2026-11-16): en las dos versiones
+
+Los cuatro bloques nuevos están en la final y en la extendida (mismo código, `components/reforma_empleador.py` y `components/palancas.py`): KPI 1.1 «¿Qué puede hacer una administradora y qué le corresponde al Estado?»; KPI 1.2 «Con la reforma del empleador: dos escenarios frente a la base»; KPI 1.3 «¿Adónde va la cotización del empleador?» y el selector de variantes del flujo comisionable. Supuestos y límites en `docs/supuestos_y_limitaciones.md`, sección 9.

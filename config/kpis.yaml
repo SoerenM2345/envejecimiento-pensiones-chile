@@ -201,6 +201,11 @@ kpis_presentacion:
         script: 20_correlaciones_cobertura.py
         fuente: ["INE Censo 2024 (% 65+, % urbano)", "CASEN 2022 (ingreso per cápita, pobreza 65+)"]
         caveat: "Correlación no implica causalidad; n = 16 regiones. Ingreso de CASEN 2022 (encuesta muestral). Cotizantes 2024 vs. Censo 2024."
+      - nombre: "¿Qué puede hacer una administradora y qué le corresponde al Estado? (palancas frente a la cobertura estancada)"
+        archivo: [kpi_cobertura_palancas.csv]
+        script: 31_palancas_cotizantes.py
+        fuente: ["Subsecretaría de Previsión Social, Nota Técnica Ley 21.735 (secciones 3.1.4, 5 y 6)", "Asociación de AFP, Hoja de Ruta 555 (2023) y Propuestas de la Mesa de Formalidad Laboral (2024)", "personas: kpi_cobertura_composicion*.csv"]
+        caveat: "El alcance de la administradora y el impacto son un juicio del equipo, no una medición. Los grupos de personas se superponen y no se suman."
 
   - id: "1.2"
     nombre: "Razón de soporte"
@@ -210,11 +215,17 @@ kpis_presentacion:
     visualizacion: barras_y_proyeccion
     status: live
     escenario: true
-    archivo: [kpi_presion_previsional_region.csv, kpi_proyeccion_regional.csv, kpi_pc_nacional.csv, kpi_pc_region.csv, kpi_pc_parametros_reforma.csv, kpi_punto_critico_sensibilidad.csv]
+    archivo: [kpi_presion_previsional_region.csv, kpi_proyeccion_regional.csv, kpi_pc_nacional.csv, kpi_pc_region.csv, kpi_pc_parametros_reforma.csv, kpi_punto_critico_sensibilidad.csv, kpi_pc_escenarios_reforma.csv, kpi_reforma_empleo_factor.csv]
     script: "07_kpis_pension_salud.py, 18_kpi_punto_critico.py, 22_punto_critico_sensibilidad.py"
     supuestos: config/escenarios.yaml
     fuente: [Superintendencia de Pensiones (cotizantes e ingreso imponible mensual, 04A), INE Censo 2024, INE proyecciones 1992-2070, INE ESI y ENE (ingreso y ocupados), Banco Central (IPC), Subsecretaría de Previsión Social (Pilar Solidario PGU/APS/PBS), "Nota Técnica Ley 21.735 (calendario PGU $250.000)"]
     caveat: "Valores 2024 reales (Superintendencia de Pensiones, Censo 2024). Proyecciones = escenario (cobertura constante, crecimiento salarial real según config/escenarios.yaml); la población 65+ regional es un reparto de tasas nacionales, no proyección oficial INE."
+    analisis:
+      - nombre: "Con la reforma del empleador: dos escenarios frente a la base"
+        archivo: [kpi_pc_escenarios_reforma.csv, kpi_reforma_empleo_factor.csv]
+        script: "15_kpi_participacion_partes.py, 30_escenarios_reforma_empleador.py"
+        fuente: ["Subsecretaría de Previsión Social, Nota Técnica Ley 21.735, Tabla 1", "Gruber (1997), NBER w5053 (traspaso total en Chile al bajar cotizaciones)"]
+        caveat: "La elasticidad del empleo formal (−0,1 y −0,3) es un supuesto, no una estimación. El Seguro Social no se suma a la capacidad: no financia el Pilar Solidario."
 
   - id: "1.3"
     nombre: "Participación del flujo comisionable"
@@ -225,10 +236,21 @@ kpis_presentacion:
     status: live
     escenario: true
     supuestos: config/escenarios.yaml
-    archivo: [kpi_flujo_comisionable.csv, kpi_participacion_partes.csv, fichas_previsionales_mensual.csv]
+    archivo: [kpi_flujo_comisionable.csv, kpi_participacion_partes.csv, fichas_previsionales_mensual.csv, kpi_reforma_empleador.csv, kpi_reforma_empleo_factor.csv]
     fuente: ["Superintendencia de Pensiones, Fichas Estadísticas Previsionales N° 136-159 (cotizantes e ingreso promedio)", "FAPP, estados financieros al 31-12-2025 (cuentas 40.110 y 40.187)", "Subsecretaría de Previsión Social (Pilar Solidario: PGU, PBS, APS)", "Subsecretaría de Previsión Social, Nota Técnica Reforma de Pensiones Ley N°21.735, Tabla 1 (gradualidad y división de la cotización del empleador; tasa SIS 1,88%), Data raw/_external/ley_21735/nota_tecnica_ley_21735_previsionsocial.pdf", "INE proyecciones 1992-2070"]
     script: 15_kpi_participacion_partes.py
     caveat: "Aporte trabajadores estimado (cotizantes × ingreso imponible promedio × 10%, con tope imponible). Aporte Estado = gasto en PGU/PBS/APS (flujo de beneficios, no cotización). El SIS se excluye del flujo en todos los años (prima de seguro, no financiamiento de pensiones ni base comisionable); variante con SIS (1,88% de la masa imponible en todos los años) como sensibilidad. Tasas y división del aporte del empleador según Nota Técnica Ley 21.735 (Data raw/_external/ley_21735/). Proyección = escenario, no pronóstico."
+    analisis:
+      - nombre: "¿Adónde va la cotización del empleador? (cuenta individual, Seguro Social y seguro de invalidez por escalón)"
+        archivo: [kpi_reforma_empleador.csv]
+        script: 15_kpi_participacion_partes.py
+        fuente: ["Subsecretaría de Previsión Social, Nota Técnica Ley 21.735, Tabla 1 y secciones 1, 2.1 y 3"]
+        caveat: "Los 1,88 puntos del seguro de invalidez se suponen constantes; la nota no separa qué parte del 2,5 % del Seguro Social lo es."
+      - nombre: "Variantes del flujo comisionable con el efecto de la reforma en el empleo formal"
+        archivo: [kpi_flujo_comisionable.csv, kpi_reforma_empleo_factor.csv]
+        script: 15_kpi_participacion_partes.py
+        fuente: ["config/escenarios.yaml (reforma_empleador)"]
+        caveat: "Supuesto de elasticidad (−0,1 y −0,3), no una estimación; casi no mueve el porcentaje, sí el monto."
 
   - id: "2.1"
     nombre: "Costo real por adulto mayor"

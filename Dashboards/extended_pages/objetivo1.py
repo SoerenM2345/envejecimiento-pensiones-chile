@@ -13,6 +13,7 @@ from components.charts import (mostrar, region_choropleth, region_bars, support_
                                coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, gender_gap_scatter)
 from components.charts import coverage_composition_chart, worker_type_chart
 from components import critical_point as cp
+from components.palancas import render_palancas
 from components.reforma_empleador import render_destinos_empleador, render_escenarios_reforma, render_flujo_con_variantes
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -53,6 +54,7 @@ def render_1_1():
     render_1_1_correlaciones()
     render_1_1_matriz()
     render_1_1_causas()
+    render_palancas()
     st.caption("n = 16 regiones. Ingreso y pobreza 65+: CASEN 2022 (encuesta muestral).")
 
 
