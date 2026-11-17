@@ -14,6 +14,7 @@ from components.charts import (mostrar, region_choropleth, region_bars, support_
 from components.charts import coverage_composition_chart, worker_type_chart
 from components import critical_point as cp
 from components.palancas import render_palancas
+from components.razon_soporte_barras import render_razon_soporte_barras
 from components.reforma_empleador import render_destinos_empleador, render_escenarios_reforma, render_flujo_con_variantes
 
 st.title("Objetivo 1: retener y ampliar la base activa")
@@ -960,6 +961,7 @@ def render_1_2():
     st.caption("\\* Número junto a las barras azules = cotizantes por adulto mayor. Línea continua = datos reales; punteada sobre fondo gris = "
                "escenario con la cobertura previsional constante (país: la de 2025; región: la de 2024). Cotizantes: diciembre, con región; "
                "población: Censo 2024 y proyecciones INE.")
+    render_razon_soporte_barras(pc_serie)
     render_1_2_punto_critico()
     render_1_2_escenarios_fijos()
     render_escenarios_reforma(pc_serie)

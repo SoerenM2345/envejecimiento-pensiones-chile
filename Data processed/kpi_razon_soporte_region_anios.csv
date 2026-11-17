@@ -1,0 +1,97 @@
+region_id,region_nombre,anio,razon,tipo,fusionada
+1,Tarapacá,2010,3.994,observado,False
+1,Tarapacá,2015,4.134,observado,False
+1,Tarapacá,2020,3.2514,observado,False
+1,Tarapacá,2024,3.1153,observado,False
+1,Tarapacá,2035,2.167,escenario,False
+1,Tarapacá,2050,1.3976,escenario,False
+2,Antofagasta,2010,4.3553,observado,False
+2,Antofagasta,2015,4.5339,observado,False
+2,Antofagasta,2020,3.9079,observado,False
+2,Antofagasta,2024,3.7845,observado,False
+2,Antofagasta,2035,2.6337,escenario,False
+2,Antofagasta,2050,1.6981,escenario,False
+3,Atacama,2010,3.4621,observado,False
+3,Atacama,2015,3.3848,observado,False
+3,Atacama,2020,2.8905,observado,False
+3,Atacama,2024,2.65,observado,False
+3,Atacama,2035,1.8436,escenario,False
+3,Atacama,2050,1.1889,escenario,False
+4,Coquimbo,2010,2.2136,observado,False
+4,Coquimbo,2015,2.3237,observado,False
+4,Coquimbo,2020,2.0215,observado,False
+4,Coquimbo,2024,1.8887,observado,False
+4,Coquimbo,2035,1.3138,escenario,False
+4,Coquimbo,2050,0.8472,escenario,False
+5,Valparaíso,2010,2.202,observado,False
+5,Valparaíso,2015,2.219,observado,False
+5,Valparaíso,2020,1.8767,observado,False
+5,Valparaíso,2024,1.6961,observado,False
+5,Valparaíso,2035,1.18,escenario,False
+5,Valparaíso,2050,0.7608,escenario,False
+6,O'Higgins,2010,2.7835,observado,False
+6,O'Higgins,2015,2.6646,observado,False
+6,O'Higgins,2020,2.3534,observado,False
+6,O'Higgins,2024,2.2136,observado,False
+6,O'Higgins,2035,1.5403,escenario,False
+6,O'Higgins,2050,0.9932,escenario,False
+7,Maule,2010,2.4319,observado,False
+7,Maule,2015,2.432,observado,False
+7,Maule,2020,2.1705,observado,False
+7,Maule,2024,1.9294,observado,False
+7,Maule,2035,1.3422,escenario,False
+7,Maule,2050,0.8656,escenario,False
+8,Biobío,2010,2.4332,observado,True
+8,Biobío,2015,2.3546,observado,True
+8,Biobío,2020,2.2061,observado,False
+8,Biobío,2024,1.9913,observado,False
+8,Biobío,2035,1.3854,escenario,False
+8,Biobío,2050,0.8934,escenario,False
+9,La Araucanía,2010,1.8045,observado,False
+9,La Araucanía,2015,1.977,observado,False
+9,La Araucanía,2020,1.7334,observado,False
+9,La Araucanía,2024,1.5996,observado,False
+9,La Araucanía,2035,1.1129,escenario,False
+9,La Araucanía,2050,0.7178,escenario,False
+10,Los Lagos,2010,2.5954,observado,False
+10,Los Lagos,2015,2.7306,observado,False
+10,Los Lagos,2020,2.5049,observado,False
+10,Los Lagos,2024,2.2205,observado,False
+10,Los Lagos,2035,1.5449,escenario,False
+10,Los Lagos,2050,0.9963,escenario,False
+11,Aysén,2010,3.3792,observado,False
+11,Aysén,2015,3.4474,observado,False
+11,Aysén,2020,2.8724,observado,False
+11,Aysén,2024,2.5977,observado,False
+11,Aysén,2035,1.807,escenario,False
+11,Aysén,2050,1.1653,escenario,False
+12,Magallanes,2010,3.3692,observado,False
+12,Magallanes,2015,3.2378,observado,False
+12,Magallanes,2020,2.6883,observado,False
+12,Magallanes,2024,2.5667,observado,False
+12,Magallanes,2035,1.786,escenario,False
+12,Magallanes,2050,1.1516,escenario,False
+13,Metropolitana,2010,3.6361,observado,False
+13,Metropolitana,2015,3.4463,observado,False
+13,Metropolitana,2020,2.9496,observado,False
+13,Metropolitana,2024,2.696,observado,False
+13,Metropolitana,2035,1.8754,escenario,False
+13,Metropolitana,2050,1.2093,escenario,False
+14,Los Ríos,2010,1.9202,observado,False
+14,Los Ríos,2015,2.036,observado,False
+14,Los Ríos,2020,1.8395,observado,False
+14,Los Ríos,2024,1.6694,observado,False
+14,Los Ríos,2035,1.1614,escenario,False
+14,Los Ríos,2050,0.7489,escenario,False
+15,Arica y Parinacota,2010,2.7689,observado,False
+15,Arica y Parinacota,2015,2.7518,observado,False
+15,Arica y Parinacota,2020,2.3126,observado,False
+15,Arica y Parinacota,2024,2.1276,observado,False
+15,Arica y Parinacota,2035,1.4801,escenario,False
+15,Arica y Parinacota,2050,0.9544,escenario,False
+16,Ñuble,2010,2.4332,observado,True
+16,Ñuble,2015,2.3546,observado,True
+16,Ñuble,2020,1.6892,observado,False
+16,Ñuble,2024,1.5078,observado,False
+16,Ñuble,2035,1.0491,escenario,False
+16,Ñuble,2050,0.6765,escenario,False

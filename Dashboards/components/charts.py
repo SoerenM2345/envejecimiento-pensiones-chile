@@ -296,6 +296,54 @@ def support_ratio_projection(historico: float, filas: pd.DataFrame, nombre: str,
     return fig
 
 
+COLOR_DATO_BARRA, COLOR_ESCENARIO_BARRA = "#1B2A41", "#527C83"  # oscuro = dato observado, verde azulado = escenario
+
+
+def _barras_razon(fig: go.Figure, d: pd.DataFrame, fila: int = None, col: int = None, tam_texto: int = 16, leyenda: bool = True) -> None:
+    """Agrega a `fig` las barras de la razón de soporte (una traza por tipo: dato observado / escenario).
+    d: anio, razon, tipo ('observado' | 'escenario'), fusionada (opcional: dato de dos regiones juntas, en tono claro)."""
+    pos = dict(row=fila, col=col) if fila else {}
+    fus = d["fusionada"].astype(bool) if "fusionada" in d else pd.Series(False, index=d.index)
+    for nombre, mascara, color in (("Dato observado", (d.tipo == "observado") & ~fus, COLOR_DATO_BARRA),
+                                   ("Dato de dos regiones juntas", (d.tipo == "observado") & fus, lighten(COLOR_DATO_BARRA, 0.55)),
+                                   ("Escenario", d.tipo == "escenario", COLOR_ESCENARIO_BARRA)):
+        s = d[mascara]
+        if s.empty:
+            continue
+        fig.add_bar(x=s.anio.astype(str), y=s.razon, name=nombre, marker_color=color, text=[f"{v:.2f}" for v in s.razon],
+                    textposition="outside", textfont=dict(size=tam_texto), cliponaxis=False, legendgroup=nombre,
+                    showlegend=leyenda, hovertemplate="%{x}: %{y:.2f}<extra>" + nombre + "</extra>", **pos)
+
+
+def support_ratio_bars(d: pd.DataFrame, titulo: str, alto: int = 500) -> go.Figure:
+    """Cotizantes por persona de 65+ en años pasados, 2024 y el escenario con cobertura constante, como barras.
+    d: anio, razon, tipo ('observado' | 'escenario'). Eje desde 0, un color para los datos y otro para el escenario."""
+    fig = go.Figure()
+    _barras_razon(fig, d)
+    fig.update_layout(**{**PLOTLY_LAYOUT, "legend": dict(orientation="h", x=1, xanchor="right", y=1.02, yanchor="bottom", bgcolor="rgba(0,0,0,0)")},
+                      title=titulo, bargap=0.33, height=alto, barmode="overlay")
+    fig.update_xaxes(type="category", categoryorder="array", categoryarray=list(d.anio.astype(str)), tickfont_size=15, showgrid=False)
+    fig.update_yaxes(visible=False, range=[0, d.razon.max() * 1.15])
+    return fig
+
+
+def support_ratio_bars_panels(d: pd.DataFrame, orden: list, titulo: str, columnas: int = 3, destacadas: tuple = ()) -> go.Figure:
+    """Un panel de barras por región (mismo eje en todos, para comparar), en el orden de `orden` (nombres de región).
+    d: region_nombre, anio, razon, tipo, fusionada. Las regiones de `destacadas` llevan el nombre en negrita."""
+    filas = -(-len(orden) // columnas)
+    fig = make_subplots(rows=filas, cols=columnas, shared_yaxes=True, horizontal_spacing=0.03, vertical_spacing=0.3 / filas,
+                        subplot_titles=[f"<b>{n}</b>" if n in destacadas else n for n in orden])
+    for i, nombre in enumerate(orden):
+        _barras_razon(fig, d[d.region_nombre == nombre], i // columnas + 1, i % columnas + 1, tam_texto=11, leyenda=(i == 0))
+    if "fusionada" in d and d[d.region_nombre.isin(orden)].fusionada.astype(bool).any():  # la leyenda solo sale de la primera región
+        fig.add_bar(x=[None], y=[None], name="Dato de dos regiones juntas", marker_color=lighten(COLOR_DATO_BARRA, 0.55))
+    fig.update_layout(**{**PLOTLY_LAYOUT, "legend": dict(orientation="h", x=1, xanchor="right", y=1.0, yanchor="bottom", bgcolor="rgba(0,0,0,0)")},
+                      title=titulo, bargap=0.3, height=250 * filas + 140, barmode="overlay")
+    fig.update_xaxes(type="category", categoryorder="array", categoryarray=[str(a) for a in sorted(d.anio.unique())], tickfont_size=11, showgrid=False)
+    fig.update_yaxes(visible=False, range=[0, d[d.region_nombre.isin(orden)].razon.max() * 1.2])
+    return fig
+
+
 LINEAS_INDICE_COSTO = (  # (columna de indices_costo, nombre, color, grosor)
     ("pilar", "Costo del Pilar", INK_PRIMARY, 3.5), ("monto", "Monto por beneficio", ORANGE, 2.5), ("pob_65", "Personas de 65+", BLUE, 2.5),
     ("cobertura", "Cobertura (beneficios por persona de 65+)", AQUA, 2.5),
