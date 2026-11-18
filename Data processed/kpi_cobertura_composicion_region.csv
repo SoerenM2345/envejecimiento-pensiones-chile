@@ -1,0 +1,103 @@
+region_id,region_nombre,pieza,grupo,personas,pct_15_64
+0,Chile,3,Cotizan: dependientes,5814037.3381,46.0753
+0,Chile,3,Cotizan: independientes y voluntarios,48845.6619,0.3871
+0,Chile,3,No cotizan: ocupados informales,2283299.0223,18.0948
+0,Chile,3,No cotizan: ocupados formales fuera de la estadística,547148.2733,4.3361
+0,Chile,2,Buscan trabajo (desocupados),755707.3176,5.9889
+0,Chile,1,Ni trabajan ni buscan,3169508.3868,25.1179
+1,Tarapacá,3,Cotizan: dependientes,109141.0696,42.9781
+1,Tarapacá,3,Cotizan: independientes y voluntarios,916.9304,0.3611
+1,Tarapacá,3,No cotizan: ocupados informales,50785.7373,19.9986
+1,Tarapacá,3,No cotizan: ocupados formales fuera de la estadística,11364.1258,4.475
+1,Tarapacá,2,Buscan trabajo (desocupados),15137.6708,5.961
+1,Tarapacá,1,Ni trabajan ni buscan,66600.4661,26.2262
+2,Antofagasta,3,Cotizan: dependientes,231066.7315,51.4746
+2,Antofagasta,3,Cotizan: independientes y voluntarios,1941.2685,0.4325
+2,Antofagasta,3,No cotizan: ocupados informales,57584.7929,12.8281
+2,Antofagasta,3,No cotizan: ocupados formales fuera de la estadística,14978.4929,3.3367
+2,Antofagasta,2,Buscan trabajo (desocupados),24290.2327,5.4111
+2,Antofagasta,1,Ni trabajan ni buscan,119033.4814,26.517
+3,Atacama,3,Cotizan: dependientes,98934.8157,48.8738
+3,Atacama,3,Cotizan: independientes y voluntarios,831.1843,0.4106
+3,Atacama,3,No cotizan: ocupados informales,42091.2553,20.7931
+3,Atacama,3,No cotizan: ocupados formales fuera de la estadística,3068.3476,1.5158
+3,Atacama,2,Buscan trabajo (desocupados),14749.7153,7.2864
+3,Atacama,1,Ni trabajan ni buscan,42753.6819,21.1203
+4,Coquimbo,3,Cotizan: dependientes,224339.2513,40.1567
+4,Coquimbo,3,Cotizan: independientes y voluntarios,1884.7487,0.3374
+4,Coquimbo,3,No cotizan: ocupados informales,112756.7652,20.1835
+4,Coquimbo,3,No cotizan: ocupados formales fuera de la estadística,28772.6827,5.1503
+4,Coquimbo,2,Buscan trabajo (desocupados),31203.2995,5.5854
+4,Coquimbo,1,Ni trabajan ni buscan,159702.2526,28.5867
+5,Valparaíso,3,Cotizan: dependientes,528710.1303,41.8621
+5,Valparaíso,3,Cotizan: independientes y voluntarios,4441.8697,0.3517
+5,Valparaíso,3,No cotizan: ocupados informales,259650.3093,20.5585
+5,Valparaíso,3,No cotizan: ocupados formales fuera de la estadística,66248.5581,5.2454
+5,Valparaíso,2,Buscan trabajo (desocupados),75673.0228,5.9916
+5,Valparaíso,1,Ni trabajan ni buscan,328257.1098,25.9907
+6,O'Higgins,3,Cotizan: dependientes,325342.6878,49.2418
+6,O'Higgins,3,Cotizan: independientes y voluntarios,2733.3122,0.4137
+6,O'Higgins,3,No cotizan: ocupados informales,127957.4748,19.3668
+6,O'Higgins,3,No cotizan: ocupados formales fuera de la estadística,0.0,0.0
+6,O'Higgins,2,Buscan trabajo (desocupados),36308.09,5.4954
+6,O'Higgins,1,Ni trabajan ni buscan,168362.4352,25.4823
+7,Maule,3,Cotizan: dependientes,326945.2244,43.6857
+7,Maule,3,Cotizan: independientes y voluntarios,2746.7756,0.367
+7,Maule,3,No cotizan: ocupados informales,158890.0378,21.2305
+7,Maule,3,No cotizan: ocupados formales fuera de la estadística,32551.7239,4.3495
+7,Maule,2,Buscan trabajo (desocupados),33727.0857,4.5065
+7,Maule,1,Ni trabajan ni buscan,193542.1526,25.8607
+8,Biobío,3,Cotizan: dependientes,469637.4198,42.9859
+8,Biobío,3,Cotizan: independientes y voluntarios,3945.5802,0.3611
+8,Biobío,3,No cotizan: ocupados informales,180881.9053,16.5561
+8,Biobío,3,No cotizan: ocupados formales fuera de la estadística,46781.759,4.2819
+8,Biobío,2,Buscan trabajo (desocupados),66582.9249,6.0943
+8,Biobío,1,Ni trabajan ni buscan,324709.4109,29.7206
+9,La Araucanía,3,Cotizan: dependientes,243151.2058,36.1616
+9,La Araucanía,3,Cotizan: independientes y voluntarios,2042.7942,0.3038
+9,La Araucanía,3,No cotizan: ocupados informales,161398.8041,24.0033
+9,La Araucanía,3,No cotizan: ocupados formales fuera de la estadística,31533.8631,4.6897
+9,La Araucanía,2,Buscan trabajo (desocupados),42365.9798,6.3007
+9,La Araucanía,1,Ni trabajan ni buscan,191909.353,28.5409
+10,Los Lagos,3,Cotizan: dependientes,263417.9383,42.9847
+10,Los Lagos,3,Cotizan: independientes y voluntarios,2213.0617,0.3611
+10,Los Lagos,3,No cotizan: ocupados informales,110828.8609,18.0851
+10,Los Lagos,3,No cotizan: ocupados formales fuera de la estadística,36274.4953,5.9193
+10,Los Lagos,2,Buscan trabajo (desocupados),17699.3721,2.8882
+10,Los Lagos,1,Ni trabajan ni buscan,182384.2717,29.7616
+11,Aysén,3,Cotizan: dependientes,32729.0325,47.5429
+11,Aysén,3,Cotizan: independientes y voluntarios,274.9675,0.3994
+11,Aysén,3,No cotizan: ocupados informales,18129.8853,26.3359
+11,Aysén,3,No cotizan: ocupados formales fuera de la estadística,4471.3129,6.4951
+11,Aysén,2,Buscan trabajo (desocupados),2420.7597,3.5165
+11,Aysén,1,Ni trabajan ni buscan,10815.0421,15.7102
+12,Magallanes,3,Cotizan: dependientes,61601.4656,53.7835
+12,Magallanes,3,Cotizan: independientes y voluntarios,517.5344,0.4519
+12,Magallanes,3,No cotizan: ocupados informales,18239.4673,15.9247
+12,Magallanes,3,No cotizan: ocupados formales fuera de la estadística,9757.0287,8.5187
+12,Magallanes,2,Buscan trabajo (desocupados),3692.8035,3.2241
+12,Magallanes,1,Ni trabajan ni buscan,20727.7005,18.0971
+13,Metropolitana,3,Cotizan: dependientes,2604213.139,50.5859
+13,Metropolitana,3,Cotizan: independientes y voluntarios,21878.861,0.425
+13,Metropolitana,3,No cotizan: ocupados informales,827515.0261,16.0742
+13,Metropolitana,3,No cotizan: ocupados formales fuera de la estadística,195622.7166,3.7999
+13,Metropolitana,2,Buscan trabajo (desocupados),346903.0444,6.7385
+13,Metropolitana,1,Ni trabajan ni buscan,1151967.2128,22.3766
+14,Los Ríos,3,Cotizan: dependientes,101459.6041,37.8255
+14,Los Ríos,3,Cotizan: independientes y voluntarios,852.3959,0.3178
+14,Los Ríos,3,No cotizan: ocupados informales,61304.1489,22.855
+14,Los Ríos,3,No cotizan: ocupados formales fuera de la estadística,23215.2645,8.655
+14,Los Ríos,2,Buscan trabajo (desocupados),13627.6939,5.0806
+14,Los Ríos,1,Ni trabajan ni buscan,67771.8926,25.2662
+15,Arica y Parinacota,3,Cotizan: dependientes,65904.3159,39.8688
+15,Arica y Parinacota,3,Cotizan: independientes y voluntarios,553.6841,0.335
+15,Arica y Parinacota,3,No cotizan: ocupados informales,31949.0598,19.3276
+15,Arica y Parinacota,3,No cotizan: ocupados formales fuera de la estadística,9415.5193,5.6959
+15,Arica y Parinacota,2,Buscan trabajo (desocupados),9480.5637,5.7353
+15,Arica y Parinacota,1,Ni trabajan ni buscan,47999.8572,29.0375
+16,Ñuble,3,Cotizan: dependientes,127443.3064,37.5099
+16,Ñuble,3,Cotizan: independientes y voluntarios,1070.6936,0.3151
+16,Ñuble,3,No cotizan: ocupados informales,77195.0793,22.7205
+16,Ñuble,3,No cotizan: ocupados formales fuera de la estadística,19232.7955,5.6607
+16,Ñuble,2,Buscan trabajo (desocupados),21845.0589,6.4296
+16,Ñuble,1,Ni trabajan ni buscan,92972.0663,27.3641

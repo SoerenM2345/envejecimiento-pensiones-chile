@@ -12,6 +12,7 @@ from components.charts import (mostrar, region_choropleth, region_bars, support_
                                commissionable_share_line, critical_point_chart, carga_waterfall, region_support_people_bars,
                                coverage_correlation_scatter, coverage_risk_matrix, coverage_trend_panels, decomposition_panels, VENTANAS_TENDENCIA, factor_bars, region_change_bars, region_ranking_bars, coverage_long_chart, extremos_largo, fixed_scenarios_chart, region_coverage_people_bars, risk_quadrant, num_cl, estilo_kpi, two_levers_scatter, gender_gap_scatter)
 from components.charts import coverage_composition_chart, worker_type_chart
+from components.composicion_regiones import render_composicion_regiones
 from components import critical_point as cp
 from components.palancas import render_palancas
 from components.razon_soporte_barras import render_razon_soporte_barras
@@ -82,7 +83,7 @@ def render_1_1_composicion():
     c = load_csv("kpi_cobertura_composicion_categoria.csv")
     g = d.set_index("grupo")
     p = lambda k: g.loc[k, "pct_15_64"]  # noqa: E731
-    mostrar(coverage_composition_chart(d))
+    mostrar(coverage_composition_chart(d, personas_texto=f", Censo 2024: {d.personas.sum() / 1e6:.1f} millones"))
     _subtitulo_visible(
         f"Qué muestra: las personas de 15 a 64 años en una sola barra. Cotizan {p('Cotizan: dependientes') + p('Cotizan: independientes y voluntarios'):.1f} %; "
         f"el resto no, por tres razones que son las piezas de la cobertura: no participan en el mercado laboral ({p('Ni trabajan ni buscan'):.1f} %), buscan trabajo "
@@ -98,6 +99,7 @@ def render_1_1_composicion():
     ], columns=["Grupo del gráfico", "Pieza de la cobertura", "Razones que ya vimos"]).set_index("Grupo del gráfico")
     tabla.insert(1, "Personas", [es_cl(f"{x:,.0f}") for x in d.personas])
     st.table(tabla)
+    render_composicion_regiones(_prioritarias(load_csv("kpi_cobertura_regiones.csv")))
     mostrar(worker_type_chart(c))
     ind = c[c.tipo == "Independientes"].set_index("universo").pct
     u_ocu, u_cot = c.universo.unique()[:2]

@@ -136,6 +136,22 @@ def test_kpi_1_1_composicion_usa_las_piezas_de_la_cobertura():
     assert (c.groupby("universo").pct.sum().round(6) == 100).all()
 
 
+def test_kpi_1_1_composicion_por_region_suma_la_cobertura_de_cada_region():
+    """El mismo gráfico por región: en Chile y en cada región los seis grupos suman la población de 15-64 y los que cotizan son la cobertura del KPI;
+    Chile coincide con el archivo del país."""
+    import pandas as pd
+    dp = DASH.parent / "Data processed"
+    d = pd.read_csv(dp / "kpi_cobertura_composicion_region.csv")
+    f = pd.read_csv(dp / "kpi_cobertura_factores_anual.csv")
+    f = f[f.anio == 2024].set_index("territorio_id")
+    assert sorted(d.region_id.unique()) == list(range(17)) and (d.groupby("region_id").size() == 6).all() and (d.personas >= 0).all()
+    for rid, x in d.groupby("region_id"):
+        assert abs(x.personas.sum() - f.p1564[rid]) < 1 and abs(x.pct_15_64.sum() - 100) < 1e-3
+        assert abs(x[x.grupo.str.startswith("Cotizan")].pct_15_64.sum() - f.cobertura_pct[rid]) < 1e-3
+    pais = pd.read_csv(dp / "kpi_cobertura_composicion.csv")
+    assert (d[d.region_id == 0].personas.round(2).values == pais.personas.round(2).values).all()
+
+
 def test_kpi_1_2_razon_y_sensibilidad():
     """KPI 1.2: razón de soporte 2024 del país = 2,27 y tabla de sensibilidad 3 × 3 del punto crítico."""
     import pandas as pd

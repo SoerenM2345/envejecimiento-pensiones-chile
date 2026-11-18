@@ -1584,34 +1584,60 @@ COLORES_COMPOSICION = {  # grupo de kpi_cobertura_composicion.csv -> color: azul
 PIEZAS_COMPOSICION = {3: "Ocupados que cotizan", 2: "Empleo", 1: "Participación laboral"}  # mismas piezas de la descomposición de la cobertura
 
 
-def coverage_composition_chart(d: pd.DataFrame) -> go.Figure:
+def _cota(fig: go.Figure, x0: float, x1: float, y: float, texto: str, arriba: bool = True, ext: float = 0.14) -> None:
+    """Cota de plano de arquitecto: línea de medida de x0 a x1 con líneas de referencia hasta la barra y marcas oblicuas en los dos extremos,
+    de modo que cada tramo se ve exactamente de dónde a dónde va. Las cotas vecinas comparten la línea de referencia de su límite."""
+    s = 1 if arriba else -1
+    fig.add_shape(type="line", xref="x", yref="y", x0=x0, x1=x1, y0=y, y1=y, line=dict(color=INK_PRIMARY, width=1.5))
+    for x in (x0, x1):  # línea de referencia desde la barra (con un pequeño hueco) hasta un poco más allá de la línea de medida
+        fig.add_shape(type="line", xref="x", yref="y", x0=x, x1=x, y0=s * 0.34, y1=y + s * ext, line=dict(color=INK_PRIMARY, width=1))
+    fig.add_trace(go.Scatter(x=[x0, x1], y=[y, y], mode="markers", marker=dict(symbol="line-ne", size=14, color=INK_PRIMARY, line=dict(width=1.8, color=INK_PRIMARY)),
+                             showlegend=False, hoverinfo="skip"))
+    fig.add_annotation(xref="x", yref="y", x=(x0 + x1) / 2, y=y + s * (ext + 0.04), yanchor="bottom" if arriba else "top", showarrow=False,
+                       font=dict(size=12, color=INK_PRIMARY), text=texto)
+
+
+def coverage_composition_chart(d: pd.DataFrame, territorio: str = "Chile", cobertura_chile: float = None, personas_texto: str = "") -> go.Figure:
     """KPI 1.1, estado actual: las personas de 15 a 64 años en una sola barra, por si cotizan o no y, si no, por qué. d =
-    kpi_cobertura_composicion.csv (pieza, grupo, personas, pct_15_64). Los grupos son las piezas de la cobertura (participación × empleo ×
-    ocupados que cotizan): arriba de la barra, una llave por pieza."""
+    kpi_cobertura_composicion.csv (o las filas de una región de kpi_cobertura_composicion_region.csv): pieza, grupo, personas, pct_15_64.
+    Los grupos son las piezas de la cobertura (participación × empleo × ocupados que cotizan). Arriba, una cota por pieza; abajo, una cota con
+    la suma de los que cotizan (dependientes + independientes y voluntarios = cobertura del KPI). cobertura_chile: referencia en las regiones."""
     fig = go.Figure()
     x0, tramos = 0.0, {}
+    cot = float(d[d.grupo.str.startswith("Cotizan")].pct_15_64.sum())
+    sin = float(d[d.grupo.str.startswith("No cotizan")].pct_15_64.sum())
+    ind = float(d[d.grupo == "Cotizan: independientes y voluntarios"].pct_15_64.iloc[0])
+    ind_r, cot_r = round(ind, 1), round(cot, 1)
+    dep_r = round(cot_r - ind_r, 1)  # los dos tramos que se leen suman exactamente el total que se lee (el redondeo no los descuadra)
     for r in d.itertuples():
         pct = float(r.pct_15_64)
-        grande = pct >= 3
-        fig.add_bar(y=[""], x=[pct], orientation="h", name=r.grupo, marker=dict(color=COLORES_COMPOSICION[r.grupo], line=dict(color="white", width=1.5)),
-                    text=[f"{r.personas / 1e6:.2f} M<br>{pct:.1f} %"] if grande else [""], textposition="inside", insidetextanchor="middle",
+        es_dep, es_ind = r.grupo == "Cotizan: dependientes", r.grupo == "Cotizan: independientes y voluntarios"
+        rotulo = f"{r.personas / 1e6:.2f} M<br>{dep_r:.1f} %" if es_dep else f"{r.personas / 1e6:.2f} M<br>{pct:.1f} %"
+        fig.add_bar(y=[0], x=[pct], orientation="h", name=r.grupo, width=0.6, marker=dict(color=COLORES_COMPOSICION[r.grupo], line=dict(color="white", width=1.5)),
+                    text=[rotulo] if pct >= 3 else [""], textposition="inside", insidetextanchor="middle",
                     textfont=dict(size=12, color="white" if r.grupo in list(COLORES_COMPOSICION)[:3] else INK_PRIMARY),
                     hovertemplate=f"{r.grupo}<br>{r.personas:,.0f} personas ({pct:.1f} % de 15 a 64 años)<extra></extra>")
-        a, b = tramos.get(r.pieza, (x0, x0))
-        tramos[r.pieza] = (min(a, x0), x0 + pct)
+        if r.pieza in tramos:
+            tramos[r.pieza] = (tramos[r.pieza][0], x0 + pct)
+        else:
+            tramos[r.pieza] = (x0, x0 + pct)
         x0 += pct
-    for pieza, (a, b) in tramos.items():  # llave sobre la barra con el nombre de la pieza
-        fig.add_shape(type="line", xref="x", yref="paper", x0=a + 0.4, x1=b - 0.4, y0=1.04, y1=1.04, line=dict(color=INK_PRIMARY, width=1.5))
-        fig.add_annotation(xref="x", yref="paper", x=(a + b) / 2, y=1.07, yanchor="bottom", showarrow=False, font=dict(size=12, color=INK_PRIMARY),
-                           text=f"<b>Pieza {pieza}: {PIEZAS_COMPOSICION[pieza]}</b>")
-    cotizan = d[d.grupo.str.startswith("Cotizan")].pct_15_64.sum()
-    sin = d[d.grupo.str.startswith("No cotizan")].pct_15_64.sum()
-    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=30, r=30, t=150, b=140), "legend": dict(orientation="h", y=-0.5, x=0, bgcolor="rgba(0,0,0,0)", traceorder="normal")},
-                      barmode="stack", bargap=0.25, height=430,
-                      title=_titulo(f"Cotizan {cotizan:.0f} de cada 100 personas de 15 a 64 años; otras {sin:.0f} trabajan y no cotizan",
-                                    "Personas de 15 a 64 años según si cotizan o no, diciembre 2024 (Censo 2024: 12,6 millones)", ancho=70))
+    for pieza, (a, b) in tramos.items():  # una cota por pieza, de límite a límite
+        _cota(fig, a, b, 0.52, f"<b>Pieza {pieza}</b><br>{PIEZAS_COMPOSICION[pieza]}")
+    detalle = f"{dep_r:.1f} % dependientes + {ind_r:.1f} % independientes y voluntarios"
+    if cobertura_chile is not None:
+        dif = round(cot_r - round(cobertura_chile, 1), 1)  # con los números que se leen en el gráfico
+        detalle += f"<br>Chile: {cobertura_chile:.1f} % ({abs(dif):.1f} puntos {'más' if dif > 0 else 'menos'})"
+    _cota(fig, 0, cot, -0.52, f"<b>Cotizan: {cot_r:.1f} %</b><br>{detalle}", arriba=False)
+    fig.add_shape(type="line", xref="x", yref="y", x0=cot - ind / 2, y0=-0.3, x1=cot + 2.2, y1=-0.52, line=dict(color=COLORES_COMPOSICION["Cotizan: independientes y voluntarios"], width=1.5))
+    fig.add_annotation(xref="x", yref="y", x=cot + 2.6, y=-0.52, xanchor="left", yanchor="middle", showarrow=False, font=dict(size=12, color=INK_PRIMARY),
+                       text=f"<b>Independientes y voluntarios: {ind_r:.1f} %</b>")
+    fig.update_layout(**{**PLOTLY_LAYOUT, "margin": dict(l=30, r=30, t=170, b=130), "legend": dict(orientation="h", y=-0.42, x=0, bgcolor="rgba(0,0,0,0)", traceorder="normal")},
+                      barmode="stack", height=560, showlegend=True,
+                      title=_titulo(f"{'Cotizan' if territorio == 'Chile' else f'En {territorio} cotizan'} {cot_r:.1f} de cada 100 personas de 15 a 64 años; otras {sin:.1f} trabajan y no cotizan",
+                                    f"Personas de 15 a 64 años según si cotizan o no, diciembre 2024{personas_texto}", ancho=70))
     fig.update_xaxes(range=[0, 100], ticksuffix=" %", title="% de las personas de 15 a 64 años", dtick=10)
-    fig.update_yaxes(visible=False)
+    fig.update_yaxes(visible=False, range=[-1.5, 1.05])
     return con_coma(fig)
 
 
