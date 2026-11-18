@@ -49,11 +49,11 @@ La diferencia total de las 8 con el país es de **−5,6 puntos**; de ellos, −
 
 | Indicador | Las 8 juntas | Chile | Las otras 8 | Las 8 menos Chile | Cómo se calcula |
 |---|---|---|---|---|---|
-| Informalidad (tasa oficial, ENE dic. 2023) (%) | 32,2 | 27,6 | 25,2 | +4,7 | promedio ponderado por ocupados 2023 |
-| Desocupación (ENE dic. 2023) (%) | 8,7 | 8,4 | 8,3 | +0,2 | promedio ponderado por fuerza de trabajo 2023 |
+| Informalidad (tasa oficial, ENE dic. 2024) (%) | 30,6 | 26,3 | 24,1 | +4,3 | promedio ponderado por ocupados 2024 |
+| Desocupación (ENE dic. 2024) (%) | 8,3 | 8,0 | 7,9 | +0,2 | promedio ponderado por fuerza de trabajo 2024 |
 | Participación laboral de 15 a 64 años (Censo 2024) (%) | 64,9 | 68,1 | 70,0 | −3,2 | promedio ponderado por población 15-64 |
 | Participación laboral de las mujeres de 15+ (Censo 2024) (%) | 46,4 | 50,6 | 53,0 | −4,2 | promedio ponderado por población 15-64 |
-| Ocupados independientes (Censo 2024) (%) | 34,5 | 33,8 | 33,4 | +0,8 | promedio ponderado por ocupados 2023 |
+| Ocupados independientes (Censo 2024) (%) | 34,5 | 33,8 | 33,4 | +0,8 | promedio ponderado por ocupados 2024 |
 | Ingreso per cápita (CASEN 2022) ($ al mes) | 439.846 | 530.177 | 583.717 | −90.331 | promedio ponderado por población total |
 | Pobreza en personas de 65+ (CASEN 2022) (%) | 17,0 | 14,9 | 13,5 | +2,1 | promedio ponderado por personas de 65+ |
 | Personas de 65+ (Censo 2024) (% de la población) | 15,1 | 14,0 | 13,3 | +1,1 | promedio ponderado por población total |
@@ -65,5 +65,5 @@ La diferencia total de las 8 con el país es de **−5,6 puntos**; de ellos, −
 
 - Los promedios ocultan diferencias entre las regiones del grupo (La Araucanía y Los Ríos tienen la cotización mucho más baja que Biobío, por ejemplo); el detalle por región está en `docs/ANALISIS_SIETE_REGIONES.md` y en el dashboard.
 - La descomposición del grupo trata a las 8 regiones como un solo territorio: es exacta, pero sus piezas no son el promedio de las piezas de cada región.
-- Las tasas de la ENE son de diciembre de 2023; la desocupación y la informalidad de 2024 no están por región en los archivos bajados (solo en el anexo del estudio de la Asociación de AFP).
+- Las tasas de la ENE (desocupación, informalidad) son de diciembre de 2024 y salen del anexo del estudio de la Asociación de AFP, que reproduce al decimal las exportaciones del INE de 2019; las exportaciones propias llegan solo a mar-may 2024.
 - Todo es asociación y aritmética, no causa; con 16 regiones no hay regresión.

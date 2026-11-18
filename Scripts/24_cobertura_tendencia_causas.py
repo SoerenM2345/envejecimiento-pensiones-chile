@@ -24,7 +24,7 @@ Decisiones (ver docs/DISCUSION_FUENTES.md, filas 16-18):
   - Cambios de regiones: antes de 2007 la Superintendencia publica Arica y Parinacota dentro de Tarapacá y Los Ríos dentro de Los Lagos;
     antes de 2018, Ñuble dentro de Biobío. Hay tres series fusionadas para 2002-2025 («Tarapacá y Arica y Parinacota» id 801,
     «Los Lagos y Los Ríos» id 810, «Biobío y Ñuble» id 816; numerador y denominador sumados) y las regiones separadas desde que existen.
-  - País: la serie del KPI 1.2 (cotizantes con región / población 15-64 INE base 2024 al nivel del Censo).
+  - País: cotizantes con región / población 15-64 INE base 2024 al nivel del Censo, en todos los años 2002-2025 (misma base que el KPI 1.2).
   - Se descartó cotizantes / ocupados (ENE) como denominador: se rompe por la pandemia (2020-2022) y por la separación de Ñuble.
   - Códigos del Censo verificados contra las cifras agregadas oficiales del INE (Base_zona_localidad_CPV24): sit_fuerza_trabajo
     1 ocupado, 2 desocupado, 3 fuera de la fuerza de trabajo; p40_cise_rec 1 independiente, 2 dependiente, 3 no remunerado;
@@ -139,15 +139,17 @@ def tendencia(nombres: pd.Series, ind: pd.DataFrame) -> pd.DataFrame:
             cot = sum(c.loc[r, a] for r in regs if not np.isnan(c.loc[r, a]))  # antes de «desde», la región nueva ya viene dentro de la grande
             filas.append((a, tid, nombre, cot, sum(p.loc[r, a] for r in regs), sum(p_raw.loc[r, a] for r in regs)))
     t = pd.DataFrame(filas, columns=["anio", "territorio_id", "territorio", "cotizantes", "pob_15_64", "pob_15_64_proy"])
-    # país: la serie del KPI 1.2 (misma que la tarjeta de razón de soporte) desde 2010; antes de 2010 la suma de las regiones,
-    # empalmada con la serie del KPI en 2010 (la diferencia entre ambas es de 0,2 puntos)
+    # país: una sola base en toda la serie. Población 15-64 de la proyección INE base 2024 (disponible desde 1992) al nivel del Censo,
+    # la misma de la tarjeta del KPI 1.2 (desde 2010 coincide con kpi_pc_nacional.csv); cotizantes con región = suma de las regiones.
+    # No se suman las regiones de la base 2017 para el país: esa base sobreestima la población nacional y empalmarla dejaba hasta 0,2 puntos de salto.
     n = pd.read_csv(DP / "kpi_pc_nacional.csv").set_index("anio")
+    e = pd.read_csv(DP / "proyeccion_pais_edad_sexo.csv")
+    pob24 = e[e.edad.between(15, 64)].groupby("anio").poblacion.sum()
     suma = t[t.territorio_id.isin(PARTICION)].groupby("anio")[["cotizantes", "pob_15_64", "pob_15_64_proy"]].sum()
     pais = pd.DataFrame({"anio": list(ANIOS), "territorio_id": 0, "territorio": "Chile"})
     pais["cotizantes"] = [suma.loc[a, "cotizantes"] for a in ANIOS]
-    ajuste = (n.loc[2010, "cotizantes_dic_con_region"] / (n.loc[2010, "pob_15_64_ine"] * n.loc[2010, "factor_censo_15_64"])) / (suma.loc[2010, "cotizantes"] / suma.loc[2010, "pob_15_64"])
-    pais["pob_15_64"] = [n.loc[a, "pob_15_64_ine"] * n.loc[a, "factor_censo_15_64"] if a >= 2010 else suma.loc[a, "pob_15_64"] / ajuste for a in ANIOS]
-    pais["pob_15_64_proy"] = [n.loc[a, "pob_15_64_ine"] if a >= 2010 else suma.loc[a, "pob_15_64_proy"] / ajuste for a in ANIOS]
+    pais["pob_15_64"] = [pob24[a] * n.factor_censo_15_64.iloc[0] for a in ANIOS]
+    pais["pob_15_64_proy"] = [pob24[a] for a in ANIOS]
     t = pd.concat([pais, t], ignore_index=True)
     t["cobertura_pct"] = 100 * t.cotizantes / t.pob_15_64
     t["cobertura_sin_ajuste_pct"] = 100 * t.cotizantes / t.pob_15_64_proy

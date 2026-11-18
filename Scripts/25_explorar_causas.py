@@ -59,6 +59,8 @@ PIB_XLSX = EXT / "bcentral_pib_regional" / "CCNN2018_PIB_REGIONAL_T.xlsx"
 CENSO = ROOT / "Data raw" / "personas_censo2024.csv"
 NS = {"s": "urn:schemas-microsoft-com:office:spreadsheet"}
 
+ANIO_ENE = 2024  # diciembre de referencia de los factores de la ENE: el mismo mes de los cotizantes (diciembre 2024); sale del anexo del estudio de la AAFP
+ANIO_ENE_DET = 2023  # las tasas por sector informal, sin agricultura y tiempo parcial no están en el anexo: solo llegan a diciembre 2023 y no se muestran
 ANIOS = range(2010, 2025)  # diciembre de cada año (nov-ene): ENE hasta 2023 y, para 2024, el anexo del estudio de la Asociación de AFP
 ID_BIOBIO_NUBLE = 816
 FACTORES_DESC = ["participacion", "empleo", "cotizacion"]
@@ -333,20 +335,21 @@ def test_asignacion(f: pd.DataFrame, ene: pd.DataFrame, ind: pd.DataFrame) -> pd
 # ───────────────────────────── factores de la ENE y del PIB para la correlación con la cobertura ─────────────────────────────
 
 def factores_ene_pib(ene, pib, pob, ind, f, censo_part_mujeres, extra) -> pd.DataFrame:
-    """Un valor por territorio (0 = Chile, 1-16 = regiones) de cada factor oficial, medido en diciembre de 2023 (último diciembre con
-    ENE); cambios 2019-2023. El PIB no tiene Chile ni Magallanes: quedan vacíos."""
+    """Un valor por territorio (0 = Chile, 1-16 = regiones) de cada factor oficial. Desocupación, informalidad y participación se miden en
+    diciembre de 2024 (ANIO_ENE, el mismo mes de los cotizantes; anexo del estudio de la AAFP) y sus cambios son 2019-2024. Las otras tasas de la
+    ENE y el PIB, que no tienen 2024, siguen en 2023 y no se muestran. El PIB no tiene Chile ni Magallanes: quedan vacíos."""
     e = ene.set_index(["anio", "territorio_id"])
     ids = list(range(0, 17))
     p15 = lambda a: {**{r: pob["p15"][a][r] for r in range(1, 17)}, 0: pob["p15"][a].loc[1:16].sum()}  # noqa: E731
     desoc = lambda a, r: 100 * e.loc[(a, r), "desocupados"] / (e.loc[(a, r), "ocupados"] + e.loc[(a, r), "desocupados"])  # noqa: E731
     partic = lambda a, r: 100 * (e.loc[(a, r), "ocupados"] + e.loc[(a, r), "desocupados"]) / p15(a)[r]  # noqa: E731
     out = pd.DataFrame(index=ids)
-    out["desocupacion_ene"] = [desoc(2023, r) for r in ids]
-    out["informalidad_ene"] = [e.loc[(2023, r), "tasa_informal"] for r in ids]
-    out["informalidad_sin_agro_ene"] = [e.loc[(2023, r), "tasa_informal_sin_agro"] for r in ids]
-    out["sector_informal_ene"] = [e.loc[(2023, r), "tasa_sector_informal"] for r in ids]
-    out["tiempo_parcial_ene"] = [e.loc[(2023, r), "tasa_parcial_involuntario"] for r in ids]
-    out["participacion_ene"] = [partic(2023, r) for r in ids]
+    out["desocupacion_ene"] = [desoc(ANIO_ENE, r) for r in ids]
+    out["informalidad_ene"] = [e.loc[(ANIO_ENE, r), "tasa_informal"] for r in ids]
+    out["informalidad_sin_agro_ene"] = [e.loc[(ANIO_ENE_DET, r), "tasa_informal_sin_agro"] for r in ids]
+    out["sector_informal_ene"] = [e.loc[(ANIO_ENE_DET, r), "tasa_sector_informal"] for r in ids]
+    out["tiempo_parcial_ene"] = [e.loc[(ANIO_ENE_DET, r), "tasa_parcial_involuntario"] for r in ids]
+    out["participacion_ene"] = [partic(ANIO_ENE, r) for r in ids]
     out["participacion_mujeres_censo"] = [censo_part_mujeres[r] for r in ids]
     for c in extra.columns:
         out[c] = [extra.loc[r, c] for r in ids]
@@ -356,21 +359,21 @@ def factores_ene_pib(ene, pib, pob, ind, f, censo_part_mujeres, extra) -> pd.Dat
     out["pib_per_capita"] = [1e3 * pb.loc[r, 2023] / pt.loc[r, 2023] if tiene(r) else np.nan for r in ids]  # millones de pesos por habitante
     out["pib_por_ocupado"] = [1e3 * pb.loc[r, 2023] / (e.loc[(2023, r), "ocupados"] * pob["escala"][r]) if tiene(r) else np.nan for r in ids]
     out["crecimiento_pib"] = [100 * ((pb.loc[r, 2023] / pb.loc[r, 2013]) ** (1 / 10) - 1) if tiene(r) else np.nan for r in ids]
-    out["cambio_desocupacion"] = [desoc(2023, r) - desoc(2019, r) for r in ids]
-    out["cambio_informalidad"] = [e.loc[(2023, r), "tasa_informal"] - e.loc[(2019, r), "tasa_informal"] for r in ids]
-    out["cambio_participacion"] = [partic(2023, r) - partic(2019, r) for r in ids]
+    out["cambio_desocupacion"] = [desoc(ANIO_ENE, r) - desoc(2019, r) for r in ids]
+    out["cambio_informalidad"] = [e.loc[(ANIO_ENE, r), "tasa_informal"] - e.loc[(2019, r), "tasa_informal"] for r in ids]
+    out["cambio_participacion"] = [partic(ANIO_ENE, r) - partic(2019, r) for r in ids]
     g = f.set_index(["territorio_id", "anio"]).cobertura_pct
-    out["_cambio_cobertura"] = [g[(r, 2023)] - g[(r, 2019)] for r in ids]
+    out["_cambio_cobertura"] = [g[(r, ANIO_ENE)] - g[(r, 2019)] for r in ids]
     return out
 
 
 FACTORES_NUEVOS = {  # factor -> (nombre legible, hipótesis, fuente, ámbito, objetivo)
-    "desocupacion_ene": ("Desocupación oficial (% de la fuerza de trabajo)", "Desempleo", "ENE (INE), dic. 2023", "regiones", "nivel"),
-    "informalidad_ene": ("Ocupados informales (tasa oficial, %)", "Informalidad", "ENE (INE), dic. 2023", "regiones", "nivel"),
+    "desocupacion_ene": ("Desocupación oficial (% de la fuerza de trabajo)", "Desempleo", "ENE (INE), dic. 2024", "regiones", "nivel"),
+    "informalidad_ene": ("Ocupados informales (tasa oficial, %)", "Informalidad", "ENE (INE), dic. 2024", "regiones", "nivel"),
     "informalidad_sin_agro_ene": ("Ocupados informales sin agricultura (%)", "Informalidad", "ENE (INE), dic. 2023", "regiones", "nivel"),
     "sector_informal_ene": ("Ocupados en el sector informal (%)", "Informalidad", "ENE (INE), dic. 2023", "regiones", "nivel"),
     "tiempo_parcial_ene": ("Tiempo parcial involuntario (%)", "Otros", "ENE (INE), dic. 2023", "regiones", "nivel"),
-    "participacion_ene": ("Participación laboral oficial (% de las personas de 15+)", "Otros", "ENE (INE), dic. 2023", "regiones", "nivel"),
+    "participacion_ene": ("Participación laboral oficial (% de las personas de 15+)", "Otros", "ENE (INE), dic. 2024", "regiones", "nivel"),
     "participacion_mujeres_censo": ("Participación laboral de las mujeres (% de las de 15+)", "Otros", "Censo 2024", "regiones", "nivel"),
     "participacion_15_64_censo": ("Participación laboral de 15 a 64 años (sin el efecto de los mayores)", "Otros", "Censo 2024", "regiones", "nivel"),
     "indigena_pct": ("Población que se declara de un pueblo originario (%)", "Otros", "Censo 2024", "regiones", "nivel"),
@@ -379,10 +382,10 @@ FACTORES_NUEVOS = {  # factor -> (nombre legible, hipótesis, fuente, ámbito, o
     "salida_pendular_pct": ("Ocupados que trabajan en otra región (%)", "Medición", "Censo 2024", "regiones", "nivel"),
     "pib_per_capita": ("PIB por habitante", "Otros", "Banco Central, 2023", "15 regiones (sin Magallanes)", "nivel"),
     "pib_por_ocupado": ("PIB por ocupado", "Otros", "Banco Central e INE, 2023", "15 regiones (sin Magallanes)", "nivel"),
-    "crecimiento_pib": ("Crecimiento anual del PIB 2013-2023 (%)", "Otros", "Banco Central", "15 regiones (sin Magallanes)", "nivel"),
-    "cambio_desocupacion": ("Cambio de la desocupación 2019-2023 (puntos)", "Desempleo", "ENE (INE)", "regiones", "cambio"),
-    "cambio_informalidad": ("Cambio de la informalidad 2019-2023 (puntos)", "Informalidad", "ENE (INE)", "regiones", "cambio"),
-    "cambio_participacion": ("Cambio de la participación 2019-2023 (puntos)", "Otros", "ENE (INE)", "regiones", "cambio"),
+    "crecimiento_pib": ("Crecimiento anual del PIB 2013-2023 (%)", "Otros", "Banco Central, 2013-2023", "15 regiones (sin Magallanes)", "nivel"),
+    "cambio_desocupacion": ("Cambio de la desocupación 2019-2024 (puntos)", "Desempleo", "ENE (INE)", "regiones", "cambio"),
+    "cambio_informalidad": ("Cambio de la informalidad 2019-2024 (puntos)", "Informalidad", "ENE (INE)", "regiones", "cambio"),
+    "cambio_participacion": ("Cambio de la participación 2019-2024 (puntos)", "Otros", "ENE (INE)", "regiones", "cambio"),
 }
 REPRESENTANTES = ["desocupacion_ene", "informalidad_ene", "migracion_interna_neta"]  # desempleo, informalidad, migración
 
@@ -462,7 +465,8 @@ def actualizar_factores(nuevos: pd.DataFrame, cobertura_2024: pd.Series):
     # y para «1 o 2 más», las dos mejores de las demás con p < 0,05.
     nivel = fac[fac.objetivo == "nivel"].assign(abs_r=lambda d: d.pearson_r.abs()).sort_values("abs_r", ascending=False)
     elegidos = [*REPRESENTANTES, nivel[nivel.hipotesis == "Industria"].factor.iloc[0]]
-    otros = nivel[nivel.hipotesis.isin(["Otros", "Educación"]) & (nivel.pearson_p < 0.05)].factor.head(2)
+    # solo con año de referencia 2024 (o el Censo/CASEN): las medidas de dic. 2023 y el PIB 2023 no se mezclan con cotizantes de diciembre 2024
+    otros = nivel[nivel.hipotesis.isin(["Otros", "Educación"]) & (nivel.pearson_p < 0.05) & ~nivel.fuente.str.contains("2023")].factor.head(2)
     fac["elegido"] = fac.factor.isin([*elegidos, *otros]) & (fac.objetivo == "nivel")
     fac = fac.assign(abs_r=fac.pearson_r.abs()).sort_values(["objetivo", "abs_r"], ascending=[False, False]).drop(columns="abs_r").reset_index(drop=True)
     fac["ranking"] = fac.groupby("objetivo").cumcount() + 1
@@ -475,7 +479,7 @@ def escenarios_fijos_kpi12(ene: pd.DataFrame) -> pd.DataFrame:
       - Tope de carga 10, 11 y 12 %: la cobertura queda como hoy.
       - Cobertura que sigue cayendo: la pendiente de la cobertura de Chile 2022-2025 (ajuste lineal, 4 años) se prolonga hasta 2050 y después
         queda constante (así es el motor: tramo lineal hasta `cobertura_2050`).
-      - Sin informalidad: los ocupados informales de hoy (ENE, diciembre 2023, llevados al nivel del Censo con el factor de la población)
+      - Sin informalidad: los ocupados informales de hoy (ENE, diciembre 2024, del anexo de la AAFP, llevados al nivel del Censo con el factor de la población)
         pasan a cotizar desde 2026: cotizantes × (1 + informales ÷ cotizantes). Supone el mismo ingreso imponible promedio y que los informales no
         están hoy entre los cotizantes; es el techo teórico, no una proyección.
       - Mitad del camino: la mitad de ese aumento."""
@@ -483,8 +487,8 @@ def escenarios_fijos_kpi12(ene: pd.DataFrame) -> pd.DataFrame:
     cob = 100 * n.cotizantes_dic_con_region / (n.pob_15_64_ine * n.factor_censo_15_64)
     pend = float(np.polyfit(np.arange(2022, 2026), cob.loc[2022:2025].to_numpy(), 1)[0])  # puntos de cobertura por año
     cob_2050 = 1 + pend * (2050 - 2025) / float(cob[2025])
-    inf = float(ene[(ene.territorio_id == 0) & (ene.anio == 2023)].informales.iloc[0]) * float(n.loc[2023, "factor_censo_15_64"])
-    salto = 1 + inf / float(n.loc[2023, "cotizantes_dic_con_region"])
+    inf = float(ene[(ene.territorio_id == 0) & (ene.anio == ANIO_ENE)].informales.iloc[0]) * float(n.loc[ANIO_ENE, "factor_censo_15_64"])
+    salto = 1 + inf / float(n.loc[ANIO_ENE, "cotizantes_dic_con_region"])
     filas = [
         ("tope_10", "Tope de carga 10 % (base)", "Tope de carga", 0.10, 1.0, 1.0, "La cotización obligatoria para pensión; la cobertura queda como hoy"),
         ("tope_11", "Tope de carga 11 %", "Tope de carga", 0.11, 1.0, 1.0, "El sistema tolera 11 % del sueldo; la cobertura queda como hoy"),
@@ -492,7 +496,7 @@ def escenarios_fijos_kpi12(ene: pd.DataFrame) -> pd.DataFrame:
         ("cobertura_cae", "Cobertura sigue cayendo", "Cobertura", 0.10, cob_2050, 1.0,
          f"La cobertura baja {abs(pend):.2f} puntos por año (tendencia 2022-2025, ajuste lineal) hasta 2050, de {cob[2025]:.1f} % a {cob[2025] + pend * 25:.1f} %"),
         ("sin_informalidad", "Sin informalidad", "Cobertura", 0.10, 1.0, salto,
-         f"Todos los informales de hoy cotizan desde 2026: {inf / 1e6:.2f} millones más sobre {n.loc[2023, 'cotizantes_dic_con_region'] / 1e6:.2f} millones de cotizantes (+{100 * (salto - 1):.0f} %)"),
+         f"Todos los informales de hoy cotizan desde 2026: {inf / 1e6:.2f} millones más sobre {n.loc[ANIO_ENE, 'cotizantes_dic_con_region'] / 1e6:.2f} millones de cotizantes (+{100 * (salto - 1):.0f} %)"),
         ("mitad_informalidad", "Mitad del camino", "Cobertura", 0.10, 1.0, 1 + (salto - 1) / 2,
          f"La mitad de los informales de hoy cotiza desde 2026 (+{50 * (salto - 1):.0f} % de cotizantes)"),
     ]
@@ -563,16 +567,16 @@ def resumen_grupo(f: pd.DataFrame, ene: pd.DataFrame, ind: pd.DataFrame) -> pd.D
             fila(f"Cambio {a0}-{ref}", nom, "puntos", vals, "descomposición del cambio de cada grupo")
 
     # 3. el resto de los indicadores: tasas ponderadas
-    e23 = ene[(ene.anio == 2023)].set_index("territorio_id")
-    pesos = {"ocupados 2023": e23.ocupados, "fuerza de trabajo 2023": e23.ocupados + e23.desocupados,
+    e24 = ene[(ene.anio == ANIO_ENE)].set_index("territorio_id")
+    pesos = {"ocupados 2024": e24.ocupados, "fuerza de trabajo 2024": e24.ocupados + e24.desocupados,
              "población total": ind.pob_total, "población 15-64": ind.pob_15_64, "personas de 65+": ind.pob_65_mas}
     pen = pd.read_csv(DP / "kpi_cobertura_pendularidad.csv").set_index("region_id")
     pesos["ocupados que viven en la región"] = pen.ocupados_residentes
-    tabla = [("Informalidad (tasa oficial, ENE dic. 2023)", "informalidad_ene", "%", "ocupados 2023"),
-             ("Desocupación (ENE dic. 2023)", "desocupacion_ene", "%", "fuerza de trabajo 2023"),
+    tabla = [("Informalidad (tasa oficial, ENE dic. 2024)", "informalidad_ene", "%", "ocupados 2024"),
+             ("Desocupación (ENE dic. 2024)", "desocupacion_ene", "%", "fuerza de trabajo 2024"),
              ("Participación laboral de 15 a 64 años (Censo 2024)", "participacion_15_64_censo", "%", "población 15-64"),
              ("Participación laboral de las mujeres de 15+ (Censo 2024)", "participacion_mujeres_censo", "%", "población 15-64"),
-             ("Ocupados independientes (Censo 2024)", "independientes", "%", "ocupados 2023"),
+             ("Ocupados independientes (Censo 2024)", "independientes", "%", "ocupados 2024"),
              ("Ingreso per cápita (CASEN 2022)", "ingreso_per_capita_prom", "$ al mes", "población total"),
              ("Pobreza en personas de 65+ (CASEN 2022)", "pct_pobreza_65", "%", "personas de 65+"),
              ("Personas de 65+ (Censo 2024)", "pct_65_mas", "% de la población", "población total"),
@@ -643,7 +647,7 @@ La diferencia total de las {n} con el país es de **{sg(v("Diferencia total"))} 
 
 - Los promedios ocultan diferencias entre las regiones del grupo (La Araucanía y Los Ríos tienen la cotización mucho más baja que Biobío, por ejemplo); el detalle por región está en `docs/ANALISIS_SIETE_REGIONES.md` y en el dashboard.
 - La descomposición del grupo trata a las {n} regiones como un solo territorio: es exacta, pero sus piezas no son el promedio de las piezas de cada región.
-- Las tasas de la ENE son de diciembre de 2023; la desocupación y la informalidad de 2024 no están por región en los archivos bajados (solo en el anexo del estudio de la Asociación de AFP).
+- Las tasas de la ENE (desocupación, informalidad) son de diciembre de 2024 y salen del anexo del estudio de la Asociación de AFP, que reproduce al decimal las exportaciones del INE de 2019; las exportaciones propias llegan solo a mar-may 2024.
 - Todo es asociación y aritmética, no causa; con 16 regiones no hay regresión.
 """
     ruta.write_text(texto)
