@@ -87,7 +87,7 @@ def test_regiones_trae_chile_y_las_columnas_de_la_ene():
     r = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id").sort_index()
     for c in ("desocupacion_ene", "informalidad_ene", "participacion_mujeres_censo", "peso_cotizantes_pct"):
         assert c in r and r.loc[1:16, c].notna().all()
-    assert r.loc[0, "informalidad_ene"] == pytest.approx(27.55, abs=0.05)
+    assert r.loc[0, "informalidad_ene"] == pytest.approx(26.27, abs=0.05)  # ENE dic. 2024 (anexo de la AAFP); dic. 2023 era 27,55
     assert r.loc[1:16, "peso_cotizantes_pct"].sum() == pytest.approx(100, abs=0.01)
 
 
@@ -154,17 +154,58 @@ def _spec_con_titulo(at, fragmento):
             return sp
 
 
-def test_barras_del_cambio_desde_2022_marcan_las_5_prioritarias():
+def _barras(at, fragmento):
+    """(regiones de abajo hacia arriba, colores) del gráfico de barras cuyo título contiene el fragmento."""
+    d = _spec_con_titulo(at, fragmento)["data"][0]
+    return list(d["y"]), list(d["marker"]["color"])
+
+
+def test_la_lista_recomendada_muestra_un_grafico_por_factor_y_los_colores_cuadran_con_los_rangos():
+    """Nivel, tendencia y brecha: 16 barras cada uno, naranja = entra por ese factor (rango ≤ 5 y bajo Chile), naranja claro = entra por otro, azul = no entra."""
     at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
+    reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv")
+    nac = reg[reg.region_id == 0].cobertura_ref.iloc[0]
+    r16 = reg[reg.region_id > 0].set_index("region_nombre")
+    entran = set(r16[r16.prioridad.notna()].index)
+    assert len(entran) == 8
+    for fragmento, rango in (("Nivel:", "rango_nivel"), ("Tendencia:", "rango_tendencia"), ("Brecha:", "rango_brecha")):
+        y, color = _barras(at, fragmento)
+        assert sorted(y) == sorted(r16.index)
+        por_este = {r for r, c in zip(y, color) if c == "#eb6834"}
+        por_otro = {r for r, c in zip(y, color) if c == "#f4b99f"}
+        assert por_este == set(r16[(r16[rango] <= 5) & (r16.cobertura_ref < nac)].index)
+        assert por_este | por_otro == entran and not por_este & por_otro
+        # la peor arriba: el gráfico va de abajo hacia arriba, así que la última barra es la de rango más bajo
+        assert r16.loc[y[-1], rango] == r16[rango].min()
+    # el título cuenta lo que se ve en naranja; en tendencia dos de las 5 peores están sobre el promedio
+    assert "Metropolitana y Antofagasta están sobre el promedio" in _spec_con_titulo(at, "Tendencia:")["layout"]["title"]["text"].replace("<br>", " ")
+    assert "Nivel: las 5 peores están bajo Chile y entran" in _spec_con_titulo(at, "Nivel:")["layout"]["title"]["text"].replace("<br>", " ")
+
+
+def test_la_tabla_de_las_16_regiones_deja_arriba_a_las_que_entran():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
+    tab = next(el.value for el in at.dataframe if "Resultado" in el.value.columns)
+    assert len(tab) == 16 and list(tab.Resultado[:8]) == ["Entra"] * 8 and not (tab.Resultado[8:] == "Entra").any()
+    assert set(tab.Región[:8]) == {"Valparaíso", "La Araucanía", "Arica y Parinacota", "Coquimbo", "Los Ríos", "Tarapacá", "Ñuble", "Biobío"}
+    assert tab.Resultado[tab.Región == "Metropolitana"].iloc[0] == "Fuera: sobre el promedio de Chile"
+    assert tab.Resultado[tab.Región == "Los Lagos"].iloc[0] == "Fuera: ningún factor entre las 5 peores"
+    assert (tab["Factores entre las 5 peores"][:8] >= 1).all()
+
+
+def test_cada_lista_muestra_el_valor_con_el_que_se_elige_y_el_naranja_cuenta_las_marcadas():
+    at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
+    for criterio, fragmento, n in (("Mayor brecha de cotizantes", "Brecha: las 5 regiones marcadas", 5), ("Mayor peso en los cotizantes", "Peso: las 5 regiones marcadas", 5),
+                                   ("Brecha o pérdida de cotizantes desde 2022", "Brecha: las 7 regiones marcadas", 7)):
+        at.radio(key="cob_criterio").set_value(criterio).run()
+        assert not at.exception, [e.value for e in at.exception]
+        assert _barras(at, fragmento)[1].count("#eb6834") == n, criterio
+    # la antigua: el cambio de la cobertura desde 2022, con el título que cuenta las prioritarias que bajaron
+    at.radio(key="cob_criterio").set_value("Caída más fuerte desde 2022").run()
     sp = _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")
     barra = sp["data"][0]
-    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 8  # las 8 prioritarias, en naranja
-    assert barra["y"][0] == "Arica y Parinacota" or min(barra["x"]) == barra["x"][list(barra["y"]).index("Arica y Parinacota")]
+    assert len(barra["y"]) == 16 and barra["marker"]["color"].count("#eb6834") == 5 and "de las 5 prioritarias" in sp["layout"]["title"]["text"]
     assert any(s.get("x0") is not None and s["x0"] == s["x1"] for s in sp["layout"]["shapes"])  # línea punteada de Chile
-    # al elegir otra lista cambian los colores pero siguen siendo 5
-    at.radio(key="cob_criterio").set_value("Mayor peso en los cotizantes").run()
-    assert _spec_con_titulo(at, "perdió la mayor cobertura desde 2022")["data"][0]["marker"]["color"].count("#eb6834") == 5  # las otras listas siguen siendo de 5
 
 
 def test_grafico_largo_tiene_tres_lineas_desde_2002():

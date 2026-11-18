@@ -1300,13 +1300,36 @@ def region_change_bars(df: pd.DataFrame, ids_sel: list, cambio_pais: float, desd
                            hovertemplate="%{y}: %{x:+.2f} puntos<extra></extra>"))
     fig.add_vline(x=cambio_pais, line_dash="dash", line_color="#52514e", annotation_text=f"Chile: {cambio_pais:+.1f}", annotation_position="top")
     peor, mejor = d.iloc[0], d.iloc[-1]
-    n_baja = int((d.cambio_2022_ref < 0).sum())
+    n_sel, n_baja_sel, n_baja_otras = int(sel.sum()), int((d.cambio_2022_ref[sel] < 0).sum()), int((d.cambio_2022_ref[~sel] < 0).sum())
     fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False,
-                      title=_titulo(f"{peor.region_nombre} perdió la mayor cobertura desde {desde} ({peor.cambio_2022_ref:+.1f} puntos); {n_baja} de {len(d)} regiones bajaron",
+                      title=_titulo(f"{peor.region_nombre} perdió la mayor cobertura desde {desde} ({peor.cambio_2022_ref:+.1f} puntos); bajaron {n_baja_sel} de las {n_sel} prioritarias y {n_baja_otras} de las otras {len(d) - n_sel}",
                                     f"Puntos de cobertura entre {desde} y {hasta}; naranja = prioritarias", ancho=60))
     fig.update_yaxes(categoryorder="total descending", title="")
     lim = float(d.cambio_2022_ref.abs().max()) * 1.25
     fig.update_xaxes(range=[-lim, lim], zeroline=True, zerolinecolor=INK_PRIMARY, title=f"Puntos de cobertura ({hasta} menos {desde})")
+    return fig
+
+
+ORANGE_CLARO = "#f4b99f"  # naranja atenuado: la región está en la lista, pero entra por otro factor
+
+
+def region_ranking_bars(d: pd.DataFrame, col: str, titulo: str, detalle: str, x_titulo: str, texto: list, ids_sel: list,
+                        razon: pd.Series | None = None, peor_abajo: bool = False, alto: int = 520) -> go.Figure:
+    """KPI 1.1: las 16 regiones en un solo factor, con el mismo diseño de las barras de cobertura por región. La peor arriba: el factor se pasa
+    con signo (negativo = peor) y se ordena de menor a mayor; con `peor_abajo` el mayor valor va arriba (p. ej. el peso en los cotizantes).
+    Colores: sin `razon`, naranja = región prioritaria y azul = las demás; con `razon` (booleano por fila de `d`), naranja = entra por este
+    factor, naranja claro = está en la lista por otro factor y azul = no entra. `texto` = rótulo de cada barra en el orden de `d`.
+    d = filas de región de kpi_cobertura_regiones.csv (region_id, region_nombre y `col`)."""
+    d = d.assign(_txt=texto, _razon=razon if razon is not None else d.region_id.isin(ids_sel)).sort_values(col, ascending=peor_abajo)
+    en_lista = d.region_id.isin(ids_sel)
+    color = [ORANGE if r else (ORANGE_CLARO if e else BLUE) for r, e in zip(d._razon, en_lista)]
+    fig = go.Figure(go.Bar(y=d.region_nombre, x=d[col], orientation="h", marker_color=color, text=d._txt, textposition="outside", cliponaxis=False,
+                           hovertemplate="%{y}: %{text}<extra></extra>"))
+    fig.update_layout(**PLOTLY_LAYOUT, **BARRAS, showlegend=False, title=_titulo(titulo, detalle, ancho=60))
+    fig.update_yaxes(categoryorder="array", categoryarray=list(d.region_nombre[::-1]), title="")  # de abajo hacia arriba: la peor queda arriba
+    lo, hi = min(0.0, float(d[col].min())), max(0.0, float(d[col].max()))
+    margen = (hi - lo) * 0.28
+    fig.update_xaxes(range=[lo - margen if lo < 0 else 0, hi + margen if hi > 0 else 0], zeroline=True, zerolinecolor=INK_PRIMARY, title=x_titulo)
     return fig
 
 

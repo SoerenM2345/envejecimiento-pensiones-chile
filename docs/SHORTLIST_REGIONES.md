@@ -38,6 +38,10 @@ Cada región recibe un **rango de 1 (la peor) a 16** en tres factores; los empat
 - **Robustez** (`kpi_cobertura_prioridad_robustez.csv`): la misma regla con cada año de inicio entre 2002 y 2022 elige **exactamente estas 8 regiones con todos los inicios hasta 2019** (18 de 21 casos). Con inicios 2020-2022 la ventana tiene 2 a 4 años, mezcla el rebote de 2021-2022 y la lista cambia en una o dos regiones (Tarapacá sale; con 2020 entran Los Lagos y Maule). Además, las 7 regiones de menor suma de rangos están dentro de la lista con todos los inicios hasta 2018.
 - **Lo que no prueba:** el factor «brecha» es nivel × tamaño, así que el nivel pesa dos veces, y la brecha en personas ya era el criterio de la lista B. Que estas regiones salgan arriba no es una confirmación independiente. Con el **peso en los cotizantes** en lugar de la brecha, la Metropolitana (44,8 %) pasa a ser rango 1 y desplaza a Biobío, Coquimbo o Los Ríos; por eso se usa la brecha.
 
+### Cómo se ve en el dashboard («¿Sube o baja la cobertura?»)
+
+Cada lista muestra **el valor con el que se elige**, no uno ajeno. La recomendada tiene **tres gráficos de barras** (nivel, tendencia desde 2007 frente a Chile y brecha), con las 16 regiones de la peor (arriba) a la mejor y el rango de 1 a 16 entre paréntesis. Naranja = entra por ese factor (rango ≤ 5 y bajo Chile), naranja claro = ya entró por otro factor, azul = no entra; el título cuenta lo que se ve (en tendencia, Metropolitana y Antofagasta están entre las 5 peores pero sobre el promedio, así que no entran). Debajo, **una tabla con las 16 regiones**: arriba las 8 que entran (más factores entre las 5 peores y luego menor suma de rangos) y abajo las demás, con el motivo de la exclusión («sobre el promedio de Chile», como la Metropolitana, o «ningún factor entre las 5 peores», como Los Lagos). Las otras listas muestran su propio valor (brecha, peso, cotizantes desde 2022 o cambio de la cobertura desde 2022).
+
 ## Las otras cuatro listas (comparación)
 
 | Lista | Las regiones | Criterio |
