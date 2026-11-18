@@ -6,7 +6,7 @@ Pedido del profesor: ver los **costos como problema nacional**, no regional, y, 
 
 | KPI | Qué pregunta responde | Cifras clave | Datos |
 |---|---|---|---|
-| **1.2 Razón de soporte y punto crítico** | ¿Cuándo el costo del Pilar Solidario de vejez supera lo que el sueldo de los cotizantes puede pagar con un tope de 10 %? | Carga requerida 6,7 % (2024) → 10,1 % (2038); punto crítico 2038; los seis escenarios fijos van de 2036 a 2055. Cascada 2024-2038: población 65+ +4,0 puntos, costo por persona +0,9, trabajadores −0,3, ingreso −1,2 | Superintendencia de Pensiones, INE, DIPRES |
+| **1.2 Razón de soporte y punto crítico** | ¿Cuándo el costo del Pilar Solidario de vejez supera lo que el sueldo de los cotizantes puede pagar con un tope de 10 %? | Carga requerida 6,7 % (2024) → 10,1 % (2038); punto crítico 2038; los seis escenarios fijos van de 2036 a 2054. Cascada 2024-2038: población 65+ +4,0 puntos, costo por persona +0,9, trabajadores −0,3, ingreso −1,2 | Superintendencia de Pensiones, INE, DIPRES |
 | **2.1 Costo real por adulto mayor** | ¿Cuánto cuesta cada persona de 65+ y por qué cambió? | $5,13 millones reales por persona 65+ en 2025 (30,2 % del PIB per cápita; 33,2 % en 2016); gasto en «Edad avanzada» 4,39 % del PIB; desglose en PGU, aportes solidarios y «resto» (sistema antiguo) | DIPRES, Subsecretaría de Previsión Social, INE |
 | **2.2 Financiamiento dedicado** | ¿Cuánto pesa en la economía y quién lo paga? | PGU + Pilar = 2,07 % del PIB (2025) → 2,62 % (2040, máximo); el Fondo de Reserva de Pensiones paga 4,5 % del Pilar; la reserva de $9,2 billones cubre 1,3 años del gasto y el alza hasta 2033 | DIPRES, Subsecretaría de Previsión Social |
 | 1.3 y 2.3 | No son costos: el flujo comisionable y la pobreza en la vejez | — | — |

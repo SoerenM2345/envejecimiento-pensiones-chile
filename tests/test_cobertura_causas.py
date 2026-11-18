@@ -250,13 +250,13 @@ def test_escenarios_fijos_del_kpi_1_2():
     for k, r in esc.iterrows():
         d = cp.serie_pais(n, proy, par, cp.Escenario(carga_max=r.carga_max, cobertura_2050=r.cobertura_2050, cobertura_salto=r.cobertura_salto))
         anios[k] = cp.punto_critico(d)["anio"]
-    assert anios == {"tope_10": 2038, "tope_11": 2044, "tope_12": 2048, "cobertura_cae": 2036, "sin_informalidad": 2055, "mitad_informalidad": 2048}
+    assert anios == {"tope_10": 2038, "tope_11": 2044, "tope_12": 2048, "cobertura_cae": 2036, "sin_informalidad": 2054, "mitad_informalidad": 2048}
 
 
 def test_pagina_muestra_los_escenarios_fijos_sin_cambiar_el_simulador():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
     assert not at.exception, [e.value for e in at.exception]
-    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
+    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2054")
     assert sp is not None
     for panel in ("xaxis", "xaxis2"):
         assert sp["layout"][panel]["range"][0] == 2025
@@ -341,14 +341,14 @@ def test_matrices_y_dispersiones_marcan_el_centro_con_un_punto_negro():
 
 def test_escenarios_fijos_son_seis_paneles_con_costo_y_capacidad():
     at = AppTest.from_file(str(ROOT / "Dashboards" / "extended_pages" / "objetivo1.py"), default_timeout=180).run()
-    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2055")
+    sp = _spec_con_titulo(at, "El punto crítico va de 2036 a 2054")
     assert len([t for t in sp["data"] if t["type"] == "scatter"]) == 12  # costo y capacidad en cada uno de los 6 paneles
     costo = [_vals(t["y"]) for t in sp["data"] if "Costo" in t["hovertemplate"]]
     assert len(costo) == 6 and all(c == costo[0] for c in costo)  # la curva del costo es la misma en los seis
     lineas = [s for s in sp["layout"]["shapes"] if s["type"] == "line" and s["line"].get("dash") == "dash" and s["x0"] == s["x1"]]
     assert len(lineas) == 6  # el cruce baja con una línea punteada al eje
     anios = sorted(a["text"] for a in sp["layout"]["annotations"] if a["text"].startswith("<b>"))
-    assert anios == sorted(f"<b>{a}</b>" for a in (2038, 2044, 2048, 2036, 2048, 2055))  # el año, fuera del gráfico
+    assert anios == sorted(f"<b>{a}</b>" for a in (2038, 2044, 2048, 2036, 2048, 2054))  # el año, fuera del gráfico
     assert not any(t.get("mode") and "text" in t.get("mode", "") for t in sp["data"])  # sin puntos con rótulo dentro del gráfico
 
 
@@ -359,7 +359,7 @@ def test_dos_palancas_explican_la_cobertura():
     assert len(d) == 16 and d.region_id.is_unique
     assert m["r2_dos_palancas"] > m["r2_solo_informalidad"] > 0.5
     assert m["coef_informalidad_ene"] < 0 < m["coef_participacion_ene"]
-    assert abs(m["r_parcial_independientes"]) < 0.2 and abs(m["r_parcial_rama_A"]) < 0.2
+    assert abs(m["r_parcial_independientes"]) < 0.3 and abs(m["r_parcial_rama_A"]) < 0.2  # n = 16: |r| < 0,5 no es significativo; independientes pasó de +0,03 a −0,25 con la informalidad de dic. 2024
     assert np.allclose(d.cobertura_2024 - d.cobertura_esperada, d.residuo, atol=0.02)
     assert abs(d.residuo.sum()) < 0.2  # MCO con constante: los residuos suman 0
     assert (d.afiliados_sin_cotizar == d.afiliados_menores_65 - d.cotizantes).all() and (d.afiliados_sin_cotizar > 0).all()
@@ -403,12 +403,13 @@ def test_siete_vs_chile_son_agregados_consistentes():
 
 
 def test_brecha_de_informalidad_por_sexo_no_se_relaciona_con_la_cobertura():
-    """Scripts/27: el total coincide con la informalidad del KPI, y ni la brecha mujeres-hombres ni su diferencia con las prioritarias explican la cobertura."""
+    """Scripts/28: el total coincide con la informalidad de dic. 2023 de la ENE, y ni la brecha mujeres-hombres ni su diferencia con las prioritarias explican la cobertura."""
     d = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo.csv")
     m = pd.read_csv(DP / "kpi_cobertura_informalidad_sexo_resumen.csv").set_index("indicador").valor
     reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id")
     assert len(d) == 16 and d.region_id.is_unique and d.prioritaria.sum() == 8
-    assert np.allclose(d.informalidad, reg.loc[d.region_id, "informalidad_ene"].values, atol=0.001)
+    e23 = pd.read_csv(DP / "ene_region_anual.csv").query("anio == 2023").set_index("territorio_id").tasa_informal  # por sexo no hay dic. 2024: se verifica contra dic. 2023
+    assert np.allclose(d.informalidad, e23.loc[d.region_id].values, atol=0.001)
     assert np.allclose(d.brecha_mujeres_hombres, d.informalidad_mujeres - d.informalidad_hombres, atol=0.001)
     assert m["p_brecha_mujeres_hombres"] > 0.05 and abs(m["r_brecha_sin_las_2_mayores"]) < 0.2
     assert abs(m["brecha_mujeres_hombres_prioritarias"] - m["brecha_mujeres_hombres_otras"]) < 0.5

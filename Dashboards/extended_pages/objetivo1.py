@@ -104,7 +104,7 @@ def render_1_1_composicion():
     _subtitulo_visible(f"Qué muestra: otra forma de partir lo mismo, por tipo de trabajo y no por razón. Según el Censo, {ind[u_ocu]:.1f} % de los ocupados son independientes "
                        f"(cuenta propia y empleadores); entre los cotizantes son {ind[u_cot]:.1f} %: casi ninguno aparece en la estadística de cotizantes.")
     st.caption(_coma(
-        "Fuente: Superintendencia de Pensiones (cotizantes de diciembre 2024, por tipo), INE (Encuesta Nacional de Empleo: ocupados, desocupados e informales de nov-ene 2023-24, "
+        "Fuente: Superintendencia de Pensiones (cotizantes de diciembre 2024, por tipo), INE (Encuesta Nacional de Empleo: ocupados, desocupados e informales de diciembre 2024 (nov-ene 2024-25), "
         "llevados al nivel del Censo con el mismo factor que la población) y Censo 2024. Es la misma cobertura de arriba (cotizantes con región ÷ población de 15 a 64 años). "
         "Límites: los ocupados y desocupados incluyen a los de 65 años o más, por eso «ni trabajan ni buscan» es un resto; se supone que ningún informal figura entre los cotizantes; "
         "la partición entre informales y formales fuera de la estadística es una resta, no un dato; el Censo y la encuesta de empleo clasifican distinto el tipo de trabajo, "
@@ -483,7 +483,7 @@ def render_1_1_causas():
     st.markdown("Esto no mide cuánto aporta cada razón: compara las 16 regiones y muestra qué tienen en común las de baja cobertura. Sirve para formular hipótesis sobre el porqué de las piezas de arriba.")
     elegidos = fac[fac.elegido].reindex(fac[fac.elegido].pearson_r.abs().sort_values(ascending=False).index)
     mostrar(estilo_kpi(factor_bars(elegidos), 440))
-    st.caption("Fuente: Censo 2024, CASEN 2022, Encuesta Nacional de Empleo (INE, diciembre 2023) y Superintendencia de Pensiones (cobertura 2024). n = 16 regiones.")
+    st.caption("Fuente: Censo 2024, CASEN 2022, Encuesta Nacional de Empleo (INE, diciembre 2024) y Superintendencia de Pensiones (cobertura 2024). n = 16 regiones.")
     fmt = lambda k, v: f"{v:,.0f}" if k == "ingreso_per_capita_prom" else f"{v:+.1f}" if k == "migracion_interna_neta" else f"{v:.1f}"  # noqa: E731
     cols, malos = {}, {}
     for f in elegidos.itertuples():
@@ -578,7 +578,7 @@ def render_1_1_sexo(prio: pd.DataFrame):
         f"en ambos sexos (hombres {en.informalidad_hombres.mean():.1f} % frente a {fuera.informalidad_hombres.mean():.1f} %; mujeres {en.informalidad_mujeres.mean():.1f} % frente a "
         f"{fuera.informalidad_mujeres.mean():.1f} %), es decir, la razón ya vista y no una nueva. Separar por sexo no agrega una causa."))
     st.caption(es_cl(
-        "Fuente: INE, Encuesta Nacional de Empleo (nov-ene 2023-24), Superintendencia de Pensiones (cobertura 2024). n = 16 regiones. La leve pendiente positiva depende de "
+        "Fuente: INE, Encuesta Nacional de Empleo (nov-ene 2023-24; por sexo no hay diciembre 2024), Superintendencia de Pensiones (cobertura 2024). n = 16 regiones. La leve pendiente positiva depende de "
         f"Antofagasta y Atacama, las dos mayores brechas y de alta cobertura: sin ellas r = {m['r_brecha_sin_las_2_mayores']:.2f}. "
         f"Por separado, la informalidad de los hombres (r = {m['r_informalidad_hombres']:.2f}) y la de las mujeres (r = {m['r_informalidad_mujeres']:.2f}) "
         "se asocian con la cobertura casi igual que el total."))
@@ -596,7 +596,7 @@ def render_1_1_dos_palancas(prio: pd.DataFrame):
         f"de cobertura, y cada punto más de participación, con {m['coef_participacion_ene']:.2f} puntos más."))
     ids = prio.region_id.astype(int).tolist()
     mostrar(estilo_kpi(two_levers_scatter(d, m["r2_dos_palancas"], ids), 600))
-    st.caption("Fuente: Superintendencia de Pensiones (cotizantes y afiliados, diciembre 2024), INE (Encuesta Nacional de Empleo, nov-ene 2023-24), Censo 2024. "
+    st.caption("Fuente: Superintendencia de Pensiones (cotizantes y afiliados, diciembre 2024), INE (Encuesta Nacional de Empleo, nov-ene 2024-25), Censo 2024. "
                "Sobre la diagonal, la región tiene más cobertura de la que esperan las dos palancas; bajo ella, menos. Mínimos cuadrados con n = 16 regiones: asociación, no causa.")
     p = d[d.region_id.isin(ids)].set_index("region_id").loc[ids]
     nac = load_csv("kpi_cobertura_regiones.csv").set_index("region_id").loc[0]
@@ -971,7 +971,7 @@ def render_1_2_escenarios_fijos():
         "Fuente: mismo motor del simulador (país, base cotizantes, ingreso promedio, sueldo real +1 % anual, PGU de $250.000, pesos reales de 2025); población: proyecciones INE llevadas al nivel del Censo 2024. "
         f"**Cobertura sigue cayendo:** la pendiente de la cobertura de Chile entre 2022 y 2025 ({pend:+.2f} puntos por año, ajuste lineal de 4 años) se prolonga hasta 2050 y después queda constante. "
         "La serie se recuperó entre 2023 y 2025, así que la pendiente es suave; con 2021-2025 sería de unos −0,3 puntos por año. "
-        "**Informalidad:** los ocupados informales de hoy (Encuesta Nacional de Empleo, diciembre 2023, al nivel del Censo) pasan a cotizar desde 2026, con el mismo ingreso imponible promedio "
+        "**Informalidad:** los ocupados informales de hoy (Encuesta Nacional de Empleo, diciembre 2024, al nivel del Censo) pasan a cotizar desde 2026, con el mismo ingreso imponible promedio "
         "que los cotizantes de hoy y sin estar hoy entre ellos. Es un techo teórico, no una proyección: sus ingresos suelen ser menores, así que el efecto real sería menor. "
         "Detalle y supuestos en docs/supuestos_y_limitaciones.md."))
 

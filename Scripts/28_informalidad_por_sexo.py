@@ -5,7 +5,9 @@ Scripts/25_explorar_causas.py (usa kpi_cobertura_regiones.csv).
 Fuentes:
   - Data raw/_external/ine_ene_regional/ene_regional_tasa_informal_por_sexo.csv   tasa de informalidad por trimestre móvil, región y sexo
         (INE, Encuesta Nacional de Empleo, serie INF_TOI_P2017, proyecciones base 2017). Se toma el trimestre nov-ene 2023-24 (código 2023-V12),
-        el mismo de la informalidad del resto del KPI; el total coincide con `informalidad_ene` de kpi_cobertura_regiones.csv (se verifica).
+        el último con sexo: la ENE por sexo llega a mar-may 2024, así que (a diferencia de `informalidad_ene`, que es de dic. 2024) no hay trimestre de
+        diciembre 2024. El total coincide con la tasa de dic. 2023 de ene_region_anual.csv (se verifica). Es un descarte: la brecha entre sexos
+        se compara con la cobertura 2024, un año después.
   - Data processed/kpi_cobertura_regiones.csv   cobertura_2024, cotizantes, regiones prioritarias (prioridad)
 
 Salidas (Data processed/):
@@ -33,8 +35,10 @@ def tabla() -> pd.DataFrame:
     raw = raw.assign(region_id=raw.DTI_CL_REGION.map(ID_REGION | {"_T": 0}), col=raw.DTI_CL_SEXO.map(SEXO))
     inf = raw.pivot(index="region_id", columns="col", values="Value")
     reg = pd.read_csv(DP / "kpi_cobertura_regiones.csv").set_index("region_id")
-    # el total debe ser la misma cifra que ya usa el KPI (otra descarga del mismo explorador del INE)
-    assert (inf["informalidad"] - reg.loc[inf.index, "informalidad_ene"]).abs().max() < 0.001
+    # el total debe ser la misma cifra de la ENE de dic. 2023 que usa el KPI (otra descarga del mismo explorador del INE)
+    ene = pd.read_csv(DP / "ene_region_anual.csv")
+    e23 = ene[ene.anio == 2023].set_index("territorio_id").tasa_informal
+    assert (inf["informalidad"] - e23.loc[inf.index]).abs().max() < 0.001
     d = inf.loc[1:].join(reg[["region_nombre", "cobertura_2024", "cotizantes_ref", "peso_cotizantes_pct", "prioridad"]])
     d["brecha_mujeres_hombres"] = d.informalidad_mujeres - d.informalidad_hombres
     d["prioritaria"] = d.prioridad.notna()

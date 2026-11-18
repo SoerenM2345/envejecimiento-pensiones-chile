@@ -8,7 +8,7 @@ de los demás factores candidatos, para mostrar que no aportan información prop
 
 Fuentes (Data processed/):
   - kpi_cobertura_regiones.csv        cobertura_2024 (cotizantes / pob. 15-64, Censo 2024), informalidad_ene y participacion_ene
-                                      (ENE, nov-ene 2023-24), independientes y rama_A (Censo 2024), participacion_mujeres_censo
+                                      (ENE, diciembre 2024 = nov-ene 2024-25), independientes y rama_A (Censo 2024), participacion_mujeres_censo
   - afiliados_por_region_edad.csv     afiliados a AFP por región y tramo de edad, diciembre 2024 (Superintendencia de Pensiones)
   - cotizantes_por_region.csv         cotizantes de diciembre 2024 por región
   - sp_ingreso_imponible_region.csv   ingreso imponible promedio 2024 por región

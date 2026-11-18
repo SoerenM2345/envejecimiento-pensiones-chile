@@ -1,6 +1,8 @@
 # Las siete regiones prioritarias: qué las une y qué hay que cuestionar
 
 > **Nota del 2026-11-16:** este análisis es de la lista de 7 («brecha o pérdida de cotizantes desde 2022»), que ya no es la recomendada. La lista recomendada es ahora de 8 regiones por nivel, tendencia desde 2007 y brecha (`docs/SHORTLIST_REGIONES.md`): contiene a las siete (Biobío entra solo por la brecha) y suma Tarapacá, que entra por la tendencia. Las pruebas de abajo se hicieron con la lista de 7; sus conclusiones sobre «mercado laboral débil» y los candidatos descartados no dependen de la lista, pero los valores p se calcularon para esos 7.
+>
+> **Nota del 2026-11-18:** las tasas de la ENE de las tablas de abajo (desocupación, informalidad, participación de 15+) son de diciembre 2023 y no se recalcularon; el dashboard usa ahora diciembre 2024 (informalidad r = −0,80, desocupación r = −0,34). Las conclusiones no cambian.
 
 Revisión crítica del 2026-11-10 (año de referencia 2024). Datos: `Data processed/kpi_cobertura_regiones.csv`, `kpi_cobertura_pendularidad.csv`, `kpi_cobertura_factores.csv`. Las pruebas de este documento se hicieron con permutación exacta (11.440 combinaciones de 7 regiones entre 16).
 
@@ -50,7 +52,7 @@ Entonces el ajuste es exacto para **seis** regiones (Valparaíso, Biobío, La Ar
 |---|---|---|
 | **Mercado laboral débil** (participación baja, desocupación alta) | Separa al grupo (p ajustado 0,044) y en la descomposición la participación explica a Biobío (−2,8 puntos), Arica (−2,3) y Coquimbo (−2,1). **Pero** la participación de 15+ cae con el envejecimiento (r = −0,70 con el % de 65+); con 15 a 64 años la diferencia sigue (64,4 % frente a 68,9 %), aunque menor | Respaldo moderado; hay que usar la medida de 15-64 (ya reemplazó a la de 15+ en el gráfico de asociaciones, r = +0,77) |
 | **Regla de asignación y pendularidad** | El saldo de pendulares se asocia con la cobertura (r = +0,59, p = 0,02) y la salida con −0,61 (p = 0,01). Si los cotizantes se contaran por lugar de trabajo, Antofagasta bajaría 7,8 puntos y Coquimbo subiría 2,3; la dispersión entre regiones bajaría de 12,2 % a 10,1 % | **Problema de medición, no de causa.** Importa para Coquimbo, Arica y Valparaíso (+1,4 a +2,3). **No** cambia a las tres de menor cobertura (La Araucanía, Los Ríos, Ñuble: menos de 0,7 puntos): su problema es robusto |
-| **Informalidad** | Explica el nivel de la cobertura (r = −0,83) pero casi no distingue al grupo (p ajustado 0,61): Biobío tiene informalidad baja (26,7 %) y aun así está | Explica «cuán baja es la cobertura», no «quiénes son las siete». Es en parte lo mismo que «no cotiza» |
+| **Informalidad** | Explica el nivel de la cobertura (r = −0,80) pero casi no distingue al grupo (p ajustado 0,61): Biobío tiene informalidad baja (26,7 %) y aun así está | Explica «cuán baja es la cobertura», no «quiénes son las siete». Es en parte lo mismo que «no cotiza» |
 | **Desempleo** | Nivel: casi no aporta a la brecha (−0,1 puntos en promedio). **Cambio:** el cambio de cotizantes 2022-2024 (%) se asocia con la desocupación (ENE ρ = −0,63, p = 0,009; Censo ρ = −0,50) | Distinto según la pregunta: no explica el nivel, sí podría explicar quién perdió gente. Con tantas pruebas, p = 0,009 no resiste el ajuste: dejarlo como pista |
 | **Envejecimiento** | 80+ y 65+ más altos en el grupo (p 0,005 y 0,020; ajustado 0,21 y 0,38) | Confunde la participación; contexto |
 | **Industria, independientes, rural, pueblos originarios** | Sin relación con el grupo | Descartados |

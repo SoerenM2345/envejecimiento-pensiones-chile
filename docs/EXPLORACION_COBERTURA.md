@@ -82,16 +82,16 @@ Lectura: en 7 de las 8 la diferencia viene sobre todo de que menos ocupados coti
 
 | Factor | Hipótesis | r | p | Fuente |
 |---|---|---|---|---|
-| Ocupados informales (tasa oficial) | Informalidad | −0,83 | < 0,001 | ENE dic. 2023 |
+| Ocupados informales (tasa oficial) | Informalidad | −0,80 | < 0,001 | ENE dic. 2024 (anexo AAFP) |
 | Ingreso per cápita | Otros | +0,77 | < 0,001 | CASEN 2022 |
 | Participación laboral (de 15+) | Otros | +0,74 | < 0,001 | Censo 2024 |
 | Ocupados en enseñanza (%) | Industria | −0,73 | 0,001 | Censo 2024 |
 | Migración interna neta en 5 años | Migración | −0,66 | 0,006 | Censo 2024 |
-| Desocupación oficial | Desempleo | **−0,32 (no significativa)** | 0,23 | ENE dic. 2023 |
+| Desocupación oficial | Desempleo | **−0,34 (no significativa)** | 0,20 | ENE dic. 2024 (anexo AAFP) |
 
-Otros resultados del cuadro completo (39 factores sobre el nivel, 3 sobre el cambio; desplegable «Exploración» del dashboard): informalidad sin agricultura −0,81, ocupados en el sector informal −0,75, participación oficial de la ENE +0,72, PIB por habitante +0,71 (n = 15), PIB por ocupado +0,68, participación de las mujeres +0,65, crecimiento del PIB 2013-2023 −0,59, tiempo parcial involuntario −0,46 (n.s.). Los cambios 2019-2023 de desocupación, informalidad y participación **no se asocian** con el cambio de la cobertura (|r| ≤ 0,19).
+Otros resultados del cuadro completo (39 factores sobre el nivel, 3 sobre el cambio; desplegable «Exploración» del dashboard): informalidad sin agricultura −0,81, ocupados en el sector informal −0,75, participación oficial de la ENE +0,74, PIB por habitante +0,71 (n = 15), PIB por ocupado +0,68, participación de las mujeres +0,65, crecimiento del PIB 2013-2023 −0,59, tiempo parcial involuntario −0,46 (n.s.). Los cambios 2019-2023 de desocupación, informalidad y participación **no se asocian** con el cambio de la cobertura (|r| ≤ 0,19).
 
-**Cambio de regla frente a la primera versión:** antes se mostraba la mejor correlación por hipótesis; con eso «desempleo» era la desocupación del Censo (r = −0,71). Ahora se muestra la medida **oficial** (ENE), que no es significativa. La diferencia entre ambas (Censo en abril de 2024, ENE en diciembre de 2023) está anotada en supuestos 4.4. Mostrar la que mejor calza entre 37 pruebas habría exagerado el papel del desempleo.
+**Cambio de regla frente a la primera versión:** antes se mostraba la mejor correlación por hipótesis; con eso «desempleo» era la desocupación del Censo (r = −0,71). Ahora se muestra la medida **oficial** (ENE), que no es significativa. La diferencia entre ambas (Censo en abril de 2024, ENE en diciembre de 2024) está anotada en supuestos 4.4. Mostrar la que mejor calza entre 37 pruebas habría exagerado el papel del desempleo.
 
 **Cómo leerlo:**
 - La informalidad oficial es en parte lo mismo que «no cotiza» (se cuenta como informal al dependiente sin cotizaciones por su empleo): una asociación alta es casi una tautología, y lo que aporta es la descomposición (el aporte está en el factor «ocupados que cotizan»).
@@ -130,7 +130,7 @@ Se comparó lo hecho antes de esta ronda con el prompt y el informe que preparó
 - Dice que `regional_2002_2035_base2017.csv` «está en el proyecto»: no estaba. Se descargó el archivo comunal del INE (11 MB) y se agrega por región.
 - «KPI 1.1 tiene dos gráficos de barras (razón de soporte y cobertura)»: en el tablero actual son el mapa y las barras regionales (bloque 1), el diagrama de dispersión con tres variables (bloque 2) y la matriz de riesgo (bloque 3). El «gráfico 2 y 3» del profesor corresponde con alta probabilidad a la dispersión y la matriz.
 - Cifras de desocupación por región de abril-junio de 2026 que cita (Ñuble 10,5 %, etc.): **no se pueden verificar con los archivos bajados**, que terminan en mar-may 2024.
-- Su advertencia de que informalidad es «parcialmente circular» sí se confirmó (r = −0,83).
+- Su advertencia de que informalidad es «parcialmente circular» sí se confirmó (r = −0,80 con diciembre 2024; −0,83 con diciembre 2023).
 - Sobre la industria: dice que la ENE por rama regional «no está confirmada»; de hecho el archivo bajado trae rama «Total» solamente.
 
 ## 7. Qué falta y cómo bajarlo

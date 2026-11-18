@@ -37,7 +37,7 @@ El simulador de arriba **no cambió**. Debajo hay **6 escenarios fijos del país
 | Tope 11 % | 2044 |
 | Tope 12 % | 2048 |
 | Cobertura sigue cayendo (tendencia 2022-2025, −0,18 puntos por año hasta 2050) | 2036 |
-| Sin informalidad (todos los informales cotizan desde 2026, +41 % de cotizantes) | 2055 |
+| Sin informalidad (todos los informales cotizan desde 2026, +39 % de cotizantes) | 2054 |
 | Mitad del camino (+21 %) | 2048 |
 
 «Sin informalidad» es un **techo teórico** (mismo ingreso imponible, salto inmediato), no una proyección.
@@ -46,7 +46,7 @@ El simulador de arriba **no cambió**. Debajo hay **6 escenarios fijos del país
 
 - Cobertura de Chile: 30,0 % (2002) → 47,8 % (2021) → 46,5 % (2024; 2025: 46,9 %, con población proyectada). Con 2024 como referencia, desde 2022 bajan 12 de 16 regiones y desde 2019 solo la Metropolitana (−1,1) y Arica y Parinacota (−0,4).
 - La diferencia con Chile viene sobre todo de **«ocupados que cotizan»** (La Araucanía −7,7 puntos, Ñuble −7,3) y en Biobío de la participación laboral (−3,8). **El desempleo casi no aporta** (entre −0,6 y +0,2).
-- La desocupación oficial no se asocia con la cobertura (r = −0,32, no significativa). La informalidad oficial sí (r = −0,83), pero es en parte lo mismo que «no cotiza».
+- La desocupación oficial no se asocia con la cobertura (r = −0,34, no significativa). La informalidad oficial sí (r = −0,80), pero es en parte lo mismo que «no cotiza».
 - Los cotizantes de `cotizantes_region.xls` coinciden al decimal con los de la Asociación de AFP en las 16 regiones: son «cotizantes del mes» de diciembre, **sin honorarios** (el archivo no lo dice; se deduce).
 - La Metropolitana pesa 1 a 5 puntos más en los cotizantes que en los ocupados. No se sabe si es por la región del empleador o por más empleo formal.
 

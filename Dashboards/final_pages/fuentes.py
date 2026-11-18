@@ -27,7 +27,7 @@ FUENTES = [
     ("INE, proyecciones 2002-2035 por comuna (base 2017)", "Población 15-64 por región, año a año",
      "Cobertura por región desde 2002", "Solo aporta la dinámica; el nivel es el del Censo 2024"),
     ("INE, Encuesta Nacional de Empleo (regional)", "Ocupados, desocupados e informalidad por región y sexo",
-     "Por qué cotizan menos en unas regiones", "Trimestre móvil nov-ene 2023-24 (el «diciembre» de la encuesta); llega a mar-may 2024"),
+     "Por qué cotizan menos en unas regiones", "Diciembre 2024 (trimestre nov-ene 2024-25), del anexo del estudio de la Asociación de AFP; las exportaciones del INE llegan a mar-may 2024 (por sexo: nov-ene 2023-24)"),
     ("INE, Encuesta Suplementaria de Ingresos y empleo", "Ingreso mediano y número de ocupados",
      "Costo por ocupado frente al 10 % del ingreso", "Ingreso nominal anual, llevado a pesos de 2025; ocupados de octubre-diciembre"),
     ("Superintendencia de Pensiones, cotizantes por región", "Cotizantes de cada diciembre, 1985-2025",
@@ -54,7 +54,7 @@ FUENTES = [
     ("CASEN 2022, Ministerio de Desarrollo Social", "Pobreza por ingresos de 65+; ingreso per cápita",
      "Pobreza en la vejez; ingreso y cobertura", "Pobreza con el factor de expansión regional; ingreso con el factor comunal de un extracto de terceros"),
     ("Asociación de AFP, Informe Previsional Económico 135", "Ocupados, desocupados e informales de diciembre de 2024",
-     "Descomposición de la brecha de cobertura", "Cifras transcritas a mano del anexo del PDF (96 valores revisados)"),
+     "Descomposición de la brecha de cobertura; informalidad y desocupación de 2024 en las causas", "Cifras transcritas a mano del anexo del PDF (96 valores revisados); reproduce al decimal la ENE del INE de 2019"),
     ("Destatis (Alemania)", "Población por edad y sexo 2024", "Comparación de pirámides", "Variante 0 (datos observados), año 2024"),
 ]
 st.dataframe(pd.DataFrame(FUENTES, columns=["Fuente", "Qué se tomó", "Dónde se ve", "Cómo se tomó"]), hide_index=True, use_container_width=True)
@@ -76,7 +76,7 @@ st.markdown(
     "en 2035 y 2050 usa un reparto de las tasas nacionales, no es oficial.\n"
     "- **Cobertura año a año:** la población regional de 2002 a 2025 viene de las proyecciones base 2017, llevadas al nivel del Censo; 2018-2025 son proyecciones, no datos. "
     "La serie del país entre 2002 y 2009 es la suma de las regiones y queda hasta 0,2 puntos sobre la serie oficial que se usa desde 2010.\n"
-    "- **Causas de la cobertura:** son correlaciones entre 16 regiones, no causas. La informalidad es del trimestre nov-ene 2023-24; con mar-may 2024 la correlación pasa de −0,83 a −0,85.\n"
+    "- **Causas de la cobertura:** son correlaciones entre 16 regiones, no causas. La informalidad es de diciembre 2024 (nov-ene 2024-25, del anexo del estudio de la Asociación de AFP, el mismo mes de los cotizantes): r = −0,80; con diciembre 2023 era −0,83 y con mar-may 2024 −0,85, así que el resultado es estable.\n"
     "- **Ingreso de la CASEN:** es una encuesta, y el extracto con comuna es de terceros (sus ingresos son idénticos a los de la base oficial). "
     "Ponderado con el factor comunal, el ingreso regional queda hasta 4,7 % bajo el calculado con el factor regional; la correlación con la cobertura pasa de 0,77 a 0,78.\n"
     "- **Escenario de razón de soporte:** supone que la cobertura previsional se mantiene constante; no es un pronóstico.\n"
