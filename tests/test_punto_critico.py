@@ -122,6 +122,17 @@ def test_pais_punto_critico_por_defecto_y_orden_de_las_bases(datos):
     assert a_med["anio"] < a_prom["anio"] < b_prom["anio"]  # mediana: menos ingreso -> antes; ocupados: más trabajadores -> después
 
 
+def test_el_ano_base_del_pais_no_cambia_el_punto_critico(datos, monkeypatch):
+    """El país parte de 2025 y las regiones de 2024 (el año del Censo): con 2024 como base del país el punto crítico queda a menos de un año
+    (2037,5 frente a 2037,7), así que mezclar los dos años de partida no mueve la conclusión (docs/DISCUSION_FUENTES.md, fila 30)."""
+    args = (datos["nac"], datos["proy"], datos["par"])
+    base_2025 = cp.punto_critico(cp.serie_pais(*args, cp.Escenario()))
+    monkeypatch.setattr(cp, "ANIO_BASE_PAIS", 2024)
+    base_2024 = cp.punto_critico(cp.serie_pais(*args, cp.Escenario()))
+    assert base_2025["estado"] == base_2024["estado"] == "cruza"
+    assert abs(base_2025["anio_exacto"] - base_2024["anio_exacto"]) < 0.5
+
+
 def test_punto_critico_se_mueve_con_los_supuestos(datos):
     args = (datos["nac"], datos["proy"], datos["par"])
     base = cp.punto_critico(cp.serie_pais(*args, cp.Escenario()))["anio"]

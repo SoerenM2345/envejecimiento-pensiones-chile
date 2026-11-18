@@ -63,14 +63,14 @@ st.subheader("Cómo se combinan las fuentes")
 st.markdown(
     "- **El Censo 2024 manda.** Si otra fuente choca con él, se usa el Censo; la otra fuente solo aporta cómo cambian las cosas en el tiempo, multiplicada por (Censo 2024 / fuente 2024). "
     "Por eso las proyecciones del INE, que corrigen el subconteo del censo (+7,5 % en 65+), no cambian el nivel de las cifras.\n"
-    "- **Año de referencia 2024:** cotizantes e ingreso imponible de diciembre de 2024 y gasto de 2024; 2025 aparece en las series.\n"
+    "- **Año de referencia 2024:** cotizantes e ingreso imponible de diciembre de 2024 y gasto de 2024; 2025 aparece en las series. Regla: todo lo que compara territorios o se cruza con el Censo es de 2024; las series y la proyección del país llegan hasta 2025 y se marcan.\n"
     "- **Pesos de 2025:** todo monto de distintos años se lleva a pesos de 2025 con el IPC promedio anual; el peso en el PIB usa precios corrientes de cada año.\n"
     "- Cada choque entre fuentes, con la decisión y su efecto en los resultados, está anotado en `docs/DISCUSION_FUENTES.md`."
 )
 
 st.subheader("Limitaciones a tener presentes")
 st.markdown(
-    "- **Años de los cotizantes:** la cobertura (KPI 1.1) y la razón de soporte (KPI 1.2) usan cotizantes de diciembre de 2024, mismo año que el Censo 2024; los de 2025 (más recientes) quedan a 20 meses del Censo y no se mezclan con su población. El análisis del punto crítico usa 2025 para el país (con las proyecciones INE de ese año) y 2024 para regiones y comunas.\n"
+    "- **Años de los cotizantes:** la cobertura (KPI 1.1) y la razón de soporte (KPI 1.2) usan cotizantes de diciembre de 2024, mismo año que el Censo 2024; los de 2025 (más recientes) quedan a 20 meses del Censo y no se mezclan con su población. El análisis del punto crítico usa 2025 como año de partida del país (con las proyecciones INE de ese año) y 2024 para regiones y comunas; toda comparación entre territorios, incluida Chile, es de 2024. Con 2024 como partida del país el punto crítico sigue en 2038 (2037,5 en lugar de 2037,7), así que la diferencia no cambia el resultado.\n"
     "- **Cotizantes sin región:** 56.094 cotizantes en 2024 y 13.914 en 2025 no tienen región informada y quedan fuera del cálculo regional.\n"
     "- **Proyección regional:** el INE aún no publica proyecciones regionales base 2024. La población 65+ por región "
     "en 2035 y 2050 usa un reparto de las tasas nacionales, no es oficial.\n"
