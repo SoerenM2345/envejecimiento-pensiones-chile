@@ -1,4 +1,6 @@
 """KPI 1.1, estado actual: el mismo gráfico de «quién cotiza y por qué no cotiza el resto», una pestaña por cada región prioritaria."""
+from string import ascii_lowercase
+
 import pandas as pd
 import streamlit as st
 
@@ -34,10 +36,11 @@ def render_composicion_regiones(prio: pd.DataFrame):
     st.markdown("Elige una región: es el mismo gráfico, con la cobertura de Chile como referencia. Las regiones son las de la lista prioritaria elegida más abajo "
                 "(por defecto, la que combina nivel, tendencia y brecha).")
     tabs = st.tabs(prio.region_nombre.tolist())
-    for tab, r in zip(tabs, prio.itertuples()):
+    for i, (tab, r) in enumerate(zip(tabs, prio.itertuples())):
         with tab:
             x = d[d.region_id == r.region_id]
-            mostrar(coverage_composition_chart(x, r.region_nombre, cob_chile, f", {x.personas.sum() / 1e6:.2f} millones de personas (Censo 2024)"))
+            mostrar(coverage_composition_chart(x, r.region_nombre, cob_chile, f", {x.personas.sum() / 1e6:.2f} millones de personas (Censo 2024)"),
+                    num=f"1.1/composicion_region:{ascii_lowercase[i]}")  # una letra por región: la lista cambia con el criterio y los números de abajo no deben moverse
             _subtitulo_visible(_frase(x, chile, r.region_nombre))
     st.caption(es_cl(
         "Los independientes y voluntarios por región son un reparto con la proporción del país (la Superintendencia no publica los cotizantes por tipo y región); "

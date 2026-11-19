@@ -11,6 +11,7 @@ import streamlit as st
 from utils import load_csv, es_cl, cargar_escenarios
 from utils import subtitulo_visible as _subtitulo_visible
 from components import critical_point as cp
+from components.numeracion import etiqueta
 from components.charts import _pct_exacto, mostrar, estilo_kpi, employer_destination_chart, fixed_scenarios_chart, commissionable_share_line, PANELES_REFORMA
 
 
@@ -25,7 +26,7 @@ def render_destinos_empleador():
     d = load_csv("kpi_reforma_empleador.csv")
     antes, hoy, fin = d[d.anio == 2024].iloc[0], d[d.anio == 2026].iloc[0], d[d.anio == 2033].iloc[0]
     largo = d[d.anio == 2054].iloc[0]
-    mostrar(employer_destination_chart(d))
+    mostrar(employer_destination_chart(d), num="1.3/destinos")
     _subtitulo_visible(
         f"Qué muestra: antes de la reforma el empleador solo pagaba el seguro de invalidez y sobrevivencia ({_pp(antes.total_empleador)} %). La ley lo sube cada agosto hasta "
         f"{_pp(fin.total_empleador)} % en 2033 (+{_pp(fin.aumento_vs_antes)} puntos). Hoy (agosto de 2026 a julio de 2027) es {_pp(hoy.total_empleador)} %, y solo {_pp(hoy.cuenta_individual)} "
@@ -77,7 +78,7 @@ def render_escenarios_reforma(pc_serie):
     anio = {c: series[c][1]["anio"] for c in series}
     mostrar(estilo_kpi(fixed_scenarios_chart(
         esc, series, paneles=PANELES_REFORMA, titulo=f"Aunque la reforma costara empleo formal, el punto crítico se adelantaría {abs(peor)} meses como máximo",
-        detalle="Costo y capacidad del Pilar Solidario de vejez, billones de pesos de 2025; el punto crítico es donde se cruzan (año bajo el eje)"), 420))
+        detalle="Costo y capacidad del Pilar Solidario de vejez, billones de pesos de 2025; el punto crítico es donde se cruzan (año bajo el eje)"), 420), num="1.2/reforma_esc")
     por = esc.set_index("clave")
     _subtitulo_visible(
         f"Qué muestra: la reforma sube el costo de contratar con contrato formal de {_pp(0.0188)} % a 8,5 % del sueldo, pero la capacidad de pago cambia poco. Si el empleador traspasa todo a los "
@@ -94,6 +95,7 @@ def render_escenarios_reforma(pc_serie):
                       "Cotizantes en 2033 frente a 2025": f"{r.cotizantes_2033_vs_2025_pct:+.1f} %".replace("-", "−") if r.clave != "base" else "sin cambio",
                       "Carga requerida en 2050 (% del sueldo)": f"{100 * f50.carga_requerida:.1f} %",
                       "Cotizantes por persona de 65+ en 2050": f"{f50.razon_soporte:.2f}"})
+    etiqueta("1.2/reforma_tabla")
     st.table(pd.DataFrame(filas).set_index("Escenario").map(es_cl))
     st.caption(es_cl(
         "Fuente: mismo motor del simulador (país, base cotizantes, ingreso promedio, sueldo real +1 % anual, PGU de $250.000, pesos reales de 2025) con la trayectoria de cotizantes de "
@@ -113,7 +115,8 @@ def render_flujo_con_variantes(todo: pd.DataFrame, ver_sis: bool):
     vista = st.radio("Variantes del escenario", ["Crecimiento del salario real", "Efecto de la reforma en el empleo formal"], horizontal=True, key="s13_variantes",
                      help="La reforma sube el costo de contratar con contrato formal; si el empleador contrata menos, bajan los cotizantes dependientes. La elasticidad es un supuesto, no una estimación.")
     reforma = vista.startswith("Efecto")
-    mostrar(commissionable_share_line(todo, cfg["crecimiento_salario_real"]["base"], ver_sis, "reforma" if reforma else "salario", el))
+    mostrar(commissionable_share_line(todo, cfg["crecimiento_salario_real"]["base"], ver_sis, "reforma" if reforma else "salario", el),
+            num="1.3/flujo_reforma" if reforma else "1.3/flujo_salario")
     if reforma:
         f = todo[(todo.variante == "sin_sis") & (todo.anio == 2033)].set_index("tipo")
         base = f.loc["escenario"]

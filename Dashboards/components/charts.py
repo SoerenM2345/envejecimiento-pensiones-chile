@@ -1728,10 +1728,14 @@ def colores_legibles(fig: go.Figure) -> go.Figure:
     return con_coma(fig)
 
 
-def mostrar(fig: go.Figure, config: dict = None, **kwargs):
-    """Única forma de dibujar un gráfico en el dashboard: colores legibles y theme=None (Streamlit no reemplaza los colores)."""
+def mostrar(fig: go.Figure, config: dict = None, num: str = None, **kwargs):
+    """Única forma de dibujar un gráfico en el dashboard: colores legibles y theme=None (Streamlit no reemplaza los colores).
+    `num` = clave de components/numeracion.py («1.1/mapa»): dibuja el número del gráfico encima."""
     import streamlit as st
     from utils import PLOTLY_DL_CONFIG
+    if num:
+        from components.numeracion import etiqueta
+        etiqueta(num)
     st.plotly_chart(colores_legibles(fig), use_container_width=True, config=config or PLOTLY_DL_CONFIG, theme=None, **kwargs)
 
 

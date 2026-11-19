@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 from utils import cargar_escenarios, es_cl, load_csv, load_geojson, kpi_card_row, PLOTLY_DL_CONFIG, subtitulo_visible
 from components.kpi_card import kpi_card
+from components.numeracion import etiqueta as etiqueta_num
 from components.cost_analysis import serie_historica, proyeccion, descomponer_pilar, indices_costo, gasto_total_vejez, _piezas_pilar
 from components.definiciones import bloque_definiciones
 from components.financiamiento import peso_historico, proyeccion_carga, trayectoria_reserva, fuentes_pilar, dependencia_regional, proyeccion_sin_pension
@@ -24,8 +25,8 @@ ANIO_PGU = 2022  # entra en vigencia la Pensión Garantizada Universal (Ley 21.4
 ANIO_FIN_2_1 = 2050
 
 
-def _g21(fig, alto=430):
-    mostrar(_estilo_2_1(fig, alto))
+def _g21(fig, alto=430, num=None):
+    mostrar(_estilo_2_1(fig, alto), num=num)
 
 
 @st.cache_data
@@ -87,9 +88,9 @@ def render_2_1():
     with t1:
         c1, c2 = st.columns(2)
         with c1:
-            _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "Pensión Garantizada Universal"))
+            _g21(cost_per_person_chart(h.reset_index(), ANIO_PGU, "Pensión Garantizada Universal"), num="2.1/costo_persona")
         with c2:
-            _g21(cost_pct_pibpc_chart(h))
+            _g21(cost_pct_pibpc_chart(h), num="2.1/costo_pibpc")
         pob = load_csv("proyeccion_envejecimiento_pais.csv").set_index("anio").pob_65_mas
         crece_65 = 100 * (pob.loc[a1] / pob.loc[ANIO_PGU] - 1)
         if desde_hito < 0 and ult.costo_pct_pib_pc < pri.costo_pct_pib_pc:
@@ -106,14 +107,14 @@ def render_2_1():
     with t2:
         c1, c2 = st.columns(2)
         with c1:
-            _g21(cost_components_chart(h))
+            _g21(cost_components_chart(h), num="2.1/componentes")
         with c2:
-            _g21(spending_vs_population_growth(h.reset_index()))
+            _g21(spending_vs_population_growth(h.reset_index()), num="2.1/gasto_vs_poblacion")
         _texto(f"**Lectura:** el Pilar y la PGU suben de ${pri.pilar_65 / 1e6:.2f} a ${ult.pilar_65 / 1e6:.2f} millones por persona 65+, pero el resto de 'Edad avanzada' "
                     f"({100 * ult.resto / ult.gasto:.0f}% del gasto) baja ${(pri.resto_65 - ult.resto_65) / 1e6:.2f} millones: su gasto total casi no crece y la población 65+ sí.")
         st.caption("\\* Resto = Edad avanzada − PGU − PBS/APS de vejez; DIPRES no lo abre, así que no se sabe si su caída es cierre del sistema antiguo o recorte.")
     with t3:
-        _g21(beneficiaries_chart(h))
+        _g21(beneficiaries_chart(h), num="2.1/beneficiarios")
         p0 = h.iloc[0]
         _texto(f"**Lectura:** el alcance sube de {100 * p0.cobertura:.0f} a {100 * ult.cobertura:.0f} beneficios por cada 100 personas 65+ y el pago por beneficio de ${p0.monto_por_beneficio / 1e6:.2f} "
                     f"a ${ult.monto_por_beneficio / 1e6:.2f} millones (≈ ${ult.monto_por_beneficio / 12:,.0f} al mes), casi quieto desde {ANIO_PGU + 1}.")
@@ -122,7 +123,7 @@ def render_2_1():
         base = st.radio("Ingreso típico de los ocupados", ["mediana", "promedio"], horizontal=True,
                         help="Mediana: la mitad de los ocupados gana menos. Promedio: total de ingresos ÷ ocupados (más alto por los ingresos muy altos).")
         hb = serie_2_1(base)
-        _g21(burden_chart(hb, base))
+        _g21(burden_chart(hb, base), num="2.1/carga_mediana" if base == "mediana" else "2.1/carga_promedio")
         u, p0 = hb.iloc[-1], hb.iloc[0]
         _texto(f"**Lectura:** repartido por igual, el gasto sería ${u.pago_plano:,.0f} al mes por ocupado: **{100 * u.carga_requerida:.0f}% del ingreso ({base})** frente al 10% de la cotización "
                     f"({100 * p0.carga_requerida:.0f}% en {a0}); harían falta {u.razon_necesaria:.1f} ocupados por persona 65+ y hay {u.ocupados_por_65:.1f}.")
@@ -135,7 +136,7 @@ def render_2_1():
                          help="Total constante: el sistema antiguo no crece. Crece: mismo gasto por persona 65+ que hoy.")
         pgu250 = st.checkbox("Incluir la PGU de $250.000 (Ley 21.735)", value=cargar_escenarios()["pgu_250"])
         pr = proyeccion_2_1(hb, crec, "constante" if resto.startswith("Total") else "crece", pgu250, base)
-        _g21(cost_projection_chart(hb, pr, base))
+        _g21(cost_projection_chart(hb, pr, base), num="2.1/proyeccion")
         f = pr.loc[ANIO_FIN_2_1]
         _texto(f"**Escenario {ANIO_FIN_2_1}:** gasto de {f.pct_pib:.1f}% del PIB (hoy {ult.pct_pib:.1f}%), {f.ocupados_por_65:.1f} ocupados por persona 65+ (hoy {ult.ocupados_por_65:.1f}) "
                     f"y un pago por ocupado de **{100 * f.carga_requerida:.0f}% del ingreso ({base})** (hoy {100 * hb.iloc[-1].carga_requerida:.0f}%).")
@@ -191,7 +192,7 @@ def render_2_1_total(h: pd.DataFrame):
         dv = pd.concat([d.loc[[ult]].assign(resto=d.loc[ult, "resto"] if resto != "no" else float("nan"),
                                             resto_pct=d.loc[ult, "resto_pct"] if resto != "no" else float("nan"),
                                             carga_pct=d.loc[ult, "pilar_pct"]), dv])
-    mostrar(estilo_kpi(total_cost_chart(dv, futuro, hitos), 680))
+    mostrar(estilo_kpi(total_cost_chart(dv, futuro, hitos), 680), num="2.1/total_esc" if futuro else "2.1/total_obs")
     o = d[~d.escenario]
     p0, u = o.iloc[0], o.iloc[-1]
     a0 = int(o.index[0])
@@ -331,14 +332,14 @@ def render_2_1_por_que(h: pd.DataFrame):
     futuro = "escenario" in per
     a0, a1 = (ult, ANIO_FIN_2_1) if futuro else (int(h.index[0]), ult)
     idx = indices_costo(h, pr, a0, a1)
-    mostrar(estilo_kpi(cost_index_chart(idx, futuro), 520))
+    mostrar(estilo_kpi(cost_index_chart(idx, futuro), 520), num="2.1/indice_esc" if futuro else "2.1/indice_obs")
     v = lambda c: idx[c].iloc[-1] / 100  # noqa: E731
     subtitulo_visible(f"Qué muestra: cuánto creció cada cosa desde {a0} (= 100); lo que queda más arriba creció más rápido. Entre {a0} y {a1} el costo del Pilar se multiplica por {v('pilar'):.1f}, "
                       f"el monto por beneficio por {v('monto'):.1f}, las personas de 65+ por {v('pob_65'):.1f} y la economía (PIB real) por {v('pib'):.1f}. "
                       + ("Por eso el costo pesa cada vez más frente a la economía." if v("pilar") > v("pib") else "El costo crece menos que la economía."))
     st.markdown("##### 2. ¿De dónde viene el aumento?")
     descs = [(et, descomponer_pilar(h, pr, x0, x1)) for et, x0, x1 in PERIODOS_COSTO]
-    mostrar(estilo_kpi(cost_drivers_chart(descs), 400))
+    mostrar(estilo_kpi(cost_drivers_chart(descs), 400), num="2.1/drivers")
     pp = lambda d, k: 100 * next(p["parte"] for p in d["partes"] if p["clave"] == k)  # noqa: E731
     d0, d1, d2 = (d for _, d in descs)
     subtitulo_visible(f"Qué muestra: de cada 100 pesos que sube el costo del Pilar, cuántos vienen de cada pieza. Hasta 2021 el monto por beneficio explica {pp(d0, 'monto'):.0f}; "
@@ -367,6 +368,7 @@ def render_2_1_por_que(h: pd.DataFrame):
     ]
     tabla = pd.DataFrame(filas, columns=["Posible razón", "En qué pieza cae", f"{PERIODOS_COSTO[0][0]}", f"{PERIODOS_COSTO[1][0]}", f"{PERIODOS_COSTO[2][0]}", "Trasfondo"])
     tabla["Trasfondo"] = tabla["Trasfondo"].map(lambda x: es_cl(x).replace("$", "\\$"))  # coma decimal; sin que el «$» se lea como fórmula
+    etiqueta_num("2.1/razones_tabla")
     st.table(tabla.set_index("Posible razón"))
     _nota("Las tres columnas de períodos son el % del aumento del costo del Pilar que aporta cada pieza (los gráficos de arriba). "
           f"Fuente: DIPRES (Estadísticas de las Finanzas Públicas), Subsecretaría de Previsión Social (PGU, PBS y APS), INE (población base 2024), pesos reales de {ANIO_BASE_COSTO}. "
@@ -442,12 +444,12 @@ def _caja(clave, titulo, formula, numeros, defecto=True):
     return ver
 
 
-def _grafico(fig, alto=460, leyenda_y=None):
+def _grafico(fig, alto=460, leyenda_y=None, num=None):
     """Mismo estilo de texto que los KPIs 1.2 y 1.3 (texto negro, leyenda abajo)."""
     estilo_kpi(fig, alto)
     if leyenda_y is not None:
         fig.update_layout(legend_y=leyenda_y)
-    mostrar(fig)
+    mostrar(fig, num=num)
 
 
 def render_2_2():
@@ -467,7 +469,7 @@ def render_2_2():
         (f"Gasto en edad avanzada / PIB ({int(ult.anio)})", f"{ult.edad_avanzada_pct_pib:.2f}%" if pd.notna(ult.edad_avanzada_pct_pib) else "n/d", "DIPRES, clasificación funcional del Gobierno Central",
          ["Gasto del Gobierno Central, código 7102 «Edad avanzada»", "Incluye PGU, PBS/APS y sistema antiguo", "Dividido por el PIB a precios corrientes"]),
     ])
-    _grafico(spending_pct_pib(d), 420)
+    _grafico(spending_pct_pib(d), 420, num="2.2/gasto_pib")
     cfg = cargar_escenarios()
     base = proyeccion_2_2(serie_2_1(), cfg["crecimiento_pib_real"], cfg["pgu_250"], cfg["aporte_fapp"])
     frp0 = load_csv("frp_reserva_anual.csv").set_index("anio").loc[2025, "cartera_propia_mm"] * 1e6
@@ -513,7 +515,7 @@ def _profundizacion_2_2():
             v_fapp = _caja("k22_v_fapp", "Con aporte al FAPP", "(Pilar + UTM × valor UTM) / PIB",
                            f"2037: ${a37.pilar / 1e12:.2f} + {ap.millones_utm.max():.0f} M UTM × ${utm:,.0f} → ${a37.carga / 1e12:.2f} billones = {a37.carga_pct_pib:.2f}%") if con_fapp else False
         with cg:
-            _grafico(fiscal_weight_chart(hist, p, con_fapp, (v_obs, v_esc, v_fapp)), 560)
+            _grafico(fiscal_weight_chart(hist, p, con_fapp, (v_obs, v_esc, v_fapp)), 560, num="2.2/peso_fiscal")
         pico = p.pilar_pct_pib.idxmax()
         fin = int(p.index.max())
         kpi_card_row([
@@ -533,9 +535,9 @@ def _profundizacion_2_2():
         fu = fuentes_pilar(frp, nac)
         g1, g2 = st.columns(2)
         with g1:
-            _grafico(financing_sources_chart(fu), 420)
+            _grafico(financing_sources_chart(fu), 420, num="2.2/fuentes")
         with g2:
-            _grafico(fapp_schedule_chart(proyeccion_2_2(h, crec, pgu250, True)), 420)
+            _grafico(fapp_schedule_chart(proyeccion_2_2(h, crec, pgu250, True)), 420, num="2.2/calendario_fapp")
         u = fu.iloc[-1]
         f1 = frp.set_index("anio").loc[2025]
         _texto(f"**Lectura:** en {int(u.anio)} el retiro del FRP (US${f1.retiros_musd:,.0f} millones) financió el **{u.pct_frp:.1f}%** del Pilar (${u.pilar_real / 1e12:.2f} billones); "
@@ -567,7 +569,7 @@ def _profundizacion_2_2():
             v_sal = _caja("k22_v_sal", "Saldo de la reserva", "S = S₋₁ × (1 + r) − G",
                           f"2026: ${reserva0 / 1e12:.1f} × {num_cl(1 + r_real, 3)} − ${dr.loc[2026].gasto_cubierto / 1e12:.2f} → ${dr.loc[2026].saldo / 1e12:.1f} billones")
         with cg:
-            _grafico(reserve_chart(dr, res, cubre, (v_gas, v_sal)), 480, leyenda_y=-0.3)
+            _grafico(reserve_chart(dr, res, cubre, (v_gas, v_sal)), 480, leyenda_y=-0.3, num="2.2/reservas")
         agot = res["anio_agotamiento"]
         kpi_card_row([
             ("Reserva al 31-dic-2025", f"${reserva0 / 1e12:.1f} billones", "FRP: US$10.091 millones × dólar de cierre $911,18" + (" + activos del FAPP" if res_in.startswith("FRP +") else ""),
@@ -583,6 +585,7 @@ def _profundizacion_2_2():
         _nota("\\* Estrella: año en que el saldo pasa a negativo. Fondo gris: escenario. Es un ejercicio de cobertura, no un plan de retiros.")
         with st.expander("Sensibilidad a la rentabilidad real (solo FRP, cubre el alza, supuestos de config/escenarios.yaml)"):
             sens = load_csv("kpi_2_2_sensibilidad.csv")
+            etiqueta_num("2.2/sensibilidad_tabla")
             st.dataframe(pd.DataFrame({
                 "Rentabilidad real": [f"{100 * r:.1f}%".replace(".", ",") + (" (base)" if b else "") for r, b in zip(sens.rentabilidad_real, sens.es_base)],
                 "VP del gasto cubierto (billones)": sens.vp_gasto_billones.round(1),
@@ -599,7 +602,7 @@ def _profundizacion_2_2():
         quema = (r6.beneficios_periodo_mm - r6.cotizaciones_periodo_mm) / 6
         g1, g2 = st.columns([3, 2])
         with g1:
-            _grafico(fapp_flow_chart(b6), 420)
+            _grafico(fapp_flow_chart(b6), 420, num="2.2/fapp_hoy")
         with g2:
             st.metric("Patrimonio del FAPP, 31-dic-2025", es_cl(f"${b5.patrimonio_mm / 1e6:.2f} billones"))
             st.metric("Patrimonio del FAPP, 30-jun-2026", es_cl(f"${num_cl(r6.patrimonio_mm / 1e6, 3)} billones"), help="Activos menos lo que el FAPP debe al FRP")
@@ -627,7 +630,7 @@ def _profundizacion_2_2():
             ("Sin pensión propia, 2050 (escenario)", f"{n50 / 1000:,.0f} mil", f"{n50 / nacr.n_sin_pension:.1f} veces las de 2024",
              ["Mismo supuesto que 2035"]),
         ])
-        _grafico(dependence_regions_chart(rr, nacr.pct_sin_pension), 520)
+        _grafico(dependence_regions_chart(rr, nacr.pct_sin_pension), 520, num="2.2/dependencia")
         _texto(f"**Lectura:** {nacr.pct_sin_pension:.0f}% de los beneficiarios de la PGU no tiene otra pensión; en {alta.region_nombre} son {alta.pct_sin_pension:.0f}% y en {baja.region_nombre} {baja.pct_sin_pension:.0f}% "
                     f"(correlación {corr:.2f} con los cotizantes por persona 65+).")
         _nota("\\* 4.º trimestre de 2024 con el Censo 2024. Escenario 2035 y 2050: tasa regional de 2024 constante.")
@@ -707,10 +710,11 @@ def render_2_3():
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("<div style='height:5.2rem'></div>", unsafe_allow_html=True)  # alinea el mapa con las barras (que llevan el selector arriba)
-        _grafico(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65", "% de personas 65+ en pobreza", "Oranges"), 520)
+        _grafico(region_choropleth(reg, load_geojson("regiones_chile.geojson"), "pct_pobreza_65", "% de personas 65+ en pobreza", "Oranges"), 520, num="2.3/mapa")
     with c2:
         vista_reg = st.radio("Vista por región", ["Porcentaje (relativo)", "Personas (mismo orden)"], horizontal=True, key="s23_vista_region")
-        _grafico(poverty_bars(reg, nac.pct_pobreza_65) if vista_reg == "Porcentaje (relativo)" else poverty_people_bars(reg, nac.pct_pobreza_65), 520)
+        _grafico(poverty_bars(reg, nac.pct_pobreza_65) if vista_reg == "Porcentaje (relativo)" else poverty_people_bars(reg, nac.pct_pobreza_65), 520,
+                 num="2.3/barras" if vista_reg == "Porcentaje (relativo)" else "2.3/barras_personas")
     sobre = reg[reg.ic95_inf > nac.ic95_sup]            # regiones cuyo intervalo queda por encima del intervalo del país
     mas_gente = reg.sort_values("n_pobres").iloc[-1]
     top3 = reg.sort_values("pct_pobreza_65", ascending=False).head(3)
@@ -732,7 +736,7 @@ def render_2_3():
     _texto("#### ¿Por qué hay más pobreza 65+ en unas regiones?")
     pc = load_csv("kpi_pobreza_cobertura_region.csv")
     rc = load_csv("kpi_cobertura_correlaciones_resumen.csv").set_index("variable").loc["pobreza_65"]
-    _grafico(poverty_coverage_scatter(pc, rc.pearson_r, rc.spearman_rho, int(rc.n)), 520)
+    _grafico(poverty_coverage_scatter(pc, rc.pearson_r, rc.spearman_rho, int(rc.n)), 520, num="2.3/pobreza_cobertura")
     _texto(f"**Lectura:** las regiones con menor cobertura tienen más pobreza en la vejez (r = {rc.pearson_r:.2f}, p = {num_cl(rc.pearson_p, 3)}): "
            "la base cotizante de hoy define la presión sobre la PGU de mañana (ver KPI 1.1).")
     _nota(f"Correlación no implica causalidad; n = {int(rc.n)}; CASEN 2022 con IC amplios en regiones pequeñas. Cobertura: cotizantes 2024 / población 15-64 (Censo 2024).")
@@ -808,10 +812,10 @@ def render_afp_economia():
     ])
     c1, c2 = st.columns(2)
     with c1:
-        mostrar(estilo_kpi(afp_cost_ratio_chart(d), 460))
+        mostrar(estilo_kpi(afp_cost_ratio_chart(d), 460), num="2.4/afp_costos")
         subtitulo_visible(f"Qué muestra: cuánto de cada peso de comisión se va en costos de administración. {a0}-{a1}, sistema completo.")
     with c2:
-        mostrar(estilo_kpi(afp_waterfall_chart(afe.cascada(d, a1), a1, u.encaje_sobre_ingresos, prev.encaje_sobre_ingresos), 460))
+        mostrar(estilo_kpi(afp_waterfall_chart(afe.cascada(d, a1), a1, u.encaje_sobre_ingresos, prev.encaje_sobre_ingresos), 460), num="2.4/afp_cascada")
         subtitulo_visible(f"Qué muestra: del ingreso a la ganancia de {a1}, en miles de millones de pesos.")
     real_c = 100 * (u.gastos_mm_2025 / p0.gastos_mm_2025 - 1)
     real_k = 100 * (u.comisiones_mm_2025 / p0.comisiones_mm_2025 - 1)
@@ -822,15 +826,15 @@ def render_afp_economia():
            "es comisión menos costo; el encaje no se controla.")
     c3, c4 = st.columns(2)
     with c3:
-        mostrar(estilo_kpi(afp_sales_it_chart(d), 460))
+        mostrar(estilo_kpi(afp_sales_it_chart(d), 460), num="2.4/afp_venta_it")
         subtitulo_visible("Qué muestra: dos partidas del gasto, medidas contra lo que se cobra.")
     with c4:
         a_comp = max(a for a in por_afp.anio.unique() if a <= a1 - 3)
-        mostrar(estilo_kpi(afp_by_firm_chart(afe.por_administradora(por_afp, a_comp, a1), a_comp, a1), 460))
+        mostrar(estilo_kpi(afp_by_firm_chart(afe.por_administradora(por_afp, a_comp, a1), a_comp, a1), 460), num="2.4/afp_por_administradora")
         subtitulo_visible(f"Qué muestra: el costo de cada administradora sobre sus ingresos, {a_comp} y {a1}.")
     _texto("**Lectura:** el gasto se desplaza de la venta a la computación; que sea digitalización no está demostrado con estos datos. Entre administradoras, las que más "
            "crecieron no siempre bajaron su costo (n = 7: no se puede afirmar un efecto de escala).")
-    mostrar(estilo_kpi(afp_stress_chart(afe.estres_comision(d, a1), eq["baja_max_pct"], a1), 440))
+    mostrar(estilo_kpi(afp_stress_chart(afe.estres_comision(d, a1), eq["baja_max_pct"], a1), 440), num="2.4/afp_estres")
     subtitulo_visible(f"Qué muestra: escenario de una baja de la comisión con los costos de {a1} fijos. Costo por cotizante: ${eq['costo_por_cotizante']:,.0f} al año; "
                       f"cubrirlo exige {eq['comision_equilibrio_pct']:.2f}% de un sueldo imponible de ${eq['sueldo_mensual']:,.0f} al mes.")
     _texto(f"**Lectura:** hay margen ante la presión de precio de la Ley 21.735 (licitación de stock: cada 24 meses el 10% de los afiliados no pensionados, "

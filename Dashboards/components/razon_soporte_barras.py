@@ -60,11 +60,11 @@ def render_razon_soporte_barras(pc_serie):
     st.divider()
     st.markdown("#### Cotizantes por persona de 65+: del pasado al escenario")
     st.markdown("Los años pasados muestran cuánto ya se perdió; el escenario, hacia dónde va si la cobertura no cambia.")
-    mostrar(estilo_kpi(_barras_pais(pc_serie), alto=480))
+    mostrar(estilo_kpi(_barras_pais(pc_serie), alto=480), num="1.2/rs_pais")
     st.markdown("##### ¿Y en las regiones críticas frente a la Metropolitana?")
     vista = st.radio("Regiones", VISTAS, horizontal=True, key="s12_barras_regiones")
     fig, criticas, menos, r24 = _paneles_regiones(vista)
-    mostrar(estilo_kpi(fig, alto=fig.layout.height))
+    mostrar(estilo_kpi(fig, alto=fig.layout.height), num="1.2/rs_regiones_criticas" if vista == VISTAS[0] else "1.2/rs_regiones_todas")
     mas = [n for n in criticas if n not in menos]
     st.caption(es_cl(
         "Observado: cotizantes de diciembre (Superintendencia de Pensiones) sobre la población 65+ de cada región; para 2010, 2015 y 2020 la "

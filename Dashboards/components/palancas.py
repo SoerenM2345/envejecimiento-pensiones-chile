@@ -3,6 +3,7 @@ Tabla de palancas ordenada por efecto y por cuántas personas alcanzan; el alcan
 import pandas as pd
 import streamlit as st
 from utils import load_csv, es_cl
+from components.numeracion import etiqueta
 from utils import subtitulo_visible as _subtitulo_visible
 
 
@@ -26,6 +27,7 @@ def render_palancas():
         "Palanca": d.palanca, "Qué es": d.que_es, "Quién actúa": d.actor, "Alcance de la administradora": d.alcance_afp,
         "A quiénes alcanza": d.grupo + " (" + d.personas.map(_millones) + ")", "Efecto": d.efecto, "Impacto": d.impacto, "Respaldo": d.respaldo,
     }).set_index("Palanca")
+    etiqueta("1.1/acciones_tabla")
     st.table(t.map(es_cl))
     st.caption(es_cl(
         "Fuente: Subsecretaría de Previsión Social, Nota Técnica de la Ley 21.735 (secciones 3.1.4, 5 y 6); Asociación de AFP, Hoja de Ruta 555 (2023) y Propuestas de la Mesa de Formalidad Laboral (2024); "

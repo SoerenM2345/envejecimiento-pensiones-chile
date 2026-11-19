@@ -4,6 +4,10 @@ ejemplo con cifras reales y una tabla de términos parecidos que no hay que conf
 import pandas as pd
 import streamlit as st
 from utils import es_cl
+from components.numeracion import etiqueta
+
+NUM_TABLAS = {"cob": ("1.1/def_ejemplo", "1.1/def_confusiones"),  # clave del bloque -> números de sus dos tablas (components/numeracion.py)
+              "costo": ("2.1/def_ejemplo", "2.1/def_confusiones")}
 
 
 def _md(texto: str):
@@ -33,8 +37,10 @@ def bloque_definiciones(titulo: str, intro: str, formula: str, piezas: list, con
                 _md(f"**Qué razones caen aquí:** {p['razones']}")
         if ejemplo is not None:
             _md(f"**{ejemplo_titulo}**")
+            etiqueta(NUM_TABLAS[clave][0])
             _tabla(ejemplo)
             if ejemplo_nota:
                 _md(ejemplo_nota)
         _md("**No confundir con**")
+        etiqueta(NUM_TABLAS[clave][1])
         _tabla(confusiones)

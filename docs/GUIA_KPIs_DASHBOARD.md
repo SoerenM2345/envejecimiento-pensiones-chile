@@ -6,6 +6,14 @@ Leyenda: 🟢 calculado con datos reales · 🟡 calculado en parte · 🔴 **FA
 
 ---
 
+## Numeración de gráficos y tablas
+
+Cada gráfico y cada tabla de las páginas de Objetivo 1, Objetivo 2 y Problema lleva su número en una etiqueta encima: `1.3.1`, `1.3.2`, … (KPI y orden dentro del KPI; la página del problema usa `P.1`, `P.2`, …; la sección de costos de las administradoras de la versión extendida, `2.4.x`). Cada vista de un selector tiene número propio, esté elegida o no: por ejemplo «Nivel», «Tendencia» y «Brecha» de las regiones prioritarias y «Caída más fuerte» son cuatro números distintos, y las pestañas por región comparten el número con una letra (`1.1.6a`, `1.1.6b`, …). La versión final no cuenta lo exclusivo de la extendida, así que no tiene huecos.
+
+La lista de claves en orden está en `Dashboards/components/numeracion.py` (`ORDEN`); en el código, `mostrar(fig, num="1.1/mapa")` y `etiqueta("1.1/tabla_x")`. Al agregar un gráfico se inserta su clave en el lugar donde aparece en la página y los números siguientes se corren solos; `tests/test_numeracion.py` avisa si falta una clave, una página no usa una registrada o un gráfico queda sin `num=`.
+
+---
+
 ## 0. Abrir el dashboard y encontrar el modo desarrollador
 
 **Abrir** (desde la raíz del proyecto):
