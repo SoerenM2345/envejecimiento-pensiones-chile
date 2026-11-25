@@ -1,0 +1,1090 @@
+# Mapa de la presentación: diapositiva -> figuras -> mensaje, subtítulo, fuente y cambios.
+# Lo lee Scripts/34_exportar_figuras_presentacion.py (exporta Outputs/figuras_pptx/).
+#
+# Campos de cada figura
+#   id           número que se cita (dashboard: se recalcula con components/numeracion.numero(key) y debe coincidir; nuevas: N.x)
+#   key          clave del dashboard («1.2/rs_pais») o null para las figuras nuevas
+#   version      final | extendida (2.4.x solo existe en la extendida)
+#   canvas       W 1600×720 · H 780×720 · F 1600×880 · T 1600×90 (franja) · R 1600×220 (fila de recuadros) · M 1600×470 (media diapositiva)
+#   role         main | supporting | backup | appendix | context | optional | alternative
+#   transform    función del script que arma la figura de la diapositiva
+#   message      titular de la diapositiva (≤ 25 palabras, sin siglas); va en la variante «standalone»
+#   subtitle     qué se mide, unidad y período (una línea, va dentro de la figura en ambas variantes)
+#   source       nota de fuente y advertencia (≤ 2 líneas), se imprime abajo a la izquierda
+#   nature       dato | escenario | juicio | mixto | proceso (el control exige la advertencia que corresponde en la nota)
+#   status       done | needs_data | blocked | superseded (reemplazada por otra figura; se exporta igual y queda como respaldo)
+#   params       opciones de la transformación (p. ej. con_perdedoras)
+#   changes      cambios aplicados frente al dashboard (van al manifest y al informe de calidad)
+#   notes        decisiones y diferencias con el pedido
+
+salida: Outputs/figuras_pptx
+lienzos:
+  W: [1600, 720]
+  H: [780, 720]
+  F: [1600, 880]
+  T: [1600, 90]
+  R: [1600, 300]
+  M: [1600, 470]   # media diapositiva (abajo): esquemas simples
+  A: [1600, 1250]   # tabla de anexo a página completa (1.1.33 completa: 8 columnas de texto no caben en F con letra ≥ 20 px)
+escala: 3
+ancho_min_px: 4680
+
+diapositivas:
+  - {id: S04, carpeta: S04_demografia, parte: Introducción, titulo: "Demografía: menos personas aportan al sistema"}
+  - {id: S05, carpeta: S05_cobertura_y_carga, parte: Introducción / conflicto, titulo: "Cobertura estancada: más carga por cada cotizante"}
+  - {id: S06, carpeta: S06_punto_critico, parte: Desarrollo, titulo: "¿Cuándo deja de ser sostenible?"}
+  - {id: S07, carpeta: S07_administradora, parte: Desarrollo, titulo: "¿Qué le pasa a la administradora?"}
+  - {id: S08, carpeta: S08_modelo_de_negocio, parte: Desarrollo, titulo: "¿Cómo puede resistir el modelo de negocio?"}
+  - {id: S09, carpeta: S09_diez_pasos, parte: Método, titulo: "Los 10 pasos del proyecto"}
+  - {id: S10, carpeta: S10_datos_por_paso, parte: Método, titulo: "Qué datos necesita cada paso"}
+  - {id: S11, carpeta: S11_pipeline, parte: Método, titulo: "De la fuente cruda al indicador"}
+  - {id: S12, carpeta: S12_limpieza, parte: Método, titulo: "Limpiar un dato: un ejemplo"}
+  - {id: S13, carpeta: S13_regiones_criticas, parte: Conflicto, titulo: "Factores de selección y regiones críticas"}
+  - {id: S13-S19, carpeta: S13-S19_seguimiento, parte: Conflicto a resolución, titulo: "Franja de seguimiento (dónde estamos en el análisis)"}
+  - {id: S14, carpeta: S14_causa_X, parte: Clímax, titulo: "La razón más grave: ocupados que no cotizan"}
+  - {id: S15, carpeta: S15_palancas, parte: Llamado a la acción, titulo: "Qué hace la administradora y qué debe pedir al Estado"}
+  - {id: S16, carpeta: S16_pronostico_X, parte: Resolución, titulo: "Qué pasa si se actúa sobre la informalidad"}
+  - {id: S17, carpeta: S17_causa_Y, parte: Conflicto, titulo: "Segunda razón: participación laboral"}
+  - {id: S18, carpeta: S18_palanca_Y, parte: Llamado a la acción, titulo: "Quién mueve la participación laboral"}
+  - {id: S19, carpeta: S19_pronostico_Y, parte: Resolución, titulo: "Escenario de participación (pendiente)"}
+
+figuras:
+  # ---------------------------------------------------------------- THEMA 1: Problema
+  - id: P.4
+    slide: S04
+    storyline_point: "Demografía: la población en edad de trabajar toca techo"
+    key: P/pico
+    version: final
+    canvas: H
+    role: main
+    transform: pico
+    slug: pico
+    message: "La población de 15 a 64 años llega a su máximo en 2034 (14,25 millones) y luego disminuye: habrá menos personas para cotizar."
+    subtitle: "Chile, personas de 15 a 64 años, millones, 1992-2070"
+    source: "Fuente: Instituto Nacional de Estadísticas, estimaciones y proyecciones de población 1992-2070 (base 2024). Desde 2025 es proyección."
+    nature: dato
+    changes:
+      - "«14,25M» pasa a «14,25 millones»"
+      - "Franja gris clara «Proyección» desde 2025 (separa estimación de proyección, sin líneas punteadas)"
+      - "Máximo en naranja (acento); la línea, azul (personas en edad de trabajar en toda la presentación)"
+      - "Se quita la franja naranja 2034-2070 y la línea punteada vertical (dos marcas para un mismo punto)"
+      - "Eje y hasta 21 millones: la serie ocupa ~2/3 de la altura"
+
+  - id: P.3
+    slide: S04
+    storyline_point: "Demografía: la población de 65 años o más se triplica"
+    key: P/envejecimiento
+    version: final
+    canvas: H
+    role: main
+    transform: envejecimiento
+    slug: envejecimiento
+    message: "La población de 65 años o más pasará de 14 % en 2024 a 43 % en 2070."
+    subtitle: "Chile, % de la población con 65 años o más, 1992-2070"
+    source: "Fuente: Instituto Nacional de Estadísticas, estimaciones y proyecciones de población 1992-2070 (base 2024); punto negro: Censo 2024."
+    nature: dato
+    changes:
+      - "Leyenda «Estimado / Proyección INE» eliminada; sin rótulos «Estimado» ni «Proyección del Instituto Nacional de Estadísticas» (pedido 20-nov): la franja gris «Proyección» y el tono más claro separan lo proyectado, y la fuente nombra al Instituto"
+      - "La proyección deja de ser punteada: línea continua en un tono más claro (pauta G8)"
+      - "Punto del Censo 2024 rotulado «Censo 2024: 14,0 %»; se quita el rótulo intermedio de 2050: solo 14 % y 43 %"
+      - "Color naranja para la población de 65 años o más (el foco); el rojo queda reservado al costo"
+
+  - id: P.1
+    slide: S04
+    storyline_point: "Respaldo: forma de la pirámide"
+    key: P/piramide
+    version: final
+    canvas: H
+    role: backup
+    transform: piramide
+    slug: piramide
+    message: "Chile ya no tiene forma de pirámide: el 14,0 % tiene 65 años o más."
+    subtitle: "Chile, miles de personas por edad y sexo, Censo 2024"
+    source: "Fuente: Instituto Nacional de Estadísticas, Censo 2024. La pirámide excluye ~151 mil personas con edad no informada (base 18,33 millones, no 18,48)."
+    nature: dato
+    changes:
+      - "Leyenda reemplazada por rótulos directos «Hombres» y «Mujeres»"
+      - "La línea punteada de los 65 años es una referencia (no un dato): se mantiene fina y se rotula «65 años»"
+      - "Hombres azul y mujeres naranja: claros y oscuros combinados, seguros para daltonismo"
+
+  - id: P.2
+    slide: S04
+    storyline_point: "Respaldo: Alemania como espejo"
+    key: P/alemania
+    version: final
+    canvas: W
+    role: backup
+    transform: alemania
+    slug: alemania
+    message: "Alemania, con 22,7 % de personas de 65 años o más, muestra hacia dónde va Chile (14,0 %)."
+    subtitle: "Población por edad y sexo, % de la población total de cada país, 2024"
+    source: "Fuente: Chile, Instituto Nacional de Estadísticas, Censo 2024 (excluye ~151 mil personas sin edad informada; base 18,33 millones). Alemania: Destatis, población 2024."
+    nature: dato
+    changes:
+      - "Leyenda reemplazada por rótulos directos «Hombres» y «Mujeres»"
+      - "Línea de los 65 años: referencia fina rotulada, no un dato"
+      - "Se cita Destatis en la nota"
+
+  - id: 1.2.4
+    slide: S05
+    storyline_point: "Cobertura estancada: menos cotizantes por cada persona mayor"
+    key: 1.2/rs_pais
+    version: final
+    canvas: W
+    role: main
+    transform: rs_pais
+    slug: cotizantes_por_persona_mayor
+    message: "Por cada persona de 65 años o más había 2,88 cotizantes en 2010, hoy 2,27; con la cobertura de 2025, serían 0,55 en 2070."
+    subtitle: "Chile, cotizantes de diciembre por persona de 65 años o más, 2010-2070; desde 2030, escenario"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre, con región), Censo 2024 y proyecciones del Instituto Nacional de Estadísticas; 2010-2020: población base 2017 llevada al nivel del Censo 2024. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Un solo color (azul) para los datos; las barras del escenario, azul claro bajo una franja «Escenario: cobertura de 2025 constante, no es un pronóstico»"
+      - "Acento naranja solo en la barra de 2070 (0,55: el final del escenario)"
+      - "Rótulo de valor en cada barra; 2010, 2024 y 2070 en negrita (las tres cifras del mensaje)"
+      - "Se quita la leyenda (dos colores de un mismo indicador)"
+    notes: "El dashboard tiene 8 barras (2010, 2015, 2020, 2024, 2030, 2040, 2050, 2070), no 3: se mantienen las 8 para ver la trayectoria y se destacan las tres del mensaje."
+
+  - id: 1.2.9
+    slide: S05
+    storyline_point: "Cobertura estancada: la carga sobre el sueldo sube"
+    key: 1.2/pc_cascada
+    version: final
+    canvas: W
+    role: main
+    transform: cascada
+    slug: carga_cascada
+    message: "Entre 2024 y 2038, la carga sobre el sueldo de quien cotiza sube de 6,7 % a 10,1 %, sobre todo por más personas mayores."
+    subtitle: "Chile, costo del Pilar Solidario de vejez en % del sueldo de quienes cotizan y aporte de cada factor, puntos porcentuales, 2024-2038"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Censo 2024 y proyecciones del Instituto Nacional de Estadísticas. Los cuatro aportes suman exacto el cambio. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Cascada rehecha con barras (un color por paso): naranja solo en el paso mayor (+4,0 puntos), los otros aumentos en naranja claro, las bajas en azul claro, los totales en gris"
+      - "Línea de referencia fina «Tope: 10 % del sueldo»"
+      - "Sin comillas «»; nombres sin siglas («Población de 65 años o más»); rótulos horizontales"
+    notes: "Pasos verificados contra la figura: población 65+ +4,0 · costo por persona 65+ +0,9 · cantidad de trabajadores −0,3 · ingreso por trabajador −1,2 (orden del dashboard: de mayor a menor)."
+
+  - id: 1.2.3
+    slide: S05
+    storyline_point: "Respaldo: la misma razón como línea"
+    key: 1.2/razon_proyeccion
+    version: final
+    canvas: W
+    role: backup
+    transform: razon_proyeccion
+    slug: razon_proyeccion
+    message: "Los cotizantes por persona de 65 años o más bajarían de 2,27 en 2024 a 0,55 en 2070 si la cobertura no cambia."
+    subtitle: "Chile, cotizantes de diciembre por persona de 65 años o más, 2024-2070; desde 2026, escenario"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre, con región), Censo 2024 y proyecciones del Instituto Nacional de Estadísticas. Escenario con la cobertura de 2025 constante, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Escenario en línea continua de tono claro (antes punteada) sobre franja «Escenario»"
+      - "Azul, como 1.2.4 (mismo indicador, mismo color); el rojo queda para el costo"
+
+  - id: 1.2.7
+    slide: S06
+    storyline_point: "Punto crítico: el costo supera la capacidad"
+    key: 1.2/pc_dinero
+    version: final
+    canvas: W
+    role: main
+    transform: pc_dinero
+    slug: punto_critico_dinero
+    message: "Con un tope de 10 % del sueldo, el costo del Pilar Solidario supera lo que el sistema puede pagar desde 2038."
+    subtitle: "Chile, costo del Pilar Solidario de vejez y capacidad de pago, billones de pesos de 2025, 2010-2070"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: tope 10 % del sueldo, cobertura de 2025 constante, Pensión Garantizada Universal de $250.000, sueldo real +1 % anual, pesos de 2025. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Rótulos directos en las líneas («Costo del Pilar Solidario», «Capacidad: 10 % del sueldo de quienes cotizan»)"
+      - "Escenario en línea continua de tono claro (antes punteada); se quitan los elementos de leyenda"
+      - "Marca naranja y rótulo en 2038; sombra roja clara donde el costo supera la capacidad"
+      - "Eje y desde 0; franja «Escenario, no es un pronóstico»"
+
+  - id: 1.2.8
+    slide: S06
+    storyline_point: "Respaldo: el punto crítico como razón"
+    key: 1.2/pc_razon
+    version: final
+    canvas: W
+    role: backup
+    transform: pc_razon
+    slug: punto_critico_razon
+    message: "Desde 2038 hay menos cotizantes por persona de 65 años o más de los que el sistema necesita para pagar el Pilar Solidario."
+    subtitle: "Chile, cotizantes por persona de 65 años o más: los que hay y los necesarios con un tope de 10 % del sueldo, 2010-2070"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: tope 10 %, cobertura de 2025 constante, Pensión Garantizada Universal de $250.000, sueldo real +1 % anual. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Rótulos directos; escenario en línea continua de tono claro; marca naranja en 2038"
+      - "La razón de equilibrio en gris oscuro (umbral), la razón observada en azul"
+    notes: "El cruce está en 1,47 cotizantes por persona de 65+, no en 1,00: en esta vista se comparan dos razones; el cociente costo ÷ capacidad (que cruza 1,00) no es un gráfico del dashboard."
+
+  - id: N.6
+    slide: S07
+    storyline_point: "La administradora: cobra a quien cotiza, administra a todos"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n6_ingreso_administradora
+    slug: ingreso_bajo_presion
+    message: "Solo la mitad de los afiliados cotiza: la comisión sale de 6,0 millones de personas, pero hay que administrar 12,1 millones de cuentas."
+    subtitle: "Afiliados a las administradoras en diciembre: cotizan y no cotizan, millones de personas, 2010-2025"
+    source: "Fuente: Superintendencia de Pensiones (afiliados no pensionados y cotizantes de diciembre; costos de administración 2025). Costo promedio, no marginal: los costos también atienden a pensionados."
+    nature: dato
+    changes:
+      - "Figura nueva: árbol del ingreso (cotizantes × sueldo × comisión) y columnas apiladas de afiliados que cotizan y que no"
+      - "Costo 2025 por cotizante ($101.151) y por afiliado ($49.891) como rótulos, sin segundo eje"
+    notes: "El mensaje pedido («con menos cotizantes activos y más cuentas pasivas, los ingresos caen») no lo muestran los datos 2010-2025: cotizantes y afiliados crecieron y la razón afiliados/cotizantes se mantuvo cerca de 2 (1,98 en 2010; 2,03 en 2025). Se usa un mensaje que sí sale de los datos; la caída es el mecanismo del árbol, no una serie observada."
+
+  - id: 2.4.1
+    slide: S07
+    storyline_point: "La administradora: los costos son la mitad de las comisiones"
+    key: 2.4/afp_costos
+    version: extendida
+    canvas: W
+    role: supporting
+    transform: afp_costos
+    slug: costos_sobre_comisiones
+    message: "Los costos de las administradoras son la mitad de sus comisiones (50,8 % en 2025): con menos cotizantes y los mismos costos, el margen se achica."
+    subtitle: "Gasto de administración del sistema ÷ ingresos por comisiones, %, 2016-2025"
+    source: "Fuente: Superintendencia de Pensiones, «Costos de administración de los Fondos de Pensiones» 2016-2025. Franja gris: cambio de serie 2020/21 (reexpresión de Habitat), no comparar crecimientos que la crucen."
+    nature: dato
+    changes:
+      - "Sin cambios de forma (una línea continua, desde 0, sin leyenda, rótulos en el primero, el máximo y el último)"
+      - "Letra agrandada; «Quiebre de serie» pasa a «Cambio de serie 2020/21»"
+    notes: "Solo existe en la versión extendida: se exporta desde extended_pages/objetivo2.py. Si se pasara a la final, conserva su número (las claves exclusivas de la extendida se numeran siempre con la lista extendida)."
+
+  - id: 1.3.1
+    slide: S08
+    storyline_point: "Modelo de negocio: dónde cobra comisión la administradora"
+    key: 1.3/flujo_barras
+    version: final
+    canvas: W
+    role: main
+    transform: flujo_barras
+    slug: flujo_comisionable
+    message: "En 2025, las cuentas individuales, donde la administradora cobra comisión, reciben 55,5 % del flujo previsional."
+    subtitle: "Dinero que entra al sistema previsional por destino, billones de pesos; solo las cuentas individuales generan comisión"
+    source: "Fuente: Superintendencia de Pensiones (fichas previsionales), Fondo Autónomo de Protección Previsional y Subsecretaría de Previsión Social. Aporte de los trabajadores estimado: cotizantes × ingreso imponible promedio × 10 %."
+    nature: dato
+    changes:
+      - "Leyenda reemplazada por rótulos directos de cada parte"
+      - "Cuentas individuales en naranja (foco); Seguro Social y Estado en grises"
+      - "Porcentajes con un decimal que suman 100,0 en cada año"
+    notes: "El dashboard titula «56 %» (2025, redondeo a entero) y la línea 1.3.2/1.3.3 rotula 55,5 % para el mismo año: en la diapositiva se usa 55,5 % para que los números conversen."
+
+  - id: 1.3.3
+    slide: S08
+    storyline_point: "Modelo de negocio: la reforma tensiona, no elimina"
+    key: 1.3/flujo_reforma
+    version: final
+    canvas: W
+    role: main
+    transform: flujo_reforma
+    slug: flujo_con_reforma
+    message: "Con la reforma, las cuentas individuales reciben 50,0 % del flujo en 2028 y 55,1 % en 2035: el negocio se tensiona, pero no desaparece."
+    subtitle: "Parte del flujo previsional que llega a cuentas individuales, %, 2024-2035; desde 2026, escenario"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social (Nota Técnica Ley 21.735). La elasticidad del empleo formal (−0,1 y −0,3) es un supuesto, no una estimación. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Escenario base en naranja continuo (antes rojo punteado); las dos variantes de la reforma en gris continuo y fino (antes punteadas)"
+      - "Puntos y rótulos en 2028 (50,0 %) y 2035 (55,1 %); rótulos directos en vez de leyenda"
+      - "Franja «Escenario»"
+    notes: "El eje y del dashboard ya parte de 0 (0-70 %): no hay eje truncado, así que la nota no dice «el eje no parte de 0». El titular del dashboard de 1.3.3 es idéntico al de 1.3.2 (variantes de salario)."
+
+  - id: 2.4.5
+    slide: S08
+    storyline_point: "Modelo de negocio: holgura de la comisión"
+    key: 2.4/afp_estres
+    version: extendida
+    canvas: W
+    role: supporting
+    transform: afp_estres
+    slug: holgura_comision
+    message: "Con los costos de 2025, la comisión podría bajar hasta 49 % antes de que el negocio principal tenga pérdida."
+    subtitle: "Comisiones menos gastos de administración, miles de millones de pesos de 2025, si la comisión baja y los gastos no cambian"
+    source: "Fuente: Superintendencia de Pensiones, «Costos de administración de los Fondos de Pensiones» 2025. Sin encaje, otros ingresos ni impuesto. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "La curva de datos pasa de punteada a continua (pauta G8)"
+      - "Se mantienen la línea de cero, la marca de equilibrio (−49 %) y «Escenario, no es un pronóstico»"
+
+  # ---------------------------------------------------------------- THEMA 2: Datos y estrategia
+  - id: N.1
+    slide: S09
+    storyline_point: "Los 10 pasos del proyecto"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n1_diez_pasos
+    slug: diez_pasos
+    message: "Seguimos los diez pasos del proyecto, desde definir el problema hasta medir su avance."
+    subtitle: "Los diez pasos del curso en cuatro fases y lo que produjo este proyecto en cada uno"
+    source: "Fuente: material del curso Herramientas de análisis y visualización de datos (los diez pasos del proyecto)."
+    nature: proceso
+    changes:
+      - "Figura nueva: diez pasos en cuatro fases, un color por fase y un producto concreto bajo cada paso"
+    notes: "El pedido sugiere «config/sources.yaml con fecha de actualización» para el paso 10: ese archivo no existe; se usa lo que sí hay (pruebas automáticas y la auditoría de fuentes)."
+
+  - id: N.2
+    slide: S10
+    storyline_point: "Qué datos necesita cada paso"
+    key: null
+    version: final
+    canvas: F
+    role: main
+    transform: n2_matriz_fuentes
+    slug: matriz_fuentes
+    message: "Cada pregunta del análisis descansa en pocas fuentes oficiales; tres vacíos de datos siguen abiertos."
+    subtitle: "Preguntas del análisis frente a fuentes: punto lleno = fuente principal, punto vacío = de apoyo, celda rayada = vacío conocido"
+    source: "Fuente: Data raw/INVENTARIO_FUENTES.md, docs/AUDITORIA_FUENTES.md, docs/DATOS_ABIERTOS.md y docs/RESUMEN_CAMBIOS_KPI_1_1_Y_1_2.md (revisados el 19-11-2026)."
+    nature: proceso
+    changes:
+      - "Figura nueva: matriz preguntas × fuentes, con nivel territorial y último dato bajo cada fuente"
+    notes: "config/sources.yaml no existe; las celdas salen de los documentos citados. La proyección regional usa la base 2017 del Instituto Nacional de Estadísticas llevada al Censo 2024."
+
+  - id: N.3
+    slide: S11
+    storyline_point: "Pipeline de datos"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n3_pipeline
+    slug: pipeline
+    message: "Los datos pasan por cuatro etapas, de la fuente cruda al indicador, y cada etapa tiene su control."
+    subtitle: "Etapas del flujo de datos (nombres de capa sobre las carpetas reales del proyecto) y el control que protege cada una"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas y otras fuentes oficiales del proyecto; conteos de fuentes y de indicadores al momento de exportar. Capas: datos crudos, datos limpios e indicadores."
+    nature: proceso
+    changes:
+      - "Figura nueva: flujo de izquierda a derecha con verbos de preparación de datos, archivo de ejemplo, conteo y control por etapa"
+
+  - id: N.4
+    slide: S12
+    storyline_point: "Profundización: limpiar un dato"
+    key: null
+    version: final
+    canvas: M
+    role: main
+    transform: n4_limpieza
+    slug: limpieza_cotizantes
+    message: "Limpiar no es borrar: de 5.918.977 cotizantes, 56.094 no informan región y se muestran aparte en vez de repartirse."
+    subtitle: "Superintendencia de Pensiones, cotizantes por región: tres reglas de limpieza y control del total (diciembre de 2024)"
+    source: "Fuente: Superintendencia de Pensiones, cotizantes por región (diciembre). Control: 16 regiones + sin región = total."
+    nature: dato
+    changes:
+      - "Figura nueva y simple, media diapositiva: tres reglas y una barra (con región + sin región = total)"
+    notes: "El pedido esperaba ≈ 5,86 millones de total y ≈ 5,81 millones con región; los datos dan 5.918.977 de total y 5.862.883 con región (5,81 millones son los dependientes que cotizan en 1.1.4, otra cifra)."
+
+  # ---------------------------------------------------------------- THEMA 3: ¿Dónde está el problema?
+  - id: N.0r
+    slide: S13
+    storyline_point: "Resumen del tema 1 antes de buscar dónde"
+    key: null
+    version: final
+    canvas: R
+    role: context
+    transform: n0_resumen
+    slug: resumen_tema1
+    message: "Antes de preguntar dónde: máximo de población activa en 2034, punto crítico en 2038 y cobertura de 46,5 %."
+    subtitle: "Tres cifras de la primera parte"
+    source: "Fuente: Instituto Nacional de Estadísticas (población en edad de trabajar), punto crítico del Pilar Solidario (escenario, no es un pronóstico) y Superintendencia de Pensiones con Censo 2024 (cobertura)."
+    nature: mixto
+    changes: ["Figura nueva: tres recuadros con cifra grande y flecha «¿Dónde?»"]
+
+  - id: N.5
+    slide: S13
+    storyline_point: "Factores de selección de las regiones críticas"
+    key: null
+    version: final
+    canvas: F
+    role: alternative
+    status: superseded
+    transform: n5_factores_seleccion
+    slug: factores_seleccion
+    message: "Siete de 16 regiones forman la selección; juntas les faltan 224.160 cotizantes."
+    subtitle: "Las 16 regiones en los tres factores (mismo orden en los tres paneles; entre paréntesis, rango de 1 = peor a 16), 2024"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre) y Censo 2024; tendencia con población del Instituto Nacional de Estadísticas base 2017 llevada al Censo. Regla en docs/SHORTLIST_REGIONES.md."
+    nature: dato
+    changes: ["Figura nueva: tres paneles pequeños con el mismo orden de regiones (en vez de un mapa de calor)"]
+    notes: "Reemplazada el 20-nov-2026 por la regla de dos preguntas (N.5a, N.5b, N.5c; docs/SELECCION_DOS_PREGUNTAS.md). Se conserva porque muestra la regla anterior (nivel, tendencia y brecha, unión de los cinco peores de cada uno)."
+
+  # ---------------------------------------------------------------- regla de dos preguntas (S13) y descomposición (S14)
+  - id: N.5a
+    slide: S13
+    storyline_point: "Pregunta 1: quién perdió puestos en el ranking de cobertura desde 2007"
+    key: null
+    version: final
+    canvas: H
+    role: main
+    transform: n5_ranking_tabla
+    slug: puestos_2007_2024
+    message: "Tres regiones bajo Chile pierden puestos desde 2007: Arica y Parinacota (10.º a 13.º), Tarapacá (7.º a 9.º) y Valparaíso (8.º a 10.º)."
+    subtitle: "Puesto en cobertura entre 15 territorios (1.º = mayor cobertura), 2007 y 2024; Biobío y Ñuble unidos"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Censo 2024; elaboración propia."
+    nature: dato
+    changes:
+      - "Figura nueva: tabla con flechas (Chile + las 9 regiones bajo Chile, en el orden de 2024); azul = pierde puestos, gris = gana puestos"
+      - "Nota de Valparaíso dentro de la figura: sube más que Chile en % pero menos en puntos"
+    notes: "El ranking tiene 15 territorios (Biobío y Ñuble unidos hasta 2017); la brecha de N.5c usa 16 regiones. Las diferencias de puestos salen de Data processed/kpi_seleccion_dos_preguntas.csv (sección ranking). En la variante standalone el lienzo es más alto que 720 px porque el titular ocupa cuatro líneas."
+
+  - id: N.5e
+    slide: S13
+    storyline_point: "Pregunta 1: los 16 territorios ordenados por cambio de cobertura 2007-2024"
+    key: null
+    version: final
+    canvas: H
+    role: supporting
+    transform: n5_ranking_tabla
+    params: {todas: true}
+    slug: tabla_16_regiones_cambio
+    message: "Solo cuatro territorios suben menos que Chile (+9,4 puntos): Valparaíso, Tarapacá, Arica y Parinacota y Metropolitana; O'Higgins lidera con +13,9."
+    subtitle: "Puesto en cobertura entre 15 territorios (1.º = mayor cobertura), 2007 y 2024, ordenados por cambio en puntos; Biobío y Ñuble unidos"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Censo 2024; elaboración propia."
+    nature: dato
+    changes:
+      - "Figura nueva: la tabla de N.5a con todas las regiones (15 territorios = 16 regiones, Biobío y Ñuble unidos), Chile arriba como referencia y el resto de mayor a menor cambio en puntos"
+      - "Azul = región bajo Chile que pierde puestos (las tres de N.5a); las demás flechas, en gris"
+    notes: "El ranking de 2007 no separa Biobío de Ñuble (Ñuble existe desde 2018), por eso son 15 filas y no 16. Orden por puntos; el orden por % cambia (La Araucanía +46,3 % sería primera)."
+
+  - id: N.5b
+    slide: S13
+    storyline_point: "Pregunta 1: cobertura de Chile 2007-2024 (el piso con el que se comparan los puestos)"
+    key: null
+    version: final
+    canvas: W
+    role: supporting
+    transform: n5_cobertura_chile
+    slug: cobertura_chile
+    message: "La cobertura de Chile subió de 37,1 % a 46,5 % entre 2007 y 2024: +9,4 puntos, +25,3 %."
+    subtitle: "Chile, cotizantes de diciembre ÷ población de 15 a 64 años, %, 2007-2024"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Censo 2024; elaboración propia. El eje no parte de 0: va de 30 % a 50 %. 2007 es el año de partida porque la serie anterior presenta un salto sin explicación."
+    nature: dato
+    changes:
+      - "Figura nueva: una línea azul (Chile), solo los dos extremos con marcador naranja y valor; franja 2020-2021 (pandemia)"
+    notes: "El eje y va de 30 a 50 y la nota lo dice (pauta G10). Variante con las tres regiones que pierden puestos: N.5b-v2."
+
+  - id: N.5b-v2
+    slide: S13
+    storyline_point: "Pregunta 1: Chile y las tres regiones que pierden puestos"
+    key: null
+    version: final
+    canvas: W
+    role: alternative
+    transform: n5_cobertura_chile
+    params: {con_perdedoras: true}
+    slug: cobertura_chile_v2
+    message: "Arica y Parinacota, Tarapacá y Valparaíso crecen menos que Chile en puntos: +7,7, +7,9 y +8,8 frente a +9,4."
+    subtitle: "Chile y tres regiones, cotizantes de diciembre ÷ población de 15 a 64 años, %, 2007-2024"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Censo 2024; elaboración propia. El eje no parte de 0: va de 30 % a 50 %. 2007 es el año de partida porque la serie anterior presenta un salto sin explicación."
+    nature: dato
+    changes:
+      - "Misma figura que N.5b con las tres regiones que pierden puestos en líneas finas naranjas, rotuladas al final (máximo cuatro líneas)"
+
+  - id: N.5c
+    slide: S13
+    storyline_point: "Pregunta 2: dónde faltan más cotizantes (regiones elegidas y motivo)"
+    key: null
+    version: final
+    canvas: H
+    role: main
+    transform: n5_brecha_colores
+    slug: brecha_por_motivo
+    message: "Siete regiones pierden puestos o concentran la brecha: reúnen el 76 % de los cotizantes que faltan para igualar a Chile."
+    subtitle: "Cotizantes que faltan para igualar la cobertura de Chile (46,5 %), miles de personas, 2024"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Censo 2024; elaboración propia."
+    nature: dato
+    changes:
+      - "Figura nueva: barras horizontales de las 10 regiones bajo Chile, ordenadas por brecha; naranja = entra por la brecha (80 %), azul = entra solo por la tendencia, gris = no entra"
+      - "Valparaíso entra por las dos preguntas: marca ▼ (también pierde puestos)"
+    notes: "La definición de la brecha ((cobertura de Chile − cobertura de la región) × población de 15 a 64 años) va dentro de la figura y no en la nota de fuente: en 780 px la nota larga ocupaba tres líneas (máximo dos)."
+
+
+  - id: 1.1.1
+    slide: S13
+    storyline_point: "Dónde: mapa de la cobertura"
+    key: 1.1/mapa
+    version: final
+    canvas: F
+    role: main
+    transform: mapa
+    slug: mapa_cobertura
+    message: "La Araucanía (36,5 %) tiene la cobertura más baja y Magallanes (54,2 %) la más alta; Chile está en 46,5 %."
+    subtitle: "Cotizantes de diciembre 2024 ÷ población de 15 a 64 años (Censo 2024), %, por región; borde naranja = región crítica"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes, dic. 2024) y Censo 2024 (Instituto Nacional de Estadísticas); 56.094 cotizantes sin región quedan fuera. Mapa base: © OpenStreetMap contributors © CARTO."
+    nature: dato
+    changes:
+      - "Borde naranja y nombre de las 7 regiones críticas; rótulos con valor para las 16 regiones, mínimo y máximo en negrita"
+      - "Escala azul secuencial que parte en azul claro (la región más baja ya no se confunde con el fondo)"
+      - "Barra de color titulada «Cotizantes ÷ población de 15 a 64 años (%)»; se mantiene la atribución del mapa base"
+
+  - id: 1.1.2
+    slide: S13
+    storyline_point: "Dónde: ranking de las 16 regiones por cobertura (acompaña al mapa)"
+    key: 1.1/barras_region
+    version: final
+    canvas: H
+    role: supporting
+    transform: vista_directa
+    slug: ranking_cobertura_regiones
+    message: "Magallanes (54,2 %) tiene la cobertura más alta y La Araucanía (36,5 %) la más baja; Chile está en 46,5 %."
+    subtitle: "Cobertura previsional (% de 15 a 64 años que cotiza), por región, 2024"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes, dic. 2024) y Censo 2024 (Instituto Nacional de Estadísticas)."
+    meta: {extra_top: 40}
+    nature: dato
+    changes:
+      - "Vista del dashboard con el pie de fuente impreso en la imagen (antes sin fuente), en el estilo de la Fig. 1.2.4"
+    notes: "Diapositiva 10 (barras junto al mapa 1.1.1). El diseño del gráfico no cambia; solo el pie."
+
+  - id: 1.1.16
+    slide: S13
+    storyline_point: "Evolución 2002-2024: Chile, la región más rezagada y la mejor"
+    key: 1.1/largo_nivel
+    version: final
+    canvas: W
+    role: supporting
+    transform: vista_directa
+    slug: cobertura_2002_2024_tres_lineas
+    message: "La distancia entre Magallanes y La Araucanía no se ha cerrado: 18 puntos en 2002 y 18 en 2024."
+    subtitle: "Cobertura previsional (cotizantes ÷ población de 15 a 64 años), %, 2002-2024: Chile, La Araucanía y Magallanes"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre, 2002-2024) y proyecciones de población del Instituto Nacional de Estadísticas (base 2017, llevadas al nivel del Censo 2024)."
+    xticks: [2002, 2025, 2]
+    nature: dato
+    changes:
+      - "Vista del dashboard con el pie de fuente impreso en la imagen (antes sin fuente), en el estilo de la Fig. 1.2.4"
+      - "La fuente aclara que la población es la proyección base 2017 llevada al nivel del Censo 2024 (así lo hace el cálculo; no es la proyección base 2024)"
+    notes: "Diapositiva 18. Texto pedido: «proyecciones de población del INE»; se agregó la base y el ajuste porque el cálculo (Scripts/24) usa la base 2017 por comuna ajustada al Censo 2024."
+
+  - id: 1.1.8
+    slide: S13
+    storyline_point: "Respaldo: factor nivel"
+    key: 1.1/prio_nivel
+    version: final
+    canvas: F
+    role: backup
+    transform: prio
+    slug: factor_nivel
+    message: "Nivel: La Araucanía está 10,0 puntos bajo Chile; las cinco peores están entre 6,0 y 10,0 puntos bajo."
+    subtitle: "Nivel = puntos de cobertura bajo (−) o sobre (+) Chile en 2024"
+    sin_rango: true
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre 2024) y Censo 2024."
+    nature: dato
+    changes:
+      - "Clave de colores dentro de la figura (naranja = entra por este factor, naranja claro = ya entró por otro, gris = no entra)"
+      - "Las regiones que no entran pasan de azul a gris (pauta G5)"
+      - "Definición del factor en palabras simples en el subtítulo"
+
+  - id: 1.1.9
+    slide: S13
+    storyline_point: "Respaldo: factor tendencia"
+    key: 1.1/prio_tendencia
+    version: final
+    canvas: F
+    role: backup
+    transform: prio
+    slug: factor_tendencia
+    message: "Tendencia: Arica y Parinacota, Tarapacá y Valparaíso han perdido terreno frente a Chile desde 2007."
+    subtitle: "Tendencia = puntos de cobertura ganados desde 2007 menos los que ganó Chile; entre paréntesis, rango de 1 (peor) a 16"
+    source: "Fuente: Superintendencia de Pensiones y proyecciones del Instituto Nacional de Estadísticas (base 2017, llevadas al Censo 2024). Metropolitana también pierde terreno, pero está sobre el promedio."
+    nature: dato
+    changes:
+      - "Clave de colores dentro de la figura; regiones que no entran en gris"
+      - "Definición del factor en el subtítulo"
+
+  - id: 1.1.10
+    slide: S13
+    storyline_point: "Respaldo: factor brecha"
+    key: 1.1/prio_brecha
+    version: final
+    canvas: F
+    role: backup
+    transform: prio
+    slug: factor_brecha
+    message: "Brecha: a La Araucanía (67.220) y Valparaíso (53.660) les faltan más cotizantes para alcanzar a Chile."
+    subtitle: "Brecha = cotizantes que faltan (−) o sobran (+) para igualar la cobertura de Chile, personas, 2024; entre paréntesis, rango"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre 2024) y Censo 2024."
+    nature: dato
+    changes:
+      - "Clave de colores dentro de la figura; regiones que no entran en gris"
+      - "Definición del factor en el subtítulo"
+
+  - id: 1.1.20
+    slide: S13
+    storyline_point: "Anexo: tabla de rangos"
+    key: 1.1/tabla_rangos
+    version: final
+    canvas: F
+    role: appendix
+    transform: tabla_rangos
+    slug: tabla_rangos
+    message: "Siete regiones entran: están bajo Chile y entre las cinco peores de al menos un factor."
+    subtitle: "Las 16 regiones con su valor y rango (1 = la peor de 16) en nivel, tendencia y brecha, 2024; naranja = entre las 5 peores"
+    source: "Rango 1 = la peor de las 16 (empates: rango promedio). Orden: número de factores entre las 5 peores y suma de rangos. Fuente: Superintendencia de Pensiones y Censo 2024."
+    nature: dato
+    changes: ["Tabla exportada como imagen, mismo orden del dashboard; celdas entre las 5 peores en naranja claro"]
+
+  - id: 1.1.18
+    slide: S13
+    storyline_point: "Opcional: región por región desde 2019"
+    key: 1.1/paneles_2019
+    version: final
+    canvas: F
+    role: optional
+    transform: paneles_2019
+    slug: paneles_desde_2019
+    message: "Desde 2019 la cobertura de Chile pasó de 46,1 % a 46,5 %; solo 2 de 16 regiones están bajo su nivel de 2019."
+    subtitle: "Cotizantes ÷ población de 15 a 64 años, %, 2019-2024; gris = Chile, naranja = regiones críticas, azul = las demás"
+    source: "Fuente: Superintendencia de Pensiones (cotizantes de diciembre), Instituto Nacional de Estadísticas (base 2017) y Censo 2024. Franja: 2020 y 2021 (pandemia)."
+    nature: dato
+    changes: ["Letra agrandada; años cada 3 en el eje para que quepan; franja 2020-2021 rotulada en la nota"]
+
+  - id: N.5d
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan"
+    key: null
+    version: final
+    canvas: F
+    role: main
+    transform: n5_descomposicion_ocho
+    slug: descomposicion_tres_etapas
+    message: "En las siete regiones, el 80 % de los cotizantes que faltan está en los ocupados que no cotizan."
+    subtitle: "Puntos de cobertura que faltan frente a Chile (46,5 %), por etapa, siete regiones críticas, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (diciembre 2024), Censo 2024; elaboración propia. Los tres aportes suman exactamente la diferencia con Chile (descomposición con media logarítmica)."
+    nature: dato
+    changes:
+      - "Figura nueva: embudo de tres etapas (Chile frente a La Araucanía), barras apiladas de las siete regiones y tres cifras (80 / 18 / 1 %)"
+      - "Reemplaza a 1.1.25 como figura principal de S14; 1.1.25 queda como respaldo"
+    notes: "Sin Biobío (pedido 20-nov): 7 regiones, ponderadas por población: 180.355 / 41.158 / 2.648 de 224.161 cotizantes que faltan = 80,4 / 18,4 / 1,2 % (con Biobío eran 69,6 / 28,0 / 2,4 %). En las 7 la etapa 3 es la mayor."
+
+  - id: 1.1.25
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan"
+    key: 1.1/desc_nivel
+    version: final
+    canvas: F
+    role: backup
+    transform: desc_nivel
+    params: {acento: cotizacion}
+    slug: descomposicion_ocupados_que_cotizan
+    message: "En las siete regiones críticas, la brecha con Chile viene sobre todo de ocupados que no cotizan, no de falta de empleo."
+    subtitle: "Diferencia de cobertura con Chile en 2024 y aporte de cada factor, puntos de cobertura, 7 regiones críticas"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Los tres aportes suman exacto la diferencia con Chile (media logarítmica). En las 7 regiones lidera «ocupados que cotizan»."
+    nature: dato
+    changes:
+      - "Acento naranja solo en «ocupados que cotizan»; participación y empleo en gris; diferencia total en gris oscuro"
+      - "Líneas de cero continuas y finas (antes punteadas)"
+    notes: "7 regiones (sin Biobío), ponderado por población: ocupados que no cotizan 80,4 % (180.355), participación 18,4 % (41.158), empleo 1,2 % (2.648) de 224.161 cotizantes que faltan."
+
+  - id: N.12a
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan (1.1.25 por separado, 16 regiones)"
+    key: null
+    version: final
+    canvas: F
+    role: backup
+    transform: n12_desc_16
+    params: {panel: participacion}
+    slug: participacion_16_regiones
+    message: "Las regiones críticas restan entre 0,1 y 2,3 puntos por participación laboral; Los Lagos (−2,9) y Biobío (−2,8) restan más sin ser críticas."
+    subtitle: "Participación laboral: aporte a la diferencia de cobertura con Chile, puntos de cobertura, 16 regiones, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Los tres aportes suman exacto la diferencia con Chile (media logarítmica). Naranja: siete regiones críticas; Biobío, en gris."
+    nature: dato
+    changes:
+      - "Un gráfico por panel de 1.1.25 (antes cuatro paneles en uno), con las 16 regiones y no solo las 7 críticas"
+      - "Ordenado de la región que más resta (arriba) a la que más suma (abajo); las siete críticas en naranja y en negrita, las demás en gris"
+    notes: "Mismos datos que 1.1.25 (kpi_cobertura_descomposicion.csv, «Nivel frente a Chile en 2024»); Biobío en gris por la exclusión de la selección (pedido 20-nov)."
+
+  - id: N.12b
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan (1.1.25 por separado, 16 regiones)"
+    key: null
+    version: final
+    canvas: F
+    role: backup
+    transform: n12_desc_16
+    params: {panel: empleo}
+    slug: empleo_16_regiones
+    message: "El empleo casi no explica la brecha: en las siete regiones críticas aporta entre −0,4 y +0,5 puntos."
+    subtitle: "Empleo (1 − desocupación): aporte a la diferencia de cobertura con Chile, puntos de cobertura, 16 regiones, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Los tres aportes suman exacto la diferencia con Chile (media logarítmica). Naranja: siete regiones críticas; Biobío, en gris."
+    nature: dato
+    changes:
+      - "Un gráfico por panel de 1.1.25 (antes cuatro paneles en uno), con las 16 regiones y no solo las 7 críticas"
+      - "Ordenado de la región que más resta (arriba) a la que más suma (abajo); las siete críticas en naranja y en negrita, las demás en gris"
+    notes: "Mismos datos que 1.1.25 (kpi_cobertura_descomposicion.csv, «Nivel frente a Chile en 2024»); Biobío en gris por la exclusión de la selección (pedido 20-nov)."
+
+  - id: N.12c
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan (1.1.25 por separado, 16 regiones)"
+    key: null
+    version: final
+    canvas: F
+    role: backup
+    transform: n12_desc_16
+    params: {panel: cotizacion}
+    slug: ocupados_que_cotizan_16_regiones
+    message: "Las siete regiones críticas restan entre 2,4 y 8,8 puntos por ocupados que no cotizan; de las demás, solo Aysén (−6,0) pasa de 3,0."
+    subtitle: "Ocupados que cotizan: aporte a la diferencia de cobertura con Chile, puntos de cobertura, 16 regiones, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Los tres aportes suman exacto la diferencia con Chile (media logarítmica). Naranja: siete regiones críticas; Biobío, en gris."
+    nature: dato
+    changes:
+      - "Un gráfico por panel de 1.1.25 (antes cuatro paneles en uno), con las 16 regiones y no solo las 7 críticas"
+      - "Ordenado de la región que más resta (arriba) a la que más suma (abajo); las siete críticas en naranja y en negrita, las demás en gris"
+    notes: "Mismos datos que 1.1.25 (kpi_cobertura_descomposicion.csv, «Nivel frente a Chile en 2024»); Biobío en gris por la exclusión de la selección (pedido 20-nov)."
+
+  - id: N.12d
+    slide: S14
+    storyline_point: "La razón más grave (X): ocupados que no cotizan (1.1.25 por separado, 16 regiones)"
+    key: null
+    version: final
+    canvas: F
+    role: backup
+    transform: n12_desc_16
+    params: {panel: total}
+    slug: diferencia_total_16_regiones
+    message: "Diez de las 16 regiones están bajo Chile; las siete críticas, entre 3,1 y 10,0 puntos, y La Araucanía (−10,0) es la más lejana."
+    subtitle: "Diferencia total: aporte a la diferencia de cobertura con Chile, puntos de cobertura, 16 regiones, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Los tres aportes suman exacto la diferencia con Chile (media logarítmica). Naranja: siete regiones críticas; Biobío, en gris."
+    nature: dato
+    changes:
+      - "Un gráfico por panel de 1.1.25 (antes cuatro paneles en uno), con las 16 regiones y no solo las 7 críticas"
+      - "Ordenado de la región que más resta (arriba) a la que más suma (abajo); las siete críticas en naranja y en negrita, las demás en gris"
+    notes: "Mismos datos que 1.1.25 (kpi_cobertura_descomposicion.csv, «Nivel frente a Chile en 2024»); Biobío en gris por la exclusión de la selección (pedido 20-nov)."
+
+  - id: 1.1.7
+    slide: S14
+    storyline_point: "X: los independientes casi no cotizan"
+    key: 1.1/tipo_trabajo
+    version: final
+    canvas: H
+    role: main
+    transform: tipo_trabajo
+    slug: independientes
+    message: "Los independientes son 34 de cada 100 ocupados, pero menos de 1 de cada 100 cotizantes."
+    subtitle: "Ocupados y cotizantes por tipo de trabajo, % de cada grupo, 2024"
+    source: "Fuente: Censo 2024 (ocupados) y Superintendencia de Pensiones (cotizantes dic. 2024). Las dos fuentes clasifican distinto: es un orden de magnitud."
+    nature: dato
+    changes:
+      - "Independientes en naranja (foco) y el resto en gris; rótulos directos de cada parte (sin leyenda)"
+      - "Nombres de las barras más cortos para la mitad de diapositiva"
+
+  - id: 1.1.4
+    slide: S14
+    storyline_point: "Contexto: quién cotiza en Chile"
+    key: 1.1/composicion
+    version: final
+    canvas: W
+    role: context
+    transform: composicion
+    slug: composicion_chile
+    message: "Cotizan 46,5 de cada 100 personas de 15 a 64 años; otras 22,4 trabajan y no cotizan."
+    subtitle: "Chile, personas de 15 a 64 años según si cotizan, trabajan o buscan trabajo, % (100 % = 12,6 millones), diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. «Ni trabajan ni buscan» es un resto: la encuesta de empleo incluye a personas de 65 años o más."
+    nature: dato
+    changes:
+      - "Acento naranja en «trabajan y no cotizan» (informales y formales fuera de la estadística); cotizan en azul; el resto en gris"
+      - "Rótulos directos y llave sobre «trabajan y no cotizan: 22,4»; se quitan las cotas «Pieza 1/2/3» y la leyenda"
+      - "Los bloques suman 100 % (control en el script)"
+
+  - id: 1.1.31
+    slide: S14
+    storyline_point: "Respaldo: dos palancas explican las diferencias"
+    key: 1.1/palancas_dispersion
+    version: final
+    canvas: F
+    role: backup
+    transform: palancas_dispersion
+    slug: dos_palancas
+    message: "Informalidad y participación laboral explican 85 % de las diferencias de cobertura entre regiones."
+    subtitle: "Cobertura real 2024 frente a la esperada con informalidad y participación, %; burbuja = afiliados de menos de 65 años que no cotizan"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo y Censo 2024. Mínimos cuadrados con 16 regiones: asociación, no causa. Ambos ejes parten de 0."
+    nature: dato
+    changes:
+      - "Diagonal fina y gris continua (antes negra punteada)"
+      - "Nombres solo de las 7 regiones críticas y Metropolitana (con letra grande no caben 16 sin taparse)"
+      - "Burbujas por área (ya lo estaban)"
+    notes: "Los ejes del dashboard ya parten de 0 (0-61 %): el pedido suponía lo contrario."
+
+  - id: 1.1.29
+    slide: S14
+    storyline_point: "Respaldo: informalidad y cobertura"
+    key: 1.1/factores
+    version: final
+    canvas: W
+    role: backup
+    transform: factores
+    slug: correlaciones
+    message: "Las regiones con más ocupados informales tienen menos cobertura previsional (correlación −0,80)."
+    subtitle: "Correlación de cada factor con la cobertura de las 16 regiones (de −1 a +1), 2024"
+    source: "Fuente: Censo 2024, Encuesta CASEN 2022, Encuesta Nacional de Empleo (dic. 2024) y Superintendencia de Pensiones. 16 regiones: asociación, no causa."
+    nature: dato
+    changes: ["«r» pasa a «correlación»; informalidad en naranja, el resto en gris"]
+
+  - id: 1.1.6
+    slide: S14
+    storyline_point: "Anexo: composición por región crítica"
+    key: 1.1/composicion_region
+    version: final
+    canvas: W
+    role: appendix
+    transform: composicion
+    letters: [a, b, c, d, e, f, g]   # sin h = Biobío (excluida, pedido 20-nov)
+    slug: composicion_region
+    message: "{titulo_dashboard}"
+    subtitle: "{region}, personas de 15 a 64 años según si cotizan, trabajan o buscan trabajo, %, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Independientes por región: reparto con la proporción del país. «Ni trabajan ni buscan» es un resto."
+    nature: dato
+    changes:
+      - "Mismo tratamiento que 1.1.4, más una marca con la cobertura de Chile (46,5 %)"
+
+  - id: 1.1.6m
+    slide: S14
+    storyline_point: "Anexo: composición en Magallanes, la región con más cobertura (referencia)"
+    key: 1.1/composicion_region
+    letter: m
+    region: Magallanes
+    region_es_maxima: true
+    version: final
+    canvas: W
+    role: appendix
+    transform: composicion
+    slug: composicion_region_magallanes
+    message: "Incluso en Magallanes, la región con más cobertura, cotizan 54,2 de cada 100 personas de 15 a 64 años; otras 24,4 trabajan y no cotizan."
+    subtitle: "{region} (región de referencia, no crítica), personas de 15 a 64 años según si cotizan, trabajan o buscan trabajo, %, diciembre 2024"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Independientes por región: reparto con la proporción del país. «Ni trabajan ni buscan» es un resto."
+    nature: dato
+    changes:
+      - "Mismo diseño que 1.1.6a-g, con las cifras de Magallanes leídas de kpi_cobertura_composicion_region.csv (el dashboard solo dibuja pestañas de regiones críticas)"
+      - "La marca de Chile dice «puntos más» (Magallanes está sobre Chile); se comprueba con los datos que es la región de mayor cobertura"
+    notes: "No existe en el dashboard: la letra «m» (de Magallanes) extiende la serie 1.1.6 sin chocar con las pestañas a-h. Sirve de contraste: ni la región con más cobertura (54,2 %) deja de tener casi una cuarta parte de su población en edad de trabajar ocupada sin cotizar."
+
+  - id: N.7
+    slide: S15
+    storyline_point: "Palancas: qué depende de la administradora"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n7_palancas
+    slug: palancas
+    message: "Solo 2 de 6 palancas dependen directamente de la administradora; las que pueden sumar más cotizantes pasan por el Estado y los empleadores."
+    subtitle: "Personas a las que alcanza cada palanca, millones, diciembre 2024; los grupos se superponen y no se suman"
+    source: "Fuente: Nota Técnica de la Ley 21.735 y Asociación de AFP (Mesa de Formalidad Laboral). El alcance de la administradora y el impacto son un juicio del equipo, no una medición."
+    nature: juicio
+    changes: ["Figura nueva: barras por palanca, dos colores (directo / indirecto), separadas en «suman personas» y «protegen lo que ya hay»"]
+
+  - id: 1.1.33
+    slide: S15
+    storyline_point: "Palancas: tabla resumida"
+    key: 1.1/acciones_tabla
+    version: final
+    canvas: F
+    role: appendix
+    transform: acciones_tabla
+    params: {modo: resumida}
+    slug: acciones_resumida
+    message: "La administradora actúa directo en cobranza y lagunas; empleo, independientes y formalización dependen del Estado y los empleadores."
+    subtitle: "Palanca, quién actúa, alcance de la administradora, personas alcanzadas e impacto"
+    source: "Fuente: Nota Técnica Ley 21.735; Asociación de AFP (Hoja de Ruta 555, Mesa de Formalidad Laboral). El alcance y el impacto son un juicio del equipo, no una medición."
+    nature: juicio
+    changes: ["Versión de 5 columnas (la tabla del dashboard tiene 8 y es muy densa para una diapositiva)"]
+
+  - id: 1.1.33
+    slide: S15
+    storyline_point: "Anexo: tabla completa"
+    key: 1.1/acciones_tabla
+    version: final
+    canvas: A
+    role: appendix
+    transform: acciones_tabla
+    params: {modo: completa}
+    slug: acciones_completa
+    notes: "Lienzo A (1600×1250): la tabla completa de 8 columnas no cabe en F con letra de 20 px."
+    message: "Qué puede hacer una administradora y qué le corresponde al Estado, palanca por palanca."
+    subtitle: "Tabla completa del dashboard (8 columnas)"
+    source: "Fuente: Nota Técnica Ley 21.735; Asociación de AFP (Hoja de Ruta 555, Mesa de Formalidad Laboral). El alcance y el impacto son un juicio del equipo, no una medición."
+    nature: juicio
+    changes: ["Tabla completa exportada como imagen, texto partido en líneas"]
+
+  - id: 1.1.32
+    slide: S15
+    storyline_point: "Respaldo: palancas por región"
+    key: 1.1/palancas_tabla
+    version: final
+    canvas: F
+    role: backup
+    transform: palancas_tabla
+    slug: palancas_por_region
+    message: "La informalidad es desfavorable en las siete regiones críticas; la participación laboral, en seis."
+    subtitle: "Regiones críticas: informalidad, participación, cobertura real y esperada, afiliados que no cotizan, 2024"
+    source: "Palanca desfavorable = al menos 1 punto peor que Chile. Afiliados que no cotizan = afiliados de menos de 65 años − cotizantes de dic. 2024 (mínimo). Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo, Censo 2024."
+    nature: dato
+    changes: ["Tabla exportada como imagen; «Informalidad» resaltada donde es desfavorable"]
+
+  - id: N.8
+    slide: S16
+    storyline_point: "Qué pasa si se actúa sobre la informalidad"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n8_escenarios
+    slug: escenarios_informalidad
+    message: "Si la mitad de los informales cotizara, el punto crítico pasaría de 2038 a 2048; si todos, a 2054; si la cobertura cae, a 2036."
+    subtitle: "Chile, costo del Pilar Solidario de vejez y capacidad de pago según la cobertura, billones de pesos de 2025, 2025-2065"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: tope 10 %, Pensión Garantizada Universal de $250.000, sueldo real +1 % anual, pesos de 2025; informales de hoy cotizan desde 2026. Escenario, no es un pronóstico."
+    nature: escenario
+    changes: ["Figura nueva: una línea de costo y cuatro de capacidad en un solo panel, rótulos directos y años de cruce bajo el eje"]
+    notes: "Series tomadas del gráfico 1.2.10 (mismo motor, components/critical_point.py); kpi_pc_escenarios_fijos.csv solo trae los parámetros. Cinco líneas: el pedido fija ≤ 4 de capacidad más el costo; se justifica en el informe (G8)."
+
+  - id: 1.2.10
+    slide: S16
+    storyline_point: "Escenarios de tope y de cobertura en seis paneles"
+    key: 1.2/esc_fijos
+    version: final
+    canvas: F
+    role: alternative
+    transform: vista_directa
+    slug: escenarios_seis_paneles
+    message: "El punto crítico va de 2036, si la cobertura sigue cayendo, a 2054, si todos los informales cotizan."
+    subtitle: "Chile, costo (rojo) y capacidad (azul) del Pilar Solidario de vejez, billones de pesos de 2025; tope de 10, 11 y 12 % y escenarios de cobertura; año de cruce bajo cada panel"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: Pensión Garantizada Universal de $250.000, sueldo real +1 % anual, pesos de 2025. Escenario, no es un pronóstico."
+    meta: {extra_top: 40, margen_b: 80}
+    nature: escenario
+    changes:
+      - "Vista del dashboard de seis paneles (tope de 10, 11 y 12 % y tres escenarios de cobertura) con el pie de fuente impreso en la imagen"
+    notes: "Diapositiva 24. Es la versión de seis paneles; la de tres paneles de cobertura (1.2.10 escenarios_paneles) sigue aparte."
+
+  - id: 1.2.10
+    slide: S16
+    storyline_point: "Alternativa: los tres escenarios de cobertura en paneles"
+    key: 1.2/esc_fijos
+    version: final
+    canvas: F
+    role: alternative
+    transform: esc_fijos
+    slug: escenarios_paneles
+    message: "El punto crítico va de 2036, si la cobertura sigue cayendo, a 2054, si todos los informales cotizan."
+    subtitle: "Chile, costo (rojo) y capacidad (azul) del Pilar Solidario de vejez, billones de pesos de 2025, tope 10 %; año de cruce en cada título"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: tope 10 %, Pensión Garantizada Universal de $250.000, sueldo real +1 % anual. Escenario, no es un pronóstico."
+    nature: escenario
+    changes:
+      - "Solo los tres paneles de cobertura (sin los de tope)"
+      - "Rótulos directos «Costo» (rojo) y «Capacidad» (azul) en el primer panel; títulos simples de panel"
+
+  - id: 1.2.11
+    slide: S16
+    storyline_point: "Anexo: tabla de escenarios"
+    key: 1.2/esc_fijos_tabla
+    version: final
+    canvas: F
+    role: appendix
+    transform: esc_fijos_tabla
+    slug: escenarios_tabla
+    message: "Que la mitad de los informales cotice atrasa el punto crítico tanto como tolerar un tope de 12 % (2048)."
+    subtitle: "Seis escenarios fijos: qué supone cada uno y su punto crítico"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. Supuestos: país, sueldo real +1 % anual, Pensión Garantizada Universal de $250.000, pesos de 2025. Escenario, no es un pronóstico."
+    nature: escenario
+    changes: ["Tabla exportada como imagen; fila de la base y de los escenarios de informalidad resaltadas"]
+
+  - id: 1.2.12
+    slide: S16
+    storyline_point: "Respaldo: la reforma casi no mueve el punto crítico"
+    key: 1.2/reforma_esc
+    version: final
+    canvas: W
+    role: backup
+    transform: reforma_esc
+    slug: reforma_punto_critico
+    message: "Aunque la reforma costara empleo formal, el punto crítico se adelantaría 10 meses como máximo."
+    subtitle: "Chile, costo y capacidad del Pilar Solidario de vejez, billones de pesos de 2025; año de cruce bajo cada panel"
+    source: "Fuente: Superintendencia de Pensiones, Subsecretaría de Previsión Social, Instituto Nacional de Estadísticas. La elasticidad del empleo formal (−0,1 y −0,3) es un supuesto: no hay estimación chilena para la reforma de 2025; caso base según Gruber (1997). Escenario, no es un pronóstico."
+    nature: escenario
+    changes: ["Letra agrandada; rótulos de panel simples; supuesto de elasticidad y cita de Gruber (1997) en la nota"]
+    notes: "Cita verificada en docs/supuestos_y_limitaciones.md §9.1 (Gruber 1997, NBER w5053: traspaso total a sueldos al bajar las cotizaciones en Chile)."
+
+  - id: 1.1.25
+    slide: S17
+    storyline_point: "Segunda razón (Y): participación laboral"
+    key: 1.1/desc_nivel
+    version: final
+    canvas: F
+    role: main
+    transform: desc_nivel
+    params: {acento: participacion}
+    slug: descomposicion_participacion
+    message: "La participación laboral es el segundo factor: explica casi 2 de cada 10 cotizantes que faltan."
+    subtitle: "Diferencia de cobertura con Chile en 2024 y aporte de cada factor, puntos de cobertura, 7 regiones críticas"
+    source: "Fuente: Superintendencia de Pensiones, Encuesta Nacional de Empleo (dic. 2024) y Censo 2024. Participación: 41.158 de 224.161 cotizantes que faltan (18,4 %). Los aportes suman exacto la diferencia."
+    nature: dato
+    changes: ["Misma figura que en S14 con el acento en «participación laboral»"]
+
+  - id: N.9
+    slide: S17
+    storyline_point: "Y por región"
+    key: null
+    version: final
+    canvas: F
+    role: main
+    transform: n9_participacion
+    slug: participacion_regiones
+    message: "Seis de las siete regiones críticas tienen menos participación laboral que Chile (62,3 %); Ñuble y La Araucanía, más de 4,5 puntos menos."
+    subtitle: "Participación laboral frente a Chile, puntos, regiones críticas, diciembre 2024 (fuerza de trabajo ÷ población de 15 a 64 años)"
+    source: "Fuente: Encuesta Nacional de Empleo (dic. 2024, llevada al Censo 2024). La encuesta regional no trae el corte por sexo: se muestra el total. La fuerza de trabajo incluye a personas de 65 años o más."
+    nature: dato
+    changes: ["Figura nueva: barras de diferencia con Chile (parten de 0), ordenadas; naranja = bajo Chile"]
+    notes: "Se usa la participación de la encuesta de empleo (la de la descomposición 1.1.25 y la tabla 1.1.32) para que los números conversen."
+
+  - id: N.10
+    slide: S17
+    storyline_point: "Por qué no participan (sexo y razones de inactividad)"
+    key: null
+    version: final
+    canvas: F
+    role: main
+    transform: bloqueada
+    slug: razones_inactividad
+    message: "Pendiente: razones de inactividad por sexo en las regiones críticas."
+    subtitle: "Especificación: barras 100 % apiladas (cuidados, estudios, desaliento, otros) por sexo, regiones críticas frente a Chile"
+    source: "Falta la Encuesta Nacional de Empleo regional por sexo y razones de inactividad (los archivos regionales traen solo «Ambos sexos»)."
+    nature: proceso
+    status: blocked
+    changes: ["Solo especificación y marcador vacío; no se inventan cifras"]
+
+  - id: N.7
+    slide: S18
+    storyline_point: "Palanca de Y: quién mueve la participación"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: n7_palancas
+    params: {destacar: "Más empleo y más participación laboral"}
+    slug: palanca_participacion
+    message: "La administradora no puede mover la participación laboral por sí sola: depende del Estado y del mercado laboral."
+    subtitle: "Personas a las que alcanza cada palanca, millones, diciembre 2024; destacada: más empleo y más participación laboral"
+    source: "Fuente: Nota Técnica de la Ley 21.735 y Asociación de AFP (Mesa de Formalidad Laboral). El alcance de la administradora y el impacto son un juicio del equipo, no una medición. Los grupos se superponen."
+    nature: juicio
+    changes: ["Misma figura N.7 con solo la fila de participación destacada (alcance de la administradora: ninguno)"]
+
+  - id: N.11
+    slide: S19
+    storyline_point: "Escenario de participación"
+    key: null
+    version: final
+    canvas: W
+    role: main
+    transform: bloqueada
+    slug: escenario_participacion
+    message: "Pendiente: punto crítico con más participación laboral."
+    subtitle: "Especificación: igual que los escenarios de informalidad, con el escenario «+x puntos de participación» frente a la base"
+    source: "Pendiente: el escenario de participación laboral aún no está calculado; no se inventan cifras."
+    nature: proceso
+    status: blocked
+    changes: ["Solo especificación y marcador vacío"]
+
+# Franja de seguimiento: una variante por paso activo (se genera aparte)
+seguimiento:
+  pasos: ["Chile", "16 regiones", "7 críticas", "Causa", "Palanca", "Proyección"]
+  uso: {S13: "7 críticas", S14: "Causa", S15: "Palanca", S16: "Proyección", S17: "Causa", S18: "Palanca", S19: "Proyección"}

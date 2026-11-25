@@ -15,8 +15,13 @@ Proyecto/
 ├── Dashboards/           # app Streamlit con dos modos: final (6 KPIs + problema) y desarrollador (todo el análisis)
 ├── Outputs/figures/      # gráficos exploratorios estáticos (validación, no el dashboard final)
 ├── docs/                 # GUIA_KPIs_DASHBOARD.md (cómo ver/reconstruir cada KPI), DATOS_ABIERTOS.md (lo que falta), PLAN_KPIs.md
-└── tests/                # pruebas: páginas, tablas de los KPIs y recetas del modo manual (pytest)
+├── tests/                # pruebas: páginas, tablas de los KPIs y recetas del modo manual (pytest)
+├── Presentacion_Graficos.ipynb      # ENTREGA FINAL: un solo cuaderno que reproduce los gráficos de la presentación (con resultados guardados)
+├── LEEME_Presentacion_Graficos.md   # qué contiene el cuaderno, qué datos necesita y qué no está incluido
+└── archive/              # material anterior que ya no se usa (capturas, documentos y presentación V4); ver archive/README.md
 ```
+
+`Outputs/figuras_pptx/` y `Outputs/figuras_notebook/` (PNG de las figuras de la presentación, ~110 MB) se generan con `Scripts/34_exportar_figuras_presentacion.py` o ejecutando el cuaderno, y no se suben a GitHub.
 
 ## Archivos que NO están en GitHub
 

@@ -6,10 +6,16 @@ proyecciones INE y datos de pensiones.
 Paleta: se usa la paleta de referencia del skill de dataviz (categorica
 azul/naranja para Hombres/Mujeres, azul solido para series unicas).
 """
+import io
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from pathlib import Path
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pie_fuente  # pie de fuente común (referencia: Fig. 1.2.4 de la presentación)
 
 OUT_DATA = Path(__file__).resolve().parent.parent / "Data processed"
 OUT_FIG = Path(__file__).resolve().parent.parent / "Outputs" / "figures"
@@ -44,7 +50,11 @@ pir = pd.read_csv(OUT_DATA / "censo_pais_edad_simple.csv")
 pir_h = pir[pir.sexo == 1].set_index("edad")["poblacion"].reindex(range(0, 86), fill_value=0)
 pir_m = pir[pir.sexo == 2].set_index("edad")["poblacion"].reindex(range(0, 86), fill_value=0)
 
-fig, ax = plt.subplots(figsize=(9, 10))
+# Lienzo de 1350 × 1500 px (9 × 10 pulgadas a 150 ppp), con el fondo reservado para el pie de fuente. Se inserta a 5,5 pulgadas de alto
+# (como las demás figuras de la diapositiva), o sea 4,95 de ancho: de ahí el tamaño de la letra del pie (≈ 10 pt, igual que la Fig. 1.2.4).
+W_PX, H_PX, DPI = 1350, 1500, 150
+CSS_W = pie_fuente.css_ancho(5.5 * W_PX / H_PX)
+fig, ax = plt.subplots(figsize=(W_PX / DPI, H_PX / DPI))
 ages = pir_h.index
 ax.barh(ages, -pir_h.values / 1000, height=1.0, color=BLUE, label="Hombres", linewidth=0)
 ax.barh(ages, pir_m.values / 1000, height=1.0, color=ORANGE, label="Mujeres", linewidth=0)
@@ -55,8 +65,6 @@ ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{abs(x):,.0f}"
 ax.set_xlabel("Miles de personas")
 ax.set_ylabel("Edad (años, 85 = 85 y más)")
 ax.set_title("Pirámide poblacional de Chile — Censo 2024", fontsize=13, color=INK_PRIMARY, loc="left", pad=14)
-ax.text(0, 87.5, "Fuente: Censo 2024, INE (18.48M personas; 85 = top-coded 85 y más)",
-        fontsize=8, color=INK_MUTED, ha="center")
 for y in (0, 15, 65):
     ax.axhline(y, color=GRIDLINE, linewidth=0.8, zorder=0)
 ax.legend(frameon=False, loc="lower right")
@@ -64,9 +72,16 @@ ax.grid(axis="x", color=GRIDLINE, linewidth=0.8, zorder=0)
 ax.set_axisbelow(True)
 for spine in ("top", "right", "left"):
     ax.spines[spine].set_visible(False)
-fig.tight_layout()
-fig.savefig(OUT_FIG / "01_piramide_nacional_censo2024.png", dpi=150)
+fig.tight_layout(rect=[0, pie_fuente.banda_px(W_PX, CSS_W) / H_PX, 1, 1])
+buf = io.BytesIO()
+fig.savefig(buf, dpi=DPI, format="png")
 plt.close(fig)
+img = Image.open(buf).convert("RGB")
+assert img.size == (W_PX, H_PX)
+n = pie_fuente.add_source_footer(
+    img, "Fuente: Instituto Nacional de Estadísticas, Censo 2024 (18,33 millones de personas con edad informada; 85 = 85 años o más).", css_width=CSS_W)
+assert n <= pie_fuente.MAX_LINEAS, f"el pie ocupa {n} líneas"
+img.save(OUT_FIG / "01_piramide_nacional_censo2024.png", dpi=(DPI, DPI))
 
 # =============================================================================
 # 2) Ranking regional de envejecimiento (% 65+)

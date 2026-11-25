@@ -22,10 +22,16 @@ Genera dos figuras:
 
 Tambien imprime, para cada pais, el % de poblacion en 0-14 / 15-64 / 65+.
 """
+import io
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from pathlib import Path
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pie_fuente  # pie de fuente común (referencia: Fig. 1.2.4 de la presentación)
 
 DATA = Path(__file__).resolve().parent.parent / "Data processed"
 OUT_FIG = Path(__file__).resolve().parent.parent / "Outputs" / "figures"
@@ -133,8 +139,17 @@ for nombre, ind in (("Chile", ind_cl), ("Alemania", ind_de)):
 # Grafico: dos paneles lado a lado, mismo estilo, con las lineas de umbral
 # que se pidan (65 anios siempre; opcionalmente tambien 15 anios)
 # =============================================================================
+# Lienzo fijo de 1957 × 1546 px (el tamaño que tenía la imagen), con el fondo reservado para el pie de fuente. Se inserta a 5,5 pulgadas de
+# alto (como las demás figuras de la diapositiva): de ahí el tamaño de la letra del pie (≈ 10 pt, igual que la Fig. 1.2.4).
+W_PX, H_PX, DPI = 1957, 1546, 150
+CSS_W = pie_fuente.css_ancho(5.5 * W_PX / H_PX)
+FUENTE = ("Fuente: Chile, Instituto Nacional de Estadísticas, Censo 2024; Alemania, Destatis, población 2024 (no proyectada). "
+          "Las edades de 85 a 99 años o más se suman en «85 y más».")
+
+
 def graficar(umbrales: list[int], out_name: str, nota_umbral: str):
-    fig, axes = plt.subplots(1, 2, figsize=(13, 9), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=((W_PX + 0.5) / DPI, (H_PX + 0.5) / DPI), sharey=True)
+    banda = pie_fuente.banda_px(W_PX, CSS_W) / H_PX  # fracción del alto reservada al pie de fuente
 
     paneles = [
         (axes[0], h_cl, m_cl, f"Chile — Censo 2024 ({total_cl:,} hab.)".replace(",", ".")),
@@ -171,27 +186,26 @@ def graficar(umbrales: list[int], out_name: str, nota_umbral: str):
         plt.Rectangle((0, 0), 1, 1, color=ORANGE, label="Mujeres (65 y más)"),
         plt.Rectangle((0, 0), 1, 1, color=ORANGE_LIGHT, label="Mujeres (< 65)"),
     ]
-    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.02), fontsize=9)
+    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, banda), fontsize=9)
 
     fig.suptitle("Pirámide poblacional: Chile vs. Alemania, 2024", fontsize=14.5, color=INK_PRIMARY,
-                 x=0.12, y=1.06, ha="left")
+                 x=0.12, y=0.99, ha="left")
     fig.text(
-        0.5, 1.0,
+        0.5, 0.955,
         "Eje x en % de la población total de cada país (no en personas); ambas se top-codean a \"85 y más\". "
         + nota_umbral,
         fontsize=9.5, color=INK_SECONDARY, ha="center", va="top",
     )
-    fig.text(
-        0.0, -0.06,
-        "Fuentes: INE, Censo 2024 (Chile). Destatis, 14ª Bevölkerungsvorausberechnung, Basisjahr 2024 "
-        "(Alemania, población real, no proyectada; edad simple 85-99+ agregada a \"85 y más\").",
-        fontsize=8, color=INK_MUTED, ha="left",
-    )
-
-    fig.tight_layout(rect=[0, 0.02, 1, 0.94])
+    fig.tight_layout(rect=[0, banda + 0.045, 1, 0.915])
     out_path = OUT_FIG / out_name
-    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    buf = io.BytesIO()
+    fig.savefig(buf, dpi=DPI, format="png")
     plt.close(fig)
+    img = Image.open(buf).convert("RGB")
+    assert img.size == (W_PX, H_PX)
+    n = pie_fuente.add_source_footer(img, FUENTE, css_width=CSS_W)
+    assert n <= pie_fuente.MAX_LINEAS, f"el pie ocupa {n} líneas"
+    img.save(out_path, dpi=(DPI, DPI))
     print("Grafico guardado en:", out_path)
 
 

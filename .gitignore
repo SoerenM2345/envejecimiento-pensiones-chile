@@ -13,3 +13,7 @@ Data raw/_external/deis/
 
 Data raw/_external/casen2022/casen_2022.dta
 .pytest_cache/
+
+# Salidas generadas (se rehacen con Scripts/34 o con Presentacion_Graficos.ipynb): ~110 MB de PNG
+Outputs/figuras_pptx/
+Outputs/figuras_notebook/
